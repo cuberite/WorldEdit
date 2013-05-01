@@ -25,8 +25,17 @@ function Initialize(Plugin)
 	PluginManager:BindCommand("/thaw",	"worldedit.butcher",	HandleThawCommand,   		" - switches volume selection mode")
 	PluginManager:BindCommand("//",	        "worldedit.superpick",	HandleSuperPickCommand,   		" - switches volume selection mode")
 
+	LoadSettings()
 	LOG("Initialized " .. PLUGIN:GetName() .. " v" .. PLUGIN:GetVersion())
 	return true
+end
+
+function LoadSettings()
+	SettingsIni = cIniFile( PLUGIN:GetLocalDirectory() .. "/Config.ini" )
+	SettingsIni:ReadFile()
+	Wand = SettingsIni:GetValueSetI("General", "Wand", 271 )
+	
+	SettingsIni:WriteFile()
 end
 
 function HandleSuperPickCommand( Split, Player )
@@ -95,7 +104,40 @@ function OnPlayerBreakingBlock(Player, BlockX, BlockY, BlockZ, BlockFace, BlockT
 		OnePlayerX[Player:GetName()] = BlockX
 		OnePlayerY[Player:GetName()] = BlockY
 		OnePlayerZ[Player:GetName()] = BlockZ
-		Player:SendMessage( cChatColor.LightPurple .. 'First position set to (' .. BlockX .. ".0, " .. BlockY .. ".0, " .. BlockZ .. ".0)." )
+		if OnePlayerX[Player:GetName()] ~= nil and TwoPlayerX[Player:GetName()] ~= nil then
+			if OnePlayerX[Player:GetName()] < TwoPlayerX[Player:GetName()] then
+				OneX = OnePlayerX[Player:GetName()]
+				TwoX = TwoPlayerX[Player:GetName()]
+			else
+				OneX = TwoPlayerX[Player:GetName()]
+				TwoX = OnePlayerX[Player:GetName()]
+			end
+			if OnePlayerY[Player:GetName()] < TwoPlayerY[Player:GetName()] then
+				OneY = OnePlayerY[Player:GetName()]
+				TwoY = TwoPlayerY[Player:GetName()]
+			else
+				OneY = TwoPlayerY[Player:GetName()]
+				TwoY = OnePlayerY[Player:GetName()]
+			end
+			if OnePlayerZ[Player:GetName()] < TwoPlayerZ[Player:GetName()] then
+				OneZ = OnePlayerZ[Player:GetName()]
+				TwoZ = TwoPlayerZ[Player:GetName()]
+			else
+				OneZ = TwoPlayerZ[Player:GetName()]
+				TwoZ = OnePlayerZ[Player:GetName()]
+			end
+			Blocks[Player:GetName()] = 0
+			for X = OneX, TwoX do
+				for Y = OneY, TwoY do
+					for Z = OneZ, TwoZ do
+						Blocks[Player:GetName()] = Blocks[Player:GetName()] + 1
+					end
+				end
+			end
+			Player:SendMessage( cChatColor.LightPurple .. 'First position set to (' .. BlockX .. ".0, " .. BlockY .. ".0, " .. BlockZ .. ".0) (" .. Blocks[Player:GetName()] .. ")." )
+		else
+			Player:SendMessage( cChatColor.LightPurple .. 'First position set to (' .. BlockX .. ".0, " .. BlockY .. ".0, " .. BlockZ .. ".0)." )
+		end
 		return true
 	end
 end
@@ -115,7 +157,40 @@ function OnPlayerRightClick(Player, BlockX, BlockY, BlockZ, BlockFace, CursorX, 
 		TwoPlayerX[Player:GetName()] = BlockX
 		TwoPlayerY[Player:GetName()] = BlockY
 		TwoPlayerZ[Player:GetName()] = BlockZ
-		Player:SendMessage( cChatColor.LightPurple .. 'Second position set to (' .. BlockX .. ".0, " .. BlockY .. ".0, " .. BlockZ .. ".0)." )
+		if OnePlayerX[Player:GetName()] ~= nil and TwoPlayerX[Player:GetName()] ~= nil then
+			if OnePlayerX[Player:GetName()] < TwoPlayerX[Player:GetName()] then
+				OneX = OnePlayerX[Player:GetName()]
+				TwoX = TwoPlayerX[Player:GetName()]
+			else
+				OneX = TwoPlayerX[Player:GetName()]
+				TwoX = OnePlayerX[Player:GetName()]
+			end
+			if OnePlayerY[Player:GetName()] < TwoPlayerY[Player:GetName()] then
+				OneY = OnePlayerY[Player:GetName()]
+				TwoY = TwoPlayerY[Player:GetName()]
+			else
+				OneY = TwoPlayerY[Player:GetName()]
+				TwoY = OnePlayerY[Player:GetName()]
+			end
+			if OnePlayerZ[Player:GetName()] < TwoPlayerZ[Player:GetName()] then
+				OneZ = OnePlayerZ[Player:GetName()]
+				TwoZ = TwoPlayerZ[Player:GetName()]
+			else
+				OneZ = TwoPlayerZ[Player:GetName()]
+				TwoZ = OnePlayerZ[Player:GetName()]
+			end
+			Blocks[Player:GetName()] = 0
+			for X = OneX, TwoX do
+				for Y = OneY, TwoY do
+					for Z = OneZ, TwoZ do
+						Blocks[Player:GetName()] = Blocks[Player:GetName()] + 1
+					end
+				end
+			end
+			Player:SendMessage( cChatColor.LightPurple .. 'Second position set to (' .. BlockX .. ".0, " .. BlockY .. ".0, " .. BlockZ .. ".0) (" .. Blocks[Player:GetName()] .. ")." )
+		else
+			Player:SendMessage( cChatColor.LightPurple .. 'Second position set to (' .. BlockX .. ".0, " .. BlockY .. ".0, " .. BlockZ .. ".0)." )
+		end
 		return true
 	end
 end
@@ -285,15 +360,17 @@ function HandleSetCommand( Split, Player )
 		TwoZ = OnePlayerZ[Player:GetName()]
 	end
 	World = Player:GetWorld()
-	Blocks[Player:GetName()] = 0
-	for X=OneX, TwoX do
+	BlockArea = cBlockArea()
+	BlockArea:Read( World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ )
+	BlockArea:Fill( 1, Block[1], Block[2] )
+	BlockArea:Write( World, OneX, OneY, OneZ )
+	--[[for X=OneX, TwoX do
 		for Z=OneZ, TwoZ do
 			for Y=OneY,TwoY do
-				Blocks[Player:GetName()] = Blocks[Player:GetName()] + 1
 				World:SetBlock(X, Y, Z, Block[1], Block[2])
 			end
 		end
-	end
+	end]]
 	Player:SendMessage( cChatColor.LightPurple .. Blocks[Player:GetName()] .. " block(s) have been changed." )
 	return true
 end
