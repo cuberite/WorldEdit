@@ -19,14 +19,25 @@ function Initialize(Plugin)
 	
 	PluginManager:BindCommand("//set",	    "worldedit.set",	HandleSetCommand,   		" - switches volume selection mode")
 	PluginManager:BindCommand("//replace",  "worldedit.replace", HandleReplaceCommand, " - switches volume selection mode")
-	PluginManager:BindCommand("//setbiome",	"worldedit.set",	HandleSetBiomeCommand,   		" - switches volume selection mode")
-	PluginManager:BindCommand("/biomelist",	"worldedit.set",	HandleBiomeListCommand,   		" - switches volume selection mode")
-	PluginManager:BindCommand("/snow",	"worldedit.butcher",	HandleSnowCommand,   		" - switches volume selection mode")
-	PluginManager:BindCommand("/thaw",	"worldedit.butcher",	HandleThawCommand,   		" - switches volume selection mode")
+	PluginManager:BindCommand("//wand",	    "worldedit.wand",	HandleWandCommand,   		" - switches volume selection mode")
+	PluginManager:BindCommand("//setbiome",	"worldedit.setbiome",	HandleSetBiomeCommand,   		" - switches volume selection mode")
+	PluginManager:BindCommand("/biomelist",	"worldedit.biomelist",	HandleBiomeListCommand,   		" - switches volume selection mode")
+	PluginManager:BindCommand("/snow",	"worldedit.snow",	HandleSnowCommand,   		" - switches volume selection mode")
+	PluginManager:BindCommand("/thaw",	"worldedit.thaw",	HandleThawCommand,   		" - switches volume selection mode")
 	PluginManager:BindCommand("//",	        "worldedit.superpick",	HandleSuperPickCommand,   		" - switches volume selection mode")
 
 	LoadSettings()
 	LOG("Initialized " .. PLUGIN:GetName() .. " v" .. PLUGIN:GetVersion())
+	return true
+end
+
+function HandleWandCommand( Split, Player )
+	Item = cItem( E_ITEM_WOODEN_AXE, 1 )
+	if( Player:GetInventory():AddItem( Item ) == true ) then
+		Player:SendMessage( cChatColor.Green .. "You have a wooden axe now." )
+	else
+		Player:SendMessage( cChatColor.Green .. "Not enough inventory space" )
+	end
 	return true
 end
 
