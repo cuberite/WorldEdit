@@ -8,6 +8,10 @@ function Initialize(Plugin)
 	TwoPlayerZ = {}
 	Blocks = {}
 	SP = {}
+	Air = {}
+	X = {}
+	PosY = {}
+	Z = {}
 	PLUGIN = Plugin
 	PLUGIN:SetName("WorldEdit")
 	PLUGIN:SetVersion(1)
@@ -17,6 +21,8 @@ function Initialize(Plugin)
 	PluginManager:AddHook(PLUGIN, cPluginManager.HOOK_PLAYER_RIGHT_CLICK)
 	PluginManager:AddHook(PLUGIN, cPluginManager.HOOK_PLAYER_LEFT_CLICK)
 	
+	PluginManager:BindCommand("/descend",       "worldedit.descend",   HandleDescendCommand,        " Go down a floor" )	
+	PluginManager:BindCommand("/ascend",        "worldedit.ascend",    HandleAscendCommand,         " Go up a floor" )	
 	PluginManager:BindCommand("//green",        "worldedit.green",     HandleGreenCommand,          " [radius] - Greens the area" )	
 	PluginManager:BindCommand("//size",	        "worldedit.size",      HandleSizeCommand,           " Get the size of the selection")
 	PluginManager:BindCommand("//paste",        "worldedit.paste",	   HandlePasteCommand,          " Pastes the clipboard's contents.")
@@ -35,6 +41,68 @@ function Initialize(Plugin)
 	LoadSettings()
 	BlockArea = cBlockArea()
 	LOG("Initialized " .. PLUGIN:GetName() .. " v" .. PLUGIN:GetVersion())
+	return true
+end
+
+function HandleDescendCommand( Split, Player )
+	World = Player:GetWorld()
+	if Player:GetPosY() ~= 1 then
+		X[Player:GetName()] = math.floor( Player:GetPosX() )
+		Z[Player:GetName()] = math.floor( Player:GetPosZ() )
+		PosY[Player:GetName()] = math.floor( Player:GetPosY() )
+		while PosY[Player:GetName()] ~= 1 do 
+			if World:GetBlock( X[Player:GetName()], PosY[Player:GetName()], Z[Player:GetName()]) == 0 then
+				if Air[Player:GetName()] == true then
+					while World:GetBlock( X[Player:GetName()], PosY[Player:GetName()], Z[Player:GetName()]) == 0 do
+						PosY[Player:GetName()] = PosY[Player:GetName()] - 1
+					end
+					break
+				end
+			else
+				Air[Player:GetName()] = true
+			end
+			PosY[Player:GetName()] = PosY[Player:GetName()] - 1
+		end
+		if PosY[Player:GetName()] ~= nil then
+			if Air[Player:GetName()] == true then
+				if PosY[Player:GetName()] ~= 1 then
+					Player:TeleportTo( Player:GetPosX(), PosY[Player:GetName()] + 1, Player:GetPosZ() )
+				end
+				Air[Player:GetName()] = false
+				PosY[Player:GetName()] = nil
+			end
+		end		
+	end
+	Player:SendMessage( cChatColor.LightPurple .. "Descended a level." )
+	return true
+end
+
+function HandleAscendCommand( Split, Player )
+	World = Player:GetWorld()
+	if Player:GetPosY() == World:GetHeight( math.floor(Player:GetPosX()), math.floor((Player:GetPosZ()) ) ) then
+		Player:SendMessage( cChatColor.LightPurple .. "Ascended a level." )
+	else
+		X[Player:GetName()] = math.floor(Player:GetPosX())
+		Z[Player:GetName()] = math.floor(Player:GetPosZ())
+		for Y = math.floor(Player:GetPosY()), World:GetHeight( X[Player:GetName()], Z[Player:GetName()] ) + 1 do
+			if World:GetBlock( X[Player:GetName()], Y, Z[Player:GetName()] ) == 0 then
+				if Air[Player:GetName()] == true then
+					PosY[Player:GetName()] = Y
+					break
+				end
+			else
+				Air[Player:GetName()] = true
+			end
+		end
+		if PosY[Player:GetName()] ~= nil then
+			if Air[Player:GetName()] == true then			
+				Player:TeleportTo( Player:GetPosX(), PosY[Player:GetName()], Player:GetPosZ() )
+				Air[Player:GetName()] = false
+				PosY[Player:GetName()] = nil
+			end
+		end		
+	end	
+	Player:SendMessage( cChatColor.LightPurple .. "Ascended a level." )
 	return true
 end
 
@@ -80,13 +148,16 @@ function GetSize( Player )
 	end
 	return X * Y * Z
 end
+
 function HandleSizeCommand( Split, Player )
-	
-	print( X )
-	print( Y )
-	print( Z )
-	print( X * Y * Z )
+	if OnePlayerX[Player:GetName()] ~= nil and TwoPlayerX[Player:GetName()] ~= nil then
+		Player:SendMessage( cChatColor.LightPurple .. "the selection is " .. GetSize( Player ) .. " block(s) big" )
+	else
+		Player:SendMessage( cChatColor.LightPurple .. "Please select a region first" )
+	end
+	return true
 end
+
 function HandleWallsCommand( Split, Player )
 	if OnePlayerX[Player:GetName()] == nil or TwoPlayerX[Player:GetName()] == nil then
 		Player:SendMessage( cChatColor.Rose .. "No Region set" )
@@ -126,16 +197,16 @@ function HandleWallsCommand( Split, Player )
 	World = Player:GetWorld()
 	
 	BlockArea:Read( World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ )
-	BlockArea:FillRelCuboid( 1, BlockArea:GetSizeX(), 1, BlockArea:GetSizeY(), 1, BlockArea:GetSizeZ(), 1, Block[1], Block[2] )
+	BlockArea:FillRelCuboid( 1, BlockArea:GetSizeX(), 1, 1, 1, 1, 1, Block[1], Block[2] )
 	BlockArea:Write( World, OneX, OneY, OneZ )
+	return true
 end
+
 function HandlePasteCommand( Split, Player )
-	
-	print(BlockArea:GetDataTypes())
 	if BlockArea:Write( Player:GetWorld(), Player:GetPosX(), Player:GetPosY(), Player:GetPosZ(), 3 ) == false then
-		Player:SendMessage( cChatColor.LightPurple .. "You didn't load a schematic" )
+		Player:SendMessage( cChatColor.LightPurple .. "You didn't copy anything" )
 	else
-		Player:SendMessage( cChatColor.LightPurple .. "Succesfull" )
+		Player:SendMessage( cChatColor.LightPurple .. "Pasted relative to you." )
 	end
 	return true
 end
@@ -145,19 +216,15 @@ function HandleSchematicCommand( Split, Player )
 		if Split[3] == nil then
 			Player:SendMessage( cChatColor.Green .. "Please state a schematic name" )
 			return true
-		end
-		
+		end	
 		BlockArea:SaveToSchematicFile( "Schematics/" .. Split[3] .. ".Schematic" )
 		Player:SendMessage( cChatColor.LightPurple .. "Clipboard saved to " .. Split[3] )
 	elseif string.upper(Split[2]) == "LOAD" then
 		if Split[3] == nil then
 			Player:SendMessage( cChatColor.Green .. "Please state a schematic name" )
 			return true
-		end 
-		
+		end 		
 		BlockArea:LoadFromSchematicFile( "Schematics/" .. Split[3] .. ".Schematic" )
-		BlockArea:Write( Player:GetWorld(), Player:GetPosX(), Player:GetPosY(), Player:GetPosZ(), 3 )
-		print(BlockArea:GetDataTypes())
 		Player:SendMessage( cChatColor.LightPurple .. "Clipboard " .. Split[3] .. " is loaded" ) 
 	end
 	return true
@@ -190,8 +257,8 @@ function HandleCopyCommand( Split, Player )
 		TwoZ = OnePlayerZ[Player:GetName()]
 	end
 	World = Player:GetWorld()
-	
 	BlockArea:Read( World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ )
+	Player:SendMessage( cChatColor. LightPurple .. "Block(s) copied." )
 	return true
 end
 	
@@ -324,7 +391,7 @@ function OnPlayerLeftClick(Player, BlockX, BlockY, BlockZ, BlockFace, CursorX, C
 		World = Player:GetWorld()
 		Item = cItem( World:GetBlock( BlockX, BlockY, BlockZ ), 10, World:GetBlockMeta( BlockX, BlockY, BlockZ ) )
 		cPickup( BlockX, BlockY, BlockZ, Item, 0.0, 0.0, 0.0 )
-		World:SetBlock( BlockX, BlockY, BlockZ, 0, 0 ) 		
+		World:DigBlock( BlockX, BlockY, BlockZ ) 		
 	end
 end
 
