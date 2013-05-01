@@ -43,20 +43,23 @@ function HandleGreenCommand( Split, Player )
 	if Split[2] == nil then
 		Radius = 5
 	elseif tonumber(Split[2]) == nil then
-		Player:SendMessage( cChatColor.Green .. "Usage: /snow [Radius]" )
+		Player:SendMessage( cChatColor.Green .. "Usage: /green [Radius]" )
 	else
 		Radius = Split[2]
 	end
 	X = Player:GetPosX()
 	Z = Player:GetPosZ()
+	Blocks[Player:GetName()] = 0
 	for x=X - Radius, X + Radius do
 		for z=Z - Radius, Z + Radius do
 			y = World:GetHeight(x, z)
 			if World:GetBlock(x, y, z) == 3 then
+				Blocks[Player:GetName()] = Blocks[Player:GetName()] + 1
 				World:SetBlock(x, y, z, 2, 0)
 			end
 		end
 	end
+	Player:SendMessage( cChatColor.LightPurple .. Blocks[Player:GetName()] .. " surfaces greened." )
 	return true
 end
 function GetSize( Player )
@@ -227,22 +230,26 @@ function HandleThawCommand( Split, Player )
 	if Split[2] == nil then
 		Radius = 5
 	elseif tonumber(Split[2]) == nil then
-		Player:SendMessage( cChatColor.Green .. "Usage: /snow [Radius]" )
+		Player:SendMessage( cChatColor.Green .. "Usage: /thaw [Radius]" )
 	else
 		Radius = Split[2]
 	end
 	X = Player:GetPosX()
 	Z = Player:GetPosZ()
+	Blocks[Player:GetName()] = 0
 	for x=X - Radius, X + Radius do
 		for z=Z - Radius, Z + Radius do
 			y = World:GetHeight(x, z)
 			if World:GetBlock(x, y, z) == 78 then
+				Blocks[Player:GetName()] = Blocks[Player:GetName()] + 1
 				World:SetBlock(x, y, z, 0, 0)
 			elseif World:GetBlock(x, y, z) == 79 then
+				Blocks[Player:GetName()] = Blocks[Player:GetName()] + 1
 				World:SetBlock(x, y, z, 8, 0)
 			end
 		end
 	end
+	Player:SendMessage( cChatColor.LightPurple .. Blocks[Player:GetName()] .. " surfaces thawed" )
 	return true
 end
 
@@ -257,18 +264,23 @@ function HandleSnowCommand( Split, Player )
 	end
 	X = Player:GetPosX()
 	Z = Player:GetPosZ()
+	Blocks[Player:GetName()] = 0
 	for x=X - Radius, X + Radius do
 		for z=Z - Radius, Z + Radius do
 			y = World:GetHeight(x, z)
 			if World:GetBlock(x, y, z) == 8 then
+				Blocks[Player:GetName()] = Blocks[Player:GetName()] + 1
 				World:SetBlock(x, y, z, 79, 0)
 			elseif World:GetBlock(x, y, z) == 10 then
+				Blocks[Player:GetName()] = Blocks[Player:GetName()] + 1
 				World:SetBlock(x, y, z, 49, 0)
 			else
+				Blocks[Player:GetName()] = Blocks[Player:GetName()] + 1
 				World:SetBlock(x, y + 1, z, 78, 0)
 			end
 		end
 	end
+	Player:SendMessage( cChatColor.LightPurple .. Blocks[Player:GetName()] .. " surfaces covered. Let is snow~" )
 	return true
 end
 
