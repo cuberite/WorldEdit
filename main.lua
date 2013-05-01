@@ -17,22 +17,184 @@ function Initialize(Plugin)
 	PluginManager:AddHook(PLUGIN, cPluginManager.HOOK_PLAYER_RIGHT_CLICK)
 	PluginManager:AddHook(PLUGIN, cPluginManager.HOOK_PLAYER_LEFT_CLICK)
 	
-	PluginManager:BindCommand("//set",	    "worldedit.set",	HandleSetCommand,   		" - switches volume selection mode")
-	PluginManager:BindCommand("//replace",  "worldedit.replace", HandleReplaceCommand, " - switches volume selection mode")
-	PluginManager:BindCommand("//wand",	    "worldedit.wand",	HandleWandCommand,   		" - switches volume selection mode")
-	PluginManager:BindCommand("//setbiome",	"worldedit.setbiome",	HandleSetBiomeCommand,   		" - switches volume selection mode")
-	PluginManager:BindCommand("/biomelist",	"worldedit.biomelist",	HandleBiomeListCommand,   		" - switches volume selection mode")
-	PluginManager:BindCommand("/snow",	"worldedit.snow",	HandleSnowCommand,   		" - switches volume selection mode")
-	PluginManager:BindCommand("/thaw",	"worldedit.thaw",	HandleThawCommand,   		" - switches volume selection mode")
-	PluginManager:BindCommand("//",	        "worldedit.superpick",	HandleSuperPickCommand,   		" - switches volume selection mode")
+	PluginManager:BindCommand("//green",        "worldedit.green",     HandleGreenCommand,          " [radius] - Greens the area" )	
+	PluginManager:BindCommand("//size",	        "worldedit.size",      HandleSizeCommand,           " Get the size of the selection")
+	PluginManager:BindCommand("//paste",        "worldedit.paste",	   HandlePasteCommand,          " Pastes the clipboard's contents.")
+	PluginManager:BindCommand("//copy",	        "worldedit.copy",      HandleCopyCommand,           " Copy the selection to the clipboard")
+	PluginManager:BindCommand("//schematic",    "worldedit.copy",      HandleSchematicCommand,      " Schematic-related commands")
+	PluginManager:BindCommand("//set",	        "worldedit.set",       HandleSetCommand,   	        " Set all the blocks inside the selection to a block")
+	PluginManager:BindCommand("//replace",      "worldedit.replace",   HandleReplaceCommand,        " Replace all the blocks in the selection with another")
+	PluginManager:BindCommand("//walls",        "worldedit.walls",     HandleWallsCommand,          " Build the four sides of the selection")
+	PluginManager:BindCommand("//wand",	        "worldedit.wand",      HandleWandCommand,           " Get the wand object")
+	PluginManager:BindCommand("//setbiome",	    "worldedit.setbiome",  HandleSetBiomeCommand,       " Set the biome of the region.")
+	PluginManager:BindCommand("/biomelist",	    "worldedit.biomelist", HandleBiomeListCommand,      " Gets all biomes available.")
+	PluginManager:BindCommand("/snow",	        "worldedit.snow",      HandleSnowCommand,           " Simulates snow")
+	PluginManager:BindCommand("/thaw",	        "worldedit.thaw",      HandleThawCommand,           " Thaws the area")
+	PluginManager:BindCommand("//",	            "worldedit.superpick", HandleSuperPickCommand,      " Toggle the super pickaxe pickaxe function")
 
 	LoadSettings()
+	BlockArea = cBlockArea()
 	LOG("Initialized " .. PLUGIN:GetName() .. " v" .. PLUGIN:GetVersion())
 	return true
 end
 
+function HandleGreenCommand( Split, Player )
+	World = Player:GetWorld()
+	if Split[2] == nil then
+		Radius = 5
+	elseif tonumber(Split[2]) == nil then
+		Player:SendMessage( cChatColor.Green .. "Usage: /snow [Radius]" )
+	else
+		Radius = Split[2]
+	end
+	X = Player:GetPosX()
+	Z = Player:GetPosZ()
+	for x=X - Radius, X + Radius do
+		for z=Z - Radius, Z + Radius do
+			y = World:GetHeight(x, z)
+			if World:GetBlock(x, y, z) == 3 then
+				World:SetBlock(x, y, z, 2, 0)
+			end
+		end
+	end
+	return true
+end
+function GetSize( Player )
+	if OnePlayerX[Player:GetName()] > TwoPlayerX[Player:GetName()] then
+		X = OnePlayerX[Player:GetName()] - TwoPlayerX[Player:GetName()] + 1
+	else
+		X = TwoPlayerX[Player:GetName()] - OnePlayerX[Player:GetName()] + 1
+	end
+	if OnePlayerY[Player:GetName()] > TwoPlayerY[Player:GetName()] then
+		Y = OnePlayerY[Player:GetName()] - TwoPlayerY[Player:GetName()] + 1
+	else
+		Y = TwoPlayerY[Player:GetName()] - OnePlayerY[Player:GetName()] + 1
+	end
+	if OnePlayerZ[Player:GetName()] > TwoPlayerZ[Player:GetName()] then
+		Z = OnePlayerZ[Player:GetName()] - TwoPlayerZ[Player:GetName()] + 1
+	else
+		Z = TwoPlayerZ[Player:GetName()] - OnePlayerZ[Player:GetName()] + 1
+	end
+	return X * Y * Z
+end
+function HandleSizeCommand( Split, Player )
+	
+	print( X )
+	print( Y )
+	print( Z )
+	print( X * Y * Z )
+end
+function HandleWallsCommand( Split, Player )
+	if OnePlayerX[Player:GetName()] == nil or TwoPlayerX[Player:GetName()] == nil then
+		Player:SendMessage( cChatColor.Rose .. "No Region set" )
+		return true
+	end
+	if Split[2] == nil then
+		Player:SendMessage( cChatColor.Rose .. "Please say a block ID" )
+	end
+	Block = StringSplit( Split[2], ":" )
+	if Block[1] == nil then
+		Block[1] = 0
+	end
+	if Block[2] == nil then
+		Block[2] = 0
+	end
+	if OnePlayerX[Player:GetName()] < TwoPlayerX[Player:GetName()] then
+		OneX = OnePlayerX[Player:GetName()]
+		TwoX = TwoPlayerX[Player:GetName()]
+	else
+		OneX = TwoPlayerX[Player:GetName()]
+		TwoX = OnePlayerX[Player:GetName()]
+	end
+	if OnePlayerY[Player:GetName()] < TwoPlayerY[Player:GetName()] then
+		OneY = OnePlayerY[Player:GetName()]
+		TwoY = TwoPlayerY[Player:GetName()]
+	else
+		OneY = TwoPlayerY[Player:GetName()]
+		TwoY = OnePlayerY[Player:GetName()]
+	end
+	if OnePlayerZ[Player:GetName()] < TwoPlayerZ[Player:GetName()] then
+		OneZ = OnePlayerZ[Player:GetName()]
+		TwoZ = TwoPlayerZ[Player:GetName()]
+	else
+		OneZ = TwoPlayerZ[Player:GetName()]
+		TwoZ = OnePlayerZ[Player:GetName()]
+	end
+	World = Player:GetWorld()
+	
+	BlockArea:Read( World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ )
+	BlockArea:FillRelCuboid( 1, BlockArea:GetSizeX(), 1, BlockArea:GetSizeY(), 1, BlockArea:GetSizeZ(), 1, Block[1], Block[2] )
+	BlockArea:Write( World, OneX, OneY, OneZ )
+end
+function HandlePasteCommand( Split, Player )
+	
+	print(BlockArea:GetDataTypes())
+	if BlockArea:Write( Player:GetWorld(), Player:GetPosX(), Player:GetPosY(), Player:GetPosZ(), 3 ) == false then
+		Player:SendMessage( cChatColor.LightPurple .. "You didn't load a schematic" )
+	else
+		Player:SendMessage( cChatColor.LightPurple .. "Succesfull" )
+	end
+	return true
+end
+
+function HandleSchematicCommand( Split, Player )
+	if string.upper(Split[2]) == "SAVE" then
+		if Split[3] == nil then
+			Player:SendMessage( cChatColor.Green .. "Please state a schematic name" )
+			return true
+		end
+		
+		BlockArea:SaveToSchematicFile( "Schematics/" .. Split[3] .. ".Schematic" )
+		Player:SendMessage( cChatColor.LightPurple .. "Clipboard saved to " .. Split[3] )
+	elseif string.upper(Split[2]) == "LOAD" then
+		if Split[3] == nil then
+			Player:SendMessage( cChatColor.Green .. "Please state a schematic name" )
+			return true
+		end 
+		
+		BlockArea:LoadFromSchematicFile( "Schematics/" .. Split[3] .. ".Schematic" )
+		BlockArea:Write( Player:GetWorld(), Player:GetPosX(), Player:GetPosY(), Player:GetPosZ(), 3 )
+		print(BlockArea:GetDataTypes())
+		Player:SendMessage( cChatColor.LightPurple .. "Clipboard " .. Split[3] .. " is loaded" ) 
+	end
+	return true
+end
+
+function HandleCopyCommand( Split, Player )
+	if OnePlayerX[Player:GetName()] == nil or TwoPlayerX[Player:GetName()] == nil then
+		Player:SendMessage( cChatColor.Rose .. "No Region set" )
+		return true
+	end
+	if OnePlayerX[Player:GetName()] < TwoPlayerX[Player:GetName()] then
+		OneX = OnePlayerX[Player:GetName()]
+		TwoX = TwoPlayerX[Player:GetName()]
+	else
+		OneX = TwoPlayerX[Player:GetName()]
+		TwoX = OnePlayerX[Player:GetName()]
+	end
+	if OnePlayerY[Player:GetName()] < TwoPlayerY[Player:GetName()] then
+		OneY = OnePlayerY[Player:GetName()]
+		TwoY = TwoPlayerY[Player:GetName()]
+	else
+		OneY = TwoPlayerY[Player:GetName()]
+		TwoY = OnePlayerY[Player:GetName()]
+	end
+	if OnePlayerZ[Player:GetName()] < TwoPlayerZ[Player:GetName()] then
+		OneZ = OnePlayerZ[Player:GetName()]
+		TwoZ = TwoPlayerZ[Player:GetName()]
+	else
+		OneZ = TwoPlayerZ[Player:GetName()]
+		TwoZ = OnePlayerZ[Player:GetName()]
+	end
+	World = Player:GetWorld()
+	
+	BlockArea:Read( World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ )
+	return true
+end
+	
+	
 function HandleWandCommand( Split, Player )
-	Item = cItem( E_ITEM_WOODEN_AXE, 1 )
+	Item = cItem( Wand, 1 )
 	if( Player:GetInventory():AddItem( Item ) == true ) then
 		Player:SendMessage( cChatColor.Green .. "You have a wooden axe now." )
 	else
@@ -44,7 +206,7 @@ end
 function LoadSettings()
 	SettingsIni = cIniFile( PLUGIN:GetLocalDirectory() .. "/Config.ini" )
 	SettingsIni:ReadFile()
-	Wand = SettingsIni:GetValueSetI("General", "Wand", 271 )
+	Wand = SettingsIni:GetValueSetI("General", "WandItem", 271 )
 	
 	SettingsIni:WriteFile()
 end
@@ -52,10 +214,10 @@ end
 function HandleSuperPickCommand( Split, Player )
 	if SP[Player:GetName()] == nil or SP[Player:GetName()] == false then
 		SP[Player:GetName()] = true
-		Player:SendMessage( cChatColor.LightPurple .. "Super pick deactivated" )
+		Player:SendMessage( cChatColor.LightPurple .. "Super pick activated" )
 	elseif SP[Player:GetName()] == true then
 		SP[Player:GetName()] = false
-		Player:SendMessage( cChatColor.LightPurple .. "Super pick activated" )
+		Player:SendMessage( cChatColor.LightPurple .. "Super pick deactivated" )
 	end
 	return true
 end
@@ -111,7 +273,7 @@ function HandleSnowCommand( Split, Player )
 end
 
 function OnPlayerBreakingBlock(Player, BlockX, BlockY, BlockZ, BlockFace, BlockType, BlockMeta)
-	if Player:GetEquippedItem().m_ItemType == 271 then
+	if Player:GetEquippedItem().m_ItemType == Wand then
 		OnePlayerX[Player:GetName()] = BlockX
 		OnePlayerY[Player:GetName()] = BlockY
 		OnePlayerZ[Player:GetName()] = BlockZ
@@ -137,15 +299,7 @@ function OnPlayerBreakingBlock(Player, BlockX, BlockY, BlockZ, BlockFace, BlockT
 				OneZ = TwoPlayerZ[Player:GetName()]
 				TwoZ = OnePlayerZ[Player:GetName()]
 			end
-			Blocks[Player:GetName()] = 0
-			for X = OneX, TwoX do
-				for Y = OneY, TwoY do
-					for Z = OneZ, TwoZ do
-						Blocks[Player:GetName()] = Blocks[Player:GetName()] + 1
-					end
-				end
-			end
-			Player:SendMessage( cChatColor.LightPurple .. 'First position set to (' .. BlockX .. ".0, " .. BlockY .. ".0, " .. BlockZ .. ".0) (" .. Blocks[Player:GetName()] .. ")." )
+			Player:SendMessage( cChatColor.LightPurple .. 'First position set to (' .. BlockX .. ".0, " .. BlockY .. ".0, " .. BlockZ .. ".0) (" .. GetSize( Player ) .. ")." )
 		else
 			Player:SendMessage( cChatColor.LightPurple .. 'First position set to (' .. BlockX .. ".0, " .. BlockY .. ".0, " .. BlockZ .. ".0)." )
 		end
@@ -156,12 +310,14 @@ end
 function OnPlayerLeftClick(Player, BlockX, BlockY, BlockZ, BlockFace, CursorX, CursorY, CursorZ)
 	if SP[Player:GetName()] == true then
 		World = Player:GetWorld()
-		World:SetBlock( BlockX, BlockY, BlockZ, 0, 0 ) 
+		Item = cItem( World:GetBlock( BlockX, BlockY, BlockZ ), 10, World:GetBlockMeta( BlockX, BlockY, BlockZ ) )
+		cPickup( BlockX, BlockY, BlockZ, Item, 0.0, 0.0, 0.0 )
+		World:SetBlock( BlockX, BlockY, BlockZ, 0, 0 ) 		
 	end
 end
 
 function OnPlayerRightClick(Player, BlockX, BlockY, BlockZ, BlockFace, CursorX, CursorY, CursorZ)
-	if Player:GetEquippedItem().m_ItemType == 271 then
+	if Player:GetEquippedItem().m_ItemType == Wand then
 		if BlockX == -1 and BlockZ == -1 and BlockY == 255 then
 			return false
 		end
@@ -191,14 +347,7 @@ function OnPlayerRightClick(Player, BlockX, BlockY, BlockZ, BlockFace, CursorX, 
 				TwoZ = OnePlayerZ[Player:GetName()]
 			end
 			Blocks[Player:GetName()] = 0
-			for X = OneX, TwoX do
-				for Y = OneY, TwoY do
-					for Z = OneZ, TwoZ do
-						Blocks[Player:GetName()] = Blocks[Player:GetName()] + 1
-					end
-				end
-			end
-			Player:SendMessage( cChatColor.LightPurple .. 'Second position set to (' .. BlockX .. ".0, " .. BlockY .. ".0, " .. BlockZ .. ".0) (" .. Blocks[Player:GetName()] .. ")." )
+			Player:SendMessage( cChatColor.LightPurple .. 'Second position set to (' .. BlockX .. ".0, " .. BlockY .. ".0, " .. BlockZ .. ".0) (" .. GetSize( Player ) .. ")." )
 		else
 			Player:SendMessage( cChatColor.LightPurple .. 'Second position set to (' .. BlockX .. ".0, " .. BlockY .. ".0, " .. BlockZ .. ".0)." )
 		end
@@ -371,18 +520,11 @@ function HandleSetCommand( Split, Player )
 		TwoZ = OnePlayerZ[Player:GetName()]
 	end
 	World = Player:GetWorld()
-	BlockArea = cBlockArea()
+	
 	BlockArea:Read( World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ )
 	BlockArea:Fill( 1, Block[1], Block[2] )
 	BlockArea:Write( World, OneX, OneY, OneZ )
-	--[[for X=OneX, TwoX do
-		for Z=OneZ, TwoZ do
-			for Y=OneY,TwoY do
-				World:SetBlock(X, Y, Z, Block[1], Block[2])
-			end
-		end
-	end]]
-	Player:SendMessage( cChatColor.LightPurple .. Blocks[Player:GetName()] .. " block(s) have been changed." )
+	Player:SendMessage( cChatColor.LightPurple .. GetSize( Player ) .. " block(s) have been changed." )
 	return true
 end
 
