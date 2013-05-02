@@ -12,8 +12,10 @@ This doesn't have all the features the real WorldEdit has YET. for now these com
 * //schematic	worldedit.schematic.save, worldedit.schematic.load
 * //set         worldedit.region.set
 * //replace     worldedit.region.replace
+* //walls       worldedit.region.walls
 * //wand        worldedit.wand
 * /biomelist    worldedit.biomelist
 * /snow         worldedit.snow
 * /thaw         worldedit.thaw
 * //            worldedit.superpickaxe
+* repl          worldedit.tool.replacer
