@@ -1,3 +1,55 @@
+-------------------------------------------------
+---------------------BUTCHER---------------------
+-------------------------------------------------
+function HandleButcherCommand( Split, Player )
+	if Split[2] == nil then
+		Radius = ButcherRadius
+	elseif tonumber( Split[2] ) == nil then
+		Player:SendMessage( cChatColor.Rose .. 'Number expected; string "' .. Split[2] .. '" given' )
+		return true
+	else
+		Radius = tonumber( Split[2] )
+	end
+	X = Player:GetPosX()
+	Y = Player:GetPosY()
+	Z = Player:GetPosZ()
+	Distance =  math.abs( math.floor( X + Y + Z ) )
+	Count[Player:GetName()] = 0
+	local EachEntity = function( Entity )
+		if Entity:IsMob() == true then
+			if Radius == 0 then
+				Entity:Destroy()
+				Count[Player:GetName()] = Count[Player:GetName()] + 1
+			else
+				EntityX = Entity:GetPosX()
+				EntityY = Entity:GetPosY()
+				EntityZ = Entity:GetPosZ()
+				if (math.abs( Distance - math.abs( math.floor( EntityX + EntityY + EntityZ ) ) ) ) < Radius then
+					Entity:Destroy()
+					Count[Player:GetName()] = Count[Player:GetName()] + 1
+				end
+			end
+		end
+	end
+	Player:GetWorld():ForEachEntity( EachEntity )
+	Player:SendMessage( cChatColor.LightPurple .. "Killed " .. Count[Player:GetName()] .. " mobs." )
+	return true
+end
+	
+	
+------------------------------------------------
+----------------------NONE----------------------
+------------------------------------------------
+function HandleNoneCommand( Split, Player )
+	if Player:GetEquippedItem().m_ItemType == ReplItem[Player:GetName()] then
+		Repl[Player:GetName()] = nil
+		ReplItem[Player:GetName()] = nil
+	end
+	Player:SendMessage( cChatColor.LightPurple .. "Tool unbound from your current item." )
+	return true
+end
+	
+	
 ------------------------------------------------
 ----------------------REPL----------------------
 ------------------------------------------------

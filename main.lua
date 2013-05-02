@@ -2,7 +2,7 @@ function Initialize(Plugin)
 	
 	PLUGIN = Plugin
 	PLUGIN:SetName("WorldEdit")
-	PLUGIN:SetVersion(1)
+	PLUGIN:SetVersion(0)
 	
 	PluginManager = cRoot:Get():GetPluginManager()
 	PluginManager:AddHook(PLUGIN, cPluginManager.HOOK_PLAYER_BREAKING_BLOCK)
@@ -11,7 +11,8 @@ function Initialize(Plugin)
 	
 	PluginManager:BindCommand("/repl",          "worldedit.tool.replacer",        HandleReplCommand,           " Block replace tool" )	
 	PluginManager:BindCommand("/descend",       "worldedit.navigation.descend",   HandleDescendCommand,        " Go down a floor" )	
-	PluginManager:BindCommand("/ascend",        "worldedit.navigation.ascend",    HandleAscendCommand,         " Go up a floor" )	
+	PluginManager:BindCommand("/ascend",        "worldedit.navigation.ascend",    HandleAscendCommand,         " Go up a floor" )
+	PluginManager:BindCommand("/butcher",       "worldedit.butcher",              HandleButcherCommand,        " Kills nearby mobs, based on radius, if none is given uses default in configuration." )	
 	PluginManager:BindCommand("//green",        "worldedit.green",                HandleGreenCommand,          " [radius] - Greens the area" )	
 	PluginManager:BindCommand("//size",	        "worldedit.selection.size",       HandleSizeCommand,           " Get the size of the selection")
 	PluginManager:BindCommand("//paste",        "worldedit.clipboard.paste",	  HandlePasteCommand,          " Pastes the clipboard's contents.")
@@ -27,7 +28,8 @@ function Initialize(Plugin)
 	PluginManager:BindCommand("/snow",	        "worldedit.snow",                 HandleSnowCommand,           " Simulates snow")
 	PluginManager:BindCommand("/thaw",	        "worldedit.thaw",                 HandleThawCommand,           " Thaws the area")
 	PluginManager:BindCommand("//",	            "worldedit.superpickaxe",         HandleSuperPickCommand,      " Toggle the super pickaxe pickaxe function")
-	
+	PluginManager:BindCommand("/none",          "",                               HandleNoneCommand,           " Unbind a bound tool from your current item" )	
+
 	CreateTables()
 	LoadSettings()
 	BlockArea = cBlockArea()

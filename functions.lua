@@ -5,6 +5,7 @@ function LoadSettings()
 	SettingsIni = cIniFile( PLUGIN:GetLocalDirectory() .. "/Config.ini" )
 	SettingsIni:ReadFile()
 	Wand = SettingsIni:GetValueSetI("General", "WandItem", 271 )
+	ButcherRadius = SettingsIni:GetValueSetI("General", "ButcherRadius", 0 )
 	SettingsIni:WriteFile()
 end
 
@@ -27,6 +28,7 @@ function CreateTables()
 	Z = {}
 	Repl = {}
 	ReplItem = {}
+	Count = {}
 end
 
 

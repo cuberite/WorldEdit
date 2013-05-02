@@ -2,6 +2,7 @@ WorldEdit
 =========
 I am currently trying to create WorldEdit for MCServer. This plugin is in early Beta stage.
 This doesn't have all the features the real WorldEdit has YET. for now these commands + permissions are actually working:
+* /butcher      worldedit.butcher
 * /descend      worldedit.navigation.descend
 * /ascend       worldedit.navigation.ascend
 * //green       worldedit.green
@@ -18,4 +19,5 @@ This doesn't have all the features the real WorldEdit has YET. for now these com
 * /snow         worldedit.snow
 * /thaw         worldedit.thaw
 * //            worldedit.superpickaxe
-* /repl          worldedit.tool.replacer
+* /repl         worldedit.tool.replacer
+* /none          
