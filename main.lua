@@ -21,23 +21,23 @@ function Initialize(Plugin)
 	PluginManager:AddHook(PLUGIN, cPluginManager.HOOK_PLAYER_RIGHT_CLICK)
 	PluginManager:AddHook(PLUGIN, cPluginManager.HOOK_PLAYER_LEFT_CLICK)
 	
-	PluginManager:BindCommand("/descend",       "worldedit.descend",   HandleDescendCommand,        " Go down a floor" )	
-	PluginManager:BindCommand("/ascend",        "worldedit.ascend",    HandleAscendCommand,         " Go up a floor" )	
-	PluginManager:BindCommand("//green",        "worldedit.green",     HandleGreenCommand,          " [radius] - Greens the area" )	
-	PluginManager:BindCommand("//size",	        "worldedit.size",      HandleSizeCommand,           " Get the size of the selection")
-	PluginManager:BindCommand("//paste",        "worldedit.paste",	   HandlePasteCommand,          " Pastes the clipboard's contents.")
-	PluginManager:BindCommand("//copy",	        "worldedit.copy",      HandleCopyCommand,           " Copy the selection to the clipboard")
-	PluginManager:BindCommand("//cut",	        "worldedit.cut",       HandleCutCommand,            " Cut the selection to the clipboard")
-	PluginManager:BindCommand("//schematic",    "worldedit.schematic", HandleSchematicCommand,      " Schematic-related commands")
-	PluginManager:BindCommand("//set",	        "worldedit.set",       HandleSetCommand,   	        " Set all the blocks inside the selection to a block")
-	PluginManager:BindCommand("//replace",      "worldedit.replace",   HandleReplaceCommand,        " Replace all the blocks in the selection with another")
-	PluginManager:BindCommand("//walls",        "worldedit.walls",     HandleWallsCommand,          " Build the four sides of the selection")
-	PluginManager:BindCommand("//wand",	        "worldedit.wand",      HandleWandCommand,           " Get the wand object")
-	PluginManager:BindCommand("//setbiome",	    "worldedit.setbiome",  HandleSetBiomeCommand,       " Set the biome of the region.")
-	PluginManager:BindCommand("/biomelist",	    "worldedit.biomelist", HandleBiomeListCommand,      " Gets all biomes available.")
-	PluginManager:BindCommand("/snow",	        "worldedit.snow",      HandleSnowCommand,           " Simulates snow")
-	PluginManager:BindCommand("/thaw",	        "worldedit.thaw",      HandleThawCommand,           " Thaws the area")
-	PluginManager:BindCommand("//",	            "worldedit.superpick", HandleSuperPickCommand,      " Toggle the super pickaxe pickaxe function")
+	PluginManager:BindCommand("/descend",       "worldedit.navigation.descend",   HandleDescendCommand,        " Go down a floor" )	
+	PluginManager:BindCommand("/ascend",        "worldedit.navigation.ascend",    HandleAscendCommand,         " Go up a floor" )	
+	PluginManager:BindCommand("//green",        "worldedit.green",                HandleGreenCommand,          " [radius] - Greens the area" )	
+	PluginManager:BindCommand("//size",	        "worldedit.selection.size",       HandleSizeCommand,           " Get the size of the selection")
+	PluginManager:BindCommand("//paste",        "worldedit.clipboard.paste",	  HandlePasteCommand,          " Pastes the clipboard's contents.")
+	PluginManager:BindCommand("//copy",	        "worldedit.clipboard.copy",       HandleCopyCommand,           " Copy the selection to the clipboard")
+	PluginManager:BindCommand("//cut",	        "worldedit.clipboard.cut",        HandleCutCommand,            " Cut the selection to the clipboard")
+	PluginManager:BindCommand("//schematic",    "",                               HandleSchematicCommand,      " Schematic-related commands")
+	PluginManager:BindCommand("//set",	        "worldedit.region.set",           HandleSetCommand,   	       " Set all the blocks inside the selection to a block")
+	PluginManager:BindCommand("//replace",      "worldedit.region.replace",       HandleReplaceCommand,        " Replace all the blocks in the selection with another")
+	PluginManager:BindCommand("//walls",        "worldedit.region.walls",         HandleWallsCommand,          " Build the four sides of the selection")
+	PluginManager:BindCommand("//wand",	        "worldedit.wand",                 HandleWandCommand,           " Get the wand object")
+	PluginManager:BindCommand("//setbiome",	    "worldedit.biome.set",            HandleSetBiomeCommand,       " Set the biome of the region.")
+	PluginManager:BindCommand("/biomelist",	    "worldedit.biomelist",            HandleBiomeListCommand,      " Gets all biomes available.")
+	PluginManager:BindCommand("/snow",	        "worldedit.snow",                 HandleSnowCommand,           " Simulates snow")
+	PluginManager:BindCommand("/thaw",	        "worldedit.thaw",                 HandleThawCommand,           " Thaws the area")
+	PluginManager:BindCommand("//",	            "worldedit.superpickaxe",         HandleSuperPickCommand,      " Toggle the super pickaxe pickaxe function")
 
 	LoadSettings()
 	BlockArea = cBlockArea()
@@ -250,19 +250,23 @@ end
 
 function HandleSchematicCommand( Split, Player )
 	if string.upper(Split[2]) == "SAVE" then
-		if Split[3] == nil then
-			Player:SendMessage( cChatColor.Green .. "Please state a schematic name" )
-			return true
-		end	
-		BlockArea:SaveToSchematicFile( "Schematics/" .. Split[3] .. ".Schematic" )
-		Player:SendMessage( cChatColor.LightPurple .. "Clipboard saved to " .. Split[3] )
+		if Player:HasPermission("worldedit.schematic.save") then
+			if Split[3] == nil then
+				Player:SendMessage( cChatColor.Green .. "Please state a schematic name" )
+				return true
+			end	
+			BlockArea:SaveToSchematicFile( "Schematics/" .. Split[3] .. ".Schematic" )
+			Player:SendMessage( cChatColor.LightPurple .. "Clipboard saved to " .. Split[3] )
+		end
 	elseif string.upper(Split[2]) == "LOAD" then
-		if Split[3] == nil then
-			Player:SendMessage( cChatColor.Green .. "Please state a schematic name" )
-			return true
-		end 		
-		BlockArea:LoadFromSchematicFile( "Schematics/" .. Split[3] .. ".Schematic" )
-		Player:SendMessage( cChatColor.LightPurple .. "Clipboard " .. Split[3] .. " is loaded" ) 
+		if Player:HasPermission("worldedit.schematic.load") then
+			if Split[3] == nil then
+				Player:SendMessage( cChatColor.Green .. "Please state a schematic name" )
+				return true
+			end 		
+			BlockArea:LoadFromSchematicFile( "Schematics/" .. Split[3] .. ".Schematic" )
+			Player:SendMessage( cChatColor.LightPurple .. "Clipboard " .. Split[3] .. " is loaded" ) 
+		end
 	end
 	return true
 end
