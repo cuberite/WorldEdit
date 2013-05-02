@@ -27,7 +27,8 @@ function Initialize(Plugin)
 	PluginManager:BindCommand("//size",	        "worldedit.size",      HandleSizeCommand,           " Get the size of the selection")
 	PluginManager:BindCommand("//paste",        "worldedit.paste",	   HandlePasteCommand,          " Pastes the clipboard's contents.")
 	PluginManager:BindCommand("//copy",	        "worldedit.copy",      HandleCopyCommand,           " Copy the selection to the clipboard")
-	PluginManager:BindCommand("//schematic",    "worldedit.copy",      HandleSchematicCommand,      " Schematic-related commands")
+	PluginManager:BindCommand("//cut",	        "worldedit.cut",       HandleCutCommand,            " Cut the selection to the clipboard")
+	PluginManager:BindCommand("//schematic",    "worldedit.schematic", HandleSchematicCommand,      " Schematic-related commands")
 	PluginManager:BindCommand("//set",	        "worldedit.set",       HandleSetCommand,   	        " Set all the blocks inside the selection to a block")
 	PluginManager:BindCommand("//replace",      "worldedit.replace",   HandleReplaceCommand,        " Replace all the blocks in the selection with another")
 	PluginManager:BindCommand("//walls",        "worldedit.walls",     HandleWallsCommand,          " Build the four sides of the selection")
@@ -41,6 +42,42 @@ function Initialize(Plugin)
 	LoadSettings()
 	BlockArea = cBlockArea()
 	LOG("Initialized " .. PLUGIN:GetName() .. " v" .. PLUGIN:GetVersion())
+	return true
+end
+
+function HandleCutCommand( Split, Player )
+	if OnePlayerX[Player:GetName()] == nil or TwoPlayerX[Player:GetName()] == nil then
+		Player:SendMessage( cChatColor.Rose .. "No Region set" )
+		return true
+	end
+	if OnePlayerX[Player:GetName()] < TwoPlayerX[Player:GetName()] then
+		OneX = OnePlayerX[Player:GetName()]
+		TwoX = TwoPlayerX[Player:GetName()]
+	else
+		OneX = TwoPlayerX[Player:GetName()]
+		TwoX = OnePlayerX[Player:GetName()]
+	end
+	if OnePlayerY[Player:GetName()] < TwoPlayerY[Player:GetName()] then
+		OneY = OnePlayerY[Player:GetName()]
+		TwoY = TwoPlayerY[Player:GetName()]
+	else
+		OneY = TwoPlayerY[Player:GetName()]
+		TwoY = OnePlayerY[Player:GetName()]
+	end
+	if OnePlayerZ[Player:GetName()] < TwoPlayerZ[Player:GetName()] then
+		OneZ = OnePlayerZ[Player:GetName()]
+		TwoZ = TwoPlayerZ[Player:GetName()]
+	else
+		OneZ = TwoPlayerZ[Player:GetName()]
+		TwoZ = OnePlayerZ[Player:GetName()]
+	end
+	World = Player:GetWorld()
+	Cut = cBlockArea()
+	BlockArea:Read( World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ )
+	Cut:Read( World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ )
+	Cut:Fill( 1, 0, 0 )
+	Cut:Write( World, OneX, OneY, OneZ )
+	Player:SendMessage( cChatColor. LightPurple .. "Block(s) cut." )
 	return true
 end
 
@@ -130,6 +167,7 @@ function HandleGreenCommand( Split, Player )
 	Player:SendMessage( cChatColor.LightPurple .. Blocks[Player:GetName()] .. " surfaces greened." )
 	return true
 end
+
 function GetSize( Player )
 	if OnePlayerX[Player:GetName()] > TwoPlayerX[Player:GetName()] then
 		X = OnePlayerX[Player:GetName()] - TwoPlayerX[Player:GetName()] + 1
@@ -194,8 +232,7 @@ function HandleWallsCommand( Split, Player )
 		OneZ = TwoPlayerZ[Player:GetName()]
 		TwoZ = OnePlayerZ[Player:GetName()]
 	end
-	World = Player:GetWorld()
-	
+	World = Player:GetWorld()	
 	BlockArea:Read( World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ )
 	BlockArea:FillRelCuboid( 1, BlockArea:GetSizeX(), 1, 1, 1, 1, 1, Block[1], Block[2] )
 	BlockArea:Write( World, OneX, OneY, OneZ )
@@ -335,10 +372,10 @@ function HandleSnowCommand( Split, Player )
 	for x=X - Radius, X + Radius do
 		for z=Z - Radius, Z + Radius do
 			y = World:GetHeight(x, z)
-			if World:GetBlock(x, y, z) == 8 then
+			if World:GetBlock(x, y , z) == 9 then
 				Blocks[Player:GetName()] = Blocks[Player:GetName()] + 1
 				World:SetBlock(x, y, z, 79, 0)
-			elseif World:GetBlock(x, y, z) == 10 then
+			elseif World:GetBlock(x, y , z) == 10 then
 				Blocks[Player:GetName()] = Blocks[Player:GetName()] + 1
 				World:SetBlock(x, y, z, 49, 0)
 			else
@@ -598,8 +635,7 @@ function HandleSetCommand( Split, Player )
 		OneZ = TwoPlayerZ[Player:GetName()]
 		TwoZ = OnePlayerZ[Player:GetName()]
 	end
-	World = Player:GetWorld()
-	
+	World = Player:GetWorld()	
 	BlockArea:Read( World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ )
 	BlockArea:Fill( 1, Block[1], Block[2] )
 	BlockArea:Write( World, OneX, OneY, OneZ )
@@ -622,9 +658,6 @@ function HandleReplaceCommand( Split, Player )
 	if ChangeBlock[1] == nil then
 		ChangeBlock[1] = 0
 	end
-	if ChangeBlock[2] == nil then
-		ChangeBlock[2] = 0
-	end
 	ToChangeBlock = StringSplit( Split[3], ":" )
 	if ToChangeBlock[1] == nil then
 		ToChangeBlock[1] = 0
@@ -633,7 +666,9 @@ function HandleReplaceCommand( Split, Player )
 		ToChangeBlock[2] = 0
 	end
 	ChangeBlock[1] = tonumber(ChangeBlock[1])
-	ChangeBlock[2] = tonumber(ChangeBlock[2])
+	if ChangeBlock[2] ~= nil then
+		ChangeBlock[2] = tonumber(ChangeBlock[2])
+	end
 	ToChangeBlock[1] = tonumber(ToChangeBlock[1])
 	ToChangeBlock[2] = tonumber(ToChangeBlock[2])
 	if OnePlayerX[Player:GetName()] < TwoPlayerX[Player:GetName()] then
@@ -659,18 +694,21 @@ function HandleReplaceCommand( Split, Player )
 	end
 	World = Player:GetWorld()
 	Blocks[Player:GetName()] = 0
-	for X=OneX, TwoX do
-		for Z=OneZ, TwoZ do
-			for Y=OneY,TwoY do
-				if World:GetBlock(X, Y, Z) == ChangeBlock[1] then 
-					if World:GetBlockMeta(X, Y, Z) == ChangeBlock[2] then
+	BlockArea:Read( World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ )
+	for X=0, BlockArea:GetSizeX() - 1 do
+		for Y=0, BlockArea:GetSizeY() - 1 do
+			for Z=0, BlockArea:GetSizeZ() - 1 do
+				if BlockArea:GetRelBlockType( X, Y, Z ) == ChangeBlock[1] then
+					if BlockArea:GetRelBlockMeta( X, Y, Z ) == ChangeBlock[2] or ChangeBlock[2] == nil then
+						BlockArea:SetRelBlockType( X, Y, Z, ToChangeBlock[1] )
+						BlockArea:SetRelBlockMeta( X, Y, Z, ToChangeBlock[2] )
 						Blocks[Player:GetName()] = Blocks[Player:GetName()] + 1
-						World:FastSetBlock(X, Y, Z, ToChangeBlock[1], ToChangeBlock[2])
 					end
 				end
 			end
 		end
 	end
+	BlockArea:Write( World, OneX, OneY, OneZ )
 	Player:SendMessage( cChatColor.LightPurple .. Blocks[Player:GetName()] .. " block(s) have been changed." )
 	return true
 end
