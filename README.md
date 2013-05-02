@@ -18,4 +18,4 @@ This doesn't have all the features the real WorldEdit has YET. for now these com
 * /snow         worldedit.snow
 * /thaw         worldedit.thaw
 * //            worldedit.superpickaxe
-* repl          worldedit.tool.replacer
+* /repl          worldedit.tool.replacer
