@@ -29,6 +29,7 @@ function CreateTables()
 	Repl = {}
 	ReplItem = {}
 	Count = {}
+	GrowTreeItem = {}
 end
 
 

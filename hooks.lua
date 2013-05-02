@@ -34,6 +34,9 @@ end
 -----------------ONPLAYERRIGHTCLICK------------------
 -----------------------------------------------------
 function OnPlayerRightClick(Player, BlockX, BlockY, BlockZ, BlockFace, CursorX, CursorY, CursorZ)
+	if BlockY == 255 and BlockZ == -1 and BlockX == -1 then
+		return true
+	end
 	if Player:GetEquippedItem().m_ItemType == Wand then
 		if BlockX == -1 and BlockZ == -1 and BlockY == 255 then
 			return false
@@ -50,11 +53,18 @@ function OnPlayerRightClick(Player, BlockX, BlockY, BlockZ, BlockFace, CursorX, 
 		end
 		return true
 	end
+	World = Player:GetWorld()
 	if Player:GetEquippedItem().m_ItemType == ReplItem[Player:GetName()] then
 		Block = StringSplit( Repl[Player:GetName()], ":" )
 		if Block[2] == nil then
 			Block[2] = 0
 		end
-		Player:GetWorld():SetBlock( BlockX, BlockY, BlockZ, Block[1], Block[2] )
+		World:SetBlock( BlockX, BlockY, BlockZ, Block[1], Block[2] )
+	elseif Player:GetEquippedItem().m_ItemType == GrowTreeItem[Player:GetName()] then
+		if World:GetBlock(BlockX, BlockY, BlockZ) == 2 or World:GetBlock(BlockX, BlockY, BlockZ) == 3 then
+			World:GrowTree( BlockX, BlockY + 1, BlockZ )
+		else
+			Player:SendMessage( cChatColor.Rose .. "A tree can't go there." )
+		end
 	end
 end

@@ -1,3 +1,16 @@
+------------------------------------------------
+----------------------TREE----------------------
+------------------------------------------------
+function HandleTreeCommand( Split, Player )
+	if ItemCategory.IsTool( Player:GetEquippedItem().m_ItemType ) then
+		GrowTreeItem[Player:GetName()] = Player:GetEquippedItem().m_ItemType
+		Player:SendMessage( cChatColor.LightPurple .. "Tree tool bound to " .. Player:GetEquippedItem().m_ItemType )
+	else
+		Player:SendMessage( cChatColor.Rose .. "Can't bind tool to " .. Player:GetEquippedItem().m_ItemType .. ": Blocks can't be used" )
+	end
+	return true
+end
+
 -------------------------------------------------
 ---------------------BUTCHER---------------------
 -------------------------------------------------
@@ -44,6 +57,8 @@ function HandleNoneCommand( Split, Player )
 	if Player:GetEquippedItem().m_ItemType == ReplItem[Player:GetName()] then
 		Repl[Player:GetName()] = nil
 		ReplItem[Player:GetName()] = nil
+	elseif Player:GetEquippedItem().m_ItemType == GrowTreeItem[Player:GetName()] then
+		GrowTreeItem[Player:GetName()] = nil
 	end
 	Player:SendMessage( cChatColor.LightPurple .. "Tool unbound from your current item." )
 	return true
@@ -369,13 +384,15 @@ function HandleWallsCommand( Split, Player )
 	OneX, TwoX, OneY, TwoY, OneZ, TwoZ = GetXYZCoords( Player )
 	World = Player:GetWorld()	
 	BlockArea:Read( World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ )
-	Blocks[Player:GetName()] = 0
+	Blocks[Player:GetName()] = ( 2 *  ( BlockArea:GetSizeX() - 1 + BlockArea:GetSizeZ() - 1 ) )
+	if Blocks[Player:GetName()] == 0 then
+		Blocks[Player:GetName()] = 1
+	end
 	Z = 0
 	for X=0, BlockArea:GetSizeX() - 1 do
 		for Y=0, BlockArea:GetSizeY() - 1 do
 			BlockArea:SetRelBlockType( X, Y, Z, Block[1] )
 			BlockArea:SetRelBlockMeta( X, Y, Z, Block[2] )
-			Blocks[Player:GetName()] = Blocks[Player:GetName()] + 1
 		end
 	end
 	Z = BlockArea:GetSizeZ() - 1
@@ -383,14 +400,12 @@ function HandleWallsCommand( Split, Player )
 		for Y=0, BlockArea:GetSizeY() - 1 do
 			BlockArea:SetRelBlockType( X, Y, Z, Block[1] )
 			BlockArea:SetRelBlockMeta( X, Y, Z, Block[2] )
-			Blocks[Player:GetName()] = Blocks[Player:GetName()] + 1
 		end
 	end
 	for Z=0, BlockArea:GetSizeX() - 1 do
 		for Y=0, BlockArea:GetSizeY() - 1  do
 			BlockArea:SetRelBlockType( X, Y, Z, Block[1] )
 			BlockArea:SetRelBlockMeta( X, Y, Z, Block[2] )
-			Blocks[Player:GetName()] = Blocks[Player:GetName()] + 1
 		end
 	end
 	X = BlockArea:GetSizeX() - 1
@@ -398,7 +413,6 @@ function HandleWallsCommand( Split, Player )
 		for Y=0, BlockArea:GetSizeY() - 1 do
 			BlockArea:SetRelBlockType( X, Y, Z, Block[1] )
 			BlockArea:SetRelBlockMeta( X, Y, Z, Block[2] )
-			Blocks[Player:GetName()] = Blocks[Player:GetName()] + 1
 		end
 	end
 	Player:SendMessage( cChatColor.LightPurple .. Blocks[Player:GetName()] .. " block(s) have changed" )
