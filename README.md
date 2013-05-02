@@ -10,7 +10,7 @@ This doesn't have all the features the real WorldEdit has YET. for now these com
 * //cut         worldedit.clipboard.cut
 * //paste       worldedit.clipboard.paste
 * //size        worldedit.selection.size
-* //schematic	worldedit.schematic.save, worldedit.schematic.load
+* //schematic	  worldedit.schematic.save, worldedit.schematic.load
 * //set         worldedit.region.set
 * //replace     worldedit.region.replace
 * //walls       worldedit.region.walls
@@ -20,4 +20,5 @@ This doesn't have all the features the real WorldEdit has YET. for now these com
 * /thaw         worldedit.thaw
 * //            worldedit.superpickaxe
 * /repl         worldedit.tool.replacer
-* /none          
+* /none        
+* /tree         worldedit.tool.tree
