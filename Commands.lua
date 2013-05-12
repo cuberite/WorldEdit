@@ -1,3 +1,51 @@
+------------------------------------------------
+-------------------Extinguish-------------------
+------------------------------------------------
+function HandleExtinguishCommand( Split, Player )
+	if Split[2] == nil then
+		Player:SendMessage( cChatColor.Rose .. "usage: /ex [Radius]" )
+	elseif tonumber( Split[2] ) == nil then
+		Player:SendMessage( cChatColor.Rose .. 'Number expected; string "' .. Split[2] .. '" given' )
+		return true
+	else
+		Radius = tonumber( Split[2] )
+	end
+	OnePlayerX[Player:GetName()] = Player:GetPosX() - Radius
+	TwoPlayerX[Player:GetName()] = Player:GetPosX() + Radius
+	OnePlayerY[Player:GetName()] = Player:GetPosY() - Radius
+	TwoPlayerY[Player:GetName()] = Player:GetPosY() + Radius
+	OnePlayerZ[Player:GetName()] = Player:GetPosZ() - Radius
+	TwoPlayerZ[Player:GetName()] = Player:GetPosZ() + Radius
+	OneX, TwoX, OneY, TwoY, OneZ, TwoZ = GetXYZCoords( Player )
+	BlockArea:Read( Player:GetWorld(), OneX, TwoX, OneY, TwoY, OneZ, TwoZ )
+	for X=0, BlockArea:GetSizeX() - 1 do
+		for Y=0, BlockArea:GetSizeY() - 1 do
+			for Z=0, BlockArea:GetSizeZ() - 1 do
+				if BlockArea:GetRelBlockType( X, Y, Z ) == 51 then
+					BlockArea:SetRelBlockType( X, Y, Z, 0 )
+				end
+			end
+		end
+	end
+	BlockArea:Write( Player:GetWorld(), OneX, OneY, OneZ )
+	return true
+end
+
+
+------------------------------------------------
+----------------------TREE----------------------
+------------------------------------------------
+function HandleTreeCommand( Split, Player )
+	if ItemCategory.IsTool( Player:GetEquippedItem().m_ItemType ) then
+		GrowTreeItem[Player:GetName()] = Player:GetEquippedItem().m_ItemType
+		Player:SendMessage( cChatColor.LightPurple .. "Tree tool bound to " .. Player:GetEquippedItem().m_ItemType )
+	else
+		Player:SendMessage( cChatColor.Rose .. "Can't bind tool to " .. Player:GetEquippedItem().m_ItemType .. ": Blocks can't be used" )
+	end
+	return true
+end
+
+
 -------------------------------------------------
 ---------------------BUTCHER---------------------
 -------------------------------------------------
@@ -31,7 +79,8 @@ function HandleButcherCommand( Split, Player )
 			end
 		end
 	end
-	Player:GetWorld():ForEachEntity( EachEntity )
+	World = Player:GetWorld()
+	World:ForEachEntity( EachEntity )
 	Player:SendMessage( cChatColor.LightPurple .. "Killed " .. Count[Player:GetName()] .. " mobs." )
 	return true
 end
@@ -44,6 +93,8 @@ function HandleNoneCommand( Split, Player )
 	if Player:GetEquippedItem().m_ItemType == ReplItem[Player:GetName()] then
 		Repl[Player:GetName()] = nil
 		ReplItem[Player:GetName()] = nil
+	elseif Player:GetEquippedItem().m_ItemType == GrowTreeItem[Player:GetName()] then
+		GrowTreeItem[Player:GetName()] = nil
 	end
 	Player:SendMessage( cChatColor.LightPurple .. "Tool unbound from your current item." )
 	return true
@@ -246,24 +297,33 @@ end
 -------------------SCHEMATIC-------------------
 -----------------------------------------------
 function HandleSchematicCommand( Split, Player )
-	if string.upper(Split[2]) == "SAVE" then
-		if Player:HasPermission("worldedit.schematic.save") then
-			if Split[3] == nil then
-				Player:SendMessage( cChatColor.Green .. "Please state a schematic name" )
-				return true
-			end	
-			BlockArea:SaveToSchematicFile( "Schematics/" .. Split[3] .. ".Schematic" )
-			Player:SendMessage( cChatColor.LightPurple .. "Clipboard saved to " .. Split[3] )
+	if Split[2] ~= nil then
+		if string.upper(Split[2]) == "SAVE" then
+			if Player:HasPermission("worldedit.schematic.save") then
+				if Split[3] == nil then
+					Player:SendMessage( cChatColor.Green .. "Please state a schematic name" )
+					return true
+				end	
+				BlockArea:SaveToSchematicFile( "Schematics/" .. Split[3] .. ".Schematic" )
+				Player:SendMessage( cChatColor.LightPurple .. Split[3] .. " saved."	)
+			end
+		elseif string.upper(Split[2]) == "LOAD" then
+			if Player:HasPermission("worldedit.schematic.load") then
+				if Split[3] == nil then
+					Player:SendMessage( cChatColor.Green .. "Please state a schematic name" )
+					return true
+				end 	
+				Schematic = io.open( "Schematics\\" .. Split[3] .. ".Schematic", "r" )
+				if not Schematic then
+					BlockArea:LoadFromSchematicFile( "Schematics/" .. Split[3] .. ".Schematic" )
+					Player:SendMessage( cChatColor.LightPurple .. "Clipboard " .. Split[3] .. " is loaded" ) 
+				else
+					Player:SendMessage( cChatColor.Rose .. "Schematic " .. Split[3] .. " does not exist" )
+				end
+			end
 		end
-	elseif string.upper(Split[2]) == "LOAD" then
-		if Player:HasPermission("worldedit.schematic.load") then
-			if Split[3] == nil then
-				Player:SendMessage( cChatColor.Green .. "Please state a schematic name" )
-				return true
-			end 		
-			BlockArea:LoadFromSchematicFile( "Schematics/" .. Split[3] .. ".Schematic" )
-			Player:SendMessage( cChatColor.LightPurple .. "Clipboard " .. Split[3] .. " is loaded" ) 
-		end
+	else
+		Player:SendMessage( cChatColor.LightPurple .. "//schematic <save:load:list:formats>" )
 	end
 	return true
 end
@@ -368,14 +428,24 @@ function HandleWallsCommand( Split, Player )
 	end
 	OneX, TwoX, OneY, TwoY, OneZ, TwoZ = GetXYZCoords( Player )
 	World = Player:GetWorld()	
+	LastBlockAction[Player:GetName()] = World:GetName() .. "," .. OneX .. "," .. OneY .. "," .. OneZ
 	BlockArea:Read( World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ )
-	Blocks[Player:GetName()] = 0
+	for I = 1, MaxUndo do
+		file = io.open( PLUGIN:GetLocalDirectory() ..  "\\" .. Player:GetName() .. "\\" .. I .. ".schematic" )
+		if not file then
+			BlockArea:SaveToSchematicFile( PLUGIN:GetLocalDirectory() ..  "/" .. Player:GetName() .. "/" .. I .. ".schematic" )
+			break
+		end
+	end
+	Blocks[Player:GetName()] = ( 2 *  ( BlockArea:GetSizeX() - 1 + BlockArea:GetSizeZ() - 1 ) * BlockArea:GetSizeY() )
+	if Blocks[Player:GetName()] == 0 then
+		Blocks[Player:GetName()] = 1
+	end
 	Z = 0
 	for X=0, BlockArea:GetSizeX() - 1 do
 		for Y=0, BlockArea:GetSizeY() - 1 do
 			BlockArea:SetRelBlockType( X, Y, Z, Block[1] )
 			BlockArea:SetRelBlockMeta( X, Y, Z, Block[2] )
-			Blocks[Player:GetName()] = Blocks[Player:GetName()] + 1
 		end
 	end
 	Z = BlockArea:GetSizeZ() - 1
@@ -383,14 +453,12 @@ function HandleWallsCommand( Split, Player )
 		for Y=0, BlockArea:GetSizeY() - 1 do
 			BlockArea:SetRelBlockType( X, Y, Z, Block[1] )
 			BlockArea:SetRelBlockMeta( X, Y, Z, Block[2] )
-			Blocks[Player:GetName()] = Blocks[Player:GetName()] + 1
 		end
 	end
 	for Z=0, BlockArea:GetSizeX() - 1 do
 		for Y=0, BlockArea:GetSizeY() - 1  do
 			BlockArea:SetRelBlockType( X, Y, Z, Block[1] )
 			BlockArea:SetRelBlockMeta( X, Y, Z, Block[2] )
-			Blocks[Player:GetName()] = Blocks[Player:GetName()] + 1
 		end
 	end
 	X = BlockArea:GetSizeX() - 1
@@ -398,7 +466,6 @@ function HandleWallsCommand( Split, Player )
 		for Y=0, BlockArea:GetSizeY() - 1 do
 			BlockArea:SetRelBlockType( X, Y, Z, Block[1] )
 			BlockArea:SetRelBlockMeta( X, Y, Z, Block[2] )
-			Blocks[Player:GetName()] = Blocks[Player:GetName()] + 1
 		end
 	end
 	Player:SendMessage( cChatColor.LightPurple .. Blocks[Player:GetName()] .. " block(s) have changed" )
