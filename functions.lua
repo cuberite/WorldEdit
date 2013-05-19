@@ -6,6 +6,7 @@ function LoadSettings()
 	SettingsIni:ReadFile()
 	Wand = SettingsIni:GetValueSetI("General", "WandItem", 271 )
 	ButcherRadius = SettingsIni:GetValueSetI("General", "ButcherRadius", 0 )
+	MaxUndo = SettingsIni:GetValueSetI("General", "Max undo", 1 )
 	SettingsIni:WriteFile()
 end
 
@@ -21,15 +22,20 @@ function CreateTables()
 	TwoPlayerY = {}
 	TwoPlayerZ = {}
 	Blocks = {}
+	TempBlocks = {}
 	SP = {}
 	Air = {}
 	X = {}
+	PosX = {}
 	PosY = {}
+	PosZ = {}
 	Z = {}
 	Repl = {}
 	ReplItem = {}
 	Count = {}
 	GrowTreeItem = {}
+	RemoveAbove = {}
+	LastBlockAction = {}
 end
 
 

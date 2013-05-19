@@ -1,3 +1,156 @@
+-------------------------------------------------
+-------------------REMOVEBELOW-------------------
+-------------------------------------------------
+function HandleRemoveBelowCommand( Split, Player )
+	X = math.floor( Player:GetPosX() )
+	y = math.floor( Player:GetPosY() )
+	Z = math.floor( Player:GetPosZ() )
+	World = Player:GetWorld()
+	TempBlocks[Player:GetName()] = 0
+	local BlockBelow = 0
+	for Y = 1, y do
+		World:SetBlock( X, Y, Z, 0, 0 )
+		BlockBelow = BlockBelow + 1
+	end
+	Player:SendMessage( cChatColor.LightPurple .. BlockBelow .. " block(s) have been removed." )
+	return true
+end
+
+
+-------------------------------------------------
+-------------------REMOVEABOVE-------------------
+-------------------------------------------------
+function HandleRemoveAboveCommand( Split, Player )
+	X = math.floor( Player:GetPosX() )
+	y = math.floor( Player:GetPosY() )
+	Z = math.floor( Player:GetPosZ() )
+	World = Player:GetWorld()
+	local BlocksAbove = 0
+	for Y = y, World:GetHeight( X, Z ) do
+		World:SetBlock( X, Y, Z, 0, 0 )
+		BlocksAbove = BlocksAbove + 1
+	end
+	Player:SendMessage( cChatColor.LightPurple .. BlocksAbove .. " block(s) have been removed." )
+	return true
+end
+
+
+-------------------------------------------------
+--------------------WORLDEDIT--------------------
+-------------------------------------------------
+function HandleWorldEditCommand( Split, Player )
+	if Split[2] == nil then
+		Player:SendMessage( cChatColor.Rose .. "/we <help:reload:version>" )
+	elseif string.upper( Split[2] ) == "VERSION" or string.upper(Split[2]) == "VER" then
+		Player:SendMessage( cChatColor.LightPurple .. "This is version " .. PLUGIN:GetVersion() )
+	elseif string.upper( Split[2] ) == "RELOAD" then
+		Player:SendMessage( cChatColor.LightPurple .. "Worldedit is reloading" )
+		PluginManager:DisablePlugin( PLUGIN:GetName() )
+		DisablePlugin = true
+	elseif string.upper( Split[2] ) == "HELP" then
+		local EachCommand = function( Command ) 
+			if string.find( PluginManager:GetCommandPermission( Command ), "worldedit" ) then
+				table.insert( CommandList, Command )
+			end
+		end
+		CommandList = {}
+		PluginManager:ForEachCommand( EachCommand )
+		Player:SendMessage( cChatColor.LightPurple .. table.concat( CommandList, ", " ) )
+	else
+		Player:SendMessage( cChatColor.Rose .. "/we <help:reload:version>" )
+	end
+	return true
+end
+
+
+-----------------------------------------------
+---------------------DRAIN---------------------
+-----------------------------------------------
+function HandleDrainCommand( Split, Player )
+	if tonumber( Split[2] ) == nil or Split[2] == nil then
+		Player:SendMessage( cChatColor.Rose .. "Too few arguments.\n//drain <radius" )
+		return true
+	else
+		Radius = tonumber( Split[2] )
+	end
+	OnePlayerX[Player:GetName()] = Player:GetPosX() - Radius
+	TwoPlayerX[Player:GetName()] = Player:GetPosX() + Radius
+	OnePlayerY[Player:GetName()] = Player:GetPosY() - Radius
+	TwoPlayerY[Player:GetName()] = Player:GetPosY() + Radius
+	OnePlayerZ[Player:GetName()] = Player:GetPosZ() - Radius
+	TwoPlayerZ[Player:GetName()] = Player:GetPosZ() + Radius
+	OneX, TwoX, OneY, TwoY, OneZ, TwoZ = GetXYZCoords( Player )
+	BlockArea:Read( Player:GetWorld(), OneX, TwoX, OneY, TwoY, OneZ, TwoZ )
+	for X=0, BlockArea:GetSizeX() - 1 do
+		for Y=0, BlockArea:GetSizeY() - 1 do
+			for Z=0, BlockArea:GetSizeZ() - 1 do
+				if BlockArea:GetRelBlockType( X, Y, Z ) == 8 or BlockArea:GetRelBlockType( X, Y, Z ) == 9 then
+					BlockArea:SetRelBlockType( X, Y, Z, 0 )
+				end
+			end
+		end
+	end
+	BlockArea:Write( Player:GetWorld(), OneX, OneY, OneZ )
+	return true
+end
+
+
+------------------------------------------------
+---------------------ROTATE---------------------
+------------------------------------------------
+function HandleRotateCommand( Split, Player )
+	if Split[2] == nil or tonumber( Split[2] ) == nil then
+		Player:SendMessage( cChatColor.Rose .. "Too few arguments.\n//rotate [90, 180, 270]" )
+		return true
+	else
+		if tonumber( Split[2] ) == 90 or tonumber( Split[2] ) == 180 or tonumber( Split[2] ) == 270 then
+			for I =1, tonumber(Split[2]) / 90 do
+				BlockArea:RotateCCW()
+			end
+			Player:SendMessage( cChatColor.Rose .. "Rotated clipboard " .. Split[2] .. " degrees" )
+		else
+			Player:SendMessage( cChatColor.Rose .. "usage: /rotate [90, 180, 270]" )
+		end
+	end
+	return true
+end
+
+
+------------------------------------------------
+-------------------EXTINGUISH-------------------
+------------------------------------------------
+function HandleExtinguishCommand( Split, Player )
+	if Split[2] == nil then
+		Player:SendMessage( cChatColor.Rose .. "usage: /ex [Radius]" )
+		return true
+	elseif tonumber( Split[2] ) == nil then
+		Player:SendMessage( cChatColor.Rose .. 'Number expected; string "' .. Split[2] .. '" given' )
+		return true
+	else
+		Radius = tonumber( Split[2] )
+	end
+	OnePlayerX[Player:GetName()] = Player:GetPosX() - Radius
+	TwoPlayerX[Player:GetName()] = Player:GetPosX() + Radius
+	OnePlayerY[Player:GetName()] = Player:GetPosY() - Radius
+	TwoPlayerY[Player:GetName()] = Player:GetPosY() + Radius
+	OnePlayerZ[Player:GetName()] = Player:GetPosZ() - Radius
+	TwoPlayerZ[Player:GetName()] = Player:GetPosZ() + Radius
+	OneX, TwoX, OneY, TwoY, OneZ, TwoZ = GetXYZCoords( Player )
+	BlockArea:Read( Player:GetWorld(), OneX, TwoX, OneY, TwoY, OneZ, TwoZ )
+	for X=0, BlockArea:GetSizeX() - 1 do
+		for Y=0, BlockArea:GetSizeY() - 1 do
+			for Z=0, BlockArea:GetSizeZ() - 1 do
+				if BlockArea:GetRelBlockType( X, Y, Z ) == 51 then
+					BlockArea:SetRelBlockType( X, Y, Z, 0 )
+				end
+			end
+		end
+	end
+	BlockArea:Write( Player:GetWorld(), OneX, OneY, OneZ )
+	return true
+end
+
+
 ------------------------------------------------
 ----------------------TREE----------------------
 ------------------------------------------------
@@ -10,6 +163,7 @@ function HandleTreeCommand( Split, Player )
 	end
 	return true
 end
+
 
 -------------------------------------------------
 ---------------------BUTCHER---------------------
@@ -44,7 +198,8 @@ function HandleButcherCommand( Split, Player )
 			end
 		end
 	end
-	Player:GetWorld():ForEachEntity( EachEntity )
+	World = Player:GetWorld()
+	World:ForEachEntity( EachEntity )
 	Player:SendMessage( cChatColor.LightPurple .. "Killed " .. Count[Player:GetName()] .. " mobs." )
 	return true
 end
@@ -103,13 +258,13 @@ end
 function HandleDescendCommand( Split, Player )
 	World = Player:GetWorld()
 	if Player:GetPosY() ~= 1 then
-		X[Player:GetName()] = math.floor( Player:GetPosX() )
-		Z[Player:GetName()] = math.floor( Player:GetPosZ() )
+		PosX[Player:GetName()] = math.floor( Player:GetPosX() )
+		PosZ[Player:GetName()] = math.floor( Player:GetPosZ() )
 		PosY[Player:GetName()] = math.floor( Player:GetPosY() )
 		while PosY[Player:GetName()] ~= 1 do 
-			if World:GetBlock( X[Player:GetName()], PosY[Player:GetName()], Z[Player:GetName()]) == 0 then
+			if World:GetBlock( PosX[Player:GetName()], PosY[Player:GetName()], PosZ[Player:GetName()]) == 0 then
 				if Air[Player:GetName()] == true then
-					while World:GetBlock( X[Player:GetName()], PosY[Player:GetName()], Z[Player:GetName()]) == 0 do
+					while World:GetBlock( PosX[Player:GetName()], PosY[Player:GetName()], PosZ[Player:GetName()]) == 0 do
 						PosY[Player:GetName()] = PosY[Player:GetName()] - 1
 					end
 					break
@@ -181,17 +336,17 @@ function HandleGreenCommand( Split, Player )
 	end
 	X = Player:GetPosX()
 	Z = Player:GetPosZ()
-	Blocks[Player:GetName()] = 0
+	TempBlocks[Player:GetName()] = 0
 	for x=X - Radius, X + Radius do
 		for z=Z - Radius, Z + Radius do
 			y = World:GetHeight(x, z)
 			if World:GetBlock(x, y, z) == 3 then
-				Blocks[Player:GetName()] = Blocks[Player:GetName()] + 1
+				TempBlocks[Player:GetName()] = TempBlocks[Player:GetName()] + 1
 				World:SetBlock(x, y, z, 2, 0)
 			end
 		end
 	end
-	Player:SendMessage( cChatColor.LightPurple .. Blocks[Player:GetName()] .. " surfaces greened." )
+	Player:SendMessage( cChatColor.LightPurple .. TempBlocks[Player:GetName()] .. " surfaces greened." )
 	return true
 end
 
@@ -261,24 +416,40 @@ end
 -------------------SCHEMATIC-------------------
 -----------------------------------------------
 function HandleSchematicCommand( Split, Player )
-	if string.upper(Split[2]) == "SAVE" then
-		if Player:HasPermission("worldedit.schematic.save") then
-			if Split[3] == nil then
-				Player:SendMessage( cChatColor.Green .. "Please state a schematic name" )
-				return true
-			end	
-			BlockArea:SaveToSchematicFile( "Schematics/" .. Split[3] .. ".Schematic" )
-			Player:SendMessage( cChatColor.LightPurple .. "Clipboard saved to " .. Split[3] )
+	if Split[2] ~= nil then
+		if string.upper(Split[2]) == "SAVE" then
+			if Player:HasPermission("worldedit.schematic.save") then
+				if Split[3] == nil then
+					Player:SendMessage( cChatColor.Green .. "Please state a schematic name" )
+					return true
+				end	
+				Schematic = io.open( "Schematics\\" .. Split[3] .. ".Schematic", "r" )
+				if Schematic then
+					Player:SendMessage( cChatColor.Rose .. "Schematic already exists" )
+				else
+					BlockArea:SaveToSchematicFile( "Schematics/" .. Split[3] .. ".Schematic" )
+					Player:SendMessage( cChatColor.LightPurple .. Split[3] .. " saved."	)
+					Schematic:close()
+				end
+			end
+		elseif string.upper(Split[2]) == "LOAD" then
+			if Player:HasPermission("worldedit.schematic.load") then
+				if Split[3] == nil then
+					Player:SendMessage( cChatColor.Green .. "Please state a schematic name" )
+					return true
+				end 	
+				Schematic = io.open( "Schematics\\" .. Split[3] .. ".Schematic", "r" )
+				if Schematic then
+					BlockArea:LoadFromSchematicFile( "Schematics/" .. Split[3] .. ".Schematic" )
+					Player:SendMessage( cChatColor.LightPurple .. "Clipboard " .. Split[3] .. " is loaded" ) 
+					Schematic:close()
+				else
+					Player:SendMessage( cChatColor.Rose .. "Schematic " .. Split[3] .. " does not exist" )
+				end
+			end
 		end
-	elseif string.upper(Split[2]) == "LOAD" then
-		if Player:HasPermission("worldedit.schematic.load") then
-			if Split[3] == nil then
-				Player:SendMessage( cChatColor.Green .. "Please state a schematic name" )
-				return true
-			end 		
-			BlockArea:LoadFromSchematicFile( "Schematics/" .. Split[3] .. ".Schematic" )
-			Player:SendMessage( cChatColor.LightPurple .. "Clipboard " .. Split[3] .. " is loaded" ) 
-		end
+	else
+		Player:SendMessage( cChatColor.LightPurple .. "//schematic <save:load:list:formats>" )
 	end
 	return true
 end
@@ -383,8 +554,16 @@ function HandleWallsCommand( Split, Player )
 	end
 	OneX, TwoX, OneY, TwoY, OneZ, TwoZ = GetXYZCoords( Player )
 	World = Player:GetWorld()	
+	LastBlockAction[Player:GetName()] = World:GetName() .. "," .. OneX .. "," .. OneY .. "," .. OneZ
 	BlockArea:Read( World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ )
-	Blocks[Player:GetName()] = ( 2 *  ( BlockArea:GetSizeX() - 1 + BlockArea:GetSizeZ() - 1 ) )
+	for I = 1, MaxUndo do
+		file = io.open( PLUGIN:GetLocalDirectory() ..  "\\" .. Player:GetName() .. "\\" .. I .. ".schematic" )
+		if not file then
+			BlockArea:SaveToSchematicFile( PLUGIN:GetLocalDirectory() ..  "/" .. Player:GetName() .. "/" .. I .. ".schematic" )
+			break
+		end
+	end
+	Blocks[Player:GetName()] = ( 2 *  ( BlockArea:GetSizeX() - 1 + BlockArea:GetSizeZ() - 1 ) * BlockArea:GetSizeY() )
 	if Blocks[Player:GetName()] == 0 then
 		Blocks[Player:GetName()] = 1
 	end
@@ -518,23 +697,23 @@ function HandleSnowCommand( Split, Player )
 	end
 	X = Player:GetPosX()
 	Z = Player:GetPosZ()
-	Blocks[Player:GetName()] = 0
+	TempBlocks[Player:GetName()] = 0
 	for x=X - Radius, X + Radius do
 		for z=Z - Radius, Z + Radius do
 			y = World:GetHeight(x, z)
 			if World:GetBlock(x, y , z) == 9 then
-				Blocks[Player:GetName()] = Blocks[Player:GetName()] + 1
+				TempBlocks[Player:GetName()] = TempBlocks[Player:GetName()] + 1
 				World:SetBlock(x, y, z, 79, 0)
 			elseif World:GetBlock(x, y , z) == 10 then
-				Blocks[Player:GetName()] = Blocks[Player:GetName()] + 1
+				TempBlocks[Player:GetName()] = TempBlocks[Player:GetName()] + 1
 				World:SetBlock(x, y, z, 49, 0)
 			else
-				Blocks[Player:GetName()] = Blocks[Player:GetName()] + 1
+				TempBlocks[Player:GetName()] = TempBlocks[Player:GetName()] + 1
 				World:SetBlock(x, y + 1, z, 78, 0)
 			end
 		end
 	end
-	Player:SendMessage( cChatColor.LightPurple .. Blocks[Player:GetName()] .. " surfaces covered. Let is snow~" )
+	Player:SendMessage( cChatColor.LightPurple .. TempBlocks[Player:GetName()] .. " surfaces covered. Let is snow~" )
 	return true
 end
 
@@ -553,20 +732,20 @@ function HandleThawCommand( Split, Player )
 	end
 	X = Player:GetPosX()
 	Z = Player:GetPosZ()
-	Blocks[Player:GetName()] = 0
+	TempBlocks[Player:GetName()] = 0
 	for x=X - Radius, X + Radius do
 		for z=Z - Radius, Z + Radius do
 			y = World:GetHeight(x, z)
 			if World:GetBlock(x, y, z) == 78 then
-				Blocks[Player:GetName()] = Blocks[Player:GetName()] + 1
+				TempBlocks[Player:GetName()] = TempBlocks[Player:GetName()] + 1
 				World:SetBlock(x, y, z, 0, 0)
 			elseif World:GetBlock(x, y, z) == 79 then
-				Blocks[Player:GetName()] = Blocks[Player:GetName()] + 1
+				TempBlocks[Player:GetName()] = TempBlocks[Player:GetName()] + 1
 				World:SetBlock(x, y, z, 8, 0)
 			end
 		end
 	end
-	Player:SendMessage( cChatColor.LightPurple .. Blocks[Player:GetName()] .. " surfaces thawed" )
+	Player:SendMessage( cChatColor.LightPurple .. TempBlocks[Player:GetName()] .. " surfaces thawed" )
 	return true
 end
 
