@@ -2,13 +2,14 @@ function Initialize(Plugin)
 	
 	PLUGIN = Plugin
 	PLUGIN:SetName("WorldEdit")
-	PLUGIN:SetVersion(0)
+	PLUGIN:SetVersion(0.1)
 	
 	PluginManager = cRoot:Get():GetPluginManager()
-	PluginManager:AddHook(PLUGIN, cPluginManager.HOOK_PLAYER_BREAKING_BLOCK)
-	PluginManager:AddHook(PLUGIN, cPluginManager.HOOK_PLAYER_RIGHT_CLICK)
-	PluginManager:AddHook(PLUGIN, cPluginManager.HOOK_PLAYER_LEFT_CLICK)
-	
+	PluginManager:AddHook(PLUGIN, cPluginManager.HOOK_PLAYER_BREAKING_BLOCK) -- Add hook OnPlayerBreakingBlock
+	PluginManager:AddHook(PLUGIN, cPluginManager.HOOK_PLAYER_RIGHT_CLICK) -- Add hook OnPlayerRightClick
+	PluginManager:AddHook(PLUGIN, cPluginManager.HOOK_PLAYER_LEFT_CLICK) -- Add hook OnPlayerLeftClick
+	LoadCommandFunctions()
+	PluginManager:BindCommand("/remove",        "worldedit.remove",               HandleRemoveCommand,         " 	Remove all entities of a type " )
 	PluginManager:BindCommand("/removebelow",   "worldedit.removebelow",          HandleRemoveBelowCommand,    "" )
 	PluginManager:BindCommand("/removeabove",   "worldedit.removeabove",          HandleRemoveAboveCommand,    "" )
 	PluginManager:BindCommand("//removebelow",  "worldedit.removebelow",          HandleRemoveBelowCommand,    "Remove blocks below you." )
@@ -16,12 +17,12 @@ function Initialize(Plugin)
 	PluginManager:BindCommand("/we",            "",                               HandleWorldEditCommand,      "World edit command" )	
 	PluginManager:BindCommand("//drain",        "worldedit.drain",                HandleDrainCommand,          "Drain a pool" )
 	PluginManager:BindCommand("//rotate",       "worldedit.clipboard.rotate",     HandleRotateCommand,         "Rotate the contents of the clipboard" )
-	PluginManager:BindCommand("//ex",           "worldedit.extinguish",          HandleExtinguishCommand,     " Extinguish nearby fire." )
-	PluginManager:BindCommand("//ext",          "worldedit.extinguish",          HandleExtinguishCommand,     "" )
-	PluginManager:BindCommand("//extinguish",   "worldedit.extinguish",          HandleExtinguishCommand,     "" )
-	PluginManager:BindCommand("/ex",            "worldedit.extinguish",          HandleExtinguishCommand,     "" )
-	PluginManager:BindCommand("/ext",           "worldedit.extinguish",          HandleExtinguishCommand,     "" )
-	PluginManager:BindCommand("/extinguish",    "worldedit.extinguish",          HandleExtinguishCommand,     "" )
+	PluginManager:BindCommand("//ex",           "worldedit.extinguish",           HandleExtinguishCommand,     " Extinguish nearby fire." )
+	PluginManager:BindCommand("//ext",          "worldedit.extinguish",           HandleExtinguishCommand,     "" )
+	PluginManager:BindCommand("//extinguish",   "worldedit.extinguish",           HandleExtinguishCommand,     "" )
+	PluginManager:BindCommand("/ex",            "worldedit.extinguish",           HandleExtinguishCommand,     "" )
+	PluginManager:BindCommand("/ext",           "worldedit.extinguish",           HandleExtinguishCommand,     "" )
+	PluginManager:BindCommand("/extinguish",    "worldedit.extinguish",           HandleExtinguishCommand,     "" )
 	PluginManager:BindCommand("/tree",          "worldedit.tool.tree",            HandleTreeCommand,           " Tree generator tool" )	
 	PluginManager:BindCommand("/repl",          "worldedit.tool.replacer",        HandleReplCommand,           " Block replace tool" )	
 	PluginManager:BindCommand("/descend",       "worldedit.navigation.descend",   HandleDescendCommand,        " Go down a floor" )	
@@ -36,6 +37,7 @@ function Initialize(Plugin)
 	PluginManager:BindCommand("//set",	        "worldedit.region.set",           HandleSetCommand,   	       " Set all the blocks inside the selection to a block")
 	PluginManager:BindCommand("//replace",      "worldedit.region.replace",       HandleReplaceCommand,        " Replace all the blocks in the selection with another")
 	PluginManager:BindCommand("//walls",        "worldedit.region.walls",         HandleWallsCommand,          " Build the four sides of the selection")
+	PluginManager:BindCommand("//faces",        "worldedit.region.faces",         HandleFacesCommand,          " Build the walls, ceiling, and floor of a selection")
 	PluginManager:BindCommand("//wand",	        "worldedit.wand",                 HandleWandCommand,           " Get the wand object")
 	PluginManager:BindCommand("//setbiome",	    "worldedit.biome.set",            HandleSetBiomeCommand,       " Set the biome of the region.")
 	PluginManager:BindCommand("/biomelist",	    "worldedit.biomelist",            HandleBiomeListCommand,      " Gets all biomes available.")
@@ -44,18 +46,18 @@ function Initialize(Plugin)
 	PluginManager:BindCommand("//",	            "worldedit.superpickaxe",         HandleSuperPickCommand,      " Toggle the super pickaxe pickaxe function")
 	PluginManager:BindCommand("/none",          "",                               HandleNoneCommand,           " Unbind a bound tool from your current item" )	
 
-	CreateTables()
-	LoadSettings()
+	CreateTables() -- create all the tables
+	LoadSettings() -- load all the settings
 	BlockArea = cBlockArea()
 	LOG("[WorldEdit] Enabling WorldEdit v" .. PLUGIN:GetVersion())
 	return true
 end
 
 function OnDisable()
-	if DisablePlugin == true then
+	if DisablePlugin == true then -- if the plugin has to be reloaded then load the plugin again ;)
 		LOGINFO( "Worldedit is reloading" )
 		PluginManager:LoadPlugin( PLUGIN:GetName() )
 	else
-		LOG( PLUGIN:GetName() .. " v" .. PLUGIN:GetVersion() .. " is shutting down..." )
+		LOG( "[WorldEdit] Disabling WorldEdit v" .. PLUGIN:GetVersion() )
 	end
 end
