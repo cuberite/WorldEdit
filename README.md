@@ -2,6 +2,8 @@ WorldEdit
 =========
 I am currently trying to create WorldEdit for MCServer. This plugin is in early Beta stage.
 This doesn't have all the features the real WorldEdit has YET. for now these commands + permissions are actually working:
+* //undo        worldedit.history.undo
+* //redo        worldedit.history.redo
 * /removebelow  worldedit.removebelow
 * /removeabove  worldedit.removeabove
 * /we
@@ -20,6 +22,7 @@ This doesn't have all the features the real WorldEdit has YET. for now these com
 * //set         worldedit.region.set
 * //replace     worldedit.region.replace
 * //walls       worldedit.region.walls
+* //faces       worldedit.region.faces
 * //wand        worldedit.wand
 * /biomelist    worldedit.biomelist
 * /snow         worldedit.snow

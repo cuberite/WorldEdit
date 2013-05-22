@@ -70,7 +70,7 @@ function HandleButcherCommand( Split, Player )
 			end
 		end
 	end
-	World = Player:GetWorld()
+	local World = Player:GetWorld()
 	World:ForEachEntity( EachEntity ) -- loop through all the entitys
 	Player:SendMessage( cChatColor.LightPurple .. "Killed " .. Mobs .. " mobs." )
 	return true

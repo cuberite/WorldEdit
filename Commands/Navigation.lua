@@ -2,7 +2,7 @@
 --------------------DESCEND--------------------
 -----------------------------------------------
 function HandleDescendCommand( Split, Player )
-	World = Player:GetWorld()
+	local World = Player:GetWorld()
 	if Player:GetPosY() ~= 1 then
 		PosX[Player:GetName()] = math.floor( Player:GetPosX() )
 		PosZ[Player:GetName()] = math.floor( Player:GetPosZ() )
@@ -39,7 +39,7 @@ end
 ---------------------ASCEND---------------------
 ------------------------------------------------
 function HandleAscendCommand( Split, Player )
-	World = Player:GetWorld()
+	local World = Player:GetWorld()
 	if Player:GetPosY() == World:GetHeight( math.floor(Player:GetPosX()), math.floor((Player:GetPosZ()) ) ) then
 		Player:SendMessage( cChatColor.LightPurple .. "Ascended a level." )
 	else

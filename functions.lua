@@ -20,8 +20,18 @@ function CreateTables()
 	TwoPlayerX = {}
 	TwoPlayerY = {}
 	TwoPlayerZ = {}
+	LandScapeOneX = {}
+	LandScapeOneY = {}
+	LandScapeOneZ = {}
+	LandScapeTwoX = {}
+	LandScapeTwoY = {}
+	LandScapeTwoZ = {}
 	Blocks = {}
-	TempBlocks = {}
+	PersonalBlockArea = {}
+	PersonalUndo = {}
+	PersonalRedo = {}
+	LastRedoCoords = {}
+	LastCoords = {}
 	SP = {}
 	Air = {}
 	X = {}
@@ -38,6 +48,9 @@ function CreateTables()
 end
 
 
+--------------------------------------------
+------------LOADCOMMANDFUNCTIONS------------
+--------------------------------------------
 function LoadCommandFunctions()
 	dofile( PLUGIN:GetLocalDirectory() .. "\\Commands\\Tools.lua" ) -- Add lua file with functions for tools commands
 	dofile( PLUGIN:GetLocalDirectory() .. "\\Commands\\Selection.lua" ) -- Add lua file with functions for selection commands
@@ -48,6 +61,26 @@ function LoadCommandFunctions()
 end
 
 
+---------------------------------------------
+--------------LOADONLINEPLAYERS--------------
+---------------------------------------------
+function LoadOnlinePlayers()
+	local EachPlayer = function( Player )
+		if PersonalBlockArea[Player:GetName()] == nil then
+			PersonalBlockArea[Player:GetName()] = cBlockArea()
+		end
+		if PersonalUndo[Player:GetName()] == nil then
+			PersonalUndo[Player:GetName()] = cBlockArea()
+		end
+		if PersonalRedo[Player:GetName()] == nil then
+			PersonalRedo[Player:GetName()] = cBlockArea()
+		end
+	end
+	local EachWorld = function( World )
+		World:ForEachPlayer( EachPlayer )
+	end
+	cRoot:Get():ForEachWorld( EachWorld )
+end
 ---------------------------------------------
 -------------------GETSIZE-------------------
 ---------------------------------------------
@@ -133,7 +166,7 @@ end
 ---------------------------------------------
 function GetXZCoords( Player )
 	if OnePlayerX[Player:GetName()] == nil or TwoPlayerX[Player:GetName()] == nil then -- check if there is a region. Needed for plugins that are going to use this plugin.
-		return true
+		return false
 	end
 	if OnePlayerX[Player:GetName()] < TwoPlayerX[Player:GetName()] then -- check what number is bigger becouse otherwise you can get a negative number.
 		OneX = OnePlayerX[Player:GetName()]
@@ -158,7 +191,7 @@ end
 ----------------------------------------------
 function GetXYZCoords( Player )
 	if OnePlayerX[Player:GetName()] == nil or TwoPlayerX[Player:GetName()] == nil then -- check if there is a region. Needed for plugins that are going to use this plugin.
-		return true
+		return false
 	end
 	if OnePlayerX[Player:GetName()] < TwoPlayerX[Player:GetName()] then -- check what number is bigger becouse otherwise you can get a negative number.
 		OneX = OnePlayerX[Player:GetName()]
@@ -180,6 +213,38 @@ function GetXYZCoords( Player )
 	else
 		OneZ = TwoPlayerZ[Player:GetName()]
 		TwoZ = OnePlayerZ[Player:GetName()]
+	end
+	return OneX, TwoX, OneY, TwoY, OneZ, TwoZ -- return the right coordinates
+end
+
+
+----------------------------------------------
+-----------------GETXYZCOORDS-----------------
+----------------------------------------------
+function GetLandXYZCoords( Player )
+	if LandScapeOneX[Player:GetName()] == nil or LandScapeTwoX[Player:GetName()] == nil then -- check if there is a region. Needed for plugins that are going to use this plugin.
+		return false
+	end
+	if LandScapeOneX[Player:GetName()] < LandScapeTwoX[Player:GetName()] then -- check what number is bigger becouse otherwise you can get a negative number.
+		OneX = LandScapeOneX[Player:GetName()]
+		TwoX = LandScapeTwoX[Player:GetName()]
+	else
+		OneX = LandScapeTwoX[Player:GetName()]
+		TwoX = LandScapeOneX[Player:GetName()]
+	end
+	if LandScapeOneY[Player:GetName()] < LandScapeTwoY[Player:GetName()] then -- check what number is bigger becouse otherwise you can get a negative number.
+		OneY = LandScapeOneY[Player:GetName()]
+		TwoY = LandScapeTwoY[Player:GetName()]
+	else
+		OneY = LandScapeTwoY[Player:GetName()]
+		TwoY = LandScapeOneY[Player:GetName()]
+	end
+	if LandScapeOneZ[Player:GetName()] < LandScapeTwoZ[Player:GetName()] then -- check what number is bigger becouse otherwise you can get a negative number.
+		OneZ = LandScapeTwoZ[Player:GetName()]
+		TwoZ = LandScapeOneZ[Player:GetName()]
+	else
+		OneZ = LandScapeOneZ[Player:GetName()]
+		TwoZ = LandScapeTwoZ[Player:GetName()]
 	end
 	return OneX, TwoX, OneY, TwoY, OneZ, TwoZ -- return the right coordinates
 end

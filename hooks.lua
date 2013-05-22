@@ -22,7 +22,7 @@ end
 ----------------------------------------------------
 function OnPlayerLeftClick(Player, BlockX, BlockY, BlockZ, BlockFace, CursorX, CursorY, CursorZ)
 	if SP[Player:GetName()] == true then
-		World = Player:GetWorld()
+		local World = Player:GetWorld()
 		Item = cItem( World:GetBlock( BlockX, BlockY, BlockZ ), 10, World:GetBlockMeta( BlockX, BlockY, BlockZ ) )
 		cPickup( BlockX, BlockY, BlockZ, Item, 0.0, 0.0, 0.0 )
 		World:DigBlock( BlockX, BlockY, BlockZ ) 		
@@ -53,7 +53,7 @@ function OnPlayerRightClick(Player, BlockX, BlockY, BlockZ, BlockFace, CursorX, 
 		end
 		return true
 	end
-	World = Player:GetWorld()
+	local World = Player:GetWorld()
 	if Player:GetEquippedItem().m_ItemType == ReplItem[Player:GetName()] then
 		Block = StringSplit( Repl[Player:GetName()], ":" )
 		if Block[2] == nil then
@@ -66,5 +66,18 @@ function OnPlayerRightClick(Player, BlockX, BlockY, BlockZ, BlockFace, CursorX, 
 		else
 			Player:SendMessage( cChatColor.Rose .. "A tree can't go there." )
 		end
+	end
+end
+
+
+-----------------------------------------------------
+-------------------ONPLAYERJOINED--------------------
+-----------------------------------------------------
+function OnPlayerJoined(Player)
+	if PersonalBlockArea[Player:GetName()] == nil then
+		PersonalBlockArea[Player:GetName()] = cBlockArea()
+	end
+	if PersonalUndo[Player:GetName()] == nil then
+		PersonalUndo[Player:GetName()] = cBlockArea()
 	end
 end

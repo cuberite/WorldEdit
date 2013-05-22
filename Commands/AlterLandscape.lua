@@ -2,12 +2,15 @@
 -------------------REMOVEBELOW-------------------
 -------------------------------------------------
 function HandleRemoveBelowCommand( Split, Player )
-	X = math.floor( Player:GetPosX() ) -- round the number ( for example from 12.23423987 to 12 )
-	y = math.floor( Player:GetPosY() ) -- round the number ( for example from 12.23423987 to 12 )
-	Z = math.floor( Player:GetPosZ() ) -- round the number ( for example from 12.23423987 to 12 )
-	World = Player:GetWorld() -- Get the world
+	local X = math.floor( Player:GetPosX() ) -- round the number ( for example from 12.23423987 to 12 )
+	local Y = math.floor( Player:GetPosY() ) -- round the number ( for example from 12.23423987 to 12 )
+	local Z = math.floor( Player:GetPosZ() ) -- round the number ( for example from 12.23423987 to 12 )
+	local World = Player:GetWorld() -- Get the world
+	
+	LastCoords[Player:GetName()] = X .. "," .. 1 .. "," .. Z .. "," .. Player:GetWorld():GetName()
+	PersonalUndo[Player:GetName()]:Read( World, X, X, 1, Y, Z, Z )
 	local BlockBelow = 0
-	for Y = 1, y do
+	for Y = 1, Y do
 		World:SetBlock( X, Y, Z, 0, 0 )
 		BlockBelow = BlockBelow + 1
 	end
@@ -20,10 +23,14 @@ end
 -------------------REMOVEABOVE-------------------
 -------------------------------------------------
 function HandleRemoveAboveCommand( Split, Player )
-	X = math.floor( Player:GetPosX() ) -- round the number ( for example from 12.23423987 to 12 )
-	y = math.floor( Player:GetPosY() ) -- round the number ( for example from 12.23423987 to 12 )
-	Z = math.floor( Player:GetPosZ() ) -- round the number ( for example from 12.23423987 to 12 )
-	World = Player:GetWorld()
+	local X = math.floor( Player:GetPosX() ) -- round the number ( for example from 12.23423987 to 12 )
+	local y = math.floor( Player:GetPosY() ) -- round the number ( for example from 12.23423987 to 12 )
+	local Z = math.floor( Player:GetPosZ() ) -- round the number ( for example from 12.23423987 to 12 )
+	local World = Player:GetWorld()
+	
+	LastCoords[Player:GetName()] = X .. "," .. 1 .. "," .. Z .. "," .. Player:GetWorld():GetName()
+	PersonalUndo[Player:GetName()]:Read( World, X, X, 1, World:GetHeight( X, Z ), Z, Z )
+	
 	local BlocksAbove = 0
 	for Y = y, World:GetHeight( X, Z ) do
 		World:SetBlock( X, Y, Z, 0, 0 )
@@ -44,24 +51,24 @@ function HandleDrainCommand( Split, Player )
 	else
 		Radius = tonumber( Split[2] ) -- set the radius to the given radius
 	end
-	OnePlayerX[Player:GetName()] = Player:GetPosX() - Radius -- Set the coordinates to the coordinates with the radius
-	TwoPlayerX[Player:GetName()] = Player:GetPosX() + Radius -- Set the coordinates to the coordinates with the radius
-	OnePlayerY[Player:GetName()] = Player:GetPosY() - Radius -- Set the coordinates to the coordinates with the radius
-	TwoPlayerY[Player:GetName()] = Player:GetPosY() + Radius -- Set the coordinates to the coordinates with the radius
-	OnePlayerZ[Player:GetName()] = Player:GetPosZ() - Radius -- Set the coordinates to the coordinates with the radius
-	TwoPlayerZ[Player:GetName()] = Player:GetPosZ() + Radius -- Set the coordinates to the coordinates with the radius
-	OneX, TwoX, OneY, TwoY, OneZ, TwoZ = GetXYZCoords( Player ) -- get the coordinates in the right order
-	BlockArea:Read( Player:GetWorld(), OneX, TwoX, OneY, TwoY, OneZ, TwoZ ) -- read the area
-	for X=0, BlockArea:GetSizeX() - 1 do
-		for Y=0, BlockArea:GetSizeY() - 1 do
-			for Z=0, BlockArea:GetSizeZ() - 1 do
-				if BlockArea:GetRelBlockType( X, Y, Z ) == E_BLOCK_WATER or BlockArea:GetRelBlockType( X, Y, Z ) == E_BLOCK_STATIONARY_WATER then -- check if the block is water
-					BlockArea:SetRelBlockType( X, Y, Z, 0 ) -- set the block to air
+	LandScapeOneX[Player:GetName()] = Player:GetPosX() - Radius -- Set the coordinates to the coordinates with the radius
+	LandScapeTwoX[Player:GetName()] = Player:GetPosX() + Radius -- Set the coordinates to the coordinates with the radius
+	LandScapeOneY[Player:GetName()] = Player:GetPosY() - Radius -- Set the coordinates to the coordinates with the radius
+	LandScapeTwoY[Player:GetName()] = Player:GetPosY() + Radius -- Set the coordinates to the coordinates with the radius
+	LandScapeOneZ[Player:GetName()] = Player:GetPosZ() - Radius -- Set the coordinates to the coordinates with the radius
+	LandScapeTwoZ[Player:GetName()] = Player:GetPosZ() + Radius -- Set the coordinates to the coordinates with the radius
+	OneX, TwoX, OneY, TwoY, OneZ, TwoZ = GetLandXYZCoords( Player ) -- get the coordinates in the right order
+	PersonalBlockArea[Player:GetName()]:Read( Player:GetWorld(), OneX, TwoX, OneY, TwoY, OneZ, TwoZ ) -- read the area
+	for X=0, PersonalBlockArea[Player:GetName()]:GetSizeX() - 1 do
+		for Y=0, PersonalBlockArea[Player:GetName()]:GetSizeY() - 1 do
+			for Z=0, PersonalBlockArea[Player:GetName()]:GetSizeZ() - 1 do
+				if PersonalBlockArea[Player:GetName()]:GetRelBlockType( X, Y, Z ) == E_BLOCK_WATER or PersonalBlockArea[Player:GetName()]:GetRelBlockType( X, Y, Z ) == E_BLOCK_STATIONARY_WATER then -- check if the block is water
+					PersonalBlockArea[Player:GetName()]:SetRelBlockType( X, Y, Z, 0 ) -- set the block to air
 				end
 			end
 		end
 	end
-	BlockArea:Write( Player:GetWorld(), OneX, OneY, OneZ ) -- write the are into the world.
+	PersonalBlockArea[Player:GetName()]:Write( Player:GetWorld(), OneX, OneY, OneZ ) -- write the are into the world.
 	return true
 end
 
@@ -70,25 +77,28 @@ end
 -------------------EXTINGUISH-------------------
 ------------------------------------------------
 function HandleExtinguishCommand( Split, Player )
-	if Split[2] == nil or tonumber( Split[2] ) == nil then
-		Player:SendMessage( cChatColor.Rose .. "Too few arguments.\n/ex <radius>" )
+	if Split[2] == nil then
+		Player:SendMessage( cChatColor.Rose .. "usage: /ex [Radius]" )
+		return true
+	elseif tonumber( Split[2] ) == nil then
+		Player:SendMessage( cChatColor.Rose .. 'Number expected; string "' .. Split[2] .. '" given' )
 		return true
 	else
 		Radius = tonumber( Split[2] )
 	end
-	OnePlayerX[Player:GetName()] = Player:GetPosX() - Radius -- Set the coordinates to the coordinates with the radius
-	TwoPlayerX[Player:GetName()] = Player:GetPosX() + Radius -- Set the coordinates to the coordinates with the radius
-	OnePlayerY[Player:GetName()] = Player:GetPosY() - Radius -- Set the coordinates to the coordinates with the radius
-	TwoPlayerY[Player:GetName()] = Player:GetPosY() + Radius -- Set the coordinates to the coordinates with the radius
-	OnePlayerZ[Player:GetName()] = Player:GetPosZ() - Radius -- Set the coordinates to the coordinates with the radius
-	TwoPlayerZ[Player:GetName()] = Player:GetPosZ() + Radius -- Set the coordinates to the coordinates with the radius
-	OneX, TwoX, OneY, TwoY, OneZ, TwoZ = GetXYZCoords( Player ) -- get the coordinates in the right order
-	BlockArea:Read( Player:GetWorld(), OneX, TwoX, OneY, TwoY, OneZ, TwoZ ) -- Read the area
+	OnePlayerX[Player:GetName()] = Player:GetPosX() - Radius
+	TwoPlayerX[Player:GetName()] = Player:GetPosX() + Radius
+	OnePlayerY[Player:GetName()] = Player:GetPosY() - Radius
+	TwoPlayerY[Player:GetName()] = Player:GetPosY() + Radius
+	OnePlayerZ[Player:GetName()] = Player:GetPosZ() - Radius
+	TwoPlayerZ[Player:GetName()] = Player:GetPosZ() + Radius
+	OneX, TwoX, OneY, TwoY, OneZ, TwoZ = GetXYZCoords( Player )
+	BlockArea:Read( Player:GetWorld(), OneX, TwoX, OneY, TwoY, OneZ, TwoZ )
 	for X=0, BlockArea:GetSizeX() - 1 do
 		for Y=0, BlockArea:GetSizeY() - 1 do
 			for Z=0, BlockArea:GetSizeZ() - 1 do
-				if BlockArea:GetRelBlockType( X, Y, Z ) == E_BLOCK_FIRE then -- check if the block is fire
-					BlockArea:SetRelBlockType( X, Y, Z, E_BLOCK_AIR )
+				if BlockArea:GetRelBlockType( X, Y, Z ) == 51 then
+					BlockArea:SetRelBlockType( X, Y, Z, 0 )
 				end
 			end
 		end
@@ -109,7 +119,7 @@ function HandleGreenCommand( Split, Player )
 	else
 		Radius = tonumber( Split[2] ) -- set the radius to the given radius
 	end
-	World = Player:GetWorld()
+	local World = Player:GetWorld()
 	X = Player:GetPosX()
 	Z = Player:GetPosZ()
 	local DirtBlocks = 0
@@ -137,7 +147,7 @@ function HandleSnowCommand( Split, Player )
 	else
 		Radius = tonumber( Split[2] ) -- set the radius to the given radius
 	end
-	World = Player:GetWorld() -- Get the world the player is in
+	local World = Player:GetWorld() -- Get the world the player is in
 	X = Player:GetPosX()
 	Z = Player:GetPosZ()
 	local SnowBlocks = 0
@@ -171,7 +181,7 @@ function HandleThawCommand( Split, Player )
 	else
 		Radius = tonumber( Split[2] ) -- set the radius to the given radius
 	end
-	World = Player:GetWorld() -- Get the world the player is in
+	local World = Player:GetWorld() -- Get the world the player is in
 	X = Player:GetPosX()
 	Z = Player:GetPosZ()
 	local ThawBlocks = 0
@@ -252,7 +262,7 @@ function HandleSetBiomeCommand( Split, Player )
 		Player:SendMessage( "Please specify a valid biome" )
 		return true
 	end
-	--World = Player:GetWorld()
+	--local World = Player:GetWorld()
 	OneX, TwoX, OneZ, TwoZ = GetXZCoords( Player )
 	for X=OneX, TwoX do
 		for Z=OneZ, TwoZ do

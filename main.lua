@@ -8,8 +8,11 @@ function Initialize(Plugin)
 	PluginManager:AddHook(PLUGIN, cPluginManager.HOOK_PLAYER_BREAKING_BLOCK) -- Add hook OnPlayerBreakingBlock
 	PluginManager:AddHook(PLUGIN, cPluginManager.HOOK_PLAYER_RIGHT_CLICK) -- Add hook OnPlayerRightClick
 	PluginManager:AddHook(PLUGIN, cPluginManager.HOOK_PLAYER_LEFT_CLICK) -- Add hook OnPlayerLeftClick
-	LoadCommandFunctions()
-	PluginManager:BindCommand("/remove",        "worldedit.remove",               HandleRemoveCommand,         " 	Remove all entities of a type " )
+	PluginManager:AddHook(PLUGIN, cPluginManager.HOOK_PLAYER_JOINED) -- Add hook OnPlayerJoined
+	LoadCommandFunctions() -- Load all the files that contains the command functions
+	PluginManager:BindCommand("//redo",         "worldedit.history.redo",         HandleRedoCommand,         " Redoes the last action (from history) " )
+	PluginManager:BindCommand("//undo",         "worldedit.history.undo",         HandleUndoCommand,         " Undoes the last action" )
+	PluginManager:BindCommand("/remove",        "worldedit.remove",               HandleRemoveCommand,         " Remove all entities of a type " )
 	PluginManager:BindCommand("/removebelow",   "worldedit.removebelow",          HandleRemoveBelowCommand,    "" )
 	PluginManager:BindCommand("/removeabove",   "worldedit.removeabove",          HandleRemoveAboveCommand,    "" )
 	PluginManager:BindCommand("//removebelow",  "worldedit.removebelow",          HandleRemoveBelowCommand,    "Remove blocks below you." )
@@ -45,8 +48,9 @@ function Initialize(Plugin)
 	PluginManager:BindCommand("/thaw",	        "worldedit.thaw",                 HandleThawCommand,           " Thaws the area")
 	PluginManager:BindCommand("//",	            "worldedit.superpickaxe",         HandleSuperPickCommand,      " Toggle the super pickaxe pickaxe function")
 	PluginManager:BindCommand("/none",          "",                               HandleNoneCommand,           " Unbind a bound tool from your current item" )	
-
+		
 	CreateTables() -- create all the tables
+	LoadOnlinePlayers() -- Load all the online players
 	LoadSettings() -- load all the settings
 	BlockArea = cBlockArea()
 	LOG("[WorldEdit] Enabling WorldEdit v" .. PLUGIN:GetVersion())
