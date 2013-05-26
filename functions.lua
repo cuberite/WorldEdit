@@ -52,12 +52,12 @@ end
 ------------LOADCOMMANDFUNCTIONS------------
 --------------------------------------------
 function LoadCommandFunctions()
-	dofile( PLUGIN:GetLocalDirectory() .. "\\Commands\\Tools.lua" ) -- Add lua file with functions for tools commands
-	dofile( PLUGIN:GetLocalDirectory() .. "\\Commands\\Selection.lua" ) -- Add lua file with functions for selection commands
-	dofile( PLUGIN:GetLocalDirectory() .. "\\Commands\\AlterLandscape.lua" ) -- Add lua file with functions for landscape editting commands
-	dofile( PLUGIN:GetLocalDirectory() .. "\\Commands\\Entitys.lua" ) -- Add lua file with functions for entity commands
-	dofile( PLUGIN:GetLocalDirectory() .. "\\Commands\\Navigation.lua" ) -- Add lua file with functions for navigation commands
-	dofile( PLUGIN:GetLocalDirectory() .. "\\Commands\\Other.lua" ) -- Add lua file with functions for all the other commands
+	dofile( PLUGIN:GetLocalDirectory() .. "/Commands/Tools.lua" ) -- Add lua file with functions for tools commands
+	dofile( PLUGIN:GetLocalDirectory() .. "/Commands/Selection.lua" ) -- Add lua file with functions for selection commands
+	dofile( PLUGIN:GetLocalDirectory() .. "/Commands/AlterLandscape.lua" ) -- Add lua file with functions for landscape editting commands
+	dofile( PLUGIN:GetLocalDirectory() .. "/Commands/Entitys.lua" ) -- Add lua file with functions for entity commands
+	dofile( PLUGIN:GetLocalDirectory() .. "/Commands/Navigation.lua" ) -- Add lua file with functions for navigation commands
+	dofile( PLUGIN:GetLocalDirectory() .. "/Commands/Other.lua" ) -- Add lua file with functions for all the other commands
 end
 
 
