@@ -49,10 +49,10 @@ function HandleButcherCommand( Split, Player )
 	else -- the radius is set to the given radius
 		Radius = tonumber( Split[2] )
 	end
-	X = Player:GetPosX()
-	Y = Player:GetPosY()
-	Z = Player:GetPosZ()
-	Distance =  math.abs( math.floor( X + Y + Z ) )
+	Cuboid = cCuboid()
+	Cuboid.p1 = Vector3i( Player:GetPosX() + Radius, Player:GetPosY() + Radius, Player:GetPosZ() + Radius )
+	Cuboid.p2 = Vector3i( Player:GetPosX() - Radius, Player:GetPosY() - Radius, Player:GetPosZ() - Radius )
+	Cuboid:Sort()
 	local Mobs = 0
 	local EachEntity = function( Entity )
 		if Entity:IsMob() == true then -- if the entity is a mob 
@@ -60,10 +60,7 @@ function HandleButcherCommand( Split, Player )
 				Entity:Destroy() -- destroy the mob
 				Mobs = Mobs + 1
 			else
-				EntityX = Entity:GetPosX()
-				EntityY = Entity:GetPosY()
-				EntityZ = Entity:GetPosZ()
-				if (math.abs( Distance - math.abs( math.floor( EntityX + EntityY + EntityZ ) ) ) ) < Radius then -- check if the mob is in range
+				if Cuboid:IsInside(Entity:GetPosX(), Entity:GetPosY(), Entity:GetPosZ()) then -- If the mob is inside the radius then destroy it.
 					Entity:Destroy()
 					Mobs = Mobs + 1
 				end
