@@ -54,6 +54,7 @@ end
 function LoadCommandFunctions()
 	dofile( PLUGIN:GetLocalDirectory() .. "/Commands/Tools.lua" ) -- Add lua file with functions for tools commands
 	dofile( PLUGIN:GetLocalDirectory() .. "/Commands/Selection.lua" ) -- Add lua file with functions for selection commands
+	dofile( PLUGIN:GetLocalDirectory() .. "/Commands/functions.lua" ) -- Add lua file with helper functions
 	dofile( PLUGIN:GetLocalDirectory() .. "/Commands/AlterLandscape.lua" ) -- Add lua file with functions for landscape editting commands
 	dofile( PLUGIN:GetLocalDirectory() .. "/Commands/Entitys.lua" ) -- Add lua file with functions for entity commands
 	dofile( PLUGIN:GetLocalDirectory() .. "/Commands/Navigation.lua" ) -- Add lua file with functions for navigation commands
@@ -247,4 +248,38 @@ function GetLandXYZCoords( Player )
 		TwoZ = LandScapeTwoZ[Player:GetName()]
 	end
 	return OneX, TwoX, OneY, TwoY, OneZ, TwoZ -- return the right coordinates
+end
+
+
+----------------------------------------------
+---------------GETBLOCKTYPEMETA---------------
+----------------------------------------------
+function GetBlockTypeMeta( Player, Blocks )
+	local Tonumber = tonumber(Blocks)
+	if Tonumber == nil then	
+		Item = cItem()
+		if StringToItem(Blocks, Item) == false then
+			Player:SendMessage(cChatColor.Rose .. "unexpected character.")
+			return false
+		else
+			print(Item.m_ItemHealth)
+			if Item.m_ItemHealth == nil then
+				Item.m_ItemHealth = 0
+			end
+			return Item.m_ItemType, Item.m_ItemHealth
+		end
+		Block = StringSplit(Blocks, ":")		
+		if tonumber(Block[1]) == nil then
+			Player:SendMessage( cChatColor.Rose .. "unexpected character." )
+			return false
+		else
+			if Block[2] == nil then
+				return Block[1], 0
+			else
+				return Block[1], Block[2]
+			end
+		end
+	else
+		return Tonumber, 0
+	end
 end
