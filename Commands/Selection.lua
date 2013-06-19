@@ -1,4 +1,26 @@
 ------------------------------------------------
+---------------------EXPAND---------------------
+------------------------------------------------
+function HandleExpandCommand( Split, Player )
+	if Split[2] == nil or tonumber(Split[2]) == nil then
+		Player:SendMessage( cChatColor.Rose .. "Invaild arguments.\n//expand <amount>" )
+		return true
+	end
+	if OnePlayerY[Player:GetName()] == nil or TwoPlayerY[Player:GetName()] == nil then
+		Player:SendMessage( cChatColor.Rose .. "Make a region selection first." )
+		return true
+	end
+	if OnePlayerY[Player:GetName()] > TwoPlayerY[Player:GetName()] then
+		OnePlayerY[Player:GetName()] = OnePlayerY[Player:GetName()] + tonumber( Split[2] )
+	else
+		TwoPlayerY[Player:GetName()] = TwoPlayerY[Player:GetName()] + tonumber( Split[2] )
+	end
+	Player:SendMessage( cChatColor.LightPurple .. "Region expanded " .. Split[2] .. " blocks." )
+	return true
+end
+
+
+------------------------------------------------
 ----------------------REDO----------------------
 ------------------------------------------------
 function HandleRedoCommand( Split, Player )
@@ -114,26 +136,14 @@ function HandleSetCommand( Split, Player )
 		Player:SendMessage( cChatColor.Rose .. "No Region set" )
 		return true
 	end
-	if Split[2] == nil then -- check if the player noted a blocktype
+		if Split[2] == nil then
 		Player:SendMessage( cChatColor.Rose .. "Please say a block ID" )
 		return true
 	end
-	Block = StringSplit( Split[2], ":" ) -- split to blocktype and meta
-	if Block[1] == nil or tonumber(Block[1]) == nil then-- Blocktype
-		Player:SendMessage( cChatColor.Rose .. "unexpected character." )
-		return true
+	local BlockType, BlockMeta = GetBlockTypeMeta( Player, Split[2] )
+	if BlockType ~= false then
+		Player:SendMessage( cChatColor.LightPurple .. HandleFillSelection( Player, Player:GetWorld(), BlockType, BlockMeta ) .. " block(s) have been changed." )
 	end
-	if Block[2] == nil or tonumber(Block[2]) == nil then -- Meta
-		Block[2] = 0
-	end
-	OneX, TwoX, OneY, TwoY, OneZ, TwoZ = GetXYZCoords( Player )	
-	local World = Player:GetWorld()	
-	LastCoords[Player:GetName()] = OneX .. "," .. OneY .. "," .. OneZ .. "," .. Player:GetWorld():GetName()
-	PersonalUndo[Player:GetName()]:Read( World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ )
-	PersonalBlockArea[Player:GetName()]:Read( World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ ) -- read the area
-	PersonalBlockArea[Player:GetName()]:Fill( 3, Block[1], Block[2] ) -- fill the area with the right blocks
-	PersonalBlockArea[Player:GetName()]:Write( World, OneX, OneY, OneZ ) -- write the area in the world
-	Player:SendMessage( cChatColor.LightPurple .. GetSize( Player ) .. " block(s) have been changed." )
 	return true
 end
 
@@ -150,47 +160,11 @@ function HandleReplaceCommand( Split, Player )
 		Player:SendMessage( cChatColor.Rose .. "Please say a block ID" )
 		return true
 	end
-	local ChangeBlock = StringSplit( Split[2], ":" ) -- Split string to blocktype and meta
-	if ChangeBlock[1] == nil or tonumber( ChangeBlock[1] ) == nil then -- to change blocktype
-		Player:SendMessage( cChatColor.Rose .. "unexpected character." )
-		return true
+	local ChangeBlockType, ChangeBlockMeta = GetBlockTypeMeta( Player, Split[2] )
+	local ToChangeBlockType, ToChangeBlockMeta = GetBlockTypeMeta( Player, Split[3] )
+	if ChangeBlockType ~= false and ToChangeBlockType ~= false then
+		Player:SendMessage( cChatColor.LightPurple .. HandleReplaceSelection( Player, Player:GetWorld(), ChangeBlockType, ChangeBlockMeta, ToChangeBlockType, ToChangeBlockMeta ) .. " block(s) have been changed." )
 	end
-	local ToChangeBlock = StringSplit( Split[3], ":" ) -- Split string to blocktype and meta
-	if ToChangeBlock[1] == nil or tonumber( ToChangeBlock[1] ) == nil then
-		Player:SendMessage( cChatColor.Rose .. "unexpected character." )
-		return true
-	end
-	if ToChangeBlock[2] == nil or tonumber( ToChangeBlock[2] ) == nil then
-		ToChangeBlock[2] = 0
-	end
-	ChangeBlock[1] = tonumber(ChangeBlock[1])
-	if tonumber( ChangeBlock[2] ) ~= nil then
-		ChangeBlock[2] = tonumber(ChangeBlock[2])
-	end
-	ToChangeBlock[1] = tonumber(ToChangeBlock[1])
-	ToChangeBlock[2] = tonumber(ToChangeBlock[2])
-	OneX, TwoX, OneY, TwoY, OneZ, TwoZ = GetXYZCoords( Player )
-	local World = Player:GetWorld()
-	local Blocks =  0
-	LastCoords[Player:GetName()] = OneX .. "," .. OneY .. "," .. OneZ .. "," .. Player:GetWorld():GetName()
-	PersonalUndo[Player:GetName()]:Read( World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ )
-	PersonalBlockArea[Player:GetName()]:Read( World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ ) -- Read the area
-	for X=0, PersonalBlockArea[Player:GetName()]:GetSizeX() - 1 do
-		for Y=0, PersonalBlockArea[Player:GetName()]:GetSizeY() - 1 do
-			for Z=0, PersonalBlockArea[Player:GetName()]:GetSizeZ() - 1 do
-				if PersonalBlockArea[Player:GetName()]:GetRelBlockType( X, Y, Z ) == ChangeBlock[1] then -- if the blocktype is the same as the block that needs to change then
-					if PersonalBlockArea[Player:GetName()]:GetRelBlockMeta( X, Y, Z ) == ChangeBlock[2] or ChangeBlock[2] == nil then -- check if the blockmeta is the same as the meta that has to change
-						PersonalBlockArea[Player:GetName()]:SetRelBlockType( X, Y, Z, ToChangeBlock[1] ) -- change the block
-						
-						PersonalBlockArea[Player:GetName()]:SetRelBlockMeta( X, Y, Z, ToChangeBlock[2] ) -- change the meta
-						Blocks = Blocks + 1 -- add a 1 to the amount of changed blocks.
-					end
-				end
-			end
-		end
-	end
-	PersonalBlockArea[Player:GetName()]:Write( World, OneX, OneY, OneZ ) -- write the area into the world.
-	Player:SendMessage( cChatColor.LightPurple .. Blocks .. " block(s) have been changed." )
 	return true
 end
 
@@ -204,43 +178,14 @@ function HandleFacesCommand( Split, Player )
 		Player:SendMessage( cChatColor.Rose .. "No Region set" )
 		return true -- stop
 	end
-	if Split[2] == nil then -- Check if the player gave a block id
+	if Split[2] == nil then
 		Player:SendMessage( cChatColor.Rose .. "Please say a block ID" )
-	end
-	local Block = StringSplit( Split[2], ":" ) -- Split the string to meta and blocktype
-	if Block[1] == nil or tonumber(Block[1]) == nil then-- Blocktype
-		Player:SendMessage( cChatColor.Rose .. "unexpected character." )
 		return true
 	end
-	if Block[2] == nil or tonumber(Block[2]) == nil then -- Meta
-		Block[2] = 0
+	local BlockType, BlockMeta = GetBlockTypeMeta( Player, Split[2] )
+	if BlockType ~= false then
+		Player:SendMessage( cChatColor.LightPurple .. HandleCreateFaces( Player, Player:GetWorld(), BlockType, BlockMeta ) .. " block(s) have been changed." )
 	end
-	OneX, TwoX, OneY, TwoY, OneZ, TwoZ = GetXYZCoords( Player ) -- get the coordinates
-	local World = Player:GetWorld()	
-	LastCoords[Player:GetName()] = OneX .. "," .. OneY .. "," .. OneZ .. "," .. Player:GetWorld():GetName()
-	PersonalUndo[Player:GetName()]:Read( World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ )
-	PersonalBlockArea[Player:GetName()]:Read( World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ ) -- read the area
-	local Blocks = ( 2 *  ( PersonalBlockArea[Player:GetName()]:GetSizeX() - 1 + PersonalBlockArea[Player:GetName()]:GetSizeZ() - 1 ) * PersonalBlockArea[Player:GetName()]:GetSizeY() ) -- calculate the amount of changed blocks.
-	if Blocks == 0 then
-		Blocks = 1
-	end
-	local Y = 0
-	local Z = 0
-	local X = 0
-	local XX = PersonalBlockArea[Player:GetName()]:GetSizeX() - 1
-	local YY = PersonalBlockArea[Player:GetName()]:GetSizeY() - 1
-	local ZZ = PersonalBlockArea[Player:GetName()]:GetSizeZ() - 1
-	
-	PersonalBlockArea[Player:GetName()]:FillRelCuboid( X, XX, Y, YY, Z, Z, 3, Block[1], Block[2] ) -- Walls
-	PersonalBlockArea[Player:GetName()]:FillRelCuboid( X, XX, Y, YY, ZZ, ZZ, 3, Block[1], Block[2] )
-	PersonalBlockArea[Player:GetName()]:FillRelCuboid( XX, XX, Y, YY, Z, ZZ, 3, Block[1], Block[2] )
-	PersonalBlockArea[Player:GetName()]:FillRelCuboid( X, X, Y, YY, Z, ZZ, 3, Block[1], Block[2] )
-	
-	PersonalBlockArea[Player:GetName()]:FillRelCuboid( X, XX, Y, Y, Z, ZZ, 3, Block[1], Block[2] ) -- Floor
-	PersonalBlockArea[Player:GetName()]:FillRelCuboid( X, XX, YY, YY, Z, ZZ, 3, Block[1], Block[2] ) -- Ceiling
-
-	Player:SendMessage( cChatColor.LightPurple .. Blocks .. " block(s) have changed" )
-	PersonalBlockArea[Player:GetName()]:Write( World, OneX, OneY, OneZ ) -- write the area in the world.
 	return true
 end
 
@@ -253,39 +198,14 @@ function HandleWallsCommand( Split, Player )
 		Player:SendMessage( cChatColor.Rose .. "No Region set" )
 		return true
 	end
-	if Split[2] == nil then -- Check if the player gave a block id
+	if Split[2] == nil then
 		Player:SendMessage( cChatColor.Rose .. "Please say a block ID" )
-	end
-	local Block = StringSplit( Split[2], ":" ) -- Split the string to meta and blocktype
-	if Block[1] == nil or tonumber(Block[1]) == nil then-- Blocktype
-		Player:SendMessage( cChatColor.Rose .. "unexpected character." )
 		return true
 	end
-	if Block[2] == nil or tonumber(Block[2]) == nil then -- Meta
-		Block[2] = 0
+	local BlockType, BlockMeta = GetBlockTypeMeta( Player, Split[2] )
+	if BlockType ~= false then
+		Player:SendMessage( cChatColor.LightPurple .. HandleCreateWalls( Player, Player:GetWorld(), BlockType, BlockMeta ) .. " block(s) have been changed." )
 	end
-	OneX, TwoX, OneY, TwoY, OneZ, TwoZ = GetXYZCoords( Player ) -- Get the right X, Y and Z coordinates
-	local World = Player:GetWorld()	
-	LastCoords[Player:GetName()] = OneX .. "," .. OneY .. "," .. OneZ .. "," .. Player:GetWorld():GetName()
-	PersonalUndo[Player:GetName()]:Read( World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ )
-	PersonalBlockArea[Player:GetName()]:Read( World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ )
-	local Blocks = ( 2 *  ( PersonalBlockArea[Player:GetName()]:GetSizeX() - 1 + PersonalBlockArea[Player:GetName()]:GetSizeZ() - 1 ) * PersonalBlockArea[Player:GetName()]:GetSizeY() ) -- Calculate the amount if blocks that are going to change
-	if Blocks == 0 then -- if the wall is 1x1x1 then the amout of blocks changed are 1
-		Blocks = 1
-	end
-	local Y = 0
-	local Z = 0
-	local X = 0
-	local XX = PersonalBlockArea[Player:GetName()]:GetSizeX() - 1
-	local YY = PersonalBlockArea[Player:GetName()]:GetSizeY() - 1
-	local ZZ = PersonalBlockArea[Player:GetName()]:GetSizeZ() - 1
-	
-	PersonalBlockArea[Player:GetName()]:FillRelCuboid( X, XX, Y, YY, Z, Z, 3, Block[1], Block[2] )
-	PersonalBlockArea[Player:GetName()]:FillRelCuboid( X, XX, Y, YY, ZZ, ZZ, 3, Block[1], Block[2] )
-	PersonalBlockArea[Player:GetName()]:FillRelCuboid( XX, XX, Y, YY, Z, ZZ, 3, Block[1], Block[2] )
-	PersonalBlockArea[Player:GetName()]:FillRelCuboid( X, X, Y, YY, Z, ZZ, 3, Block[1], Block[2] )
-	Player:SendMessage( cChatColor.LightPurple .. Blocks .. " block(s) have changed" )
-	PersonalBlockArea[Player:GetName()]:Write( World, OneX, OneY, OneZ ) -- Write the region into the world
 	return true
 end
 
@@ -317,7 +237,7 @@ end
 function HandleSchematicCommand( Split, Player )
 	if Split[2] ~= nil then 
 		if string.upper(Split[2]) == "SAVE" or string.upper(Split[2]) == "L" then -- check if the player want to save a region.
-			if Player:HasPermission("worldedit.schematic.save") then -- check if the player has the permission to use the command
+			if Player:HasPermission("worldedit.schematic.save") or Player:HasPermission("worldedit.*") then -- check if the player has the permission to use the command
 				if Split[3] == nil then -- check if the player stated a name for the schematic.
 					Player:SendMessage( cChatColor.Green .. "Please state a schematic name" )
 					return true
@@ -332,7 +252,7 @@ function HandleSchematicCommand( Split, Player )
 				end
 			end
 		elseif string.upper(Split[2]) == "LOAD" or string.upper(Split[2]) == "L" then -- check if the player wants to load a schematic
-			if Player:HasPermission("worldedit.schematic.load") then -- check if the player has the permission to use the command
+			if Player:HasPermission("worldedit.schematic.load") or Player:HasPermission("worldedit.*") then -- check if the player has the permission to use the command
 				if Split[3] == nil then -- check if the player stated a name of the schematic.
 					Player:SendMessage( cChatColor.Green .. "Please state a schematic name" )
 					return true
@@ -347,7 +267,7 @@ function HandleSchematicCommand( Split, Player )
 				end
 			end
 		elseif string.upper(Split[2]) == "DELETE" then -- check if the player wants to delete a file
-			if Player:HasPermission("worldedit.schematic.delete") then
+			if Player:HasPermission("worldedit.schematic.delete") or Player:HasPermission("worldedit.*") then
 				if Split[3] == nil then
 					Player:SendMessage( cChatColor.Green .. "Please state a schematic name" )
 					return true
