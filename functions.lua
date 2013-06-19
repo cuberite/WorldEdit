@@ -262,7 +262,6 @@ function GetBlockTypeMeta( Player, Blocks )
 			Player:SendMessage(cChatColor.Rose .. "unexpected character.")
 			return false
 		else
-			print(Item.m_ItemHealth)
 			if Item.m_ItemHealth == nil then
 				Item.m_ItemHealth = 0
 			end
