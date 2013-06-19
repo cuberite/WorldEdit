@@ -7,9 +7,6 @@ function HandleCreateWalls( Player, World, BlockType, BlockMeta )
 	if Blocks == 0 then -- if the wall is 1x1x1 then the amout of blocks changed are 1
 		Blocks = 1
 	end
-	if BlockMeta == nil then
-		BlockMeta = 0
-	end
 	local Y = 0
 	local Z = 0
 	local X = 0
@@ -37,9 +34,6 @@ function HandleCreateFaces( Player, World, BlockType, BlockMeta )
 	if Blocks == 0 then
 		Blocks = 1
 	end
-	if BlockMeta == nil then
-		BlockMeta = 0
-	end
 	local Y = 0
 	local Z = 0
 	local X = 0
@@ -62,9 +56,6 @@ end
 
 
 function HandleFillSelection( Player, World, BlockType, BlockMeta )
-	if BlockMeta == nil then
-		BlockMeta = 0
-	end
 	OneX, TwoX, OneY, TwoY, OneZ, TwoZ = GetXYZCoords( Player )	
 	local World = Player:GetWorld()	
 	LastCoords[Player:GetName()] = OneX .. "," .. OneY .. "," .. OneZ .. "," .. Player:GetWorld():GetName()
