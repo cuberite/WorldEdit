@@ -75,17 +75,14 @@ end
 ----------------------PASTE----------------------
 -------------------------------------------------
 function HandlePasteCommand( Split, Player )
-	if PersonalUndo[Player:GetName()]:GetSizeX() == 0 and PersonalUndo[Player:GetName()]:GetSizeY() == 0 and PersonalUndo[Player:GetName()]:GetSizeZ() == 0 then
+	if PersonalBlockArea[Player:GetName()]:GetSizeX() == 0 and PersonalBlockArea[Player:GetName()]:GetSizeY() == 0 and PersonalBlockArea[Player:GetName()]:GetSizeZ() == 0 then
 		Player:SendMessage( cChatColor.Rose .. "Your clipboard is empty. Use //copy first." )
 		return true
 	end
 	LastCoords[Player:GetName()] = OneX .. "," .. OneY .. "," .. OneZ .. "," .. Player:GetWorld():GetName()
-	PersonalUndo[Player:GetName()]:Read( World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ )
-	if PersonalBlockArea[Player:GetName()]:Write( Player:GetWorld(), Player:GetPosX(), Player:GetPosY(), Player:GetPosZ(), 3 ) == false then -- paste the area that the player copied
-		Player:SendMessage( cChatColor.LightPurple .. "You didn't copy anything" )
-	else
-		Player:SendMessage( cChatColor.LightPurple .. "Pasted relative to you." )
-	end
+	PersonalUndo[Player:GetName()]:Read( Player:GetWorld(), Player:GetPosX(), Player:GetPosX() + PersonalBlockArea[Player:GetName()]:GetSizeX(), Player:GetPosY(), Player:GetPosY() + PersonalBlockArea[Player:GetName()]:GetSizeY(), Player:GetPosZ(), Player:GetPosZ() + PersonalBlockArea[Player:GetName()]:GetSizeZ() )
+	PersonalBlockArea[Player:GetName()]:Write( Player:GetWorld(), Player:GetPosX(), Player:GetPosY(), Player:GetPosZ(), 3 ) -- paste the area that the player copied
+	Player:SendMessage( cChatColor.LightPurple .. "Pasted relative to you." )
 	return true
 end
 
