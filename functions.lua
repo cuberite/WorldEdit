@@ -277,6 +277,6 @@ function GetBlockTypeMeta( Player, Blocks )
 			end
 		end
 	else
-		return Tonumber, 0
+		return Tonumber, 0, true
 	end
 end

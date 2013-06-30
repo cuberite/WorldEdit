@@ -159,10 +159,10 @@ function HandleReplaceCommand( Split, Player )
 		Player:SendMessage( cChatColor.Rose .. "Please say a block ID" )
 		return true
 	end
-	local ChangeBlockType, ChangeBlockMeta = GetBlockTypeMeta( Player, Split[2] )
+	local ChangeBlockType, ChangeBlockMeta, TypeOnly = GetBlockTypeMeta( Player, Split[2] )
 	local ToChangeBlockType, ToChangeBlockMeta = GetBlockTypeMeta( Player, Split[3] )
 	if ChangeBlockType ~= false and ToChangeBlockType ~= false then
-		Player:SendMessage( cChatColor.LightPurple .. HandleReplaceSelection( Player, Player:GetWorld(), ChangeBlockType, ChangeBlockMeta, ToChangeBlockType, ToChangeBlockMeta ) .. " block(s) have been changed." )
+		Player:SendMessage( cChatColor.LightPurple .. HandleReplaceSelection( Player, Player:GetWorld(), ChangeBlockType, ChangeBlockMeta, ToChangeBlockType, ToChangeBlockMeta, TypeOnly ) .. " block(s) have been changed." )
 	end
 	return true
 end

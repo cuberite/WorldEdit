@@ -69,7 +69,7 @@ function HandleFillSelection( Player, World, BlockType, BlockMeta )
 end
 
 
-function HandleReplaceSelection( Player, World, ChangeBlockType, ChangeBlockMeta, ToChangeBlockType, ToChangeBlockMeta )
+function HandleReplaceSelection( Player, World, ChangeBlockType, ChangeBlockMeta, ToChangeBlockType, ToChangeBlockMeta, TypeOnly )
 	OneX, TwoX, OneY, TwoY, OneZ, TwoZ = GetXYZCoords( Player )
 	local Blocks =  0
 	LastCoords[Player:GetName()] = OneX .. "," .. OneY .. "," .. OneZ .. "," .. Player:GetWorld():GetName()
@@ -79,7 +79,7 @@ function HandleReplaceSelection( Player, World, ChangeBlockType, ChangeBlockMeta
 		for Y=0, PersonalBlockArea[Player:GetName()]:GetSizeY() - 1 do
 			for Z=0, PersonalBlockArea[Player:GetName()]:GetSizeZ() - 1 do
 				if PersonalBlockArea[Player:GetName()]:GetRelBlockType( X, Y, Z ) == ChangeBlockType then -- if the blocktype is the same as the block that needs to change then
-					if PersonalBlockArea[Player:GetName()]:GetRelBlockMeta( X, Y, Z ) == ChangeBlockMeta then -- check if the blockmeta is the same as the meta that has to change
+					if PersonalBlockArea[Player:GetName()]:GetRelBlockMeta( X, Y, Z ) == ChangeBlockMeta or TypeOnly == true then -- check if the blockmeta is the same as the meta that has to change
 						PersonalBlockArea[Player:GetName()]:SetRelBlockType( X, Y, Z, ToChangeBlockType ) -- change the block
 						PersonalBlockArea[Player:GetName()]:SetRelBlockMeta( X, Y, Z, ToChangeBlockMeta ) -- change the meta
 						Blocks = Blocks + 1 -- add a 1 to the amount of changed blocks.
