@@ -75,13 +75,14 @@ end
 ----------------------PASTE----------------------
 -------------------------------------------------
 function HandlePasteCommand( Split, Player )
-	if PersonalBlockArea[Player:GetName()]:GetSizeX() == 0 and PersonalBlockArea[Player:GetName()]:GetSizeY() == 0 and PersonalBlockArea[Player:GetName()]:GetSizeZ() == 0 then
+	if PersonalClipboard[Player:GetName()]:GetSizeX() == 0 and PersonalClipboard[Player:GetName()]:GetSizeY() == 0 and PersonalClipboard[Player:GetName()]:GetSizeZ() == 0 then
 		Player:SendMessage( cChatColor.Rose .. "Your clipboard is empty. Use //copy first." )
 		return true
 	end
-	LastCoords[Player:GetName()] = OneX .. "," .. OneY .. "," .. OneZ .. "," .. Player:GetWorld():GetName()
-	PersonalUndo[Player:GetName()]:Read( Player:GetWorld(), Player:GetPosX(), Player:GetPosX() + PersonalBlockArea[Player:GetName()]:GetSizeX(), Player:GetPosY(), Player:GetPosY() + PersonalBlockArea[Player:GetName()]:GetSizeY(), Player:GetPosZ(), Player:GetPosZ() + PersonalBlockArea[Player:GetName()]:GetSizeZ() )
-	PersonalBlockArea[Player:GetName()]:Write( Player:GetWorld(), Player:GetPosX(), Player:GetPosY(), Player:GetPosZ(), 3 ) -- paste the area that the player copied
+	LastCoords[Player:GetName()] = Player:GetPosX() .. "," .. Player:GetPosY() .. "," .. Player:GetPosZ() .. "," .. Player:GetWorld():GetName()
+	PersonalUndo[Player:GetName()]:Read( Player:GetWorld(), Player:GetPosX(), Player:GetPosX() + PersonalClipboard[Player:GetName()]:GetSizeX(), Player:GetPosY(), Player:GetPosY() + PersonalClipboard[Player:GetName()]:GetSizeY(), Player:GetPosZ(), Player:GetPosZ() + PersonalClipboard[Player:GetName()]:GetSizeZ() )
+	PersonalClipboard[Player:GetName()]:Write( Player:GetWorld(), Player:GetPosX(), Player:GetPosY(), Player:GetPosZ(), 3 ) -- paste the area that the player copied
+	Player:GetWorld():WakeUpSimulatorsInArea(Player:GetPosX() - 1, Player:GetPosX() + PersonalClipboard[Player:GetName()]:GetSizeX() + 1, Player:GetPosY() - 1, Player:GetPosY() + PersonalClipboard[Player:GetName()]:GetSizeY() + 1, Player:GetPosZ() - 1, Player:GetPosZ() + PersonalClipboard[Player:GetName()]:GetSizeZ() + 1 )
 	Player:SendMessage( cChatColor.LightPurple .. "Pasted relative to you." )
 	return true
 end
@@ -97,7 +98,7 @@ function HandleCopyCommand( Split, Player )
 	end
 	OneX, TwoX, OneY, TwoY, OneZ, TwoZ = GetXYZCoords( Player ) -- get the right coordinates
 	local World = Player:GetWorld()
-	PersonalBlockArea[Player:GetName()]:Read( World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ ) -- read the area
+	PersonalClipboard[Player:GetName()]:Read( World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ ) -- read the area
 	Player:SendMessage( cChatColor. LightPurple .. "Block(s) copied." )
 	return true
 end
@@ -115,11 +116,12 @@ function HandleCutCommand( Split, Player )
 	local World = Player:GetWorld() -- get the world
 	LastCoords[Player:GetName()] = OneX .. "," .. OneY .. "," .. OneZ .. "," .. Player:GetWorld():GetName()
 	PersonalUndo[Player:GetName()]:Read( World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ )
-	Cut = cPersonalBlockArea[Player:GetName()]()
-	PersonalBlockArea[Player:GetName()]:Read( World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ ) -- read the area
+	Cut = cBlockArea()
+	PersonalClipboard[Player:GetName()]:Read( World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ ) -- read the area
 	Cut:Read( World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ ) -- read the area
 	Cut:Fill( 3, 0, 0 ) -- delete the area
 	Cut:Write( World, OneX, OneY, OneZ ) -- write the area
+	World:WakeUpSimulatorsInArea( OneX - 1, TwoX + 1, OneY - 1, TwoY + 1, OneZ - 1, TwoZ + 1 )
 	Player:SendMessage( cChatColor. LightPurple .. "Block(s) cut." )
 	return true
 end
@@ -133,7 +135,7 @@ function HandleSetCommand( Split, Player )
 		Player:SendMessage( cChatColor.Rose .. "No Region set" )
 		return true
 	end
-		if Split[2] == nil then
+	if Split[2] == nil then
 		Player:SendMessage( cChatColor.Rose .. "Please say a block ID" )
 		return true
 	end
@@ -214,15 +216,14 @@ function HandleRotateCommand( Split, Player )
 	if Split[2] == nil or tonumber( Split[2] ) == nil then -- Check if the player gave an angle
 		Player:SendMessage( cChatColor.Rose .. "Too few arguments.\n//rotate [90, 180, 270]" )
 		return true
-	else
-		if tonumber( Split[2] ) == 90 or tonumber( Split[2] ) == 180 or tonumber( Split[2] ) == 270 then
-			for I =1, tonumber(Split[2]) / 90 do -- rotate the area some times.
-				PersonalBlockArea[Player:GetName()]:RotateCCW() -- Rotate the area
-			end
-			Player:SendMessage( cChatColor.Rose .. "Rotated clipboard " .. Split[2] .. " degrees" )
-		else
-			Player:SendMessage( cChatColor.Rose .. "usage: /rotate [90, 180, 270]" )
+	end
+	if tonumber( Split[2] ) == 90 or tonumber( Split[2] ) == 180 or tonumber( Split[2] ) == 270 then
+		for I =1, tonumber(Split[2]) / 90 do -- rotate the area some times.
+			PersonalClipboard[Player:GetName()]:RotateCCW() -- Rotate the area
 		end
+		Player:SendMessage( cChatColor.Rose .. "Rotated clipboard " .. Split[2] .. " degrees" )
+	else
+		Player:SendMessage( cChatColor.Rose .. "usage: /rotate [90, 180, 270]" )
 	end
 	return true
 end
@@ -232,53 +233,53 @@ end
 -------------------SCHEMATIC-------------------
 -----------------------------------------------
 function HandleSchematicCommand( Split, Player )
-	if Split[2] ~= nil then 
-		if string.upper(Split[2]) == "SAVE" or string.upper(Split[2]) == "L" then -- check if the player want to save a region.
-			if Player:HasPermission("worldedit.schematic.save") or Player:HasPermission("worldedit.*") then -- check if the player has the permission to use the command
-				if Split[3] == nil then -- check if the player stated a name for the schematic.
-					Player:SendMessage( cChatColor.Green .. "Please state a schematic name" )
-					return true
-				end	
-				Schematic = io.open( "Schematics\\" .. Split[3] .. ".Schematic", "r" ) -- check if the schematic file already exists.
-				if Schematic then -- check if the schematic exists
-					Player:SendMessage( cChatColor.Rose .. "Schematic already exists" )
-					Schematic:close() -- close the file
-				else
-					PersonalBlockArea[Player:GetName()]:SaveToSchematicFile( "Schematics/" .. Split[3] .. ".Schematic" ) -- save the schematic.
-					Player:SendMessage( cChatColor.LightPurple .. Split[3] .. " saved."	)					
-				end
-			end
-		elseif string.upper(Split[2]) == "LOAD" or string.upper(Split[2]) == "L" then -- check if the player wants to load a schematic
-			if Player:HasPermission("worldedit.schematic.load") or Player:HasPermission("worldedit.*") then -- check if the player has the permission to use the command
-				if Split[3] == nil then -- check if the player stated a name of the schematic.
-					Player:SendMessage( cChatColor.Green .. "Please state a schematic name" )
-					return true
-				end 	
-				Schematic = io.open( "Schematics\\" .. Split[3] .. ".Schematic", "r" ) -- check if the schematic file already exists.
-				if Schematic then -- check if the schematic exists
-					PersonalBlockArea[Player:GetName()]:LoadFromSchematicFile( "Schematics/" .. Split[3] .. ".Schematic" ) -- load the schematic file
-					Player:SendMessage( cChatColor.LightPurple .. "Clipboard " .. Split[3] .. " is loaded" ) 
-					Schematic:close() -- close the file
-				else
-					Player:SendMessage( cChatColor.Rose .. "Schematic " .. Split[3] .. " does not exist" )
-				end
-			end
-		elseif string.upper(Split[2]) == "DELETE" then -- check if the player wants to delete a file
-			if Player:HasPermission("worldedit.schematic.delete") or Player:HasPermission("worldedit.*") then
-				if Split[3] == nil then
-					Player:SendMessage( cChatColor.Green .. "Please state a schematic name" )
-					return true
-				end
-				Schematic = io.open( "Schematics\\" .. Split[3] .. ".Schematic", "r" ) -- check if the schematic file already exists.
-				if Schematic then
-					Schematic:close() -- close the schematic file
-					os.remove( "Schematics\\" .. Split[3] .. ".Schematic" ) -- remove the schematic file
-					Player:SendMessage( cChatColor.LightPurple .. "Schematic " .. Split[3] .. " is deleted" ) 
-				end
+	if Split[2] == nil then
+		Player:SendMessage( cChatColor.LightPurple .. "//schematic <save:load:delete>" )
+		return true
+	end
+	if string.upper(Split[2]) == "SAVE" or string.upper(Split[2]) == "L" then -- check if the player want to save a region.
+		if Player:HasPermission("worldedit.schematic.save") or Player:HasPermission("worldedit.*") then -- check if the player has the permission to use the command
+			if Split[3] == nil then -- check if the player stated a name for the schematic.
+				Player:SendMessage( cChatColor.Green .. "Please state a schematic name" )
+				return true
+			end	
+			Schematic = io.open( "Schematics\\" .. Split[3] .. ".Schematic", "r" ) -- check if the schematic file already exists.
+			if Schematic then -- check if the schematic exists
+				Player:SendMessage( cChatColor.Rose .. "Schematic already exists" )
+				Schematic:close() -- close the file
+			else
+				PersonalClipboard[Player:GetName()]:SaveToSchematicFile( "Schematics/" .. Split[3] .. ".Schematic" ) -- save the schematic.
+				Player:SendMessage( cChatColor.LightPurple .. Split[3] .. " saved."	)					
 			end
 		end
-	else -- the command didn't exist or the player did not gave a command
-		Player:SendMessage( cChatColor.LightPurple .. "//schematic <save:load:delete>" )
+	elseif string.upper(Split[2]) == "LOAD" or string.upper(Split[2]) == "L" then -- check if the player wants to load a schematic
+		if Player:HasPermission("worldedit.schematic.load") or Player:HasPermission("worldedit.*") then -- check if the player has the permission to use the command
+			if Split[3] == nil then -- check if the player stated a name of the schematic.
+				Player:SendMessage( cChatColor.Green .. "Please state a schematic name" )
+				return true
+			end 	
+			Schematic = io.open( "Schematics\\" .. Split[3] .. ".Schematic", "r" ) -- check if the schematic file already exists.
+			if Schematic then -- check if the schematic exists
+				PersonalClipboard[Player:GetName()]:LoadFromSchematicFile( "Schematics/" .. Split[3] .. ".Schematic" ) -- load the schematic file
+				Player:SendMessage( cChatColor.LightPurple .. "Clipboard " .. Split[3] .. " is loaded" ) 
+				Schematic:close() -- close the file
+			else
+				Player:SendMessage( cChatColor.Rose .. "Schematic " .. Split[3] .. " does not exist" )
+			end
+		end
+	elseif string.upper(Split[2]) == "DELETE" then -- check if the player wants to delete a file
+		if Player:HasPermission("worldedit.schematic.delete") or Player:HasPermission("worldedit.*") then
+			if Split[3] == nil then
+				Player:SendMessage( cChatColor.Green .. "Please state a schematic name" )
+				return true
+			end
+			Schematic = io.open( "Schematics\\" .. Split[3] .. ".Schematic", "r" ) -- check if the schematic file already exists.
+			if Schematic then
+				Schematic:close() -- close the schematic file
+				os.remove( "Schematics\\" .. Split[3] .. ".Schematic" ) -- remove the schematic file
+				Player:SendMessage( cChatColor.LightPurple .. "Schematic " .. Split[3] .. " is deleted" ) 
+			end
+		end
 	end
 	return true
 end

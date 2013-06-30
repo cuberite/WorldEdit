@@ -19,6 +19,7 @@ function HandleCreateWalls( Player, World, BlockType, BlockMeta )
 	PersonalBlockArea[Player:GetName()]:FillRelCuboid( XX, XX, Y, YY, Z, ZZ, 3, BlockType, BlockMeta )
 	PersonalBlockArea[Player:GetName()]:FillRelCuboid( X, X, Y, YY, Z, ZZ, 3, BlockType, BlockMeta )	
 	PersonalBlockArea[Player:GetName()]:Write( World, OneX, OneY, OneZ ) -- Write the region into the world
+	World:WakeUpSimulatorsInArea( OneX - 1, TwoX + 1, OneY - 1, TwoY + 1, OneZ - 1, TwoZ + 1 )
 	return Blocks
 end
 
@@ -50,6 +51,7 @@ function HandleCreateFaces( Player, World, BlockType, BlockMeta )
 	PersonalBlockArea[Player:GetName()]:FillRelCuboid( X, XX, YY, YY, Z, ZZ, 3, BlockType, BlockMeta ) -- Ceiling
 
 	PersonalBlockArea[Player:GetName()]:Write( World, OneX, OneY, OneZ ) -- write the area in the world.
+	World:WakeUpSimulatorsInArea( OneX - 1, TwoX + 1, OneY - 1, TwoY + 1, OneZ - 1, TwoZ + 1 )
 	return Blocks
 end
 
@@ -57,12 +59,12 @@ end
 
 function HandleFillSelection( Player, World, BlockType, BlockMeta )
 	OneX, TwoX, OneY, TwoY, OneZ, TwoZ = GetXYZCoords( Player )	
-	local World = Player:GetWorld()	
 	LastCoords[Player:GetName()] = OneX .. "," .. OneY .. "," .. OneZ .. "," .. Player:GetWorld():GetName()
 	PersonalUndo[Player:GetName()]:Read( World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ )
 	PersonalBlockArea[Player:GetName()]:Read( World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ ) -- read the area
 	PersonalBlockArea[Player:GetName()]:Fill( 3, BlockType, BlockMeta ) -- fill the area with the right blocks
 	PersonalBlockArea[Player:GetName()]:Write( World, OneX, OneY, OneZ ) -- write the area in the world
+	World:WakeUpSimulatorsInArea( OneX - 1, TwoX + 1, OneY - 1, TwoY + 1, OneZ - 1, TwoZ + 1 )
 	return GetSize(Player)
 end
 
@@ -87,5 +89,6 @@ function HandleReplaceSelection( Player, World, ChangeBlockType, ChangeBlockMeta
 		end
 	end
 	PersonalBlockArea[Player:GetName()]:Write( World, OneX, OneY, OneZ ) -- write the area into the world.
+	World:WakeUpSimulatorsInArea( OneX - 1, TwoX + 1, OneY - 1, TwoY + 1, OneZ - 1, TwoZ + 1 )
 	return Blocks
 end

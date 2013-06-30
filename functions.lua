@@ -30,6 +30,7 @@ function CreateTables()
 	PersonalBlockArea = {}
 	PersonalUndo = {}
 	PersonalRedo = {}
+	PersonalClipboard = {}
 	LastRedoCoords = {}
 	LastCoords = {}
 	SP = {}
@@ -66,7 +67,8 @@ end
 --------------LOADONLINEPLAYERS--------------
 ---------------------------------------------
 function LoadOnlinePlayers()
-	local EachPlayer = function( Player )
+	cRoot:Get():ForEachPlayer(
+	function( Player )
 		if PersonalBlockArea[Player:GetName()] == nil then
 			PersonalBlockArea[Player:GetName()] = cBlockArea()
 		end
@@ -76,11 +78,10 @@ function LoadOnlinePlayers()
 		if PersonalRedo[Player:GetName()] == nil then
 			PersonalRedo[Player:GetName()] = cBlockArea()
 		end
-	end
-	local EachWorld = function( World )
-		World:ForEachPlayer( EachPlayer )
-	end
-	cRoot:Get():ForEachWorld( EachWorld )
+		if PersonalClipboard[Player:GetName()] == nil then
+			PersonalClipboard[Player:GetName()] = cBlockArea()
+		end
+	end )
 end
 ---------------------------------------------
 -------------------GETSIZE-------------------
@@ -106,9 +107,9 @@ end
 
 
 ---------------------------------------------
-------------SET_BIOME_FROM_STRING------------
+------------GET_BIOME_FROM_STRING------------
 ---------------------------------------------
-function SetBiomeFromString( Split, Player ) -- this simply checks what the player said and then returns the network number that that biome has
+function GetBiomeFromString( Split, Player ) -- this simply checks what the player said and then returns the network number that that biome has
 	Split[2] = string.upper(Split[2])
 	if Split[2] == "OCEAN" then
 		return 0
