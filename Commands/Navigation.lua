@@ -23,7 +23,7 @@ function HandleDescendCommand( Split, Player )
 		if PosY[Player:GetName()] ~= nil then
 			if Air[Player:GetName()] == true then
 				if PosY[Player:GetName()] ~= 1 then
-					Player:TeleportTo( Player:GetPosX(), PosY[Player:GetName()] + 1, Player:GetPosZ() )
+					Player:TeleportToCoords( Player:GetPosX(), PosY[Player:GetName()] + 1, Player:GetPosZ() )
 				end
 				Air[Player:GetName()] = false
 				PosY[Player:GetName()] = nil
@@ -57,7 +57,7 @@ function HandleAscendCommand( Split, Player )
 		end
 		if PosY[Player:GetName()] ~= nil then
 			if Air[Player:GetName()] == true then			
-				Player:TeleportTo( Player:GetPosX(), PosY[Player:GetName()], Player:GetPosZ() )
+				Player:TeleportToCoords( Player:GetPosX(), PosY[Player:GetName()], Player:GetPosZ() )
 				Air[Player:GetName()] = false
 				PosY[Player:GetName()] = nil
 			end
