@@ -242,7 +242,9 @@ end
 --------------------SETBIOME--------------------
 ------------------------------------------------
 function HandleSetBiomeCommand( Split, Player )
-	if Split[2] == nil then
+	Player:SendMessage( cChatColor.Red .. "This command does not work." )
+	return true
+	--[[if Split[2] == nil then
 		Player:SendMessage( cChatColor.Rose .. "Please say a biome" )
 		return true
 	end
@@ -261,5 +263,5 @@ function HandleSetBiomeCommand( Split, Player )
 		for Z=OneZ, TwoZ do
 			cChunkDesc:SetBiome( X, Z, Biome )
 		end
-	end
+	end]]
 end
