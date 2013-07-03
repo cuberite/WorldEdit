@@ -8,13 +8,13 @@ function HandleReplCommand( Split, Player )
 	elseif IsValidBlock( tonumber(Split[2]) ) == true and ItemCategory.IsTool( Player:GetEquippedItem().m_ItemType ) == true then -- check if the player gave a valid block id and has a tool in his hand
 		Repl[Player:GetName()] = tonumber(Split[2]) 
 		ReplItem[Player:GetName()] = Player:GetEquippedItem().m_ItemType -- bind tool to //repl
-		Player:SendMessage( cChatColor.LightPurple .. "Block replacer tool bound to " .. Player:GetEquippedItem().m_ItemType )
+		Player:SendMessage( cChatColor.LightPurple .. "Block replacer tool bound to " .. ItemToString(Player:GetEquippedItem()) )
 	else
 		if IsValidBlock( tonumber(Split[2]) ) == false then
 			Player:SendMessage( cChatColor.Rose .. Split[2] .. " isn't a valid block" )
 			return true
 		end
-		Player:SendMessage( cChatColor.Rose .. "Can't bind tool to " .. Player:GetEquippedItem().m_ItemType .. ": Blocks can't be used" )
+		Player:SendMessage( cChatColor.Rose .. "Can't bind tool to " .. ItemToString(Player:GetEquippedItem()) .. ": Blocks can't be used" )
 	end
 	return true
 end
@@ -41,9 +41,9 @@ end
 function HandleTreeCommand( Split, Player )
 	if ItemCategory.IsTool( Player:GetEquippedItem().m_ItemType ) then -- check if the player has a tool in his hand
 		GrowTreeItem[Player:GetName()] = Player:GetEquippedItem().m_ItemType -- bind tool to /tree
-		Player:SendMessage( cChatColor.LightPurple .. "Tree tool bound to " .. Player:GetEquippedItem().m_ItemType )
+		Player:SendMessage( cChatColor.LightPurple .. "Tree tool bound to " .. ItemToString(Player:GetEquippedItem()) )
 	else
-		Player:SendMessage( cChatColor.Rose .. "Can't bind tool to " .. Player:GetEquippedItem().m_ItemType .. ": Blocks can't be used" )
+		Player:SendMessage( cChatColor.Rose .. "Can't bind tool to " .. ItemToString(Player:GetEquippedItem()) .. ": Blocks can't be used" )
 	end
 	return true
 end
