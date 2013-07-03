@@ -13,7 +13,7 @@ I am currently trying to create WorldEdit for MCServer. This plugin is in early 
 * **//faces** worldedit.region.faces<br />
  Build the walls, ceiling, and floor of a selection<br />
 * **//green** worldedit.green<br />
- [radius] - Greens the area<br />
+ Greens the area<br />
 * **//paste** worldedit.clipboard.paste<br />
  Pastes the clipboard's contents.<br />
 * **//redo** worldedit.history.redo<br />
@@ -60,3 +60,9 @@ I am currently trying to create WorldEdit for MCServer. This plugin is in early 
  Toggle functionality of the edit wand<br />
 * **/tree** worldedit.tool.tree<br />
  Tree generator tool<br />
+* **/we** worldedit.help worldedit.reload<br />
+ WorldEdit commands<br >
+* **//schematic** worldedit.schematic.save worldedit.schematic.load worldedit.schematic.delete<br />
+ Schematic-related commands<br />
+* **/none**<br />
+ Unbind a bound tool from your current item<br />
