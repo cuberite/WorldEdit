@@ -1,3 +1,31 @@
+-----------------------------------------------
+-------------------BIOMEINFO-------------------
+-----------------------------------------------
+function HandleBiomeInfoCommand( Split, Player )
+	if Split[2] == "-p" then
+		local Biome = GetStringFromBiome(World:GetBiomeAt(math.floor(Player:GetPosX()), math.floor(Player:GetPosZ())))
+		Player:SendMessage( cChatColor.LightPurple .. "Biome: " .. Biome )
+		return true
+	end
+	if OnePlayerY[Player:GetName()] == nil or TwoPlayerY[Player:GetName()] == nil then
+		Player:SendMessage( cChatColor.Rose .. "Make a region selection first." )
+		return true
+	end
+	local BiomeList = {}
+	local World = Player:GetWorld()
+	local OneX, TwoX, OneZ, TwoZ = GetXZCoords( Player )
+	for X = OneX, TwoX do
+		for Z = OneZ, TwoZ do
+			if table.contains(BiomeList, GetStringFromBiome(World:GetBiomeAt(X, Z))) == false then
+				BiomeList[#BiomeList + 1] = GetStringFromBiome(World:GetBiomeAt(X, Z))
+			end
+		end
+	end
+	Player:SendMessage( cChatColor.LightPurple .. "Biomes:\n " .. table.concat( BiomeList, "\n " ) )
+	return true
+end
+	
+
 ------------------------------------------------
 ---------------------EXPAND---------------------
 ------------------------------------------------

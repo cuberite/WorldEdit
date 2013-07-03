@@ -10,6 +10,7 @@ function Initialize(Plugin)
 	PluginManager:AddHook(PLUGIN, cPluginManager.HOOK_PLAYER_LEFT_CLICK) -- Add hook OnPlayerLeftClick
 	PluginManager:AddHook(PLUGIN, cPluginManager.HOOK_PLAYER_JOINED) -- Add hook OnPlayerJoined
 	LoadCommandFunctions() -- Load all the files that contains the command functions
+	PluginManager:BindCommand("/biomeinfo",     "worldedit.biome.info",           HandleBiomeInfoCommand,      " Get the biome of the targeted block." )
 	PluginManager:BindCommand("/toggleeditwand","worldedit.wand.toggle",          HandleToggleEditWandCommand, " Toggle functionality of the edit wand" )
 	PluginManager:BindCommand("//redo",         "worldedit.history.redo",         HandleRedoCommand,           " Redoes the last action (from history)" )
 	PluginManager:BindCommand("//undo",         "worldedit.history.undo",         HandleUndoCommand,           " Undoes the last action" )
