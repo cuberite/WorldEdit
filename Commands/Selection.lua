@@ -1,13 +1,10 @@
------------------------------------------------
--------------------BIOMEINFO-------------------
------------------------------------------------
 function HandleBiomeInfoCommand( Split, Player )
 	if Split[2] == "-p" then
 		local Biome = GetStringFromBiome(World:GetBiomeAt(math.floor(Player:GetPosX()), math.floor(Player:GetPosZ())))
 		Player:SendMessage( cChatColor.LightPurple .. "Biome: " .. Biome )
 		return true
 	end
-	if OnePlayerY[Player:GetName()] == nil or TwoPlayerY[Player:GetName()] == nil then
+	if OnePlayer[Player:GetName()] == nil or TwoPlayer[Player:GetName()] == nil then
 		Player:SendMessage( cChatColor.Rose .. "Make a region selection first." )
 		return true
 	end
@@ -34,14 +31,14 @@ function HandleExpandCommand( Split, Player )
 		Player:SendMessage( cChatColor.Rose .. "Invaild arguments.\n//expand <amount>" )
 		return true
 	end
-	if OnePlayerY[Player:GetName()] == nil or TwoPlayerY[Player:GetName()] == nil then
+	if OnePlayer[Player:GetName()] == nil or TwoPlayer[Player:GetName()] == nil then
 		Player:SendMessage( cChatColor.Rose .. "Make a region selection first." )
 		return true
 	end
-	if OnePlayerY[Player:GetName()] > TwoPlayerY[Player:GetName()] then
-		OnePlayerY[Player:GetName()] = OnePlayerY[Player:GetName()] + tonumber( Split[2] )
+	if OnePlayer[Player:GetName()].y > TwoPlayer[Player:GetName()].y then
+		OnePlayer[Player:GetName()].y = OnePlayer[Player:GetName()].y + tonumber( Split[2] )
 	else
-		TwoPlayerY[Player:GetName()] = TwoPlayerY[Player:GetName()] + tonumber( Split[2] )
+		TwoPlayer[Player:GetName()].y = TwoPlayer[Player:GetName()].y + tonumber( Split[2] )
 	end
 	Player:SendMessage( cChatColor.LightPurple .. "Region expanded " .. Split[2] .. " blocks." )
 	return true
@@ -120,11 +117,11 @@ end
 ----------------------COPY----------------------
 ------------------------------------------------
 function HandleCopyCommand( Split, Player )
-	if OnePlayerX[Player:GetName()] == nil or TwoPlayerX[Player:GetName()] == nil then -- Check if there is a region selected
+	if OnePlayer[Player:GetName()] == nil or TwoPlayer[Player:GetName()] == nil then -- Check if there is a region selected
 		Player:SendMessage( cChatColor.Rose .. "No Region set" )
 		return true
 	end
-	OneX, TwoX, OneY, TwoY, OneZ, TwoZ = GetXYZCoords( Player ) -- get the right coordinates
+	local OneX, TwoX, OneY, TwoY, OneZ, TwoZ = GetXYZCoords( Player ) -- get the right coordinates
 	local World = Player:GetWorld()
 	PersonalClipboard[Player:GetName()]:Read( World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ ) -- read the area
 	Player:SendMessage( cChatColor. LightPurple .. "Block(s) copied." )
@@ -136,11 +133,11 @@ end
 ----------------------CUT----------------------
 -----------------------------------------------
 function HandleCutCommand( Split, Player )
-	if OnePlayerX[Player:GetName()] == nil or TwoPlayerX[Player:GetName()] == nil then -- Check if there is a region selected
+	if OnePlayer[Player:GetName()] == nil or TwoPlayer[Player:GetName()] == nil then -- Check if there is a region selected
 		Player:SendMessage( cChatColor.Rose .. "No Region set" )
 		return true
 	end
-	OneX, TwoX, OneY, TwoY, OneZ, TwoZ = GetXYZCoords( Player ) -- get the right coordinates
+	local OneX, TwoX, OneY, TwoY, OneZ, TwoZ = GetXYZCoords( Player ) -- get the right coordinates
 	local World = Player:GetWorld() -- get the world
 	LastCoords[Player:GetName()] = OneX .. "," .. OneY .. "," .. OneZ .. "," .. Player:GetWorld():GetName()
 	PersonalUndo[Player:GetName()]:Read( World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ )
@@ -159,7 +156,7 @@ end
 ----------------------SET----------------------
 -----------------------------------------------
 function HandleSetCommand( Split, Player )
-	if OnePlayerX[Player:GetName()] == nil or TwoPlayerX[Player:GetName()] == nil then -- Check if there is a region selected
+	if OnePlayer[Player:GetName()] == nil or TwoPlayer[Player:GetName()] == nil then -- Check if there is a region selected
 		Player:SendMessage( cChatColor.Rose .. "No Region set" )
 		return true
 	end
@@ -179,7 +176,7 @@ end
 ---------------------REPLACE---------------------
 -------------------------------------------------
 function HandleReplaceCommand( Split, Player )
-	if OnePlayerX[Player:GetName()] == nil or TwoPlayerX[Player:GetName()] == nil then -- Check if there is a region selected
+	if OnePlayer[Player:GetName()] == nil or TwoPlayer[Player:GetName()] == nil then -- Check if there is a region selected
 		Player:SendMessage( cChatColor.Rose .. "No Region set" )
 		return true
 	end
@@ -201,7 +198,7 @@ end
 ----------------------FACES----------------------
 -------------------------------------------------
 function HandleFacesCommand( Split, Player )
-	if OnePlayerX[Player:GetName()] == nil or TwoPlayerX[Player:GetName()] == nil then -- Check if there is a region selected
+	if OnePlayer[Player:GetName()] == nil or TwoPlayer[Player:GetName()] == nil then -- Check if there is a region selected
 		Player:SendMessage( cChatColor.Rose .. "No Region set" )
 		return true -- stop
 	end
@@ -221,7 +218,7 @@ end
 ----------------------WALLS----------------------
 -------------------------------------------------
 function HandleWallsCommand( Split, Player )
-	if OnePlayerX[Player:GetName()] == nil or TwoPlayerX[Player:GetName()] == nil then -- Check if there is a region selected
+	if OnePlayer[Player:GetName()] == nil or TwoPlayer[Player:GetName()] == nil then -- Check if there is a region selected
 		Player:SendMessage( cChatColor.Rose .. "No Region set" )
 		return true
 	end

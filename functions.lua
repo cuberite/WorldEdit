@@ -14,18 +14,8 @@ end
 ------------------CREATETABLES-----------------
 -----------------------------------------------
 function CreateTables()
-	OnePlayerX = {}
-	OnePlayerY = {}
-	OnePlayerZ = {}
-	TwoPlayerX = {}
-	TwoPlayerY = {}
-	TwoPlayerZ = {}
-	LandScapeOneX = {}
-	LandScapeOneY = {}
-	LandScapeOneZ = {}
-	LandScapeTwoX = {}
-	LandScapeTwoY = {}
-	LandScapeTwoZ = {}
+	OnePlayer = {}
+	TwoPlayer = {}
 	Blocks = {}
 	PersonalBlockArea = {}
 	PersonalUndo = {}
@@ -35,11 +25,9 @@ function CreateTables()
 	LastCoords = {}
 	SP = {}
 	Air = {}
-	X = {}
 	PosX = {}
 	PosY = {}
 	PosZ = {}
-	Z = {}
 	Repl = {}
 	ReplItem = {}
 	Count = {}
@@ -80,20 +68,20 @@ end
 -------------------GETSIZE-------------------
 ---------------------------------------------
 function GetSize( Player )
-	if OnePlayerX[Player:GetName()] > TwoPlayerX[Player:GetName()] then -- check what number is bigger becouse otherwise you can get a negative number.
-		X = OnePlayerX[Player:GetName()] - TwoPlayerX[Player:GetName()] + 1
+	if OnePlayer[Player:GetName()].x > TwoPlayer[Player:GetName()].x then -- check what number is bigger becouse otherwise you can get a negative number.
+		X = OnePlayer[Player:GetName()].x - TwoPlayer[Player:GetName()].x + 1
 	else
-		X = TwoPlayerX[Player:GetName()] - OnePlayerX[Player:GetName()] + 1
+		X = TwoPlayer[Player:GetName()].x - OnePlayer[Player:GetName()].x + 1
 	end
-	if OnePlayerY[Player:GetName()] > TwoPlayerY[Player:GetName()] then -- check what number is bigger becouse otherwise you can get a negative number.
-		Y = OnePlayerY[Player:GetName()] - TwoPlayerY[Player:GetName()] + 1
+	if OnePlayer[Player:GetName()].y > TwoPlayer[Player:GetName()].y then -- check what number is bigger becouse otherwise you can get a negative number.
+		Y = OnePlayer[Player:GetName()].y - TwoPlayer[Player:GetName()].y + 1
 	else
-		Y = TwoPlayerY[Player:GetName()] - OnePlayerY[Player:GetName()] + 1
+		Y = TwoPlayer[Player:GetName()].y - OnePlayer[Player:GetName()].y + 1
 	end
-	if OnePlayerZ[Player:GetName()] > TwoPlayerZ[Player:GetName()] then -- check what number is bigger becouse otherwise you can get a negative number.
-		Z = OnePlayerZ[Player:GetName()] - TwoPlayerZ[Player:GetName()] + 1
+	if OnePlayer[Player:GetName()].z > TwoPlayer[Player:GetName()].z then -- check what number is bigger becouse otherwise you can get a negative number.
+		Z = OnePlayer[Player:GetName()].z - TwoPlayer[Player:GetName()].z + 1
 	else
-		Z = TwoPlayerZ[Player:GetName()] - OnePlayerZ[Player:GetName()] + 1
+		Z = TwoPlayer[Player:GetName()].z - OnePlayer[Player:GetName()].z + 1
 	end
 	return X * Y * Z -- calculate the area.
 end
@@ -160,22 +148,22 @@ end
 -----------------GETXZCOORDS-----------------
 ---------------------------------------------
 function GetXZCoords( Player )
-	if OnePlayerX[Player:GetName()] == nil or TwoPlayerX[Player:GetName()] == nil then -- check if there is a region. Needed for plugins that are going to use this plugin.
+	if OnePlayer[Player:GetName()] == nil or TwoPlayer[Player:GetName()] == nil then -- check if there is a region. Needed for plugins that are going to use this plugin.
 		return false
 	end
-	if OnePlayerX[Player:GetName()] < TwoPlayerX[Player:GetName()] then -- check what number is bigger becouse otherwise you can get a negative number.
-		OneX = OnePlayerX[Player:GetName()]
-		TwoX = TwoPlayerX[Player:GetName()]
+	if OnePlayer[Player:GetName()].x < TwoPlayer[Player:GetName()].x then -- check what number is bigger becouse otherwise you can get a negative number.
+		OneX = OnePlayer[Player:GetName()].x
+		TwoX = TwoPlayer[Player:GetName()].x
 	else
-		OneX = TwoPlayerX[Player:GetName()]
-		TwoX = OnePlayerX[Player:GetName()]
+		OneX = TwoPlayer[Player:GetName()].x
+		TwoX = OnePlayer[Player:GetName()].x
 	end
-	if OnePlayerZ[Player:GetName()] < TwoPlayerZ[Player:GetName()] then -- check what number is bigger becouse otherwise you can get a negative number.
-		OneZ = OnePlayerZ[Player:GetName()]
-		TwoZ = TwoPlayerZ[Player:GetName()]
+	if OnePlayer[Player:GetName()].z < TwoPlayer[Player:GetName()].z then -- check what number is bigger becouse otherwise you can get a negative number.
+		OneZ = OnePlayer[Player:GetName()].z
+		TwoZ = TwoPlayer[Player:GetName()].z
 	else
-		OneZ = TwoPlayerZ[Player:GetName()]
-		TwoZ = OnePlayerZ[Player:GetName()]
+		OneZ = TwoPlayer[Player:GetName()].z
+		TwoZ = OnePlayer[Player:GetName()].z
 	end
 	return OneX, TwoX, OneZ, TwoZ -- return the right coordinates
 end
@@ -185,29 +173,29 @@ end
 -----------------GETXYZCOORDS-----------------
 ----------------------------------------------
 function GetXYZCoords( Player )
-	if OnePlayerX[Player:GetName()] == nil or TwoPlayerX[Player:GetName()] == nil then -- check if there is a region. Needed for plugins that are going to use this plugin.
+	if OnePlayer[Player:GetName()] == nil or TwoPlayer[Player:GetName()] == nil then -- check if there is a region. Needed for plugins that are going to use this plugin.
 		return false
 	end
-	if OnePlayerX[Player:GetName()] < TwoPlayerX[Player:GetName()] then -- check what number is bigger becouse otherwise you can get a negative number.
-		OneX = OnePlayerX[Player:GetName()]
-		TwoX = TwoPlayerX[Player:GetName()]
+	if OnePlayer[Player:GetName()].x < TwoPlayer[Player:GetName()].x then -- check what number is bigger becouse otherwise you can get a negative number.
+		OneX = OnePlayer[Player:GetName()].x
+		TwoX = TwoPlayer[Player:GetName()].x
 	else
-		OneX = TwoPlayerX[Player:GetName()]
-		TwoX = OnePlayerX[Player:GetName()]
+		OneX = TwoPlayer[Player:GetName()].x
+		TwoX = OnePlayer[Player:GetName()].x
 	end
-	if OnePlayerY[Player:GetName()] < TwoPlayerY[Player:GetName()] then -- check what number is bigger becouse otherwise you can get a negative number.
-		OneY = OnePlayerY[Player:GetName()]
-		TwoY = TwoPlayerY[Player:GetName()]
+	if OnePlayer[Player:GetName()].y < TwoPlayer[Player:GetName()].y then -- check what number is bigger becouse otherwise you can get a negative number.
+		OneY = OnePlayer[Player:GetName()].y
+		TwoY = TwoPlayer[Player:GetName()].y
 	else
-		OneY = TwoPlayerY[Player:GetName()]
-		TwoY = OnePlayerY[Player:GetName()]
+		OneY = TwoPlayer[Player:GetName()].y
+		TwoY = OnePlayer[Player:GetName()].y
 	end
-	if OnePlayerZ[Player:GetName()] < TwoPlayerZ[Player:GetName()] then -- check what number is bigger becouse otherwise you can get a negative number.
-		OneZ = OnePlayerZ[Player:GetName()]
-		TwoZ = TwoPlayerZ[Player:GetName()]
+	if OnePlayer[Player:GetName()].z < TwoPlayer[Player:GetName()].z then -- check what number is bigger becouse otherwise you can get a negative number.
+		OneZ = OnePlayer[Player:GetName()].z
+		TwoZ = TwoPlayer[Player:GetName()].z
 	else
-		OneZ = TwoPlayerZ[Player:GetName()]
-		TwoZ = OnePlayerZ[Player:GetName()]
+		OneZ = TwoPlayer[Player:GetName()].z
+		TwoZ = OnePlayer[Player:GetName()].z
 	end
 	return OneX, TwoX, OneY, TwoY, OneZ, TwoZ -- return the right coordinates
 end

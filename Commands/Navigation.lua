@@ -43,10 +43,10 @@ function HandleAscendCommand( Split, Player )
 	if Player:GetPosY() == World:GetHeight( math.floor(Player:GetPosX()), math.floor((Player:GetPosZ()) ) ) then
 		Player:SendMessage( cChatColor.LightPurple .. "Ascended a level." )
 	else
-		X[Player:GetName()] = math.floor(Player:GetPosX())
-		Z[Player:GetName()] = math.floor(Player:GetPosZ())
-		for Y = math.floor(Player:GetPosY()), World:GetHeight( X[Player:GetName()], Z[Player:GetName()] ) + 1 do
-			if World:GetBlock( X[Player:GetName()], Y, Z[Player:GetName()] ) == 0 then
+		local X = math.floor(Player:GetPosX())
+		local Z = math.floor(Player:GetPosZ())
+		for Y = math.floor(Player:GetPosY()), World:GetHeight( X, Z ) + 1 do
+			if World:GetBlock( X, Y, Z ) == E_BLOCK_AIR then
 				if Air[Player:GetName()] == true then
 					PosY[Player:GetName()] = Y
 					break
