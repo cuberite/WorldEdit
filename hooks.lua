@@ -71,19 +71,5 @@ end
 -------------------ONPLAYERJOINED--------------------
 -----------------------------------------------------
 function OnPlayerJoined(Player)
-	if PersonalBlockArea[Player:GetName()] == nil then
-		PersonalBlockArea[Player:GetName()] = cBlockArea()
-	end
-	if PersonalUndo[Player:GetName()] == nil then
-		PersonalUndo[Player:GetName()] = cBlockArea()
-	end
-	if PersonalRedo[Player:GetName()] == nil then
-		PersonalRedo[Player:GetName()] = cBlockArea()
-	end
-	if PersonalClipboard[Player:GetName()] == nil then
-		PersonalClipboard[Player:GetName()] = cBlockArea()
-	end
-	if WandActivated[Player:GetName()] == nil then
-		WandActivated[Player:GetName()] = true
-	end
+	LoadPlayer(Player)
 end

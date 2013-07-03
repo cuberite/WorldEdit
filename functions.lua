@@ -52,14 +52,12 @@ end
 ---------------------------------------------
 function LoadOnlinePlayers()
 	cRoot:Get():ForEachPlayer(
-	function( Player )
-		PersonalBlockArea[Player:GetName()] = cBlockArea()
-		PersonalUndo[Player:GetName()] = cBlockArea()
-		PersonalRedo[Player:GetName()] = cBlockArea()
-		PersonalClipboard[Player:GetName()] = cBlockArea()
-		WandActivated[Player:GetName()] = true
+	function(Player)
+		LoadPlayer(Player)
 	end )
 end
+
+
 ---------------------------------------------
 -------------------GETSIZE-------------------
 ---------------------------------------------
@@ -323,4 +321,26 @@ function table.contains(table, element)
     end
   end
   return false
+end
+
+
+--------------------------------------------
+----------------LOADPLAYER------------------
+--------------------------------------------
+function LoadPlayer(Player)
+	if PersonalBlockArea[Player:GetName()] == nil then
+		PersonalBlockArea[Player:GetName()] = cBlockArea()
+	end
+	if PersonalUndo[Player:GetName()] == nil then
+		PersonalUndo[Player:GetName()] = cBlockArea()
+	end
+	if PersonalRedo[Player:GetName()] == nil then
+		PersonalRedo[Player:GetName()] = cBlockArea()
+	end
+	if PersonalClipboard[Player:GetName()] == nil then
+		PersonalClipboard[Player:GetName()] = cBlockArea()
+	end
+	if WandActivated[Player:GetName()] == nil then
+		WandActivated[Player:GetName()] = true
+	end
 end
