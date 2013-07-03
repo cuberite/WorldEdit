@@ -24,10 +24,6 @@ function CreateTables()
 	LastRedoCoords = {}
 	LastCoords = {}
 	SP = {}
-	Air = {}
-	PosX = {}
-	PosY = {}
-	PosZ = {}
 	Repl = {}
 	ReplItem = {}
 	Count = {}

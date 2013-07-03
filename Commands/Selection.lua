@@ -1,3 +1,6 @@
+-----------------------------------------------
+-------------------BIOMEINFO-------------------
+-----------------------------------------------
 function HandleBiomeInfoCommand( Split, Player )
 	if Split[2] == "-p" then
 		local Biome = GetStringFromBiome(World:GetBiomeAt(math.floor(Player:GetPosX()), math.floor(Player:GetPosZ())))
@@ -21,7 +24,7 @@ function HandleBiomeInfoCommand( Split, Player )
 	Player:SendMessage( cChatColor.LightPurple .. "Biomes:\n " .. table.concat( BiomeList, "\n " ) )
 	return true
 end
-	
+
 
 ------------------------------------------------
 ---------------------EXPAND---------------------

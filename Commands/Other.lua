@@ -14,8 +14,8 @@ function HandleWorldEditCommand( Split, Player )
 		end
 	elseif string.upper( Split[2] ) == "HELP" then -- check if the player wants to know all the commands.
 		if Player:HasPermission("worldedit.help") or Player:HasPermission("worldedit.*") then
-			local EachCommand = function( Command ) 
-				local Start, End = string.find( PluginManager:GetCommandPermission( Command ), "worldedit" )
+			local EachCommand = function(Command, Permission, HelpString) 
+				local Start, End = string.find( Permission, "worldedit" )
 				if Start == 1 and End == 9 then -- check if the command is from this plugin
 					table.insert( CommandList, Command ) -- insert command into the CommandList table
 				end
