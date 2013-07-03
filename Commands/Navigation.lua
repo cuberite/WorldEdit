@@ -5,10 +5,9 @@ function HandleDescendCommand( Split, Player )
 	local World = Player:GetWorld()
 	if Player:GetPosY() ~= 1 then
 		local X = math.floor( Player:GetPosX() )
-		local y = math.floor( Player:GetPosY() )
 		local Z = math.floor( Player:GetPosZ() )
 		local Air = false
-		for Y=y, 1, -1 do
+		for Y=math.floor( Player:GetPosY() ), 1, -1 do
 			if World:GetBlock(X, Y, Z) == E_BLOCK_AIR then
 				if Air == true then -- if the player went through blocks other then air then go further until you can teleport
 					while World:GetBlock(X, Y, Z) == E_BLOCK_AIR do
