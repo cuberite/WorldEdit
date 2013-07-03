@@ -45,9 +45,19 @@ function HandleWandCommand( Split, Player )
 end
 
 
-
-
-
+------------------------------------------------
+-----------------TOGGLEEDITWAND-----------------
+------------------------------------------------
+function HandleToggleEditWandCommand( Split, Player )
+	if WandActivated[Player:GetName()] == false or WandActivated[Player:GetName()] == nil then
+		WandActivated[Player:GetName()] = true
+		Player:SendMessage( cChatColor.LightPurple .. "Edit wand enabled." )
+	else
+		WandActivated[Player:GetName()] = false
+		Player:SendMessage( cChatColor.LightPurple .. "Edit wand disabled." )
+	end
+	return true
+end
 
 
 

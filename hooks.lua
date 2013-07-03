@@ -2,17 +2,19 @@
 ---------------ONPLAYERBREAKINGBLOCK----------------
 ----------------------------------------------------
 function OnPlayerBreakingBlock(Player, BlockX, BlockY, BlockZ, BlockFace, BlockType, BlockMeta)
-	if Player:GetEquippedItem().m_ItemType == Wand then
-		OnePlayerX[Player:GetName()] = BlockX
-		OnePlayerY[Player:GetName()] = BlockY
-		OnePlayerZ[Player:GetName()] = BlockZ
-		if OnePlayerX[Player:GetName()] ~= nil and TwoPlayerX[Player:GetName()] ~= nil then
-			OneX, TwoX, OneY, TwoY, OneZ, TwoZ = GetXYZCoords( Player )
-			Player:SendMessage( cChatColor.LightPurple .. 'First position set to (' .. BlockX .. ".0, " .. BlockY .. ".0, " .. BlockZ .. ".0) (" .. GetSize( Player ) .. ")." )
-		else
-			Player:SendMessage( cChatColor.LightPurple .. 'First position set to (' .. BlockX .. ".0, " .. BlockY .. ".0, " .. BlockZ .. ".0)." )
+	if WandActivated[Player:GetName()] == true then
+		if Player:GetEquippedItem().m_ItemType == Wand then
+			OnePlayerX[Player:GetName()] = BlockX
+			OnePlayerY[Player:GetName()] = BlockY
+			OnePlayerZ[Player:GetName()] = BlockZ
+			if OnePlayerX[Player:GetName()] ~= nil and TwoPlayerX[Player:GetName()] ~= nil then
+				OneX, TwoX, OneY, TwoY, OneZ, TwoZ = GetXYZCoords( Player )
+				Player:SendMessage( cChatColor.LightPurple .. 'First position set to (' .. BlockX .. ".0, " .. BlockY .. ".0, " .. BlockZ .. ".0) (" .. GetSize( Player ) .. ")." )
+			else
+				Player:SendMessage( cChatColor.LightPurple .. 'First position set to (' .. BlockX .. ".0, " .. BlockY .. ".0, " .. BlockZ .. ".0)." )
+			end
+			return true
 		end
-		return true
 	end
 end
 
@@ -37,21 +39,23 @@ function OnPlayerRightClick(Player, BlockX, BlockY, BlockZ, BlockFace, CursorX, 
 	if BlockY == 255 and BlockZ == -1 and BlockX == -1 then
 		return true
 	end
-	if Player:GetEquippedItem().m_ItemType == Wand then
-		if BlockX == -1 and BlockZ == -1 and BlockY == 255 then
-			return false
+	if WandActivated[Player:GetName()] == true then
+		if Player:GetEquippedItem().m_ItemType == Wand then
+			if BlockX == -1 and BlockZ == -1 and BlockY == 255 then
+				return false
+			end
+			TwoPlayerX[Player:GetName()] = BlockX
+			TwoPlayerY[Player:GetName()] = BlockY
+			TwoPlayerZ[Player:GetName()] = BlockZ
+			if OnePlayerX[Player:GetName()] ~= nil and TwoPlayerX[Player:GetName()] ~= nil then
+				OneX, TwoX, OneY, TwoY, OneZ, TwoZ = GetXYZCoords( Player )
+				Blocks[Player:GetName()] = 0
+				Player:SendMessage( cChatColor.LightPurple .. 'Second position set to (' .. BlockX .. ".0, " .. BlockY .. ".0, " .. BlockZ .. ".0) (" .. GetSize( Player ) .. ")." )
+			else
+				Player:SendMessage( cChatColor.LightPurple .. 'Second position set to (' .. BlockX .. ".0, " .. BlockY .. ".0, " .. BlockZ .. ".0)." )
+			end
+			return true
 		end
-		TwoPlayerX[Player:GetName()] = BlockX
-		TwoPlayerY[Player:GetName()] = BlockY
-		TwoPlayerZ[Player:GetName()] = BlockZ
-		if OnePlayerX[Player:GetName()] ~= nil and TwoPlayerX[Player:GetName()] ~= nil then
-			OneX, TwoX, OneY, TwoY, OneZ, TwoZ = GetXYZCoords( Player )
-			Blocks[Player:GetName()] = 0
-			Player:SendMessage( cChatColor.LightPurple .. 'Second position set to (' .. BlockX .. ".0, " .. BlockY .. ".0, " .. BlockZ .. ".0) (" .. GetSize( Player ) .. ")." )
-		else
-			Player:SendMessage( cChatColor.LightPurple .. 'Second position set to (' .. BlockX .. ".0, " .. BlockY .. ".0, " .. BlockZ .. ".0)." )
-		end
-		return true
 	end
 	local World = Player:GetWorld()
 	if Player:GetEquippedItem().m_ItemType == ReplItem[Player:GetName()] then
@@ -79,5 +83,14 @@ function OnPlayerJoined(Player)
 	end
 	if PersonalUndo[Player:GetName()] == nil then
 		PersonalUndo[Player:GetName()] = cBlockArea()
+	end
+	if PersonalRedo[Player:GetName()] == nil then
+		PersonalRedo[Player:GetName()] = cBlockArea()
+	end
+	if PersonalClipboard[Player:GetName()] == nil then
+		PersonalClipboard[Player:GetName()] = cBlockArea()
+	end
+	if WandActivated[Player:GetName()] == nil then
+		WandActivated[Player:GetName()] = true
 	end
 end
