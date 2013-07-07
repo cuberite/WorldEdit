@@ -51,6 +51,7 @@ function Initialize(Plugin)
 	PluginManager:BindCommand("/snow",	        "worldedit.snow",                 HandleSnowCommand,           " Simulates snow")
 	PluginManager:BindCommand("/thaw",	        "worldedit.thaw",                 HandleThawCommand,           " Thaws the area")
 	PluginManager:BindCommand("//",	            "worldedit.superpickaxe",         HandleSuperPickCommand,      " Toggle the super pickaxe pickaxe function")
+	PluginManager:BindCommand("/",	            "worldedit.superpickaxe",         HandleSuperPickCommand,      "")
 	PluginManager:BindCommand("/none",          "",                               HandleNoneCommand,           " Unbind a bound tool from your current item" )	
 		
 	CreateTables() -- create all the tables

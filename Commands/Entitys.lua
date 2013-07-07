@@ -3,14 +3,10 @@
 ------------------------------------------------
 function HandleRemoveCommand( Split, Player )
 	if Split[2] == nil then -- check if the player gave a radius
-		Player:SendMessage( cChatColor.Rose .. "Too few arguments.\n/remove <type> <radius>" )
+		Player:SendMessage( cChatColor.Rose .. "Too few arguments.\n/remove <type>" )
 	else
-		if Split[3] == nil or tonumber( Split[3] ) == nil then
-			Player:SendMessage( cChatColor.Rose .. 'Number expected; string "' .. Split[3] .. '" given' )
-			return true
-		end
+		Entitys = 0
 		if string.upper( Split[2] ) == "ITEMS" then -- check if the plugin has to destroy pickups
-			local Entitys = 0
 			local LoopEntity = function( Entity )
 				if Entity:IsPickup() then -- if the entity is a pickup then destroy it.
 					Entity:Destroy()
@@ -19,7 +15,6 @@ function HandleRemoveCommand( Split, Player )
 			end
 			Player:GetWorld():ForEachEntity( LoopEntity )
 		elseif string.upper( Split[2] ) == "MINECARTS" then -- check if the plugin needs to destroy minecarts
-			Entitys = 0
 			local LoopEntity = function( Entity )
 				if Entity:IsMinecart() then -- if the entity is a minecart then destroy it 
 					Entity:Destroy()
