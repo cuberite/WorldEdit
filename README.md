@@ -1,7 +1,7 @@
 ![Alt text](Logo start.png)<br />
-I am currently trying to create WorldEdit for [MCServer](http://www.mc-server.org/). This plugin is in early Beta stage. This doesn't have all the features the real WorldEdit has YET. for now these commands + permissions are actually working: <br />
-**How to install**<br />
-Put the `WorldEdit-master` folder in the plugins folder and add `Plugin=WorldEdit-master` to the settings.ini in the `[Plugins]` section<br />
+I am currently trying to create WorldEdit for [MCServer](http://www.mc-server.org/). This plugin is in early Beta stage.<br />
+### How to install<br />
+Put the `WorldEdit-master` folder in the plugins folder and add `Plugin=WorldEdit-master` to the settings.ini in the `[Plugins]` section<br /><br />
 * **//** worldedit.superpickaxe<br />
 Toggle the super pickaxe pickaxe function<br />
 * **//copy** worldedit.clipboard.copy<br />
