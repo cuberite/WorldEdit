@@ -1,4 +1,4 @@
-![Alt text](Logo start.png)<br />
+This plugin is not in collaboration with the developpers of the real WorldEdit plugin.
 I am currently trying to create WorldEdit for [MCServer](http://www.mc-server.org/). This plugin is in early Beta stage.<br />
 ### How to install<br />
 Put the `WorldEdit-master` folder in the plugins folder and add `Plugin=WorldEdit-master` to the settings.ini in the `[Plugins]` section<br /><br />
