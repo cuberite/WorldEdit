@@ -36,7 +36,7 @@ end
 ------------------------------------------------
 function HandleWandCommand( Split, Player )
 	Item = cItem( Wand, 1 ) -- create the cItem object
-	if( Player:GetInventory():AddItem( Item ) == true ) then -- check if the player got the item
+	if (Player:GetInventory():AddItem( Item )) then -- check if the player got the item
 		Player:SendMessage( cChatColor.Green .. "You have a wooden axe now." )
 	else
 		Player:SendMessage( cChatColor.Green .. "Not enough inventory space" )
@@ -49,7 +49,7 @@ end
 -----------------TOGGLEEDITWAND-----------------
 ------------------------------------------------
 function HandleToggleEditWandCommand( Split, Player )
-	if WandActivated[Player:GetName()] == false or WandActivated[Player:GetName()] == nil then
+	if not WandActivated[Player:GetName()] or WandActivated[Player:GetName()] == nil then
 		WandActivated[Player:GetName()] = true
 		Player:SendMessage( cChatColor.LightPurple .. "Edit wand enabled." )
 	else

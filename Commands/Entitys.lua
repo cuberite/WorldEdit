@@ -50,7 +50,7 @@ function HandleButcherCommand( Split, Player )
 	Cuboid:Sort()
 	local Mobs = 0
 	local EachEntity = function( Entity )
-		if Entity:IsMob() == true then -- if the entity is a mob 
+		if (Entity:IsMob()) then -- if the entity is a mob 
 			if Radius == 0 then -- if the radius is 0 then destroy all the mobs
 				Entity:Destroy() -- destroy the mob
 				Mobs = Mobs + 1

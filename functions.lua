@@ -344,3 +344,53 @@ function LoadPlayer(Player)
 		WandActivated[Player:GetName()] = true
 	end
 end
+
+
+-------------------------------------------
+-----------------COMPASS-------------------
+-------------------------------------------
+function Compass(Player, World)
+	local Teleported = false
+	local Air = false
+	local Callbacks = {
+		OnNextBlock = function(X, Y, Z, BlockType, BlockMeta)
+			if BlockType ~= E_BLOCK_AIR then
+				Air = true
+			else
+				if Air then
+					if BlockType == E_BLOCK_AIR then
+						Player:TeleportToCoords(X + 0.5, Y, Z + 0.5)
+						Teleported = true
+						return true
+					end
+					Air = false
+				end
+			end
+		end;
+	};
+	local EyePos = Player:GetEyePosition()
+	local LookVector = Player:GetLookVector()
+	LookVector:Normalize()	
+
+	local Start = EyePos + LookVector + LookVector;
+	local End = EyePos + LookVector * 50
+	
+	cLineBlockTracer.Trace(World, Callbacks, Start.x, Start.y, Start.z, End.x, End.y, End.z)
+	if not Teleported then
+		Player:SendMessage(cChatColor.Rose .. "Nothing to pass through!")
+	end
+end
+
+
+-------------------------------------------
+-----------------COMPASS-------------------
+-------------------------------------------
+function GetBlockXYZFromTrace(Player)
+	local World = Player:GetWorld()
+	local Tracer = cTracer( World )
+					
+	local EyePos = Vector3f(Player:GetEyePosition().x, Player:GetEyePosition().y, Player:GetEyePosition().z)
+	local EyeVector = Vector3f(Player:GetLookVector().x, Player:GetLookVector().y, Player:GetLookVector().z)
+	Tracer:Trace(EyePos , EyeVector, 10)
+	return Tracer.BlockHitPosition.x, Tracer.BlockHitPosition.y, Tracer.BlockHitPosition.z
+end

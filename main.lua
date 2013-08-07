@@ -53,6 +53,8 @@ function Initialize(Plugin)
 	PluginManager:BindCommand("//",	            "worldedit.superpickaxe",         HandleSuperPickCommand,      " Toggle the super pickaxe pickaxe function")
 	PluginManager:BindCommand("/",	            "worldedit.superpickaxe",         HandleSuperPickCommand,      "")
 	PluginManager:BindCommand("/none",          "",                               HandleNoneCommand,           " Unbind a bound tool from your current item" )	
+	
+	PluginManager:BindCommand("/pumpkins",      "worldedit.generation.pumpkins ", HandlePumpkinsCommand,       "")
 		
 	CreateTables() -- create all the tables
 	LoadOnlinePlayers() -- Load all the online players
@@ -63,7 +65,7 @@ function Initialize(Plugin)
 end
 
 function OnDisable()
-	if DisablePlugin == true then -- if the plugin has to be reloaded then load the plugin again ;)
+	if (DisablePlugin) then -- if the plugin has to be reloaded then load the plugin again ;)
 		LOGINFO( "Worldedit is reloading" )
 		PluginManager:LoadPlugin( PLUGIN:GetName() )
 	else

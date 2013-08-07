@@ -9,7 +9,7 @@ function HandleDescendCommand( Split, Player )
 		local Air = false
 		for Y=math.floor( Player:GetPosY() ), 1, -1 do
 			if World:GetBlock(X, Y, Z) == E_BLOCK_AIR then
-				if Air == true then -- if the player went through blocks other then air then go further until you can teleport
+				if (Air) then -- if the player went through blocks other then air then go further until you can teleport
 					while World:GetBlock(X, Y, Z) == E_BLOCK_AIR do
 						Y = Y - 1
 					end
@@ -21,7 +21,7 @@ function HandleDescendCommand( Split, Player )
 			end
 		end
 		if y ~= nil then
-			if Air == true then
+			if (Air) then
 				if Y ~= 1 then
 					Player:TeleportToCoords( Player:GetPosX(), y + 1, Player:GetPosZ() )
 				end
@@ -46,7 +46,7 @@ function HandleAscendCommand( Split, Player )
 		local Air = false
 		for Y = math.floor(Player:GetPosY()), World:GetHeight( X, Z ) + 1 do
 			if World:GetBlock( X, Y, Z ) == E_BLOCK_AIR then
-				if Air == true then
+				if (Air) then
 					y = Y
 					break
 				end
@@ -55,7 +55,7 @@ function HandleAscendCommand( Split, Player )
 			end
 		end
 		if y ~= nil then
-			if Air == true then			
+			if (Air) then			
 				Player:TeleportToCoords( Player:GetPosX(), y, Player:GetPosZ() )
 			end
 		end		

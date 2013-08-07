@@ -10,7 +10,7 @@ function HandleReplCommand( Split, Player )
 		ReplItem[Player:GetName()] = Player:GetEquippedItem().m_ItemType -- bind tool to //repl
 		Player:SendMessage( cChatColor.LightPurple .. "Block replacer tool bound to " .. ItemToString(Player:GetEquippedItem()) )
 	else
-		if IsValidBlock( tonumber(Split[2]) ) == false then
+		if not IsValidBlock( tonumber(Split[2]) ) then
 			Player:SendMessage( cChatColor.Rose .. Split[2] .. " isn't a valid block" )
 			return true
 		end
@@ -53,7 +53,7 @@ end
 -------------------SUPERPICK-------------------
 -----------------------------------------------
 function HandleSuperPickCommand( Split, Player )
-	if SP[Player:GetName()] == nil or SP[Player:GetName()] == false then -- check if super pickaxe is activated
+	if not SP[Player:GetName()] == nil or SP[Player:GetName()] then -- check if super pickaxe is activated
 		SP[Player:GetName()] = true
 		Player:SendMessage( cChatColor.LightPurple .. "Super pick activated" )
 	else -- else deactivate the superpickaxe

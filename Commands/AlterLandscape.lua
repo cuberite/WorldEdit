@@ -265,3 +265,44 @@ function HandleSetBiomeCommand( Split, Player )
 		end
 	end]]
 end
+
+
+
+------------------------------------------------
+--------------------PUMPKINS--------------------
+------------------------------------------------
+function HandlePumpkinsCommand(Split, Player)
+	if Split[2] == nil then
+		Radius = 10
+	elseif tonumber(Split[2]) == nil then
+		Player:SendMessage(cChatColor.Rose .. "invaild argument")
+		return true
+	else
+		Radius = Split[2]
+	end
+	World = Player:GetWorld()
+	for I=1, Radius * 2 do
+		local X = math.floor(Player:GetPosX()) + math.random(-Radius, Radius)
+		local Z = math.floor(Player:GetPosZ()) + math.random(-Radius, Radius)
+		local Y = World:GetHeight(X, Z) + 1
+		if World:GetBlock(X, Y - 1, Z) == E_BLOCK_GRASS or World:GetBlock(X, Y, Z) - 1 == E_BLOCK_DIRT then
+			World:SetBlock(X, Y, Z, 17, 0)
+			for i=1, math.random(1, 6) do
+				X = X + math.random(-2, 2)
+				Z = Z + math.random(-2, 2)
+				Y = World:GetHeight(X, Z) + 1
+				if World:GetBlock(X, Y - 1, Z) == E_BLOCK_GRASS or World:GetBlock(X, Y, Z) - 1 == E_BLOCK_DIRT then
+					World:SetBlock(X, Y, Z, 18, 0)
+				end
+			end
+			for i=1, math.random(1, 4) do
+				X = X + math.random(-2, 2)
+				Z = Z + math.random(-2, 2)
+				if World:GetBlock(X, Y - 1, Z) == E_BLOCK_GRASS or World:GetBlock(X, Y, Z) - 1 == E_BLOCK_DIRT then
+					World:SetBlock(X, Y, Z, 86, math.random(0, 3))
+				end
+			end
+		end
+	end
+	return true
+end		

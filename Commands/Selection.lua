@@ -16,7 +16,7 @@ function HandleBiomeInfoCommand( Split, Player )
 	local OneX, TwoX, OneZ, TwoZ = GetXZCoords( Player )
 	for X = OneX, TwoX do
 		for Z = OneZ, TwoZ do
-			if table.contains(BiomeList, GetStringFromBiome(World:GetBiomeAt(X, Z))) == false then
+			if not table.contains(BiomeList, GetStringFromBiome(World:GetBiomeAt(X, Z))) then
 				BiomeList[#BiomeList + 1] = GetStringFromBiome(World:GetBiomeAt(X, Z))
 			end
 		end
@@ -265,20 +265,24 @@ function HandleSchematicCommand( Split, Player )
 		Player:SendMessage( cChatColor.LightPurple .. "//schematic <save:load:delete>" )
 		return true
 	end
+	if Split[3] == nil then
+		Player:SendMessage(cChatColor.Rose .. 'Too few arguments\n//schematic save [format] <filename>\n\nSave a schematic into your clipboard\nFormat is a format from "//schematic formats"')
+		return true
+	end
+	if Split[4] == nil then
+					Player:SendMessage( cChatColor.Green .. "Please state a schematic name" )
+					return true
+				end
 	if string.upper(Split[2]) == "SAVE" or string.upper(Split[2]) == "L" then -- check if the player want to save a region.
 		if Player:HasPermission("worldedit.schematic.save") or Player:HasPermission("worldedit.*") then -- check if the player has the permission to use the command
-			if Split[3] == nil then -- check if the player stated a name for the schematic.
-				Player:SendMessage( cChatColor.Green .. "Please state a schematic name" )
-				return true
-			end	
-			Schematic = io.open( "Schematics\\" .. Split[3] .. ".Schematic", "r" ) -- check if the schematic file already exists.
-			if Schematic then -- check if the schematic exists
-				Player:SendMessage( cChatColor.Rose .. "Schematic already exists" )
-				Schematic:close() -- close the file
-			else
-				PersonalClipboard[Player:GetName()]:SaveToSchematicFile( "Schematics/" .. Split[3] .. ".Schematic" ) -- save the schematic.
-				Player:SendMessage( cChatColor.LightPurple .. Split[3] .. " saved."	)					
-			end
+			if string.upper(Split[3]) == "MCEDIT" then -- check if the player stated a name for the schematic.
+				if Split[4] == nil then
+					Player:SendMessage( cChatColor.Green .. "Please state a schematic name" )
+					return true
+				end
+				PersonalClipboard[Player:GetName()]:SaveToSchematicFile( "Schematics/" .. Split[4] .. ".Schematic" ) -- save the schematic.
+				Player:SendMessage( cChatColor.LightPurple .. Split[4] .. " saved."	)		
+			end				
 		end
 	elseif string.upper(Split[2]) == "LOAD" or string.upper(Split[2]) == "L" then -- check if the player wants to load a schematic
 		if Player:HasPermission("worldedit.schematic.load") or Player:HasPermission("worldedit.*") then -- check if the player has the permission to use the command
@@ -286,11 +290,12 @@ function HandleSchematicCommand( Split, Player )
 				Player:SendMessage( cChatColor.Green .. "Please state a schematic name" )
 				return true
 			end 	
-			Schematic = io.open( "Schematics\\" .. Split[3] .. ".Schematic", "r" ) -- check if the schematic file already exists.
+			local Schematic = io.open("Schematics\\" .. Split[3] .. ".Schematic", "r") -- check if the schematic file already exists.
 			if Schematic then -- check if the schematic exists
 				PersonalClipboard[Player:GetName()]:LoadFromSchematicFile( "Schematics/" .. Split[3] .. ".Schematic" ) -- load the schematic file
 				Player:SendMessage( cChatColor.LightPurple .. "Clipboard " .. Split[3] .. " is loaded" ) 
 				Schematic:close() -- close the file
+				return true
 			else
 				Player:SendMessage( cChatColor.Rose .. "Schematic " .. Split[3] .. " does not exist" )
 			end

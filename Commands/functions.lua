@@ -75,11 +75,14 @@ function HandleReplaceSelection( Player, World, ChangeBlockType, ChangeBlockMeta
 	LastCoords[Player:GetName()] = OneX .. "," .. OneY .. "," .. OneZ .. "," .. Player:GetWorld():GetName()
 	PersonalUndo[Player:GetName()]:Read( World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ )
 	PersonalBlockArea[Player:GetName()]:Read( World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ ) -- Read the area
-	for X=0, PersonalBlockArea[Player:GetName()]:GetSizeX() - 1 do
-		for Y=0, PersonalBlockArea[Player:GetName()]:GetSizeY() - 1 do
-			for Z=0, PersonalBlockArea[Player:GetName()]:GetSizeZ() - 1 do
+	local XSize = PersonalBlockArea[Player:GetName()]:GetSizeX() - 1
+	local YSize = PersonalBlockArea[Player:GetName()]:GetSizeY() - 1
+	local ZSize = PersonalBlockArea[Player:GetName()]:GetSizeZ() - 1
+	for X=0, XSize do
+		for Y=0, YSize do
+			for Z=0, ZSize do
 				if PersonalBlockArea[Player:GetName()]:GetRelBlockType( X, Y, Z ) == ChangeBlockType then -- if the blocktype is the same as the block that needs to change then
-					if PersonalBlockArea[Player:GetName()]:GetRelBlockMeta( X, Y, Z ) == ChangeBlockMeta or TypeOnly == true then -- check if the blockmeta is the same as the meta that has to change
+					if PersonalBlockArea[Player:GetName()]:GetRelBlockMeta( X, Y, Z ) == ChangeBlockMeta or (TypeOnly) then -- check if the blockmeta is the same as the meta that has to change
 						PersonalBlockArea[Player:GetName()]:SetRelBlockType( X, Y, Z, ToChangeBlockType ) -- change the block
 						PersonalBlockArea[Player:GetName()]:SetRelBlockMeta( X, Y, Z, ToChangeBlockMeta ) -- change the meta
 						Blocks = Blocks + 1 -- add a 1 to the amount of changed blocks.
