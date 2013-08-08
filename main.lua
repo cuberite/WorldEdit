@@ -57,6 +57,7 @@ function Initialize(Plugin)
 	PluginManager:BindCommand("/",	            "worldedit.superpickaxe",            HandleSuperPickCommand,      "")
 	PluginManager:BindCommand("/none",          "",                                  HandleNoneCommand,           " Unbind a bound tool from your current item")	
 	PluginManager:BindCommand("/thru",          "worldedit.navigation.thru.command", HandleThruCommand,           " Passthrough walls")
+	PluginManager:BindCommand("/up",            "worldedit.navigation.up",           HandleUpCommand,             " Go upwards some distance")
 	
 	--Experimental commands:
 	PluginManager:BindCommand("/pumpkins",      "worldedit.generation.pumpkins",     HandlePumpkinsCommand,       "")

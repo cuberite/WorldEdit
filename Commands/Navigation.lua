@@ -1,4 +1,40 @@
 ----------------------------------------------
+----------------------UP----------------------
+----------------------------------------------
+function HandleUpCommand(Split, Player)
+	if #Split < 2 then
+		Player:SendMessage(cChatColor.Rose .. "Too few arguments.")
+		Player:SendMessage(cChatColor.Rose .. "/up <block>")
+		return true
+	elseif #Split > 2 then
+		Player:SendMessage(cChatColor.Rose .. "Too many arguments.")
+		Player:SendMessage(cChatColor.Rose .. "/up <block>")
+		return true
+	end
+	local Height = tonumber(Split[2])
+	if Height == nil then
+		Player:SendMessage(cChatColor.Rose .. 'Number expected; string"' .. Split[2] .. '" given.')
+		return true
+	end
+	local Y = math.floor(Player:GetPosY())
+	local y = math.floor(Player:GetPosY()) + Height
+	local X = math.floor(Player:GetPosX())
+	local Z = math.floor(Player:GetPosZ())
+	local World = Player:GetWorld()
+	for Y = Y, y + 1 do
+		if World:GetBlock(X, Y, Z) ~= E_BLOCK_AIR then
+			Player:SendMessage(cChatColor.Rose .. "You would hit something above you.")
+			return true
+		end
+	end
+	World:SetBlock(X, y - 1, Z, 20, 0)
+	Player:TeleportToCoords(X + 0.5, y, Z + 0.5)
+	Player:SendMessage(cChatColor.LightPurple .. "Whoosh!")
+	return true
+end
+
+
+----------------------------------------------
 ---------------------THRU---------------------
 ----------------------------------------------
 function HandleThruCommand(Split, Player)
