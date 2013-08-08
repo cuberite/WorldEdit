@@ -58,11 +58,13 @@ end
 -----------------------------------------------------
 function OnPlayerRightClick(Player, BlockX, BlockY, BlockZ, BlockFace, CursorX, CursorY, CursorZ)
 	if (BlockX ~= -1) or (BlockY ~= 255) or (BlockZ ~= -1) then
+		-- Check if the wand is activated
 		if (WandActivated[Player:GetName()]) then
+			-- Check if the wand is equipped
 			if Player:GetEquippedItem().m_ItemType == Wand then
 				TwoPlayer[Player:GetName()] = Vector3i(BlockX, BlockY, BlockZ)
 				if OnePlayer[Player:GetName()] ~= nil and TwoPlayer[Player:GetName()] ~= nil then
-					Player:SendMessage( cChatColor.LightPurple .. 'Second position set to (' .. BlockX .. ".0, " .. BlockY .. ".0, " .. BlockZ .. ".0) (" .. GetSize( Player ) .. ")." )
+					Player:SendMessage( cChatColor.LightPurple .. 'Second position set to (' .. BlockX .. ".0, " .. BlockY .. ".0, " .. BlockZ .. ".0) (" .. GetSize(Player) .. ")." )
 				else
 					Player:SendMessage( cChatColor.LightPurple .. 'Second position set to (' .. BlockX .. ".0, " .. BlockY .. ".0, " .. BlockZ .. ".0)." )
 				end
@@ -70,23 +72,33 @@ function OnPlayerRightClick(Player, BlockX, BlockY, BlockZ, BlockFace, CursorX, 
 			end
 		end
 		
+		-- Check if the equipped item is the replace item.
 		if Player:GetEquippedItem().m_ItemType == ReplItem[Player:GetName()] then
-			Block = StringSplit( Repl[Player:GetName()], ":" )
+			Block = StringSplit(Repl[Player:GetName()], ":")
 			if Block[2] == nil then
 				Block[2] = 0
 			end
 			World:SetBlock( BlockX, BlockY, BlockZ, Block[1], Block[2] )
-		elseif Player:GetEquippedItem().m_ItemType == GrowTreeItem[Player:GetName()] then
+			return false
+		end
+		
+		-- Check if the equipped item is the grow tree item.
+		if Player:GetEquippedItem().m_ItemType == GrowTreeItem[Player:GetName()] then
 			if World:GetBlock(BlockX, BlockY, BlockZ) == 2 or World:GetBlock(BlockX, BlockY, BlockZ) == 3 then
 				World:GrowTree( BlockX, BlockY + 1, BlockZ )
 			else
 				Player:SendMessage( cChatColor.Rose .. "A tree can't go there." )
 			end
 		end
+		
 		return false
 	end
+	
+	-- Check if the equipped item is a compass.
 	if (Player:GetEquippedItem().m_ItemType == E_ITEM_COMPASS) then
-		Compass(Player, Player:GetWorld())
+		if Player:HasPermission("worldedit.navigation.thru.command") then
+			Compass(Player, Player:GetWorld())
+		end
 	end
 end
 

@@ -358,12 +358,19 @@ function Compass(Player, World)
 				Air = true
 			else
 				if Air then
-					if BlockType == E_BLOCK_AIR then
+					if BlockType == E_BLOCK_AIR and World:GetBlock(X, Y - 1, Z) ~= E_BLOCK_AIR then
 						Player:TeleportToCoords(X + 0.5, Y, Z + 0.5)
 						Teleported = true
 						return true
+					else
+						for y = Y, 1, -1 do
+							if World:GetBlock(X, y, Z) ~= E_BLOCK_AIR then
+								Player:TeleportToCoords(X + 0.5, y + 1, Z + 0.5)
+								Teleported = true
+								return true
+							end
+						end
 					end
-					Air = false
 				end
 			end
 		end;
@@ -373,7 +380,7 @@ function Compass(Player, World)
 	LookVector:Normalize()	
 
 	local Start = EyePos + LookVector + LookVector;
-	local End = EyePos + LookVector * 50
+	local End = EyePos + LookVector * 75
 	
 	cLineBlockTracer.Trace(World, Callbacks, Start.x, Start.y, Start.z, End.x, End.y, End.z)
 	if not Teleported then

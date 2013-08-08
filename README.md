@@ -58,6 +58,8 @@ Block replace tool<br />
 Simulates snow<br />
 * **/thaw** worldedit.thaw<br />
 Thaws the area<br />
+* **/thru** worldedit.navigation.thru.command<br />
+Passthrough walls<br />
 * **/toggleeditwand** worldedit.wand.toggle<br />
 Toggle functionality of the edit wand<br />
 * **/tree** worldedit.tool.tree<br />

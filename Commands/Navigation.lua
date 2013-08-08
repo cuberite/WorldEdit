@@ -1,7 +1,22 @@
+----------------------------------------------
+---------------------THRU---------------------
+----------------------------------------------
+function HandleThruCommand(Split, Player)
+	if #Split ~= 1 then
+		Player:SendMessage(cChatColor.Rose .. "Too many arguments.")
+		Player:SendMessage(cChatColor.Rose .. "/thru")
+		return true
+	end
+	Compass(Player, Player:GetWorld())
+	Player:SendMessage(cChatColor.LightPurple .. "Whoosh!")
+	return true
+end
+
+
 -----------------------------------------------
 --------------------DESCEND--------------------
 -----------------------------------------------
-function HandleDescendCommand( Split, Player )
+function HandleDescendCommand(Split, Player)
 	local World = Player:GetWorld()
 	if Player:GetPosY() ~= 1 then
 		local X = math.floor( Player:GetPosX() )
@@ -36,7 +51,7 @@ end
 ------------------------------------------------
 ---------------------ASCEND---------------------
 ------------------------------------------------
-function HandleAscendCommand( Split, Player )
+function HandleAscendCommand(Split, Player)
 	local World = Player:GetWorld()
 	if Player:GetPosY() == World:GetHeight( math.floor(Player:GetPosX()), math.floor((Player:GetPosZ()) ) ) then
 		Player:SendMessage( cChatColor.LightPurple .. "Ascended a level." )
