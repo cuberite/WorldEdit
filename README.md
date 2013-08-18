@@ -50,6 +50,8 @@ Gets all biomes available.<br />
 Kills nearby mobs, based on radius, if none is given uses default in configuration.<br />
 * **/descend** worldedit.navigation.descend<br />
 Go down a floor<br />
+* **/jumpto** worldedit.navigation.jumpto.command<br />
+Teleport to a location<br />
 * **/remove** worldedit.remove<br />
 Remove all entities of a type<br />
 * **/repl** worldedit.tool.replacer<br />
@@ -64,6 +66,8 @@ Passthrough walls<br />
 Toggle functionality of the edit wand<br />
 * **/tree** worldedit.tool.tree<br />
 Tree generator tool<br />
+* **/up** worldedit.navigation.up<br />
+Go upwards some distance<br />
 * **/we** worldedit.help worldedit.reload<br />
  WorldEdit commands<br >
 * **//schematic** worldedit.schematic.save worldedit.schematic.load worldedit.schematic.delete<br />

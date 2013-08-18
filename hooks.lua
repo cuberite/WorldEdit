@@ -20,35 +20,16 @@ end
 -----------------ONPLAYERLEFTCLICK------------------
 ----------------------------------------------------
 function OnPlayerLeftClick(Player, BlockX, BlockY, BlockZ, BlockFace, Status)
+	if Status == 0 then
+		if Player:HasPermission("worldedit.navigation.jumpto.tool") and Player:GetEquippedItem().m_ItemType == E_ITEM_COMPASS then
+			LeftClickCompassUsed[Player:GetName()] = false
+			return true
+		end
+	end
 	if (SP[Player:GetName()]) then
 		local World = Player:GetWorld()
-		Item = cItem( World:GetBlock( BlockX, BlockY, BlockZ ), 10, World:GetBlockMeta( BlockX, BlockY, BlockZ ) )
-		cPickup( BlockX, BlockY, BlockZ, Item, 0.0, 0.0, 0.0 )
+		Item = cItem(World:GetBlock(BlockX, BlockY, BlockZ), 1, World:GetBlockMeta(BlockX, BlockY, BlockZ))
 		World:DigBlock( BlockX, BlockY, BlockZ ) 		
-	end
-	if (Player:GetEquippedItem().m_ItemType == E_ITEM_COMPASS) then
-		if Player:HasPermission("worldedit.navigation.jumpto.tool") then
-			World = Player:GetWorld()
-			local Tracer = cTracer( World )
-			local EyePos = Vector3f(Player:GetEyePosition().x, Player:GetEyePosition().y, Player:GetEyePosition().z)
-			local EyeVector = Vector3f(Player:GetLookVector().x, Player:GetLookVector().y, Player:GetLookVector().z)
-			Tracer:Trace( EyePos , EyeVector, 200 )
-			X = Tracer.BlockHitPosition.x
-			Z = Tracer.BlockHitPosition.z
-			
-			if Z == nil or X == nil then
-				Player:SendMessage( cChatColor.Green .. "No blocks in sight(or too far)")
-				return false
-			end
-			for y = Tracer.BlockHitPosition.y, World:GetHeight(X, Z) + 1 do
-				if World:GetBlock(X, y, Z) == E_BLOCK_AIR then
-					Y = y
-					break
-				end
-			end
-			Player:TeleportToCoords( X + 0.5, Y, Z + 0.5 )
-			return false
-		end
 	end
 end
 
@@ -64,9 +45,9 @@ function OnPlayerRightClick(Player, BlockX, BlockY, BlockZ, BlockFace, CursorX, 
 			if Player:GetEquippedItem().m_ItemType == Wand then
 				TwoPlayer[Player:GetName()] = Vector3i(BlockX, BlockY, BlockZ)
 				if OnePlayer[Player:GetName()] ~= nil and TwoPlayer[Player:GetName()] ~= nil then
-					Player:SendMessage( cChatColor.LightPurple .. 'Second position set to (' .. BlockX .. ".0, " .. BlockY .. ".0, " .. BlockZ .. ".0) (" .. GetSize(Player) .. ")." )
+					Player:SendMessage(cChatColor.LightPurple .. 'Second position set to (' .. BlockX .. ".0, " .. BlockY .. ".0, " .. BlockZ .. ".0) (" .. GetSize(Player) .. ").")
 				else
-					Player:SendMessage( cChatColor.LightPurple .. 'Second position set to (' .. BlockX .. ".0, " .. BlockY .. ".0, " .. BlockZ .. ".0)." )
+					Player:SendMessage(cChatColor.LightPurple .. 'Second position set to (' .. BlockX .. ".0, " .. BlockY .. ".0, " .. BlockZ .. ".0).")
 				end
 				return false
 			end
@@ -95,10 +76,8 @@ function OnPlayerRightClick(Player, BlockX, BlockY, BlockZ, BlockFace, CursorX, 
 	end
 	
 	-- Check if the equipped item is a compass.
-	if (Player:GetEquippedItem().m_ItemType == E_ITEM_COMPASS) then
-		if Player:HasPermission("worldedit.navigation.thru.command") then
-			Compass(Player, Player:GetWorld())
-		end
+	if (Player:GetEquippedItem().m_ItemType == E_ITEM_COMPASS) and Player:HasPermission("worldedit.navigation.thru.tool") then
+		RightClickCompass(Player, Player:GetWorld())
 	end
 end
 
@@ -108,4 +87,23 @@ end
 -----------------------------------------------------
 function OnPlayerJoined(Player)
 	LoadPlayer(Player)
+end
+
+
+
+----------------------------------------------------
+-----------------ONPLAYERANIMATION------------------
+----------------------------------------------------
+function OnPlayerAnimation(Player, Animation)
+	if Animation == 1 then
+		local PlayerName = Player:GetName()
+		if LeftClickCompassUsed[PlayerName] or LeftClickCompassUsed[PlayerName] == nil then
+			if Player:GetEquippedItem().m_ItemType == E_ITEM_COMPASS and Player:HasPermission("worldedit.navigation.jumpto.tool") then
+				if not LeftClickCompass(Player, Player:GetWorld()) then
+					Player:SendMessage(cChatColor.Rose .. "No blocks in sight (or too far)!")
+				end
+			end
+		end
+		LeftClickCompassUsed[Player:GetName()] = true
+	end
 end

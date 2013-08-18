@@ -77,7 +77,7 @@ function HandleExtinguishCommand( Split, Player )
 	if Split[2] == nil then
 		Player:SendMessage( cChatColor.Rose .. "usage: /ex [Radius]" )
 		return true
-	elseif tonumber( Split[2] ) == nil then
+	elseif tonumber(Split[2]) == nil then
 		Player:SendMessage( cChatColor.Rose .. 'Number expected; string "' .. Split[2] .. '" given' )
 		return true
 	else
@@ -87,17 +87,17 @@ function HandleExtinguishCommand( Split, Player )
 	local Y = math.floor(Player:GetPosY())
 	local Z = math.floor(Player:GetPosZ())
 	local BlockArea = cBlockArea()
-	BlockArea:Read( Player:GetWorld(), X - Radius, X + Radius, Y - Radius, Y + Radius, Z - Radius, Z + Radius )
+	BlockArea:Read(Player:GetWorld(), X - Radius, X + Radius, Y - Radius, Y + Radius, Z - Radius, Z + Radius)
 	for X=0, BlockArea:GetSizeX() - 1 do
 		for Y=0, BlockArea:GetSizeY() - 1 do
 			for Z=0, BlockArea:GetSizeZ() - 1 do
-				if BlockArea:GetRelBlockType( X, Y, Z ) == 51 then
-					BlockArea:SetRelBlockType( X, Y, Z, 0 )
+				if BlockArea:GetRelBlockType(X, Y, Z) == 51 then
+					BlockArea:SetRelBlockType(X, Y, Z, 0)
 				end
 			end
 		end
 	end
-	BlockArea:Write( Player:GetWorld(), X - Radius, Y - Radius, Z - Radius )
+	BlockArea:Write(Player:GetWorld(), X - Radius, Y - Radius, Z - Radius)
 	return true
 end
 
@@ -106,11 +106,11 @@ end
 ----------------------GREEN----------------------
 -------------------------------------------------
 function HandleGreenCommand( Split, Player )
-	if tonumber( Split[2] ) == nil or Split[2] == nil then -- check if the player gave a radius
+	if tonumber(Split[2]) == nil or Split[2] == nil then -- check if the player gave a radius
 		Player:SendMessage( cChatColor.Rose .. "Too few arguments.\n//green <radius>" )
 		return true
 	else
-		Radius = tonumber( Split[2] ) -- set the radius to the given radius
+		Radius = tonumber(Split[2]) -- set the radius to the given radius
 	end
 	local World = Player:GetWorld()
 	local X = math.floor(Player:GetPosX())
@@ -125,7 +125,7 @@ function HandleGreenCommand( Split, Player )
 			end
 		end
 	end
-	Player:SendMessage( cChatColor.LightPurple .. DirtBlocks .. " surfaces greened." )
+	Player:SendMessage(cChatColor.LightPurple .. DirtBlocks .. " surfaces greened.")
 	return true
 end
 
@@ -134,11 +134,11 @@ end
 ----------------------SNOW----------------------
 ------------------------------------------------
 function HandleSnowCommand( Split, Player )	
-	if tonumber( Split[2] ) == nil or Split[2] == nil then -- check if the player gave a radius
+	if tonumber(Split[2]) == nil or Split[2] == nil then -- check if the player gave a radius
 		Player:SendMessage( cChatColor.Rose .. "Too few arguments.\n//snow <radius>" )
 		return true
 	else
-		Radius = tonumber( Split[2] ) -- set the radius to the given radius
+		Radius = tonumber(Split[2]) -- set the radius to the given radius
 	end
 	local World = Player:GetWorld() -- Get the world the player is in
 	local X = math.floor(Player:GetPosX())
@@ -168,11 +168,11 @@ end
 ----------------------THAW----------------------
 ------------------------------------------------
 function HandleThawCommand( Split, Player )
-	if tonumber( Split[2] ) == nil or Split[2] == nil then -- check if the player gave a radius
+	if tonumber(Split[2]) == nil or Split[2] == nil then -- check if the player gave a radius
 		Player:SendMessage( cChatColor.Rose .. "Too few arguments.\n//thaw <radius>" )
 		return true
 	else
-		Radius = tonumber( Split[2] ) -- set the radius to the given radius
+		Radius = tonumber(Split[2]) -- set the radius to the given radius
 	end
 	local World = Player:GetWorld() -- Get the world the player is in
 	local X = math.floor(Player:GetPosX())
@@ -242,7 +242,7 @@ end
 --------------------SETBIOME--------------------
 ------------------------------------------------
 function HandleSetBiomeCommand( Split, Player )
-	Player:SendMessage( cChatColor.Red .. "This command does not work." )
+	Player:SendMessage(cChatColor.Red .. "This command does not work.")
 	return true
 	--[[if Split[2] == nil then
 		Player:SendMessage( cChatColor.Rose .. "Please say a biome" )

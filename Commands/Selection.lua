@@ -13,7 +13,7 @@ function HandleBiomeInfoCommand( Split, Player )
 	end
 	local BiomeList = {}
 	local World = Player:GetWorld()
-	local OneX, TwoX, OneZ, TwoZ = GetXZCoords( Player )
+	local OneX, TwoX, OneZ, TwoZ = GetXZCoords(Player)
 	for X = OneX, TwoX do
 		for Z = OneZ, TwoZ do
 			if not table.contains(BiomeList, GetStringFromBiome(World:GetBiomeAt(X, Z))) then
@@ -21,7 +21,7 @@ function HandleBiomeInfoCommand( Split, Player )
 			end
 		end
 	end
-	Player:SendMessage( cChatColor.LightPurple .. "Biomes:\n " .. table.concat( BiomeList, "\n " ) )
+	Player:SendMessage(cChatColor.LightPurple .. "Biomes:\n " .. table.concat(BiomeList, "\n " ))
 	return true
 end
 
@@ -104,14 +104,14 @@ end
 -------------------------------------------------
 function HandlePasteCommand( Split, Player )
 	if PersonalClipboard[Player:GetName()]:GetSizeX() == 0 and PersonalClipboard[Player:GetName()]:GetSizeY() == 0 and PersonalClipboard[Player:GetName()]:GetSizeZ() == 0 then
-		Player:SendMessage( cChatColor.Rose .. "Your clipboard is empty. Use //copy first." )
+		Player:SendMessage(cChatColor.Rose .. "Your clipboard is empty. Use //copy first.")
 		return true
 	end
 	LastCoords[Player:GetName()] = Player:GetPosX() .. "," .. Player:GetPosY() .. "," .. Player:GetPosZ() .. "," .. Player:GetWorld():GetName()
 	PersonalUndo[Player:GetName()]:Read( Player:GetWorld(), Player:GetPosX(), Player:GetPosX() + PersonalClipboard[Player:GetName()]:GetSizeX(), Player:GetPosY(), Player:GetPosY() + PersonalClipboard[Player:GetName()]:GetSizeY(), Player:GetPosZ(), Player:GetPosZ() + PersonalClipboard[Player:GetName()]:GetSizeZ() )
 	PersonalClipboard[Player:GetName()]:Write( Player:GetWorld(), Player:GetPosX(), Player:GetPosY(), Player:GetPosZ(), 3 ) -- paste the area that the player copied
 	Player:GetWorld():WakeUpSimulatorsInArea(Player:GetPosX() - 1, Player:GetPosX() + PersonalClipboard[Player:GetName()]:GetSizeX() + 1, Player:GetPosY() - 1, Player:GetPosY() + PersonalClipboard[Player:GetName()]:GetSizeY() + 1, Player:GetPosZ() - 1, Player:GetPosZ() + PersonalClipboard[Player:GetName()]:GetSizeZ() + 1 )
-	Player:SendMessage( cChatColor.LightPurple .. "Pasted relative to you." )
+	Player:SendMessage(cChatColor.LightPurple .. "Pasted relative to you.")
 	return true
 end
 
@@ -121,13 +121,13 @@ end
 ------------------------------------------------
 function HandleCopyCommand( Split, Player )
 	if OnePlayer[Player:GetName()] == nil or TwoPlayer[Player:GetName()] == nil then -- Check if there is a region selected
-		Player:SendMessage( cChatColor.Rose .. "No Region set" )
+		Player:SendMessage(cChatColor.Rose .. "No Region set")
 		return true
 	end
-	local OneX, TwoX, OneY, TwoY, OneZ, TwoZ = GetXYZCoords( Player ) -- get the right coordinates
+	local OneX, TwoX, OneY, TwoY, OneZ, TwoZ = GetXYZCoords(Player) -- get the right coordinates
 	local World = Player:GetWorld()
 	PersonalClipboard[Player:GetName()]:Read( World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ ) -- read the area
-	Player:SendMessage( cChatColor. LightPurple .. "Block(s) copied." )
+	Player:SendMessage(cChatColor.LightPurple .. "Block(s) copied.")
 	return true
 end
 
@@ -137,14 +137,14 @@ end
 -----------------------------------------------
 function HandleCutCommand( Split, Player )
 	if OnePlayer[Player:GetName()] == nil or TwoPlayer[Player:GetName()] == nil then -- Check if there is a region selected
-		Player:SendMessage( cChatColor.Rose .. "No Region set" )
+		Player:SendMessage(cChatColor.Rose .. "No Region set")
 		return true
 	end
 	local OneX, TwoX, OneY, TwoY, OneZ, TwoZ = GetXYZCoords( Player ) -- get the right coordinates
 	local World = Player:GetWorld() -- get the world
 	LastCoords[Player:GetName()] = OneX .. "," .. OneY .. "," .. OneZ .. "," .. Player:GetWorld():GetName()
 	PersonalUndo[Player:GetName()]:Read( World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ )
-	Cut = cBlockArea()
+	local Cut = cBlockArea()
 	PersonalClipboard[Player:GetName()]:Read( World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ ) -- read the area
 	Cut:Read( World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ ) -- read the area
 	Cut:Fill( 3, 0, 0 ) -- delete the area

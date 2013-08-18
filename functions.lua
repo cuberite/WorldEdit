@@ -30,20 +30,21 @@ function CreateTables()
 	GrowTreeItem = {}
 	RemoveAbove = {}
 	WandActivated = {}
+	LeftClickCompassUsed = {}
 end
 
 
 --------------------------------------------
 ------------LOADCOMMANDFUNCTIONS------------
 --------------------------------------------
-function LoadCommandFunctions()
-	dofile( PLUGIN:GetLocalDirectory() .. "/Commands/Tools.lua" ) -- Add lua file with functions for tools commands
-	dofile( PLUGIN:GetLocalDirectory() .. "/Commands/Selection.lua" ) -- Add lua file with functions for selection commands
-	dofile( PLUGIN:GetLocalDirectory() .. "/Commands/functions.lua" ) -- Add lua file with helper functions
-	dofile( PLUGIN:GetLocalDirectory() .. "/Commands/AlterLandscape.lua" ) -- Add lua file with functions for landscape editting commands
-	dofile( PLUGIN:GetLocalDirectory() .. "/Commands/Entitys.lua" ) -- Add lua file with functions for entity commands
-	dofile( PLUGIN:GetLocalDirectory() .. "/Commands/Navigation.lua" ) -- Add lua file with functions for navigation commands
-	dofile( PLUGIN:GetLocalDirectory() .. "/Commands/Other.lua" ) -- Add lua file with functions for all the other commands
+function LoadCommandFunctions(PluginDir)
+	dofile( PluginDir .. "/Commands/Tools.lua" ) -- Add lua file with functions for tools commands
+	dofile( PluginDir .. "/Commands/Selection.lua" ) -- Add lua file with functions for selection commands
+	dofile( PluginDir .. "/Commands/functions.lua" ) -- Add lua file with helper functions
+	dofile( PluginDir .. "/Commands/AlterLandscape.lua" ) -- Add lua file with functions for landscape editting commands
+	dofile( PluginDir .. "/Commands/Entitys.lua" ) -- Add lua file with functions for entity commands
+	dofile( PluginDir .. "/Commands/Navigation.lua" ) -- Add lua file with functions for navigation commands
+	dofile( PluginDir .. "/Commands/Other.lua" ) -- Add lua file with functions for all the other commands
 end
 
 
@@ -196,41 +197,9 @@ end
 
 
 ----------------------------------------------
------------------GETXYZCOORDS-----------------
-----------------------------------------------
-function GetLandXYZCoords( Player )
-	if LandScapeOneX[Player:GetName()] == nil or LandScapeTwoX[Player:GetName()] == nil then -- check if there is a region. Needed for plugins that are going to use this plugin.
-		return false
-	end
-	if LandScapeOneX[Player:GetName()] < LandScapeTwoX[Player:GetName()] then -- check what number is bigger becouse otherwise you can get a negative number.
-		OneX = LandScapeOneX[Player:GetName()]
-		TwoX = LandScapeTwoX[Player:GetName()]
-	else
-		OneX = LandScapeTwoX[Player:GetName()]
-		TwoX = LandScapeOneX[Player:GetName()]
-	end
-	if LandScapeOneY[Player:GetName()] < LandScapeTwoY[Player:GetName()] then -- check what number is bigger becouse otherwise you can get a negative number.
-		OneY = LandScapeOneY[Player:GetName()]
-		TwoY = LandScapeTwoY[Player:GetName()]
-	else
-		OneY = LandScapeTwoY[Player:GetName()]
-		TwoY = LandScapeOneY[Player:GetName()]
-	end
-	if LandScapeOneZ[Player:GetName()] < LandScapeTwoZ[Player:GetName()] then -- check what number is bigger becouse otherwise you can get a negative number.
-		OneZ = LandScapeTwoZ[Player:GetName()]
-		TwoZ = LandScapeOneZ[Player:GetName()]
-	else
-		OneZ = LandScapeOneZ[Player:GetName()]
-		TwoZ = LandScapeTwoZ[Player:GetName()]
-	end
-	return OneX, TwoX, OneY, TwoY, OneZ, TwoZ -- return the right coordinates
-end
-
-
-----------------------------------------------
 ---------------GETBLOCKTYPEMETA---------------
 ----------------------------------------------
-function GetBlockTypeMeta( Player, Blocks )
+function GetBlockTypeMeta(Player, Blocks)
 	local Tonumber = tonumber(Blocks)
 	if Tonumber == nil then	
 		Item = cItem()
@@ -346,52 +315,9 @@ function LoadPlayer(Player)
 end
 
 
--------------------------------------------
------------------COMPASS-------------------
--------------------------------------------
-function Compass(Player, World)
-	local Teleported = false
-	local Air = false
-	local Callbacks = {
-		OnNextBlock = function(X, Y, Z, BlockType, BlockMeta)
-			if BlockType ~= E_BLOCK_AIR then
-				Air = true
-			else
-				if Air then
-					if BlockType == E_BLOCK_AIR and World:GetBlock(X, Y - 1, Z) ~= E_BLOCK_AIR then
-						Player:TeleportToCoords(X + 0.5, Y, Z + 0.5)
-						Teleported = true
-						return true
-					else
-						for y = Y, 1, -1 do
-							if World:GetBlock(X, y, Z) ~= E_BLOCK_AIR then
-								Player:TeleportToCoords(X + 0.5, y + 1, Z + 0.5)
-								Teleported = true
-								return true
-							end
-						end
-					end
-				end
-			end
-		end;
-	};
-	local EyePos = Player:GetEyePosition()
-	local LookVector = Player:GetLookVector()
-	LookVector:Normalize()	
-
-	local Start = EyePos + LookVector + LookVector;
-	local End = EyePos + LookVector * 75
-	
-	cLineBlockTracer.Trace(World, Callbacks, Start.x, Start.y, Start.z, End.x, End.y, End.z)
-	if not Teleported then
-		Player:SendMessage(cChatColor.Rose .. "Nothing to pass through!")
-	end
-end
-
-
--------------------------------------------
------------------COMPASS-------------------
--------------------------------------------
+--------------------------------------------
+-----------GETBLOCKXYZFROMTRACE-------------
+--------------------------------------------
 function GetBlockXYZFromTrace(Player)
 	local World = Player:GetWorld()
 	local Tracer = cTracer( World )

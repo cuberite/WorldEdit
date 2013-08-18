@@ -53,7 +53,7 @@ end
 -------------------SUPERPICK-------------------
 -----------------------------------------------
 function HandleSuperPickCommand( Split, Player )
-	if not SP[Player:GetName()] == nil or SP[Player:GetName()] then -- check if super pickaxe is activated
+	if SP[Player:GetName()] == nil or not SP[Player:GetName()] then -- check if super pickaxe is activated
 		SP[Player:GetName()] = true
 		Player:SendMessage( cChatColor.LightPurple .. "Super pick activated" )
 	else -- else deactivate the superpickaxe

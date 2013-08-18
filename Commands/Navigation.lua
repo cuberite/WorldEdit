@@ -35,6 +35,21 @@ end
 
 
 ----------------------------------------------
+--------------------JUMPTO--------------------
+----------------------------------------------
+function HandleJumpToCommand(Split, Player)
+	if #Split ~= 1 then
+		Player:SendMessage(cChatColor.Rose .. "Too many arguments.")
+		Player:SendMessage(cChatColor.Rose .. "/jumpto")
+		return true
+	end
+	LeftClickCompass(Player, Player:GetWorld())
+	Player:SendMessage(cChatColor.LightPurple .. "Poof!!")
+	return true
+end
+
+
+----------------------------------------------
 ---------------------THRU---------------------
 ----------------------------------------------
 function HandleThruCommand(Split, Player)
@@ -43,7 +58,7 @@ function HandleThruCommand(Split, Player)
 		Player:SendMessage(cChatColor.Rose .. "/thru")
 		return true
 	end
-	Compass(Player, Player:GetWorld())
+	RightClickCompass(Player, Player:GetWorld())
 	Player:SendMessage(cChatColor.LightPurple .. "Whoosh!")
 	return true
 end
@@ -54,7 +69,7 @@ end
 -----------------------------------------------
 function HandleDescendCommand(Split, Player)
 	local World = Player:GetWorld()
-	if Player:GetPosY() ~= 1 then
+	if Player:GetPosY() < 1 then
 		local X = math.floor( Player:GetPosX() )
 		local Z = math.floor( Player:GetPosZ() )
 		local Air = false
