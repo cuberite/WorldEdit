@@ -2,14 +2,20 @@ function Initialize(Plugin)
 	
 	PLUGIN = Plugin
 	PLUGIN:SetName("WorldEdit")
-	PLUGIN:SetVersion(0.1)
+	PLUGIN:SetVersion(1)
+		
+	cPluginManager.AddHook(cPluginManager.HOOK_PLAYER_BREAKING_BLOCK, SelectFirstPointHook);
+	
+	cPluginManager.AddHook(cPluginManager.HOOK_PLAYER_RIGHT_CLICK,    SelectSecondPointHook);
+	cPluginManager.AddHook(cPluginManager.HOOK_PLAYER_RIGHT_CLICK,    RightClickCompassHook);
+	cPluginManager.AddHook(cPluginManager.HOOK_PLAYER_RIGHT_CLICK,    ToolsHook);
+	
+	cPluginManager.AddHook(cPluginManager.HOOK_PLAYER_LEFT_CLICK,     LeftClickCompassHook);
+	cPluginManager.AddHook(cPluginManager.HOOK_PLAYER_LEFT_CLICK,     SuperPickaxeHook);
+	cPluginManager.AddHook(cPluginManager.HOOK_PLAYER_JOINED,         OnPlayerJoined);
+	cPluginManager.AddHook(cPluginManager.HOOK_PLAYER_ANIMATION,      OnPlayerAnimation);
 	
 	PluginManager = cRoot:Get():GetPluginManager()
-	PluginManager:AddHook(PLUGIN, cPluginManager.HOOK_PLAYER_BREAKING_BLOCK) -- Add hook OnPlayerBreakingBlock
-	PluginManager:AddHook(PLUGIN, cPluginManager.HOOK_PLAYER_RIGHT_CLICK) -- Add hook OnPlayerRightClick
-	PluginManager:AddHook(PLUGIN, cPluginManager.HOOK_PLAYER_LEFT_CLICK) -- Add hook OnPlayerLeftClick
-	PluginManager:AddHook(PLUGIN, cPluginManager.HOOK_PLAYER_JOINED) -- Add hook OnPlayerJoined
-	PluginManager:AddHook(PLUGIN, cPluginManager.HOOK_PLAYER_ANIMATION)
 	
 	LoadCommandFunctions(Plugin:GetLocalDirectory()) -- Load all the files that contains the command functions
 	
@@ -21,8 +27,9 @@ function Initialize(Plugin)
 	PluginManager:BindCommand("/ascend",        "worldedit.navigation.ascend",         HandleAscendCommand,         " Go up a floor")
 	PluginManager:BindCommand("/asc",           "worldedit.navigation.ascend",         HandleAscendCommand,         "")
 	PluginManager:BindCommand("/thru",          "worldedit.navigation.thru.command",   HandleThruCommand,           " Passthrough walls")
-	PluginManager:BindCommand("/jumpto",        "worldedit.navigation.jumpto.command", HandleJumpToCommand,       " Teleport to a location")
+	PluginManager:BindCommand("/jumpto",        "worldedit.navigation.jumpto.command", HandleJumpToCommand,         " Teleport to a location")
 	PluginManager:BindCommand("/up",            "worldedit.navigation.up",             HandleUpCommand,             " Go upwards some distance")
+	PluginManager:BindCommand("/ceil",          "worldedit.navigation.ceiling",        HandleCeilCommand,           " Go to the celing")
 
 	-- Region commands:
 	PluginManager:BindCommand("//set",	        "worldedit.region.set",                HandleSetCommand,   	       " Set all the blocks inside the selection to a block")

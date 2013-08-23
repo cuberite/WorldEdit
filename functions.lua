@@ -4,7 +4,11 @@
 function LoadSettings()
 	SettingsIni = cIniFile( PLUGIN:GetLocalDirectory() .. "/Config.ini" )
 	SettingsIni:ReadFile()
-	Wand = SettingsIni:GetValueSetI("General", "WandItem", 271 )
+	Wand = ConsoleGetBlockTypeMeta(SettingsIni:GetValueSet("General", "WandItem", 271 ))
+	if not Wand then
+		LOGWARN("The given wand ID is not valid. Using wooden axe.")
+		Wand = E_ITEM_WOODEN_AXE
+	end
 	ButcherRadius = SettingsIni:GetValueSetI("General", "ButcherRadius", 0 )
 	SettingsIni:WriteFile()
 end
@@ -28,7 +32,6 @@ function CreateTables()
 	ReplItem = {}
 	Count = {}
 	GrowTreeItem = {}
-	RemoveAbove = {}
 	WandActivated = {}
 	LeftClickCompassUsed = {}
 end
@@ -202,14 +205,14 @@ end
 function GetBlockTypeMeta(Player, Blocks)
 	local Tonumber = tonumber(Blocks)
 	if Tonumber == nil then	
-		Item = cItem()
+		local Item = cItem()
 		if StringToItem(Blocks, Item) == false then
 			Player:SendMessage(cChatColor.Rose .. "unexpected character.")
 			return false
 		else
 			return Item.m_ItemType, Item.m_ItemDamage
 		end
-		Block = StringSplit(Blocks, ":")		
+		local Block = StringSplit(Blocks, ":")		
 		if tonumber(Block[1]) == nil then
 			Player:SendMessage( cChatColor.Rose .. "unexpected character." )
 			return false
@@ -226,6 +229,32 @@ function GetBlockTypeMeta(Player, Blocks)
 end
 
 
+-----------------------------------------------
+------------CONSOLEGETBLOCKTYPEMETA------------
+-----------------------------------------------
+function ConsoleGetBlockTypeMeta(Blocks)
+	local Tonumber = tonumber(Blocks)
+	if Tonumber == nil then	
+		local Item = cItem()
+		if StringToItem(Blocks, Item) == false then
+			return false
+		else
+			return Item.m_ItemType, Item.m_ItemDamage
+		end
+		local Block = StringSplit(Blocks, ":")		
+		if tonumber(Block[1]) == nil then
+			return false
+		else
+			if Block[2] == nil then
+				return Block[1], 0
+			else
+				return Block[1], Block[2]
+			end
+		end
+	else
+		return Tonumber, 0, true
+	end
+end
 ----------------------------------------------
 --------------GETSTRINGFROMBIOME--------------
 ----------------------------------------------

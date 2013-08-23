@@ -1,7 +1,7 @@
-----------------------------------------------------
----------------ONPLAYERBREAKINGBLOCK----------------
-----------------------------------------------------
-function OnPlayerBreakingBlock(Player, BlockX, BlockY, BlockZ, BlockFace, BlockType, BlockMeta)
+---------------------------------------------------
+-----------------SELECTFIRSTPOINT------------------
+---------------------------------------------------
+function SelectFirstPointHook(Player, BlockX, BlockY, BlockZ, BlockFace, BlockType, BlockMeta)
 	if (WandActivated[Player:GetName()]) then
 		if Player:GetEquippedItem().m_ItemType == Wand then
 			OnePlayer[Player:GetName()] = Vector3i(BlockX, BlockY, BlockZ)
@@ -16,16 +16,10 @@ function OnPlayerBreakingBlock(Player, BlockX, BlockY, BlockZ, BlockFace, BlockT
 end
 
 
-----------------------------------------------------
------------------ONPLAYERLEFTCLICK------------------
-----------------------------------------------------
-function OnPlayerLeftClick(Player, BlockX, BlockY, BlockZ, BlockFace, Status)
-	if Status == 0 then
-		if Player:HasPermission("worldedit.navigation.jumpto.tool") and Player:GetEquippedItem().m_ItemType == E_ITEM_COMPASS then
-			LeftClickCompassUsed[Player:GetName()] = false
-			return true
-		end
-	end
+---------------------------------------------------
+-------------------SUPERPICKAXE--------------------
+---------------------------------------------------
+function SuperPickaxeHook(Player, BlockX, BlockY, BlockZ, BlockFace, Status)
 	if (SP[Player:GetName()]) then
 		local World = Player:GetWorld()
 		Item = cItem(World:GetBlock(BlockX, BlockY, BlockZ), 1, World:GetBlockMeta(BlockX, BlockY, BlockZ))
@@ -34,12 +28,50 @@ function OnPlayerLeftClick(Player, BlockX, BlockY, BlockZ, BlockFace, Status)
 end
 
 
------------------------------------------------------
------------------ONPLAYERRIGHTCLICK------------------
------------------------------------------------------
-function OnPlayerRightClick(Player, BlockX, BlockY, BlockZ, BlockFace, CursorX, CursorY, CursorZ)
+---------------------------------------------------
+-----------------LeftClickCompass------------------
+---------------------------------------------------
+function LeftClickCompassHook(Player, BlockX, BlockY, BlockZ, BlockFace, Status)
+	if Status == 0 then
+		if Player:HasPermission("worldedit.navigation.jumpto.tool") and Player:GetEquippedItem().m_ItemType == E_ITEM_COMPASS then
+			LeftClickCompassUsed[Player:GetName()] = false
+			return true
+		end
+	end
+end
+
+
+----------------------------------------------------
+---------------------TOOLSHOOK----------------------
+----------------------------------------------------
+function ToolsHook(Player, BlockX, BlockY, BlockZ, BlockFace, CursorX, CursorY, CursorZ)
 	if (BlockX ~= -1) or (BlockY ~= 255) or (BlockZ ~= -1) then
-		-- Check if the wand is activated
+		local PlayerName = Player:GetName()
+		local World = Player:GetWorld()
+		if Player:GetEquippedItem().m_ItemType == ReplItem[PlayerName] then
+			Block = StringSplit(Repl[PlayerName], ":")
+			if Block[2] == nil then
+				Block[2] = 0
+			end
+			World:SetBlock(BlockX, BlockY, BlockZ, Block[1], Block[2])
+			return false
+		end
+		if Player:GetEquippedItem().m_ItemType == GrowTreeItem[PlayerName] then
+			if World:GetBlock(BlockX, BlockY, BlockZ) == 2 or World:GetBlock(BlockX, BlockY, BlockZ) == 3 then
+				World:GrowTree(BlockX, BlockY + 1, BlockZ)
+			else
+				Player:SendMessage( cChatColor.Rose .. "A tree can't go there." )
+			end
+		end
+	end
+end
+
+
+----------------------------------------------------
+-----------------SELECTSECONDPOINT------------------
+----------------------------------------------------
+function SelectSecondPointHook(Player, BlockX, BlockY, BlockZ, BlockFace, CursorX, CursorY, CursorZ)
+	if (BlockX ~= -1) or (BlockY ~= 255) or (BlockZ ~= -1) then
 		if (WandActivated[Player:GetName()]) then
 			-- Check if the wand is equipped
 			if Player:GetEquippedItem().m_ItemType == Wand then
@@ -52,29 +84,17 @@ function OnPlayerRightClick(Player, BlockX, BlockY, BlockZ, BlockFace, CursorX, 
 				return false
 			end
 		end
-		
-		-- Check if the equipped item is the replace item.
-		if Player:GetEquippedItem().m_ItemType == ReplItem[Player:GetName()] then
-			Block = StringSplit(Repl[Player:GetName()], ":")
-			if Block[2] == nil then
-				Block[2] = 0
-			end
-			World:SetBlock( BlockX, BlockY, BlockZ, Block[1], Block[2] )
-			return false
-		end
-		
-		-- Check if the equipped item is the grow tree item.
-		if Player:GetEquippedItem().m_ItemType == GrowTreeItem[Player:GetName()] then
-			if World:GetBlock(BlockX, BlockY, BlockZ) == 2 or World:GetBlock(BlockX, BlockY, BlockZ) == 3 then
-				World:GrowTree( BlockX, BlockY + 1, BlockZ )
-			else
-				Player:SendMessage( cChatColor.Rose .. "A tree can't go there." )
-			end
-		end
-		
+	end
+end
+
+
+----------------------------------------------------
+-----------------RIGHTCLICKCOMPASS------------------
+----------------------------------------------------
+function RightClickCompassHook(Player, BlockX, BlockY, BlockZ, BlockFace, CursorX, CursorY, CursorZ)
+	if (BlockX ~= -1) or (BlockY ~= 255) or (BlockZ ~= -1) then
 		return false
 	end
-	
 	-- Check if the equipped item is a compass.
 	if (Player:GetEquippedItem().m_ItemType == E_ITEM_COMPASS) and Player:HasPermission("worldedit.navigation.thru.tool") then
 		RightClickCompass(Player, Player:GetWorld())

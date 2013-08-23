@@ -129,3 +129,47 @@ function HandleAscendCommand(Split, Player)
 	Player:SendMessage( cChatColor.LightPurple .. "Ascended a level." )
 	return true
 end
+
+
+------------------------------------------------
+----------------------CEIL----------------------
+------------------------------------------------
+function HandleCeilCommand(Split, Player)
+	if #Split > 2 then
+		Player:SendMessage(cChatColor.Rose .. "Too many arguments.")
+		Player:SendMessage(cChatColor.Rose .. "/ceil [cleurance]")
+		return true
+	end
+	if Split[2] == nil then
+		ClearAnce = 0
+	else
+		ClearAnce = tonumber(Split[2])
+	end
+	if ClearAnce == nil then
+		Player:SendMessage(cChatColor.Rose .. 'Number expected; string "' .. Split[2] .. '" given.')
+		return true
+	end
+	local World = Player:GetWorld()
+	local X = math.floor(Player:GetPosX())
+	local Y = math.floor(Player:GetPosY())
+	local Z = math.floor(Player:GetPosZ())
+	local WorldHeight = World:GetHeight(X, Z)
+	if Y >= WorldHeight + 1 then
+		Player:SendMessage(cChatColor.Rose .. "No free spot above you found.")
+		return true
+	end
+	for y=Y, WorldHeight do
+		if World:GetBlock(X, y, Z) ~= E_BLOCK_AIR then
+			World:SetBlock(X, y - ClearAnce - 3, Z, E_BLOCK_GLASS, 0)
+			local I = y - ClearAnce - 2
+			if I == Y then
+				Player:SendMessage(cChatColor.Rose .. "No free spot above you found.")
+				return true
+			end
+			Player:TeleportToCoords(X + 0.5, I, Z + 0.5)
+			break
+		end
+	end
+	Player:SendMessage(cChatColor.LightPurple .. "Whoosh!")
+	return true
+end

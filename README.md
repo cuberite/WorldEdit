@@ -48,6 +48,8 @@ Get the biome of the targeted block.<br />
 Gets all biomes available.<br />
 * **/butcher** worldedit.butcher<br />
 Kills nearby mobs, based on radius, if none is given uses default in configuration.<br />
+* **/ceil** worldedit.navigation.ceiling<br />
+Go to the celing<br />
 * **/descend** worldedit.navigation.descend<br />
 Go down a floor<br />
 * **/jumpto** worldedit.navigation.jumpto.command<br />
