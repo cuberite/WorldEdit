@@ -1,20 +1,20 @@
 -------------------------------------------------
 -------------------REMOVEBELOW-------------------
 -------------------------------------------------
-function HandleRemoveBelowCommand( Split, Player )
-	local X = math.floor( Player:GetPosX() ) -- round the number ( for example from 12.23423987 to 12 )
-	local Y = math.floor( Player:GetPosY() ) -- round the number ( for example from 12.23423987 to 12 )
-	local Z = math.floor( Player:GetPosZ() ) -- round the number ( for example from 12.23423987 to 12 )
+function HandleRemoveBelowCommand(Split, Player)
+	local X = math.floor(Player:GetPosX()) -- round the number (for example from 12.23423987 to 12)
+	local Y = math.floor(Player:GetPosY()) -- round the number (for example from 12.23423987 to 12)
+	local Z = math.floor(Player:GetPosZ()) -- round the number (for example from 12.23423987 to 12)
 	local World = Player:GetWorld() -- Get the world
 	
 	LastCoords[Player:GetName()] = X .. "," .. 1 .. "," .. Z .. "," .. Player:GetWorld():GetName()
-	PersonalUndo[Player:GetName()]:Read( World, X, X, 1, Y, Z, Z )
+	PersonalUndo[Player:GetName()]:Read(World, X, X, 1, Y, Z, Z)
 	local BlockBelow = 0
 	for Y = 1, Y do
-		World:SetBlock( X, Y, Z, E_BLOCK_AIR, 0 )
+		World:SetBlock(X, Y, Z, E_BLOCK_AIR, 0)
 		BlockBelow = BlockBelow + 1
 	end
-	Player:SendMessage( cChatColor.LightPurple .. BlockBelow .. " block(s) have been removed." )
+	Player:SendMessage(cChatColor.LightPurple .. BlockBelow .. " block(s) have been removed.")
 	return true
 end
 
@@ -22,21 +22,21 @@ end
 -------------------------------------------------
 -------------------REMOVEABOVE-------------------
 -------------------------------------------------
-function HandleRemoveAboveCommand( Split, Player )
-	local X = math.floor( Player:GetPosX() ) -- round the number ( for example from 12.23423987 to 12 )
-	local y = math.floor( Player:GetPosY() ) -- round the number ( for example from 12.23423987 to 12 )
-	local Z = math.floor( Player:GetPosZ() ) -- round the number ( for example from 12.23423987 to 12 )
+function HandleRemoveAboveCommand(Split, Player)
+	local X = math.floor(Player:GetPosX()) -- round the number (for example from 12.23423987 to 12)
+	local y = math.floor(Player:GetPosY()) -- round the number (for example from 12.23423987 to 12)
+	local Z = math.floor(Player:GetPosZ()) -- round the number (for example from 12.23423987 to 12)
 	local World = Player:GetWorld()
 	
 	LastCoords[Player:GetName()] = X .. "," .. 1 .. "," .. Z .. "," .. Player:GetWorld():GetName()
-	PersonalUndo[Player:GetName()]:Read( World, X, X, 1, World:GetHeight( X, Z ), Z, Z )
+	PersonalUndo[Player:GetName()]:Read(World, X, X, 1, World:GetHeight(X, Z), Z, Z)
 	
 	local BlocksAbove = 0
-	for Y = y, World:GetHeight( X, Z ) do
-		World:SetBlock( X, Y, Z, E_BLOCK_AIR, 0 )
+	for Y = y, World:GetHeight(X, Z) do
+		World:SetBlock(X, Y, Z, E_BLOCK_AIR, 0)
 		BlocksAbove = BlocksAbove + 1
 	end
-	Player:SendMessage( cChatColor.LightPurple .. BlocksAbove .. " block(s) have been removed." )
+	Player:SendMessage(cChatColor.LightPurple .. BlocksAbove .. " block(s) have been removed.")
 	return true
 end
 
@@ -44,28 +44,28 @@ end
 -----------------------------------------------
 ---------------------DRAIN---------------------
 -----------------------------------------------
-function HandleDrainCommand( Split, Player )
-	if tonumber( Split[2] ) == nil or Split[2] == nil then -- check if the player gave a radius
-		Player:SendMessage( cChatColor.Rose .. "Too few arguments.\n//drain <radius>" )
+function HandleDrainCommand(Split, Player)
+	if tonumber(Split[2]) == nil or Split[2] == nil then -- check if the player gave a radius
+		Player:SendMessage(cChatColor.Rose .. "Too few arguments.\n//drain <radius>")
 		return true
 	else
-		Radius = tonumber( Split[2] ) -- set the radius to the given radius
+		Radius = tonumber(Split[2]) -- set the radius to the given radius
 	end
 	local X = math.floor(Player:GetPosX())
 	local Y = math.floor(Player:GetPosY())
 	local Z = math.floor(Player:GetPosZ())
 	local BlockArea = cBlockArea()
-	BlockArea:Read( Player:GetWorld(), X - Radius, X + Radius, Y - Radius, Y + Radius, Z - Radius, Z + Radius ) -- read the area
+	BlockArea:Read(Player:GetWorld(), X - Radius, X + Radius, Y - Radius, Y + Radius, Z - Radius, Z + Radius) -- read the area
 	for x=0, BlockArea:GetSizeX() - 1 do
 		for y=0, BlockArea:GetSizeY() - 1 do
 			for z=0, BlockArea:GetSizeZ() - 1 do
-				if BlockArea:GetRelBlockType( x, y, z ) == E_BLOCK_WATER or BlockArea:GetRelBlockType( x, y, z ) == E_BLOCK_STATIONARY_WATER then -- check if the block is water
-					BlockArea:SetRelBlockType( x, y, z, 0 ) -- set the block to air
+				if BlockArea:GetRelBlockType(x, y, z) == E_BLOCK_WATER or BlockArea:GetRelBlockType(x, y, z) == E_BLOCK_STATIONARY_WATER then -- check if the block is water
+					BlockArea:SetRelBlockType(x, y, z, 0) -- set the block to air
 				end
 			end
 		end
 	end
-	BlockArea:Write( Player:GetWorld(), X - Radius, Y - Radius, Z - Radius ) -- write the are into the world.
+	BlockArea:Write(Player:GetWorld(), X - Radius, Y - Radius, Z - Radius) -- write the are into the world.
 	return true
 end
 
@@ -73,15 +73,15 @@ end
 ------------------------------------------------
 -------------------EXTINGUISH-------------------
 ------------------------------------------------
-function HandleExtinguishCommand( Split, Player )
+function HandleExtinguishCommand(Split, Player)
 	if Split[2] == nil then
-		Player:SendMessage( cChatColor.Rose .. "usage: /ex [Radius]" )
+		Player:SendMessage(cChatColor.Rose .. "usage: /ex [Radius]")
 		return true
 	elseif tonumber(Split[2]) == nil then
-		Player:SendMessage( cChatColor.Rose .. 'Number expected; string "' .. Split[2] .. '" given' )
+		Player:SendMessage(cChatColor.Rose .. 'Number expected; string "' .. Split[2] .. '" given')
 		return true
 	else
-		Radius = tonumber( Split[2] )
+		Radius = tonumber(Split[2])
 	end
 	local X = math.floor(Player:GetPosX())
 	local Y = math.floor(Player:GetPosY())
@@ -105,9 +105,9 @@ end
 -------------------------------------------------
 ----------------------GREEN----------------------
 -------------------------------------------------
-function HandleGreenCommand( Split, Player )
+function HandleGreenCommand(Split, Player)
 	if tonumber(Split[2]) == nil or Split[2] == nil then -- check if the player gave a radius
-		Player:SendMessage( cChatColor.Rose .. "Too few arguments.\n//green <radius>" )
+		Player:SendMessage(cChatColor.Rose .. "Too few arguments.\n//green <radius>")
 		return true
 	else
 		Radius = tonumber(Split[2]) -- set the radius to the given radius
@@ -133,9 +133,9 @@ end
 ------------------------------------------------
 ----------------------SNOW----------------------
 ------------------------------------------------
-function HandleSnowCommand( Split, Player )	
+function HandleSnowCommand(Split, Player)	
 	if tonumber(Split[2]) == nil or Split[2] == nil then -- check if the player gave a radius
-		Player:SendMessage( cChatColor.Rose .. "Too few arguments.\n//snow <radius>" )
+		Player:SendMessage(cChatColor.Rose .. "Too few arguments.\n//snow <radius>")
 		return true
 	else
 		Radius = tonumber(Split[2]) -- set the radius to the given radius
@@ -146,7 +146,7 @@ function HandleSnowCommand( Split, Player )
 	local SnowBlocks = 0
 	for x=X - Radius, X + Radius do
 		for z=Z - Radius, Z + Radius do
-			y = World:GetHeight(x, z)
+			local y = World:GetHeight(x, z)
 			if World:GetBlock(x, y , z) == E_BLOCK_STATIONARY_WATER then -- check if the block is water
 				SnowBlocks = SnowBlocks + 1
 				World:SetBlock(x, y, z, E_BLOCK_ICE, 0) -- set the block to ice
@@ -154,12 +154,14 @@ function HandleSnowCommand( Split, Player )
 				SnowBlocks = SnowBlocks + 1
 				World:SetBlock(x, y, z, E_BLOCK_OBSIDIAN, 0) -- set the block to obsydian
 			else
-				SnowBlocks = SnowBlocks + 1
-				World:SetBlock(x, y + 1, z, E_BLOCK_SNOW, 0) -- set the block to snow.
+				if g_BlockIsSnowable[World:GetBlock(x, y, z)] then
+					SnowBlocks = SnowBlocks + 1
+					World:SetBlock(x, y + 1, z, E_BLOCK_SNOW, 0) -- set the block to snow.
+				end
 			end
 		end
 	end
-	Player:SendMessage( cChatColor.LightPurple .. SnowBlocks .. " surfaces covered. Let is snow~" )
+	Player:SendMessage(cChatColor.LightPurple .. SnowBlocks .. " surfaces covered. Let is snow~")
 	return true
 end
 
@@ -167,9 +169,9 @@ end
 ------------------------------------------------
 ----------------------THAW----------------------
 ------------------------------------------------
-function HandleThawCommand( Split, Player )
+function HandleThawCommand(Split, Player)
 	if tonumber(Split[2]) == nil or Split[2] == nil then -- check if the player gave a radius
-		Player:SendMessage( cChatColor.Rose .. "Too few arguments.\n//thaw <radius>" )
+		Player:SendMessage(cChatColor.Rose .. "Too few arguments.\n//thaw <radius>")
 		return true
 	else
 		Radius = tonumber(Split[2]) -- set the radius to the given radius
@@ -180,7 +182,7 @@ function HandleThawCommand( Split, Player )
 	local ThawBlocks = 0
 	for x=X - Radius, X + Radius do
 		for z=Z - Radius, Z + Radius do
-			y = World:GetHeight(x, z)
+			local y = World:GetHeight(x, z)
 			if World:GetBlock(x, y, z) == E_BLOCK_SNOW then -- check if the block is snow
 				ThawBlocks = ThawBlocks + 1
 				World:SetBlock(x, y, z, E_BLOCK_AIR, 0) -- set the block to an air block
@@ -190,7 +192,7 @@ function HandleThawCommand( Split, Player )
 			end
 		end
 	end
-	Player:SendMessage( cChatColor.LightPurple .. ThawBlocks .. " surfaces thawed" )
+	Player:SendMessage(cChatColor.LightPurple .. ThawBlocks .. " surfaces thawed")
 	return true
 end
 
@@ -198,41 +200,41 @@ end
 -----------------------------------------------
 -------------------BIOMELIST-------------------
 -----------------------------------------------
-function HandleBiomeListCommand( Split, Player )
+function HandleBiomeListCommand(Split, Player)
 	if Split[2] == nil then -- if there was no page given then the page is 1
 		Split[2] = 1 
 	end
 	if tonumber(Split[2]) == 1 then -- Page 1
-		Player:SendMessage( cChatColor.Green .. "Page 1" )
-		Player:SendMessage( "Ocean" )
-		Player:SendMessage( "Plains" )
-		Player:SendMessage( "Desert" )
-		Player:SendMessage( "Extreme_Hills" )
-		Player:SendMessage( "Forest" )
-		Player:SendMessage( "Taiga" )
-		Player:SendMessage( "Swampland" )
-		Player:SendMessage( "River" )
+		Player:SendMessage(cChatColor.Green .. "Page 1")
+		Player:SendMessage("Ocean")
+		Player:SendMessage("Plains")
+		Player:SendMessage("Desert")
+		Player:SendMessage("Extreme_Hills")
+		Player:SendMessage("Forest")
+		Player:SendMessage("Taiga")
+		Player:SendMessage("Swampland")
+		Player:SendMessage("River")
 	elseif tonumber(Split[2]) == 2 then -- Page 2
-		Player:SendMessage( cChatColor.Green .. "Page 2" )
-		Player:SendMessage( "Hell" )
-		Player:SendMessage( "Sky" )
-		Player:SendMessage( "FrozenOcean" )
-		Player:SendMessage( "FrozenRiver" )
-		Player:SendMessage( "Ice_Plains" )
-		Player:SendMessage( "Ice_Mountains" )
-		Player:SendMessage( "MushroomIsland" )
-		Player:SendMessage( "MushroomIslandShore" )
+		Player:SendMessage(cChatColor.Green .. "Page 2")
+		Player:SendMessage("Hell")
+		Player:SendMessage("Sky")
+		Player:SendMessage("FrozenOcean")
+		Player:SendMessage("FrozenRiver")
+		Player:SendMessage("Ice_Plains")
+		Player:SendMessage("Ice_Mountains")
+		Player:SendMessage("MushroomIsland")
+		Player:SendMessage("MushroomIslandShore")
 	elseif tonumber(Split[2]) == 3 then -- Page 3
-		Player:SendMessage( cChatColor.Green .. "Page 3" )
-		Player:SendMessage( "Beach" )
-		Player:SendMessage( "DesertHills" )
-		Player:SendMessage( "ForestHills" )
-		Player:SendMessage( "TaigaHills " )
-		Player:SendMessage( "Extreme_Hills_Edge" )
-		Player:SendMessage( "Jungle" )
-		Player:SendMessage( "JungleHills" )
+		Player:SendMessage(cChatColor.Green .. "Page 3")
+		Player:SendMessage("Beach")
+		Player:SendMessage("DesertHills")
+		Player:SendMessage("ForestHills")
+		Player:SendMessage("TaigaHills ")
+		Player:SendMessage("Extreme_Hills_Edge")
+		Player:SendMessage("Jungle")
+		Player:SendMessage("JungleHills")
 	else
-		Player:SendMessage( "/biomelist [1-3]" ) -- the page was not valid
+		Player:SendMessage("/biomelist [1-3]") -- the page was not valid
 	end
 	return true
 end
@@ -241,27 +243,27 @@ end
 ------------------------------------------------
 --------------------SETBIOME--------------------
 ------------------------------------------------
-function HandleSetBiomeCommand( Split, Player )
+function HandleSetBiomeCommand(Split, Player)
 	Player:SendMessage(cChatColor.Red .. "This command does not work.")
 	return true
 	--[[if Split[2] == nil then
-		Player:SendMessage( cChatColor.Rose .. "Please say a biome" )
+		Player:SendMessage(cChatColor.Rose .. "Please say a biome")
 		return true
 	end
 	if OnePlayer[Player:GetName()] == nil or TwoPlayer[Player:GetName()] == nil then
-		Player:SendMessage( cChatColor.Rose .. "No Region set" )
+		Player:SendMessage(cChatColor.Rose .. "No Region set")
 		return true
 	end
-	Biome = GetBiomeFromString( Split, Player )
+	Biome = GetBiomeFromString(Split, Player)
 	if Biome == false then
-		Player:SendMessage( "Please specify a valid biome" )
+		Player:SendMessage("Please specify a valid biome")
 		return true
 	end
 	--local World = Player:GetWorld()
-	OneX, TwoX, OneZ, TwoZ = GetXZCoords( Player )
+	OneX, TwoX, OneZ, TwoZ = GetXZCoords(Player)
 	for X=OneX, TwoX do
 		for Z=OneZ, TwoZ do
-			cChunkDesc:SetBiome( X, Z, Biome )
+			cChunkDesc:SetBiome(X, Z, Biome)
 		end
 	end]]
 end

@@ -1,16 +1,16 @@
 -----------------------------------------------
 ------------------LOADSETTINGS-----------------
 -----------------------------------------------
-function LoadSettings()
-	SettingsIni = cIniFile( PLUGIN:GetLocalDirectory() .. "/Config.ini" )
-	SettingsIni:ReadFile()
-	Wand = ConsoleGetBlockTypeMeta(SettingsIni:GetValueSet("General", "WandItem", 271 ))
+function LoadSettings(Path)
+	SettingsIni = cIniFile()
+	SettingsIni:ReadFile(Path)
+	Wand = ConsoleGetBlockTypeMeta(SettingsIni:GetValueSet("General", "WandItem", 271))
 	if not Wand then
 		LOGWARN("The given wand ID is not valid. Using wooden axe.")
 		Wand = E_ITEM_WOODEN_AXE
 	end
-	ButcherRadius = SettingsIni:GetValueSetI("General", "ButcherRadius", 0 )
-	SettingsIni:WriteFile()
+	ButcherRadius = SettingsIni:GetValueSetI("General", "ButcherRadius", 0)
+	SettingsIni:WriteFile(Path)
 end
 
 
@@ -41,13 +41,13 @@ end
 ------------LOADCOMMANDFUNCTIONS------------
 --------------------------------------------
 function LoadCommandFunctions(PluginDir)
-	dofile( PluginDir .. "/Commands/Tools.lua" ) -- Add lua file with functions for tools commands
-	dofile( PluginDir .. "/Commands/Selection.lua" ) -- Add lua file with functions for selection commands
-	dofile( PluginDir .. "/Commands/functions.lua" ) -- Add lua file with helper functions
-	dofile( PluginDir .. "/Commands/AlterLandscape.lua" ) -- Add lua file with functions for landscape editting commands
-	dofile( PluginDir .. "/Commands/Entitys.lua" ) -- Add lua file with functions for entity commands
-	dofile( PluginDir .. "/Commands/Navigation.lua" ) -- Add lua file with functions for navigation commands
-	dofile( PluginDir .. "/Commands/Other.lua" ) -- Add lua file with functions for all the other commands
+	dofile(PluginDir .. "/Commands/Tools.lua") -- Add lua file with functions for tools commands
+	dofile(PluginDir .. "/Commands/Selection.lua") -- Add lua file with functions for selection commands
+	dofile(PluginDir .. "/Commands/functions.lua") -- Add lua file with helper functions
+	dofile(PluginDir .. "/Commands/AlterLandscape.lua") -- Add lua file with functions for landscape editting commands
+	dofile(PluginDir .. "/Commands/Entitys.lua") -- Add lua file with functions for entity commands
+	dofile(PluginDir .. "/Commands/Navigation.lua") -- Add lua file with functions for navigation commands
+	dofile(PluginDir .. "/Commands/Other.lua") -- Add lua file with functions for all the other commands
 end
 
 
@@ -58,14 +58,14 @@ function LoadOnlinePlayers()
 	cRoot:Get():ForEachPlayer(
 	function(Player)
 		LoadPlayer(Player)
-	end )
+	end)
 end
 
 
 ---------------------------------------------
 -------------------GETSIZE-------------------
 ---------------------------------------------
-function GetSize( Player )
+function GetSize(Player)
 	if OnePlayer[Player:GetName()].x > TwoPlayer[Player:GetName()].x then -- check what number is bigger becouse otherwise you can get a negative number.
 		X = OnePlayer[Player:GetName()].x - TwoPlayer[Player:GetName()].x + 1
 	else
@@ -88,7 +88,7 @@ end
 ---------------------------------------------
 ------------GET_BIOME_FROM_STRING------------
 ---------------------------------------------
-function GetBiomeFromString( Split, Player ) -- this simply checks what the player said and then returns the network number that that biome has
+function GetBiomeFromString(Split, Player) -- this simply checks what the player said and then returns the network number that that biome has
 	Split[2] = string.upper(Split[2])
 	if Split[2] == "OCEAN" then
 		return 0
@@ -145,7 +145,7 @@ end
 ---------------------------------------------
 -----------------GETXZCOORDS-----------------
 ---------------------------------------------
-function GetXZCoords( Player )
+function GetXZCoords(Player)
 	if OnePlayer[Player:GetName()] == nil or TwoPlayer[Player:GetName()] == nil then -- check if there is a region. Needed for plugins that are going to use this plugin.
 		return false
 	end
@@ -170,7 +170,7 @@ end
 ----------------------------------------------
 -----------------GETXYZCOORDS-----------------
 ----------------------------------------------
-function GetXYZCoords( Player )
+function GetXYZCoords(Player)
 	if OnePlayer[Player:GetName()] == nil or TwoPlayer[Player:GetName()] == nil then -- check if there is a region. Needed for plugins that are going to use this plugin.
 		return false
 	end
@@ -214,7 +214,7 @@ function GetBlockTypeMeta(Player, Blocks)
 		end
 		local Block = StringSplit(Blocks, ":")		
 		if tonumber(Block[1]) == nil then
-			Player:SendMessage( cChatColor.Rose .. "unexpected character." )
+			Player:SendMessage(cChatColor.Rose .. "unexpected character.")
 			return false
 		else
 			if Block[2] == nil then
@@ -349,7 +349,7 @@ end
 --------------------------------------------
 function GetBlockXYZFromTrace(Player)
 	local World = Player:GetWorld()
-	local Tracer = cTracer( World )
+	local Tracer = cTracer(World)
 					
 	local EyePos = Vector3f(Player:GetEyePosition().x, Player:GetEyePosition().y, Player:GetEyePosition().z)
 	local EyeVector = Vector3f(Player:GetLookVector().x, Player:GetLookVector().y, Player:GetLookVector().z)

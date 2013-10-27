@@ -6,9 +6,9 @@ function SelectFirstPointHook(Player, BlockX, BlockY, BlockZ, BlockFace, BlockTy
 		if Player:GetEquippedItem().m_ItemType == Wand then
 			OnePlayer[Player:GetName()] = Vector3i(BlockX, BlockY, BlockZ)
 			if OnePlayer[Player:GetName()] ~= nil and TwoPlayer[Player:GetName()] ~= nil then
-				Player:SendMessage( cChatColor.LightPurple .. 'First position set to (' .. BlockX .. ".0, " .. BlockY .. ".0, " .. BlockZ .. ".0) (" .. GetSize( Player ) .. ")." )
+				Player:SendMessage(cChatColor.LightPurple .. 'First position set to (' .. BlockX .. ".0, " .. BlockY .. ".0, " .. BlockZ .. ".0) (" .. GetSize(Player) .. ").")
 			else
-				Player:SendMessage( cChatColor.LightPurple .. 'First position set to (' .. BlockX .. ".0, " .. BlockY .. ".0, " .. BlockZ .. ".0)." )
+				Player:SendMessage(cChatColor.LightPurple .. 'First position set to (' .. BlockX .. ".0, " .. BlockY .. ".0, " .. BlockZ .. ".0).")
 			end
 			return true
 		end
@@ -23,7 +23,7 @@ function SuperPickaxeHook(Player, BlockX, BlockY, BlockZ, BlockFace, Status)
 	if (SP[Player:GetName()]) then
 		local World = Player:GetWorld()
 		Item = cItem(World:GetBlock(BlockX, BlockY, BlockZ), 1, World:GetBlockMeta(BlockX, BlockY, BlockZ))
-		World:DigBlock( BlockX, BlockY, BlockZ ) 		
+		World:DigBlock(BlockX, BlockY, BlockZ) 		
 	end
 end
 
@@ -35,7 +35,7 @@ function LeftClickCompassHook(Player, BlockX, BlockY, BlockZ, BlockFace, Status)
 	if Status == 0 then
 		if Player:HasPermission("worldedit.navigation.jumpto.tool") and Player:GetEquippedItem().m_ItemType == E_ITEM_COMPASS then
 			LeftClickCompassUsed[Player:GetName()] = false
-			return true
+			return false
 		end
 	end
 end
@@ -60,7 +60,7 @@ function ToolsHook(Player, BlockX, BlockY, BlockZ, BlockFace, CursorX, CursorY, 
 			if World:GetBlock(BlockX, BlockY, BlockZ) == 2 or World:GetBlock(BlockX, BlockY, BlockZ) == 3 then
 				World:GrowTree(BlockX, BlockY + 1, BlockZ)
 			else
-				Player:SendMessage( cChatColor.Rose .. "A tree can't go there." )
+				Player:SendMessage(cChatColor.Rose .. "A tree can't go there.")
 			end
 		end
 	end

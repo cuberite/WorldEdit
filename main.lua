@@ -37,11 +37,11 @@ function Initialize(Plugin)
 	PluginManager:BindCommand("//walls",        "worldedit.region.walls",              HandleWallsCommand,          " Build the four sides of the selection")
 	PluginManager:BindCommand("//faces",        "worldedit.region.faces",              HandleFacesCommand,          " Build the walls, ceiling, and floor of a selection")
 	PluginManager:BindCommand("//setbiome",	    "worldedit.biome.set",                 HandleSetBiomeCommand,       " Set the biome of the region.")
-	PluginManager:BindCommand("/biomeinfo",     "worldedit.biome.info",                HandleBiomeInfoCommand,      " Get the biome of the targeted block." )
+	PluginManager:BindCommand("/biomeinfo",     "worldedit.biome.info",                HandleBiomeInfoCommand,      " Get the biome of the targeted block.")
 	PluginManager:BindCommand("//size",	        "worldedit.selection.size",            HandleSizeCommand,           " Get the size of the selection")
 
 	-- Clipboard commands:
-	PluginManager:BindCommand("//rotate",       "worldedit.clipboard.rotate",          HandleRotateCommand,         " Rotate the contents of the clipboard" )
+	PluginManager:BindCommand("//rotate",       "worldedit.clipboard.rotate",          HandleRotateCommand,         " Rotate the contents of the clipboard")
 	PluginManager:BindCommand("//paste",        "worldedit.clipboard.paste",	       HandlePasteCommand,          " Pastes the clipboard's contents.")
 	PluginManager:BindCommand("//copy",	        "worldedit.clipboard.copy",            HandleCopyCommand,           " Copy the selection to the clipboard")
 	PluginManager:BindCommand("//cut",	        "worldedit.clipboard.cut",             HandleCutCommand,            " Cut the selection to the clipboard")
@@ -68,21 +68,21 @@ function Initialize(Plugin)
 	
 	-- Help commands:
 	PluginManager:BindCommand("/biomelist",	    "worldedit.biomelist",                 HandleBiomeListCommand,      " Gets all biomes available.")
-	PluginManager:BindCommand("/we",            "",                                    HandleWorldEditCommand,      " World edit command" )	
+	PluginManager:BindCommand("/we",            "",                                    HandleWorldEditCommand,      " World edit command")	
 	
 	-- Terraforming commands:
-	PluginManager:BindCommand("/removebelow",   "worldedit.removebelow",               HandleRemoveBelowCommand,    "" )
-	PluginManager:BindCommand("/removeabove",   "worldedit.removeabove",               HandleRemoveAboveCommand,    "" )
-	PluginManager:BindCommand("//removebelow",  "worldedit.removebelow",               HandleRemoveBelowCommand,    " Remove blocks below you." )
-	PluginManager:BindCommand("//removeabove",  "worldedit.removeabove",               HandleRemoveAboveCommand,    " Remove blocks above your head." )
-	PluginManager:BindCommand("//drain",        "worldedit.drain",                     HandleDrainCommand,          " Drain a pool" )
-	PluginManager:BindCommand("//ex",           "worldedit.extinguish",                HandleExtinguishCommand,     " Extinguish nearby fire." )
-	PluginManager:BindCommand("//ext",          "worldedit.extinguish",                HandleExtinguishCommand,     "" )
-	PluginManager:BindCommand("//extinguish",   "worldedit.extinguish",                HandleExtinguishCommand,     "" )
-	PluginManager:BindCommand("/ex",            "worldedit.extinguish",                HandleExtinguishCommand,     "" )
-	PluginManager:BindCommand("/ext",           "worldedit.extinguish",                HandleExtinguishCommand,     "" )
-	PluginManager:BindCommand("/extinguish",    "worldedit.extinguish",                HandleExtinguishCommand,     "" )
-	PluginManager:BindCommand("//green",        "worldedit.green",                     HandleGreenCommand,          " Greens the area" )
+	PluginManager:BindCommand("/removebelow",   "worldedit.removebelow",               HandleRemoveBelowCommand,    "")
+	PluginManager:BindCommand("/removeabove",   "worldedit.removeabove",               HandleRemoveAboveCommand,    "")
+	PluginManager:BindCommand("//removebelow",  "worldedit.removebelow",               HandleRemoveBelowCommand,    " Remove blocks below you.")
+	PluginManager:BindCommand("//removeabove",  "worldedit.removeabove",               HandleRemoveAboveCommand,    " Remove blocks above your head.")
+	PluginManager:BindCommand("//drain",        "worldedit.drain",                     HandleDrainCommand,          " Drain a pool")
+	PluginManager:BindCommand("//ex",           "worldedit.extinguish",                HandleExtinguishCommand,     " Extinguish nearby fire.")
+	PluginManager:BindCommand("//ext",          "worldedit.extinguish",                HandleExtinguishCommand,     "")
+	PluginManager:BindCommand("//extinguish",   "worldedit.extinguish",                HandleExtinguishCommand,     "")
+	PluginManager:BindCommand("/ex",            "worldedit.extinguish",                HandleExtinguishCommand,     "")
+	PluginManager:BindCommand("/ext",           "worldedit.extinguish",                HandleExtinguishCommand,     "")
+	PluginManager:BindCommand("/extinguish",    "worldedit.extinguish",                HandleExtinguishCommand,     "")
+	PluginManager:BindCommand("//green",        "worldedit.green",                     HandleGreenCommand,          " Greens the area")
 	PluginManager:BindCommand("/snow",	        "worldedit.snow",                      HandleSnowCommand,           " Simulates snow")
 	PluginManager:BindCommand("/thaw",	        "worldedit.thaw",                      HandleThawCommand,           " Thaws the area")
 	
@@ -91,16 +91,16 @@ function Initialize(Plugin)
 		
 	CreateTables() -- create all the tables
 	LoadOnlinePlayers() -- Load all the online players
-	LoadSettings() -- load all the settings
+	LoadSettings(PLUGIN:GetLocalDirectory() .. "/Config.ini") -- load all the settings
 	LOG("[WorldEdit] Enabling WorldEdit v" .. PLUGIN:GetVersion())
 	return true
 end
 
 function OnDisable()
 	if (DisablePlugin) then -- if the plugin has to be reloaded then load the plugin again ;)
-		LOGINFO( "Worldedit is reloading" )
-		PluginManager:LoadPlugin( PLUGIN:GetName() )
+		LOGINFO("Worldedit is reloading")
+		PluginManager:LoadPlugin(PLUGIN:GetName())
 	else
-		LOG( "[WorldEdit] Disabling WorldEdit v" .. PLUGIN:GetVersion() )
+		LOG("[WorldEdit] Disabling WorldEdit v" .. PLUGIN:GetVersion())
 	end
 end

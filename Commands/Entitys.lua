@@ -1,14 +1,14 @@
 ------------------------------------------------
 ---------------------REMOVE---------------------
 ------------------------------------------------
-function HandleRemoveCommand( Split, Player )
+function HandleRemoveCommand(Split, Player)
 	if Split[2] == nil then -- check if the player gave a radius
-		Player:SendMessage( cChatColor.Rose .. "Too few arguments.\n/remove <type>" )
+		Player:SendMessage(cChatColor.Rose .. "Too few arguments.\n/remove <type>")
 		return true
 	end
 	Entitys = 0
 	if string.upper(Split[2]) == "ITEMS" then -- check if the plugin has to destroy pickups
-		local LoopEntity = function( Entity )
+		local LoopEntity = function(Entity)
 			if Entity:IsPickup() then -- if the entity is a pickup then destroy it.
 				Entity:Destroy()
 				Entitys = Entitys + 1
@@ -16,7 +16,7 @@ function HandleRemoveCommand( Split, Player )
 		end
 		Player:GetWorld():ForEachEntity(LoopEntity)
 	elseif string.upper(Split[2]) == "MINECARTS" then -- check if the plugin needs to destroy minecarts
-		local LoopEntity = function( Entity )
+		local LoopEntity = function(Entity)
 			if Entity:IsMinecart() then -- if the entity is a minecart then destroy it 
 				Entity:Destroy()
 				Entitys = Entitys + 1
@@ -24,10 +24,10 @@ function HandleRemoveCommand( Split, Player )
 		end
 		Player:GetWorld():ForEachEntity(LoopEntity)	
 	else
-		Player:SendMessage( cChatColor.Rose .. "Acceptable types: items, minecarts" ) -- the entity that the player wants to destroy does not exist.
+		Player:SendMessage(cChatColor.Rose .. "Acceptable types: items, minecarts") -- the entity that the player wants to destroy does not exist.
 		return true
 	end
-	Player:SendMessage( cChatColor.LightPurple .. "Marked " .. Entitys .. " entit(ies) for removal." )
+	Player:SendMessage(cChatColor.LightPurple .. "Marked " .. Entitys .. " entit(ies) for removal.")
 	return true
 end
 
@@ -35,11 +35,11 @@ end
 -------------------------------------------------
 ---------------------BUTCHER---------------------
 -------------------------------------------------
-function HandleButcherCommand( Split, Player )
+function HandleButcherCommand(Split, Player)
 	if Split[2] == nil then -- if the player did not give a radius then the radius is the normal radius
 		Radius = ButcherRadius
 	elseif tonumber(Split[2]) == nil then -- if the player gave a string as radius then stop
-		Player:SendMessage( cChatColor.Rose .. 'Number expected; string "' .. Split[2] .. '" given' )
+		Player:SendMessage(cChatColor.Rose .. 'Number expected; string "' .. Split[2] .. '" given')
 		return true
 	else -- the radius is set to the given radius
 		Radius = tonumber(Split[2])
