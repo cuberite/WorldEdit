@@ -66,20 +66,21 @@ end
 -------------------GETSIZE-------------------
 ---------------------------------------------
 function GetSize(Player)
-	if OnePlayer[Player:GetName()].x > TwoPlayer[Player:GetName()].x then -- check what number is bigger becouse otherwise you can get a negative number.
-		X = OnePlayer[Player:GetName()].x - TwoPlayer[Player:GetName()].x + 1
+	local PlayerName = Player:GetName()
+	if OnePlayer[PlayerName].x > TwoPlayer[PlayerName].x then -- check what number is bigger becouse otherwise you can get a negative number.
+		X = OnePlayer[PlayerName].x - TwoPlayer[PlayerName].x + 1
 	else
-		X = TwoPlayer[Player:GetName()].x - OnePlayer[Player:GetName()].x + 1
+		X = TwoPlayer[PlayerName].x - OnePlayer[PlayerName].x + 1
 	end
-	if OnePlayer[Player:GetName()].y > TwoPlayer[Player:GetName()].y then -- check what number is bigger becouse otherwise you can get a negative number.
-		Y = OnePlayer[Player:GetName()].y - TwoPlayer[Player:GetName()].y + 1
+	if OnePlayer[PlayerName].y > TwoPlayer[PlayerName].y then -- check what number is bigger becouse otherwise you can get a negative number.
+		Y = OnePlayer[PlayerName].y - TwoPlayer[PlayerName].y + 1
 	else
-		Y = TwoPlayer[Player:GetName()].y - OnePlayer[Player:GetName()].y + 1
+		Y = TwoPlayer[PlayerName].y - OnePlayer[PlayerName].y + 1
 	end
-	if OnePlayer[Player:GetName()].z > TwoPlayer[Player:GetName()].z then -- check what number is bigger becouse otherwise you can get a negative number.
-		Z = OnePlayer[Player:GetName()].z - TwoPlayer[Player:GetName()].z + 1
+	if OnePlayer[PlayerName].z > TwoPlayer[PlayerName].z then -- check what number is bigger becouse otherwise you can get a negative number.
+		Z = OnePlayer[PlayerName].z - TwoPlayer[PlayerName].z + 1
 	else
-		Z = TwoPlayer[Player:GetName()].z - OnePlayer[Player:GetName()].z + 1
+		Z = TwoPlayer[PlayerName].z - OnePlayer[PlayerName].z + 1
 	end
 	return X * Y * Z -- calculate the area.
 end
@@ -146,22 +147,23 @@ end
 -----------------GETXZCOORDS-----------------
 ---------------------------------------------
 function GetXZCoords(Player)
-	if OnePlayer[Player:GetName()] == nil or TwoPlayer[Player:GetName()] == nil then -- check if there is a region. Needed for plugins that are going to use this plugin.
+	local PlayerName = Player:GetName()
+	if OnePlayer[PlayerName] == nil or TwoPlayer[PlayerName] == nil then -- check if there is a region. Needed for plugins that are going to use this plugin.
 		return false
 	end
-	if OnePlayer[Player:GetName()].x < TwoPlayer[Player:GetName()].x then -- check what number is bigger becouse otherwise you can get a negative number.
-		OneX = OnePlayer[Player:GetName()].x
-		TwoX = TwoPlayer[Player:GetName()].x
+	if OnePlayer[PlayerName].x < TwoPlayer[PlayerName].x then -- check what number is bigger becouse otherwise you can get a negative number.
+		OneX = OnePlayer[PlayerName].x
+		TwoX = TwoPlayer[PlayerName].x
 	else
-		OneX = TwoPlayer[Player:GetName()].x
-		TwoX = OnePlayer[Player:GetName()].x
+		OneX = TwoPlayer[PlayerName].x
+		TwoX = OnePlayer[PlayerName].x
 	end
-	if OnePlayer[Player:GetName()].z < TwoPlayer[Player:GetName()].z then -- check what number is bigger becouse otherwise you can get a negative number.
-		OneZ = OnePlayer[Player:GetName()].z
-		TwoZ = TwoPlayer[Player:GetName()].z
+	if OnePlayer[PlayerName].z < TwoPlayer[PlayerName].z then -- check what number is bigger becouse otherwise you can get a negative number.
+		OneZ = OnePlayer[PlayerName].z
+		TwoZ = TwoPlayer[PlayerName].z
 	else
-		OneZ = TwoPlayer[Player:GetName()].z
-		TwoZ = OnePlayer[Player:GetName()].z
+		OneZ = TwoPlayer[PlayerName].z
+		TwoZ = OnePlayer[PlayerName].z
 	end
 	return OneX, TwoX, OneZ, TwoZ -- return the right coordinates
 end
@@ -171,29 +173,30 @@ end
 -----------------GETXYZCOORDS-----------------
 ----------------------------------------------
 function GetXYZCoords(Player)
-	if OnePlayer[Player:GetName()] == nil or TwoPlayer[Player:GetName()] == nil then -- check if there is a region. Needed for plugins that are going to use this plugin.
+	local PlayerName = Player:GetName()
+	if OnePlayer[PlayerName] == nil or TwoPlayer[PlayerName] == nil then -- check if there is a region. Needed for plugins that are going to use this plugin.
 		return false
 	end
-	if OnePlayer[Player:GetName()].x < TwoPlayer[Player:GetName()].x then -- check what number is bigger becouse otherwise you can get a negative number.
-		OneX = OnePlayer[Player:GetName()].x
-		TwoX = TwoPlayer[Player:GetName()].x
+	if OnePlayer[PlayerName].x < TwoPlayer[PlayerName].x then -- check what number is bigger becouse otherwise you can get a negative number.
+		OneX = OnePlayer[PlayerName].x
+		TwoX = TwoPlayer[PlayerName].x
 	else
-		OneX = TwoPlayer[Player:GetName()].x
-		TwoX = OnePlayer[Player:GetName()].x
+		OneX = TwoPlayer[PlayerName].x
+		TwoX = OnePlayer[PlayerName].x
 	end
-	if OnePlayer[Player:GetName()].y < TwoPlayer[Player:GetName()].y then -- check what number is bigger becouse otherwise you can get a negative number.
-		OneY = OnePlayer[Player:GetName()].y
-		TwoY = TwoPlayer[Player:GetName()].y
+	if OnePlayer[PlayerName].y < TwoPlayer[PlayerName].y then -- check what number is bigger becouse otherwise you can get a negative number.
+		OneY = OnePlayer[PlayerName].y
+		TwoY = TwoPlayer[PlayerName].y
 	else
-		OneY = TwoPlayer[Player:GetName()].y
-		TwoY = OnePlayer[Player:GetName()].y
+		OneY = TwoPlayer[PlayerName].y
+		TwoY = OnePlayer[PlayerName].y
 	end
-	if OnePlayer[Player:GetName()].z < TwoPlayer[Player:GetName()].z then -- check what number is bigger becouse otherwise you can get a negative number.
-		OneZ = OnePlayer[Player:GetName()].z
-		TwoZ = TwoPlayer[Player:GetName()].z
+	if OnePlayer[PlayerName].z < TwoPlayer[PlayerName].z then -- check what number is bigger becouse otherwise you can get a negative number.
+		OneZ = OnePlayer[PlayerName].z
+		TwoZ = TwoPlayer[PlayerName].z
 	else
-		OneZ = TwoPlayer[Player:GetName()].z
-		TwoZ = OnePlayer[Player:GetName()].z
+		OneZ = TwoPlayer[PlayerName].z
+		TwoZ = OnePlayer[PlayerName].z
 	end
 	return OneX, TwoX, OneY, TwoY, OneZ, TwoZ -- return the right coordinates
 end
@@ -326,20 +329,21 @@ end
 ----------------LOADPLAYER------------------
 --------------------------------------------
 function LoadPlayer(Player)
-	if PersonalBlockArea[Player:GetName()] == nil then
-		PersonalBlockArea[Player:GetName()] = cBlockArea()
+	local PlayerName = Player:GetName()
+	if PersonalBlockArea[PlayerName] == nil then
+		PersonalBlockArea[PlayerName] = cBlockArea()
 	end
-	if PersonalUndo[Player:GetName()] == nil then
-		PersonalUndo[Player:GetName()] = cBlockArea()
+	if PersonalUndo[PlayerName] == nil then
+		PersonalUndo[PlayerName] = cBlockArea()
 	end
-	if PersonalRedo[Player:GetName()] == nil then
-		PersonalRedo[Player:GetName()] = cBlockArea()
+	if PersonalRedo[PlayerName] == nil then
+		PersonalRedo[PlayerName] = cBlockArea()
 	end
-	if PersonalClipboard[Player:GetName()] == nil then
-		PersonalClipboard[Player:GetName()] = cBlockArea()
+	if PersonalClipboard[PlayerName] == nil then
+		PersonalClipboard[PlayerName] = cBlockArea()
 	end
-	if WandActivated[Player:GetName()] == nil then
-		WandActivated[Player:GetName()] = true
+	if WandActivated[PlayerName] == nil then
+		WandActivated[PlayerName] = true
 	end
 end
 
