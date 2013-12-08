@@ -154,23 +154,30 @@ end
 ------------LEFTCLICKCOMPASS--------------
 ------------------------------------------
 function LeftClickCompass(Player, World)
-	local Tracer = cTracer(World)
-	local EyePos = Vector3f(Player:GetEyePosition().x, Player:GetEyePosition().y, Player:GetEyePosition().z)
-	local EyeVector = Vector3f(Player:GetLookVector().x, Player:GetLookVector().y, Player:GetLookVector().z)
-	Tracer:Trace(EyePos , EyeVector, 200)
-	local X = Tracer.BlockHitPosition.x
-	local Z = Tracer.BlockHitPosition.z
-	local Y = Tracer.BlockHitPosition.y
-	if Z == 0 and X == 0 and Y == 0 then
+	local Callbacks = {
+		OnNextBlock = function(X, Y, Z, BlockType, BlockMeta)
+			if BlockType ~= E_BLOCK_AIR and not g_BlockOneHitDig[BlockType] then
+				for y = Y, World:GetHeight(X, Z) + 1 do
+					if World:GetBlock(X, y, Z) == E_BLOCK_AIR then
+						Y = y
+						break
+					end
+				end
+				Player:TeleportToCoords(X + 0.5, Y, Z + 0.5)
+				return true
+			end
+		end
+	};
+	
+	local EyePos = Player:GetEyePosition()
+	local LookVector = Player:GetLookVector()
+	LookVector:Normalize()
+	
+	local Start = EyePos + LookVector + LookVector;
+	local End = EyePos + LookVector * 75
+	if cLineBlockTracer.Trace(World, Callbacks, Start.x, Start.y, Start.z, End.x, End.y, End.z) then
+		return true
+	else
 		return false
 	end
-	
-	for y = Y, World:GetHeight(X, Z) + 1 do
-		if World:GetBlock(X, y, Z) == E_BLOCK_AIR then
-			Y = y
-			break
-		end
-	end
-	Player:TeleportToCoords(X + 0.5, Y, Z + 0.5)
-	return true
 end
