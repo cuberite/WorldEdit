@@ -107,10 +107,24 @@ function HandlePasteCommand(Split, Player)
 		Player:SendMessage(cChatColor.Rose .. "Your clipboard is empty. Use //copy first.")
 		return true
 	end
-	LastCoords[Player:GetName()] = Player:GetPosX() .. "," .. Player:GetPosY() .. "," .. Player:GetPosZ() .. "," .. Player:GetWorld():GetName()
-	PersonalUndo[Player:GetName()]:Read(Player:GetWorld(), Player:GetPosX(), Player:GetPosX() + PersonalClipboard[Player:GetName()]:GetSizeX(), Player:GetPosY(), Player:GetPosY() + PersonalClipboard[Player:GetName()]:GetSizeY(), Player:GetPosZ(), Player:GetPosZ() + PersonalClipboard[Player:GetName()]:GetSizeZ())
-	PersonalClipboard[Player:GetName()]:Write(Player:GetWorld(), Player:GetPosX(), Player:GetPosY(), Player:GetPosZ(), 3) -- paste the area that the player copied
-	Player:GetWorld():WakeUpSimulatorsInArea(Player:GetPosX() - 1, Player:GetPosX() + PersonalClipboard[Player:GetName()]:GetSizeX() + 1, Player:GetPosY() - 1, Player:GetPosY() + PersonalClipboard[Player:GetName()]:GetSizeY() + 1, Player:GetPosZ() - 1, Player:GetPosZ() + PersonalClipboard[Player:GetName()]:GetSizeZ() + 1)
+	local PlayerName = Player:GetName()
+	local World = Player:GetWorld()
+	local MinX = Player:GetPosX()
+	local MinY = Player:GetPosY()
+	local MinZ = Player:GetPosZ()
+	local MaxX = MinX + PersonalClipboard[PlayerName]:GetSizeX()
+	local MaxY = MinY + PersonalClipboard[PlayerName]:GetSizeY()
+	local MaxZ = MinZ + PersonalClipboard[PlayerName]:GetSizeZ()
+	
+	if CheckIfInsideAreas(MinX, MaxX, MinY, MaxY, MinZ, MaxZ) then -- Check if the clipboard intersects with any of the areas.
+		Player:SendMessage(cChatColor.Rose .. "Clipboard intersects with an area")
+		return true
+	end
+	
+	LastCoords[PlayerName] = MinX .. "," .. MinY .. "," .. MinZ .. "," .. World:GetName()
+	PersonalUndo[PlayerName]:Read(World, MinX, MaxX, MinY, MaxY, MinZ, MaxZ)
+	PersonalClipboard[PlayerName]:Write(World, MinX, MinY, MinZ, 3) -- paste the area that the player copied
+	World:WakeUpSimulatorsInArea(MinX - 1, MaxX + 1, MinY - 1, MaxY + 1, MinZ - 1, MaxZ + 1)
 	Player:SendMessage(cChatColor.LightPurple .. "Pasted relative to you.")
 	return true
 end
@@ -141,6 +155,12 @@ function HandleCutCommand(Split, Player)
 		return true
 	end
 	local OneX, TwoX, OneY, TwoY, OneZ, TwoZ = GetXYZCoords(Player) -- get the right coordinates
+	
+	if CheckIfInsideAreas(OneX, TwoX, OneY, TwoY, OneZ, TwoZ) then -- Check if the clipboard intersects with any of the areas.
+		Player:SendMessage(cChatColor.Rose .. "Region intersects with an area")
+		return true
+	end
+	
 	local World = Player:GetWorld() -- get the world
 	LastCoords[Player:GetName()] = OneX .. "," .. OneY .. "," .. OneZ .. "," .. Player:GetWorld():GetName()
 	PersonalUndo[Player:GetName()]:Read(World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ)
@@ -163,13 +183,20 @@ function HandleSetCommand(Split, Player)
 		Player:SendMessage(cChatColor.Rose .. "No Region set")
 		return true
 	end
+	
 	if Split[2] == nil then
 		Player:SendMessage(cChatColor.Rose .. "Please say a block ID")
 		return true
 	end
+	
 	local BlockType, BlockMeta = GetBlockTypeMeta(Player, Split[2])
 	if BlockType ~= false then
-		Player:SendMessage(cChatColor.LightPurple .. HandleFillSelection(Player, Player:GetWorld(), BlockType, BlockMeta) .. " block(s) have been changed.")
+		local Blocks = HandleFillSelection(Player, Player:GetWorld(), BlockType, BlockMeta)
+		if not Blocks then
+			Player:SendMessage(cChatColor.Rose .. "Region intersects with an area")
+		else
+			Player:SendMessage(cChatColor.LightPurple .. Blocks .. " block(s) have been changed.")
+		end
 	end
 	return true
 end
@@ -190,7 +217,12 @@ function HandleReplaceCommand(Split, Player)
 	local ChangeBlockType, ChangeBlockMeta, TypeOnly = GetBlockTypeMeta(Player, Split[2])
 	local ToChangeBlockType, ToChangeBlockMeta = GetBlockTypeMeta(Player, Split[3])
 	if ChangeBlockType ~= false and ToChangeBlockType ~= false then
-		Player:SendMessage(cChatColor.LightPurple .. HandleReplaceSelection(Player, Player:GetWorld(), ChangeBlockType, ChangeBlockMeta, ToChangeBlockType, ToChangeBlockMeta, TypeOnly) .. " block(s) have been changed.")
+		local Blocks = HandleReplaceSelection(Player, Player:GetWorld(), ChangeBlockType, ChangeBlockMeta, ToChangeBlockType, ToChangeBlockMeta, TypeOnly)
+		if not Blocks then
+			Player:SendMessage(cChatColor.Rose .. "Region intersects with an area")
+		else
+			Player:SendMessage(cChatColor.LightPurple .. Blocks .. " block(s) have been changed.")
+		end
 	end
 	return true
 end
@@ -211,7 +243,12 @@ function HandleFacesCommand(Split, Player)
 	end
 	local BlockType, BlockMeta = GetBlockTypeMeta(Player, Split[2])
 	if BlockType ~= false then
-		Player:SendMessage(cChatColor.LightPurple .. HandleCreateFaces(Player, Player:GetWorld(), BlockType, BlockMeta) .. " block(s) have been changed.")
+		local Blocks = HandleCreateFaces(Player, Player:GetWorld(), BlockType, BlockMeta)
+		if not Blocks then
+			Player:SendMessage(cChatColor.Rose .. "Region intersects with an area")
+		else
+			Player:SendMessage(cChatColor.LightPurple .. Blocks .. " block(s) have been changed.")
+		end
 	end
 	return true
 end
@@ -231,7 +268,12 @@ function HandleWallsCommand(Split, Player)
 	end
 	local BlockType, BlockMeta = GetBlockTypeMeta(Player, Split[2])
 	if BlockType ~= false then
-		Player:SendMessage(cChatColor.LightPurple .. HandleCreateWalls(Player, Player:GetWorld(), BlockType, BlockMeta) .. " block(s) have been changed.")
+		local Blocks = HandleCreateWalls(Player, Player:GetWorld(), BlockType, BlockMeta)
+		if not Blocks then
+			Player:SendMessage(cChatColor.Rose .. "Region intersects with an area")
+		else
+			Player:SendMessage(cChatColor.LightPurple .. Blocks .. " block(s) have been changed.")
+		end
 	end
 	return true
 end

@@ -124,6 +124,6 @@ function OnPlayerAnimation(Player, Animation)
 				end
 			end
 		end
-		LeftClickCompassUsed[Player:GetName()] = true
+		LeftClickCompassUsed[PlayerName] = true
 	end
 end

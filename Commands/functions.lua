@@ -3,6 +3,11 @@
 -------------------------------------------------
 function HandleCreateWalls(Player, World, BlockType, BlockMeta)
 	local OneX, TwoX, OneY, TwoY, OneZ, TwoZ = GetXYZCoords(Player) -- Get the right X, Y and Z coordinates
+	
+	if CheckIfInsideAreas(OneX, TwoX, OneY, TwoY, OneZ, TwoZ) then -- Check if the region intersects with any of the areas.
+		return false
+	end
+	
 	LastCoords[Player:GetName()] = OneX .. "," .. OneY .. "," .. OneZ .. "," .. World:GetName()
 	PersonalUndo[Player:GetName()]:Read(World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ)
 	PersonalBlockArea[Player:GetName()]:Read(World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ)
@@ -32,6 +37,11 @@ end
 -------------------------------------------------
 function HandleCreateFaces(Player, World, BlockType, BlockMeta)
 	local OneX, TwoX, OneY, TwoY, OneZ, TwoZ = GetXYZCoords(Player) -- get the coordinates
+	
+	if CheckIfInsideAreas(OneX, TwoX, OneY, TwoY, OneZ, TwoZ) then -- Check if the region intersects with any of the areas.
+		return false
+	end
+	
 	local World = Player:GetWorld()	
 	LastCoords[Player:GetName()] = OneX .. "," .. OneY .. "," .. OneZ .. "," .. Player:GetWorld():GetName()
 	PersonalUndo[Player:GetName()]:Read(World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ)
@@ -65,7 +75,12 @@ end
 ------------------FILLFUNCTION------------------
 ------------------------------------------------
 function HandleFillSelection(Player, World, BlockType, BlockMeta)
-	local OneX, TwoX, OneY, TwoY, OneZ, TwoZ = GetXYZCoords(Player)	
+	local OneX, TwoX, OneY, TwoY, OneZ, TwoZ = GetXYZCoords(Player)
+	
+	if CheckIfInsideAreas(OneX, TwoX, OneY, TwoY, OneZ, TwoZ) then -- Check if the region intersects with any of the areas.
+		return false
+	end
+	
 	LastCoords[Player:GetName()] = OneX .. "," .. OneY .. "," .. OneZ .. "," .. Player:GetWorld():GetName()
 	PersonalUndo[Player:GetName()]:Read(World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ)
 	PersonalBlockArea[Player:GetName()]:Read(World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ) -- read the area
@@ -81,7 +96,12 @@ end
 -------------------------------------------------
 function HandleReplaceSelection(Player, World, ChangeBlockType, ChangeBlockMeta, ToChangeBlockType, ToChangeBlockMeta, TypeOnly)
 	local OneX, TwoX, OneY, TwoY, OneZ, TwoZ = GetXYZCoords(Player)
-	local Blocks =  0
+	
+	if CheckIfInsideAreas(OneX, TwoX, OneY, TwoY, OneZ, TwoZ) then -- Check if the region intersects with any of the areas.
+		return false
+	end
+	
+	local Blocks = 0
 	LastCoords[Player:GetName()] = OneX .. "," .. OneY .. "," .. OneZ .. "," .. Player:GetWorld():GetName()
 	PersonalUndo[Player:GetName()]:Read(World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ)
 	PersonalBlockArea[Player:GetName()]:Read(World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ) -- Read the area

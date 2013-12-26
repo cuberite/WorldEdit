@@ -1,3 +1,6 @@
+PLUGIN = nil
+ExclusionArea = {}
+
 function Initialize(Plugin)
 	
 	PLUGIN = Plugin

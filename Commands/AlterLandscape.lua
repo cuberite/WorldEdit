@@ -7,6 +7,11 @@ function HandleRemoveBelowCommand(Split, Player)
 	local Z = math.floor(Player:GetPosZ()) -- round the number (for example from 12.23423987 to 12)
 	local World = Player:GetWorld() -- Get the world
 	
+	if CheckIfInsideAreas(X, Y, Z, 0, 0, 0) then
+		Player:SendMessage(cChatColor.Rose .. "You are inside an area")
+		return true
+	end
+	
 	LastCoords[Player:GetName()] = X .. "," .. 1 .. "," .. Z .. "," .. Player:GetWorld():GetName()
 	PersonalUndo[Player:GetName()]:Read(World, X, X, 1, Y, Z, Z)
 	local BlockBelow = 0
@@ -27,6 +32,11 @@ function HandleRemoveAboveCommand(Split, Player)
 	local y = math.floor(Player:GetPosY()) -- round the number (for example from 12.23423987 to 12)
 	local Z = math.floor(Player:GetPosZ()) -- round the number (for example from 12.23423987 to 12)
 	local World = Player:GetWorld()
+	
+	if CheckIfInsideAreas(X, Y, Z, 0, 0, 0) then
+		Player:SendMessage(cChatColor.Rose .. "You are inside an area")
+		return true
+	end
 	
 	LastCoords[Player:GetName()] = X .. "," .. 1 .. "," .. Z .. "," .. Player:GetWorld():GetName()
 	PersonalUndo[Player:GetName()]:Read(World, X, X, 1, World:GetHeight(X, Z), Z, Z)
@@ -51,11 +61,20 @@ function HandleDrainCommand(Split, Player)
 	else
 		Radius = tonumber(Split[2]) -- set the radius to the given radius
 	end
-	local X = math.floor(Player:GetPosX())
-	local Y = math.floor(Player:GetPosY())
-	local Z = math.floor(Player:GetPosZ())
+	local MinX = math.floor(Player:GetPosX()) - Radius
+	local MinY = math.floor(Player:GetPosY()) - Radius
+	local MinZ = math.floor(Player:GetPosZ()) - Radius
+	local MaxX = math.floor(Player:GetPosX()) + Radius
+	local MaxY = math.floor(Player:GetPosY()) + Radius
+	local MaxZ = math.floor(Player:GetPosZ()) + Radius
+	
+	if CheckIfInsideAreas(MinX, MaxX, MinY, MaxY, MinZ, MaxZ) then
+		Player:SendMessage(cChatColor.Rose .. "You are inside an area")
+		return true
+	end
+	
 	local BlockArea = cBlockArea()
-	BlockArea:Read(Player:GetWorld(), X - Radius, X + Radius, Y - Radius, Y + Radius, Z - Radius, Z + Radius) -- read the area
+	BlockArea:Read(Player:GetWorld(), MinX, MaxX, MinY, MaxY, MinZ, MaxZ) -- read the area
 	for x=0, BlockArea:GetSizeX() - 1 do
 		for y=0, BlockArea:GetSizeY() - 1 do
 			for z=0, BlockArea:GetSizeZ() - 1 do
@@ -65,7 +84,7 @@ function HandleDrainCommand(Split, Player)
 			end
 		end
 	end
-	BlockArea:Write(Player:GetWorld(), X - Radius, Y - Radius, Z - Radius) -- write the are into the world.
+	BlockArea:Write(Player:GetWorld(), MinX, MinY, MinZ) -- write the are into the world.
 	return true
 end
 
@@ -83,11 +102,20 @@ function HandleExtinguishCommand(Split, Player)
 	else
 		Radius = tonumber(Split[2])
 	end
-	local X = math.floor(Player:GetPosX())
-	local Y = math.floor(Player:GetPosY())
-	local Z = math.floor(Player:GetPosZ())
+	local MinX = math.floor(Player:GetPosX()) - Radius
+	local MinY = math.floor(Player:GetPosY()) - Radius
+	local MinZ = math.floor(Player:GetPosZ()) - Radius
+	local MaxX = math.floor(Player:GetPosX()) + Radius
+	local MaxY = math.floor(Player:GetPosY()) + Radius
+	local MaxZ = math.floor(Player:GetPosZ()) + Radius
+	
+	if CheckIfInsideAreas(MinX, MaxX, MinY, MaxY, MinZ, MaxZ) then
+		Player:SendMessage(cChatColor.Rose .. "You are inside an area")
+		return true
+	end
+	
 	local BlockArea = cBlockArea()
-	BlockArea:Read(Player:GetWorld(), X - Radius, X + Radius, Y - Radius, Y + Radius, Z - Radius, Z + Radius)
+	BlockArea:Read(Player:GetWorld(), MinX, MaxX, MinY, MaxY, MinZ, MaxZ)
 	for X=0, BlockArea:GetSizeX() - 1 do
 		for Y=0, BlockArea:GetSizeY() - 1 do
 			for Z=0, BlockArea:GetSizeZ() - 1 do
@@ -97,7 +125,7 @@ function HandleExtinguishCommand(Split, Player)
 			end
 		end
 	end
-	BlockArea:Write(Player:GetWorld(), X - Radius, Y - Radius, Z - Radius)
+	BlockArea:Write(Player:GetWorld(), MinX, MinY, MinZ)
 	return true
 end
 
@@ -282,7 +310,7 @@ function HandlePumpkinsCommand(Split, Player)
 	else
 		Radius = Split[2]
 	end
-	World = Player:GetWorld()
+	local World = Player:GetWorld()
 	for I=1, Radius * 2 do
 		local X = math.floor(Player:GetPosX()) + math.random(-Radius, Radius)
 		local Z = math.floor(Player:GetPosZ()) + math.random(-Radius, Radius)

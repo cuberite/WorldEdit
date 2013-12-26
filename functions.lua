@@ -48,6 +48,9 @@ function LoadCommandFunctions(PluginDir)
 	dofile(PluginDir .. "/Commands/Entitys.lua") -- Add lua file with functions for entity commands
 	dofile(PluginDir .. "/Commands/Navigation.lua") -- Add lua file with functions for navigation commands
 	dofile(PluginDir .. "/Commands/Other.lua") -- Add lua file with functions for all the other commands
+	
+	dofile(PluginDir .. "/API/Manage.lua")
+	dofile(PluginDir .. "/API/Check.lua")
 end
 
 
