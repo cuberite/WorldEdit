@@ -154,6 +154,7 @@ end
 ------------LEFTCLICKCOMPASS--------------
 ------------------------------------------
 function LeftClickCompass(Player, World)
+	local HasHit = false
 	local Callbacks = {
 		OnNextBlock = function(X, Y, Z, BlockType, BlockMeta)
 			if BlockType ~= E_BLOCK_AIR and not g_BlockOneHitDig[BlockType] then
@@ -164,6 +165,7 @@ function LeftClickCompass(Player, World)
 					end
 				end
 				Player:TeleportToCoords(X + 0.5, Y, Z + 0.5)
+				HasHit = true
 				return true
 			end
 		end
@@ -175,9 +177,6 @@ function LeftClickCompass(Player, World)
 	
 	local Start = EyePos + LookVector + LookVector;
 	local End = EyePos + LookVector * 75
-	if cLineBlockTracer.Trace(World, Callbacks, Start.x, Start.y, Start.z, End.x, End.y, End.z) then
-		return true
-	else
-		return false
-	end
+	cLineBlockTracer.Trace(World, Callbacks, Start.x, Start.y, Start.z, End.x, End.y, End.z)
+	return HasHit
 end
