@@ -33,7 +33,7 @@ function HandleRemoveAboveCommand(Split, Player)
 	local Z = math.floor(Player:GetPosZ()) -- round the number (for example from 12.23423987 to 12)
 	local World = Player:GetWorld()
 	
-	if CheckIfInsideAreas(X, X, Y, Y, Z, Z, Player, Player:GetWorld(), "removeabove") then
+	if CheckIfInsideAreas(X, X, y, y, Z, Z, Player, World, "removeabove") then
 		Player:SendMessage(cChatColor.Rose .. "You are inside an area")
 		return true
 	end
@@ -146,7 +146,7 @@ function HandleGreenCommand(Split, Player)
 	local DirtBlocks = 0
 	for x=X - Radius, X + Radius do
 		for z=Z - Radius, Z + Radius do
-			y = World:GetHeight(x, z)
+			local y = World:GetHeight(x, z)
 			if World:GetBlock(x, y, z) == E_BLOCK_DIRT then -- if the block is dirt
 				DirtBlocks = DirtBlocks + 1
 				World:SetBlock(x, y, z, E_BLOCK_GRASS, 0) -- set the block to grass

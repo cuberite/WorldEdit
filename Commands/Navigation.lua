@@ -69,15 +69,18 @@ end
 -----------------------------------------------
 function HandleDescendCommand(Split, Player)
 	local World = Player:GetWorld()
-	if Player:GetPosY() < 1 then
+	if Player:GetPosY() > 1 then
 		local X = math.floor(Player:GetPosX())
 		local Z = math.floor(Player:GetPosZ())
 		local Air = false
 		for Y=math.floor(Player:GetPosY()), 1, -1 do
 			if World:GetBlock(X, Y, Z) == E_BLOCK_AIR then
 				if (Air) then -- if the player went through blocks other then air then go further until you can teleport
-					while World:GetBlock(X, Y, Z) == E_BLOCK_AIR do
-						Y = Y - 1
+					for I=Y, 1 , -1 do
+						if g_BlockIsSolid[World:GetBlock(X, I, Z)] then
+							Y = I
+							break
+						end
 					end
 					y = Y
 					break
