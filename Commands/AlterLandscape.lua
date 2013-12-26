@@ -7,7 +7,7 @@ function HandleRemoveBelowCommand(Split, Player)
 	local Z = math.floor(Player:GetPosZ()) -- round the number (for example from 12.23423987 to 12)
 	local World = Player:GetWorld() -- Get the world
 	
-	if CheckIfInsideAreas(X, Y, Z, 0, 0, 0) then
+	if CheckIfInsideAreas(X, X, Y, Y, Z, Z, Player, Player:GetWorld(), "removebelow") then
 		Player:SendMessage(cChatColor.Rose .. "You are inside an area")
 		return true
 	end
@@ -33,7 +33,7 @@ function HandleRemoveAboveCommand(Split, Player)
 	local Z = math.floor(Player:GetPosZ()) -- round the number (for example from 12.23423987 to 12)
 	local World = Player:GetWorld()
 	
-	if CheckIfInsideAreas(X, Y, Z, 0, 0, 0) then
+	if CheckIfInsideAreas(X, X, Y, Y, Z, Z, Player, Player:GetWorld(), "removeabove") then
 		Player:SendMessage(cChatColor.Rose .. "You are inside an area")
 		return true
 	end
@@ -68,7 +68,7 @@ function HandleDrainCommand(Split, Player)
 	local MaxY = math.floor(Player:GetPosY()) + Radius
 	local MaxZ = math.floor(Player:GetPosZ()) + Radius
 	
-	if CheckIfInsideAreas(MinX, MaxX, MinY, MaxY, MinZ, MaxZ) then
+	if CheckIfInsideAreas(MinX, MaxX, MinY, MaxY, MinZ, MaxZ, Player, Player:GetWorld(), "drain") then
 		Player:SendMessage(cChatColor.Rose .. "You are inside an area")
 		return true
 	end
@@ -109,7 +109,7 @@ function HandleExtinguishCommand(Split, Player)
 	local MaxY = math.floor(Player:GetPosY()) + Radius
 	local MaxZ = math.floor(Player:GetPosZ()) + Radius
 	
-	if CheckIfInsideAreas(MinX, MaxX, MinY, MaxY, MinZ, MaxZ) then
+	if CheckIfInsideAreas(MinX, MaxX, MinY, MaxY, MinZ, MaxZ, Player, Player:GetWorld(), "extinguish") then
 		Player:SendMessage(cChatColor.Rose .. "You are inside an area")
 		return true
 	end

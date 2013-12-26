@@ -116,7 +116,7 @@ function HandlePasteCommand(Split, Player)
 	local MaxY = MinY + PersonalClipboard[PlayerName]:GetSizeY()
 	local MaxZ = MinZ + PersonalClipboard[PlayerName]:GetSizeZ()
 	
-	if CheckIfInsideAreas(MinX, MaxX, MinY, MaxY, MinZ, MaxZ) then -- Check if the clipboard intersects with any of the areas.
+	if CheckIfInsideAreas(MinX, MaxX, MinY, MaxY, MinZ, MaxZ, Player, Player:GetWorld(), "paste") then -- Check if the clipboard intersects with any of the areas.
 		Player:SendMessage(cChatColor.Rose .. "Clipboard intersects with an area")
 		return true
 	end
@@ -156,7 +156,7 @@ function HandleCutCommand(Split, Player)
 	end
 	local OneX, TwoX, OneY, TwoY, OneZ, TwoZ = GetXYZCoords(Player) -- get the right coordinates
 	
-	if CheckIfInsideAreas(OneX, TwoX, OneY, TwoY, OneZ, TwoZ) then -- Check if the clipboard intersects with any of the areas.
+	if CheckIfInsideAreas(OneX, TwoX, OneY, TwoY, OneZ, TwoZ, Player, Player:GetWorld(), "cut") then -- Check if the clipboard intersects with any of the areas.
 		Player:SendMessage(cChatColor.Rose .. "Region intersects with an area")
 		return true
 	end

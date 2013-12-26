@@ -4,7 +4,7 @@
 function HandleCreateWalls(Player, World, BlockType, BlockMeta)
 	local OneX, TwoX, OneY, TwoY, OneZ, TwoZ = GetXYZCoords(Player) -- Get the right X, Y and Z coordinates
 	
-	if CheckIfInsideAreas(OneX, TwoX, OneY, TwoY, OneZ, TwoZ) then -- Check if the region intersects with any of the areas.
+	if CheckIfInsideAreas(OneX, TwoX, OneY, TwoY, OneZ, TwoZ, Player, World, "walls") then -- Check if the region intersects with any of the areas.
 		return false
 	end
 	
@@ -38,7 +38,7 @@ end
 function HandleCreateFaces(Player, World, BlockType, BlockMeta)
 	local OneX, TwoX, OneY, TwoY, OneZ, TwoZ = GetXYZCoords(Player) -- get the coordinates
 	
-	if CheckIfInsideAreas(OneX, TwoX, OneY, TwoY, OneZ, TwoZ) then -- Check if the region intersects with any of the areas.
+	if CheckIfInsideAreas(OneX, TwoX, OneY, TwoY, OneZ, TwoZ, Player, World, "faces") then -- Check if the region intersects with any of the areas.
 		return false
 	end
 	
@@ -77,7 +77,7 @@ end
 function HandleFillSelection(Player, World, BlockType, BlockMeta)
 	local OneX, TwoX, OneY, TwoY, OneZ, TwoZ = GetXYZCoords(Player)
 	
-	if CheckIfInsideAreas(OneX, TwoX, OneY, TwoY, OneZ, TwoZ) then -- Check if the region intersects with any of the areas.
+	if CheckIfInsideAreas(OneX, TwoX, OneY, TwoY, OneZ, TwoZ, Player, World, "fill") then -- Check if the region intersects with any of the areas.
 		return false
 	end
 	
@@ -97,7 +97,7 @@ end
 function HandleReplaceSelection(Player, World, ChangeBlockType, ChangeBlockMeta, ToChangeBlockType, ToChangeBlockMeta, TypeOnly)
 	local OneX, TwoX, OneY, TwoY, OneZ, TwoZ = GetXYZCoords(Player)
 	
-	if CheckIfInsideAreas(OneX, TwoX, OneY, TwoY, OneZ, TwoZ) then -- Check if the region intersects with any of the areas.
+	if CheckIfInsideAreas(OneX, TwoX, OneY, TwoY, OneZ, TwoZ, Player, World, "replace") then -- Check if the region intersects with any of the areas.
 		return false
 	end
 	

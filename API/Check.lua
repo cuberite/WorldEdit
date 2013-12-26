@@ -1,8 +1,6 @@
-function CheckIfInsideAreas(MinX, MaxX, MinY, MaxY, MinZ, MaxZ)
-	local Region = cCuboid(MinX, MinY, MinZ, MaxX, MaxY, MaxZ)
-	Region:Sort()
-	for Key, Value in pairs(ExclusionArea) do
-		if Value[1]:DoesIntersect(Region) then
+function CheckIfInsideAreas(a_MinX, a_MaxX, a_MinY, a_MaxY, a_MinZ, a_MaxZ, a_Player, a_World, a_Operation)
+	for Key, Value in pairs(ExclusionArea[a_World:GetName()]) do
+		if Value.Plugin:Call(Value.FunctionName, a_MinX, a_MaxX, a_MinY, a_MaxY, a_MinZ, a_MaxZ, a_Player, a_World, a_Operation) then
 			return true
 		end
 	end
