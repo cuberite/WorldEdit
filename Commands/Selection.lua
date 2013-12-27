@@ -117,7 +117,6 @@ function HandlePasteCommand(Split, Player)
 	local MaxZ = MinZ + PersonalClipboard[PlayerName]:GetSizeZ()
 	
 	if CheckIfInsideAreas(MinX, MaxX, MinY, MaxY, MinZ, MaxZ, Player, Player:GetWorld(), "paste") then -- Check if the clipboard intersects with any of the areas.
-		Player:SendMessage(cChatColor.Rose .. "Clipboard intersects with an area")
 		return true
 	end
 	
@@ -157,7 +156,6 @@ function HandleCutCommand(Split, Player)
 	local OneX, TwoX, OneY, TwoY, OneZ, TwoZ = GetXYZCoords(Player) -- get the right coordinates
 	
 	if CheckIfInsideAreas(OneX, TwoX, OneY, TwoY, OneZ, TwoZ, Player, Player:GetWorld(), "cut") then -- Check if the clipboard intersects with any of the areas.
-		Player:SendMessage(cChatColor.Rose .. "Region intersects with an area")
 		return true
 	end
 	
@@ -192,9 +190,7 @@ function HandleSetCommand(Split, Player)
 	local BlockType, BlockMeta = GetBlockTypeMeta(Player, Split[2])
 	if BlockType ~= false then
 		local Blocks = HandleFillSelection(Player, Player:GetWorld(), BlockType, BlockMeta)
-		if not Blocks then
-			Player:SendMessage(cChatColor.Rose .. "Region intersects with an area")
-		else
+		if Blocks then
 			Player:SendMessage(cChatColor.LightPurple .. Blocks .. " block(s) have been changed.")
 		end
 	end
@@ -218,9 +214,7 @@ function HandleReplaceCommand(Split, Player)
 	local ToChangeBlockType, ToChangeBlockMeta = GetBlockTypeMeta(Player, Split[3])
 	if ChangeBlockType ~= false and ToChangeBlockType ~= false then
 		local Blocks = HandleReplaceSelection(Player, Player:GetWorld(), ChangeBlockType, ChangeBlockMeta, ToChangeBlockType, ToChangeBlockMeta, TypeOnly)
-		if not Blocks then
-			Player:SendMessage(cChatColor.Rose .. "Region intersects with an area")
-		else
+		if Blocks then
 			Player:SendMessage(cChatColor.LightPurple .. Blocks .. " block(s) have been changed.")
 		end
 	end

@@ -8,7 +8,6 @@ function HandleRemoveBelowCommand(Split, Player)
 	local World = Player:GetWorld() -- Get the world
 	
 	if CheckIfInsideAreas(X, X, Y, Y, Z, Z, Player, Player:GetWorld(), "removebelow") then
-		Player:SendMessage(cChatColor.Rose .. "You are inside an area")
 		return true
 	end
 	
@@ -34,7 +33,6 @@ function HandleRemoveAboveCommand(Split, Player)
 	local World = Player:GetWorld()
 	
 	if CheckIfInsideAreas(X, X, y, y, Z, Z, Player, World, "removeabove") then
-		Player:SendMessage(cChatColor.Rose .. "You are inside an area")
 		return true
 	end
 	
@@ -69,7 +67,6 @@ function HandleDrainCommand(Split, Player)
 	local MaxZ = math.floor(Player:GetPosZ()) + Radius
 	
 	if CheckIfInsideAreas(MinX, MaxX, MinY, MaxY, MinZ, MaxZ, Player, Player:GetWorld(), "drain") then
-		Player:SendMessage(cChatColor.Rose .. "You are inside an area")
 		return true
 	end
 	
@@ -110,7 +107,6 @@ function HandleExtinguishCommand(Split, Player)
 	local MaxZ = math.floor(Player:GetPosZ()) + Radius
 	
 	if CheckIfInsideAreas(MinX, MaxX, MinY, MaxY, MinZ, MaxZ, Player, Player:GetWorld(), "extinguish") then
-		Player:SendMessage(cChatColor.Rose .. "You are inside an area")
 		return true
 	end
 	
@@ -146,7 +142,7 @@ function HandleGreenCommand(Split, Player)
 	local MaxX = math.floor(Player:GetPosX()) + Radius
 	local MinZ = math.floor(Player:GetPosZ()) - Radius
 	local MaxZ = math.floor(Player:GetPosZ()) + Radius
-	local YCheck = GetMultipleBlockChanges(MinX, MaxX, MinZ, MaxZ, Player, World, "snow")
+	local YCheck = GetMultipleBlockChanges(MinX, MaxX, MinZ, MaxZ, Player, World, "green")
 	local PossibleBlockChanges = {}
 	
 	for x=MinX, MaxX do
@@ -159,9 +155,7 @@ function HandleGreenCommand(Split, Player)
 		end
 	end
 	
-	if YCheck:Flush() then
-		Player:SendMessage(cChatColor.Rose .. "Changes would intersect with an area")
-	else
+	if not YCheck:Flush() then
 		for idx, value in ipairs(PossibleBlockChanges) do
 			World:SetBlock(value.X, value.Y, value.Z, value.BlockType, 0)
 		end
@@ -206,9 +200,7 @@ function HandleSnowCommand(Split, Player)
 		end
 	end
 	
-	if YCheck:Flush() then
-		Player:SendMessage(cChatColor.Rose .. "Changes would intersect with an area")
-	else
+	if not YCheck:Flush() then
 		for idx, value in ipairs(PossibleBlockChanges) do
 			World:SetBlock(value.X, value.Y, value.Z, value.BlockType, 0)
 		end
@@ -249,13 +241,11 @@ function HandleThawCommand(Split, Player)
 		end
 	end
 	
-	if YCheck:Flush() then
-		Player:SendMessage(cChatColor.Rose .. "Changes would intersect with an area")
-	else
+	if not YCheck:Flush() then
 		for idx, value in ipairs(PossibleBlockChanges) do
 			World:SetBlock(value.X, value.Y, value.Z, value.BlockType, 0)
 		end
-		Player:SendMessage(cChatColor.LightPurple .. #PossibleBlockChanges .. " surfaces covered. Let is snow~")
+		Player:SendMessage(cChatColor.LightPurple .. #PossibleBlockChanges .. "  surfaces thawed")
 	end
 	return true
 end
