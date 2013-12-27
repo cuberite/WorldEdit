@@ -140,20 +140,33 @@ function HandleGreenCommand(Split, Player)
 	else
 		Radius = tonumber(Split[2]) -- set the radius to the given radius
 	end
+	
 	local World = Player:GetWorld()
-	local X = math.floor(Player:GetPosX())
-	local Z = math.floor(Player:GetPosZ())
-	local DirtBlocks = 0
-	for x=X - Radius, X + Radius do
-		for z=Z - Radius, Z + Radius do
+	local MinX = math.floor(Player:GetPosX()) - Radius
+	local MaxX = math.floor(Player:GetPosX()) + Radius
+	local MinZ = math.floor(Player:GetPosZ()) - Radius
+	local MaxZ = math.floor(Player:GetPosZ()) + Radius
+	local YCheck = GetMultipleBlockChanges(MinX, MaxX, MinZ, MaxZ, Player, World, "snow")
+	local PossibleBlockChanges = {}
+	
+	for x=MinX, MaxX do
+		for z=MinZ, MaxZ do
 			local y = World:GetHeight(x, z)
+			YCheck:SetY(y)
 			if World:GetBlock(x, y, z) == E_BLOCK_DIRT then -- if the block is dirt
-				DirtBlocks = DirtBlocks + 1
-				World:SetBlock(x, y, z, E_BLOCK_GRASS, 0) -- set the block to grass
+				table.insert(PossibleBlockChanges, {X = x, Y = y, Z = z, BlockType = E_BLOCK_GRASS})
 			end
 		end
 	end
-	Player:SendMessage(cChatColor.LightPurple .. DirtBlocks .. " surfaces greened.")
+	
+	if YCheck:Flush() then
+		Player:SendMessage(cChatColor.Rose .. "Changes would intersect with an area")
+	else
+		for idx, value in ipairs(PossibleBlockChanges) do
+			World:SetBlock(value.X, value.Y, value.Z, value.BlockType, 0)
+		end
+		Player:SendMessage(cChatColor.LightPurple .. #PossibleBlockChanges .. " surfaces greened.")
+	end
 	return true
 end
 
@@ -168,28 +181,39 @@ function HandleSnowCommand(Split, Player)
 	else
 		Radius = tonumber(Split[2]) -- set the radius to the given radius
 	end
+	
 	local World = Player:GetWorld() -- Get the world the player is in
-	local X = math.floor(Player:GetPosX())
-	local Z = math.floor(Player:GetPosZ())
-	local SnowBlocks = 0
-	for x=X - Radius, X + Radius do
-		for z=Z - Radius, Z + Radius do
+	local MinX = math.floor(Player:GetPosX()) - Radius
+	local MaxX = math.floor(Player:GetPosX()) + Radius
+	local MinZ = math.floor(Player:GetPosZ()) - Radius
+	local MaxZ = math.floor(Player:GetPosZ()) + Radius
+	local YCheck = GetMultipleBlockChanges(MinX, MaxX, MinZ, MaxZ, Player, World, "snow")
+	local PossibleBlockChanges = {}
+	
+	for x=MinX, MaxX do
+		for z=MinZ, MaxZ do
 			local y = World:GetHeight(x, z)
+			YCheck:SetY(y)
 			if World:GetBlock(x, y , z) == E_BLOCK_STATIONARY_WATER then -- check if the block is water
-				SnowBlocks = SnowBlocks + 1
-				World:SetBlock(x, y, z, E_BLOCK_ICE, 0) -- set the block to ice
+				table.insert(PossibleBlockChanges, {X = x, Y = y, Z = z, BlockType = E_BLOCK_ICE})
 			elseif World:GetBlock(x, y , z) == E_BLOCK_LAVA then -- check if the block is lava
-				SnowBlocks = SnowBlocks + 1
-				World:SetBlock(x, y, z, E_BLOCK_OBSIDIAN, 0) -- set the block to obsydian
+				table.insert(PossibleBlockChanges, {X = x, Y = y, Z = z, BlockType = E_BLOCK_OBSIDIAN})
 			else
 				if g_BlockIsSnowable[World:GetBlock(x, y, z)] then
-					SnowBlocks = SnowBlocks + 1
-					World:SetBlock(x, y + 1, z, E_BLOCK_SNOW, 0) -- set the block to snow.
+					table.insert(PossibleBlockChanges, {X = x, Y = y + 1, Z = z, BlockType = E_BLOCK_SNOW})
 				end
 			end
 		end
 	end
-	Player:SendMessage(cChatColor.LightPurple .. SnowBlocks .. " surfaces covered. Let is snow~")
+	
+	if YCheck:Flush() then
+		Player:SendMessage(cChatColor.Rose .. "Changes would intersect with an area")
+	else
+		for idx, value in ipairs(PossibleBlockChanges) do
+			World:SetBlock(value.X, value.Y, value.Z, value.BlockType, 0)
+		end
+		Player:SendMessage(cChatColor.LightPurple .. #PossibleBlockChanges .. " surfaces covered. Let is snow~")
+	end
 	return true
 end
 
@@ -204,23 +228,35 @@ function HandleThawCommand(Split, Player)
 	else
 		Radius = tonumber(Split[2]) -- set the radius to the given radius
 	end
+	
 	local World = Player:GetWorld() -- Get the world the player is in
-	local X = math.floor(Player:GetPosX())
-	local Z = math.floor(Player:GetPosZ())
-	local ThawBlocks = 0
-	for x=X - Radius, X + Radius do
-		for z=Z - Radius, Z + Radius do
+	local MinX = math.floor(Player:GetPosX()) - Radius
+	local MaxX = math.floor(Player:GetPosX()) + Radius
+	local MinZ = math.floor(Player:GetPosZ()) - Radius
+	local MaxZ = math.floor(Player:GetPosZ()) + Radius
+	local YCheck = GetMultipleBlockChanges(MinX, MaxX, MinZ, MaxZ, Player, World, "thaw")
+	local PossibleBlockChanges = {}
+	
+	for x=MinX, MaxX do
+		for z=MinZ, MaxZ do
 			local y = World:GetHeight(x, z)
+			YCheck:SetY(y)
 			if World:GetBlock(x, y, z) == E_BLOCK_SNOW then -- check if the block is snow
-				ThawBlocks = ThawBlocks + 1
-				World:SetBlock(x, y, z, E_BLOCK_AIR, 0) -- set the block to an air block
+				table.insert(PossibleBlockChanges, {X = x, Y = y, Z = z, BlockType = E_BLOCK_AIR})
 			elseif World:GetBlock(x, y, z) == E_BLOCK_ICE then -- check if the block is ice
-				ThawBlocks = ThawBlocks + 1
-				World:SetBlock(x, y, z, E_BLOCK_WATER, 0) -- set the block to water
+				table.insert(PossibleBlockChanges, {X = x, Y = y, Z = z, BlockType = E_BLOCK_WATER})
 			end
 		end
 	end
-	Player:SendMessage(cChatColor.LightPurple .. ThawBlocks .. " surfaces thawed")
+	
+	if YCheck:Flush() then
+		Player:SendMessage(cChatColor.Rose .. "Changes would intersect with an area")
+	else
+		for idx, value in ipairs(PossibleBlockChanges) do
+			World:SetBlock(value.X, value.Y, value.Z, value.BlockType, 0)
+		end
+		Player:SendMessage(cChatColor.LightPurple .. #PossibleBlockChanges .. " surfaces covered. Let is snow~")
+	end
 	return true
 end
 

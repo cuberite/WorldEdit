@@ -34,9 +34,9 @@ function CreateTables()
 	GrowTreeItem = {}
 	WandActivated = {}
 	LeftClickCompassUsed = {}
-	ExclusionArea = {}
+	ExclusionAreaPlugins = {}
 	cRoot:Get():ForEachWorld(function(World)
-		ExclusionArea[World:GetName()] = {}
+		ExclusionAreaPlugins[World:GetName()] = {}
 	end)
 end
 
