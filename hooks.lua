@@ -22,7 +22,6 @@ end
 function SuperPickaxeHook(Player, BlockX, BlockY, BlockZ, BlockFace, Status)
 	if (SP[Player:GetName()]) then
 		local World = Player:GetWorld()
-		Item = cItem(World:GetBlock(BlockX, BlockY, BlockZ), 1, World:GetBlockMeta(BlockX, BlockY, BlockZ))
 		World:DigBlock(BlockX, BlockY, BlockZ) 		
 	end
 end

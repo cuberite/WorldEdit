@@ -67,8 +67,8 @@ function Initialize(Plugin)
 	PluginManager:BindCommand("//wand",	        "worldedit.wand",                      HandleWandCommand,           " Get the wand object")
 	PluginManager:BindCommand("//",	            "worldedit.superpickaxe",              HandleSuperPickCommand,      " Toggle the super pickaxe pickaxe function")
 	PluginManager:BindCommand("/",	            "worldedit.superpickaxe",              HandleSuperPickCommand,      "")
-	PluginManager:BindCommand("//pos1",         "worldedit.selection.pos",             HandlePos1Command,            "Set position 1")
-	PluginManager:BindCommand("//pos2",         "worldedit.selection.pos",             HandlePos2Command,            "Set position 2")
+	PluginManager:BindCommand("//pos1",         "worldedit.selection.pos",             HandlePos1Command,           " Set position 1")
+	PluginManager:BindCommand("//pos2",         "worldedit.selection.pos",             HandlePos2Command,           " Set position 2")
 	
 	-- Help commands:
 	PluginManager:BindCommand("/biomelist",	    "worldedit.biomelist",                 HandleBiomeListCommand,      " Gets all biomes available.")
