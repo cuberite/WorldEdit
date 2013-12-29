@@ -28,6 +28,11 @@ local function GetCategoryCommands(a_CategoryName)
 		end
 	end
 	AppendCategoryCommand("", g_PluginInfo.Commands);
+	table.sort(res,
+		function (cmd1, cmd2)
+			return (string.lower(cmd1.Command) < string.lower(cmd2.Command));
+		end
+	);
 	return res;
 end
 
@@ -55,7 +60,42 @@ function DumpPluginInfoForum()
 	-- Make sure the categories have their command lists:
 	BuildCategories();
 	
-	-- TODO
+	local f, msg = io.open(cPluginManager:GetCurrentPlugin():GetName() .. "_forum.txt", "w");
+	if (f == nil) then
+		LOG("Cannot dump forum info: " .. msg);
+		return;
+	end
+
+	-- Write the description:
+	f:write(g_PluginInfo.Description);
+	
+	-- Write the commands:
+	local Categories = {};
+	for name, cat in pairs(g_PluginInfo.Categories) do
+		table.insert(Categories, {Name = name, Info = cat});
+	end
+	table.sort(Categories,
+		function(cat1, cat2)
+			return (string.lower(cat1.Name) < string.lower(cat2.Name));
+		end
+	);
+	for idx, cat in ipairs(Categories) do
+		f:write("\n[size=Large]", cat.Name, "[/size]\n", cat.Info.Description, "\n");
+		for idx2, cmd in ipairs(cat.Info.Commands) do
+			f:write("Command: [b]", cmd.Command, "[/b] - ", cmd.Info.HelpString, "\n");
+			if (cmd.Info.Permission ~= nil) then
+				f:write("Permission required: ", cmd.Info.Permission, "\n");
+			end
+			if (cmd.Info.DetailedDescription ~= nil) then
+				f:write(cmd.Info.DetailedDescription);
+			end
+			f:write("\n");
+		end
+	end
+	
+	-- TODO: Write the AdditionalInfo
+
+	f:close();
 end
 
 

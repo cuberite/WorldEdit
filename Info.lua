@@ -8,8 +8,7 @@ g_PluginInfo =
 	Name = "WorldEdit",
 	Version = "0.1",
 	Date = "2013-12-29",
-	Description = [[
-		This plugin allows you to easily manage the world, edit the world, navigate around or get information. It bears similarity to the Bukkit's WorldEdit plugin and aims to have the same set of commands,however, it has no affiliation to that plugin.
+	Description = [[This plugin allows you to easily manage the world, edit the world, navigate around or get information. It bears similarity to the Bukkit's WorldEdit plugin and aims to have the same set of commands,however, it has no affiliation to that plugin.
 	]],
 	Commands =
 	{
@@ -338,39 +337,57 @@ g_PluginInfo =
 	{
 		Navigation =
 		{
-			Desc = "Commands that helps the player moving to locations.",
+			Description = "Commands that helps the player moving to locations.",
 		},
 		Clipboard =
 		{
-			Desc = "All the commands that have anything todo with a players clipboard.",
+			Description = "All the commands that have anything todo with a players clipboard.",
 		},
 		Tool =
 		{
-			Desc = "Commands that activate a tool. If a tool is activated you can use it by right or left clicking with your mouse.",
+			Description = "Commands that activate a tool. If a tool is activated you can use it by right or left clicking with your mouse.",
 		},
 		Region =
 		{
-			Desc = "Commands in this category will allow the player to edit the region he/she has selected using //pos[1/2] or using the wand item.",
+			Description = "Commands in this category will allow the player to edit the region he/she has selected using //pos[1/2] or using the wand item.",
 		},
 		Selection =
 		{
-			Desc = "Commands that give info/help setting the region you have selected.",
+			Description = "Commands that give info/help setting the region you have selected.",
 		},
 		History =
 		{
-			Desc = "Commands that can undo/redo past WorldEdit actions.",
+			Description = "Commands that can undo/redo past WorldEdit actions.",
 		},
 		Terraforming =
 		{
-			Desc = "Commands that help you Modifying the terrain.",
+			Description = "Commands that help you Modifying the terrain.",
 		},
 		Biome =
 		{
-			Desc = "Any biome specific commands.",
+			Description = "Any biome specific commands.",
 		},
 		Special =
 		{
-			Desc = "Commands that don't realy fit in another category.",
+			Description = "Commands that don't realy fit in another category.",
 		},
-	}
-}	
+	},
+	
+	AdditionalInfo =
+	{
+		{
+			Header = "API",
+			Contents = [[
+			]],
+		},
+		{
+			Header = "Config",
+			Contents = [[
+			]],
+		}
+	},  -- AdditionalInfo
+}
+
+
+
+

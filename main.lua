@@ -26,9 +26,15 @@ function Initialize(Plugin)
 	LoadOnlinePlayers() -- Load all the online players
 	LoadSettings(PLUGIN:GetLocalDirectory() .. "/Config.ini") -- load all the settings
 	
+	DumpPluginInfoForum()
+	
 	LOG("[WorldEdit] Enabling WorldEdit v" .. PLUGIN:GetVersion())
 	return true
 end
+
+
+
+
 
 function OnDisable()
 	if (DisablePlugin) then -- if the plugin has to be reloaded then load the plugin again ;)
