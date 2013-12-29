@@ -19,20 +19,8 @@ function Initialize(Plugin)
 	
 	PluginManager = cRoot:Get():GetPluginManager()
 	
-	LoadCommandFunctions(Plugin:GetLocalDirectory()) -- Load all the files that contains the command functions
-	
-	--Bind all the commands.
-	dofile(PLUGIN:GetLocalFolder() .. "/Commands.lua") -- Reload the Commands file so the command handlers are initialized.
-	for key, value in pairs(g_PluginInfo.Commands) do
-		local Aliases = StringSplit(value.Command, ";")
-		for I, k in pairs(Aliases) do
-			if I == 1 then -- This is the main command. That is the only command that needs a help string.
-				PluginManager:BindCommand(k, value.Permission, value.Handler, value.HelpString)
-			else
-				PluginManager:BindCommand(k, value.Permission, value.Handler, "")
-			end
-		end
-	end
+	--Bind all the commands:
+	RegisterPluginInfoCommands();
 	
 	CreateTables() -- create all the tables
 	LoadOnlinePlayers() -- Load all the online players
