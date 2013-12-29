@@ -3,8 +3,8 @@ PLUGIN = nil
 function Initialize(Plugin)
 	
 	PLUGIN = Plugin
-	PLUGIN:SetName("WorldEdit")
-	PLUGIN:SetVersion(1)
+	PLUGIN:SetName(g_PluginInfo.Name)
+	PLUGIN:SetVersion(g_PluginInfo.Version)
 		
 	cPluginManager.AddHook(cPluginManager.HOOK_PLAYER_BREAKING_BLOCK, SelectFirstPointHook);
 	
@@ -33,10 +33,11 @@ function Initialize(Plugin)
 			end
 		end
 	end
-		
+	
 	CreateTables() -- create all the tables
 	LoadOnlinePlayers() -- Load all the online players
 	LoadSettings(PLUGIN:GetLocalDirectory() .. "/Config.ini") -- load all the settings
+	
 	LOG("[WorldEdit] Enabling WorldEdit v" .. PLUGIN:GetVersion())
 	return true
 end
