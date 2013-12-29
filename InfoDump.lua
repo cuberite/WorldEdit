@@ -72,7 +72,7 @@ local function DumpCommandsForum(f)
 	
 	-- Dump per-category commands:
 	for idx, cat in ipairs(Categories) do
-		f:write("\n[size=Large]", cat.Name, "[/size]\n", cat.Info.Description, "\n");
+		f:write("\n[size=Large]", cat.Name, "[/size]\n", cat.Info.Description, "\n[list]");
 		for idx2, cmd in ipairs(cat.Info.Commands) do
 			f:write("Command: [b]", cmd.Command, "[/b] - ", cmd.Info.HelpString, "\n");
 			if (cmd.Info.Permission ~= nil) then
@@ -83,6 +83,7 @@ local function DumpCommandsForum(f)
 			end
 			f:write("\n");
 		end
+		f:write("[/list]")
 	end
 end
 
