@@ -14,15 +14,12 @@ function HandleWorldEditCommand(Split, Player)
 		end
 	elseif string.upper(Split[2]) == "HELP" then -- check if the player wants to know all the commands.
 		if Player:HasPermission("worldedit.help") or Player:HasPermission("worldedit.*") then
-			local EachCommand = function(Command, Permission, HelpString) 
-				local Start, End = string.find(Permission, "worldedit")
-				if Start == 1 and End == 9 then -- check if the command is from this plugin
-					table.insert(CommandList, Command) -- insert command into the CommandList table
-				end
+			local Commands = ""
+			for Command, Information in pairs(g_PluginInfo.Commands) do
+				local Split = StringSplit(Information.Command, ";")
+				Commands = Commands .. cChatColor.LightPurple .. table.concat(Split, ", ") .. ", "
 			end
-			CommandList = {} -- create/clear the CommandList table
-			PluginManager:ForEachCommand(EachCommand) -- for each command do the local function EachCommand
-			Player:SendMessage(cChatColor.LightPurple .. table.concat(CommandList, ", ")) -- give the player a message with the commands split by  ", "
+			Player:SendMessage(string.sub(Commands, 1, string.len(Commands) - 2)) -- Remove the last ", "
 		end
 	else
 		Player:SendMessage(cChatColor.Rose .. "/we <help:reload:version>") -- command not found
