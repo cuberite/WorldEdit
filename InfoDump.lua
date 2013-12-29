@@ -56,29 +56,21 @@ end
 
 
 
-function DumpPluginInfoForum()
-	-- Make sure the categories have their command lists:
-	BuildCategories();
-	
-	local f, msg = io.open(cPluginManager:GetCurrentPlugin():GetName() .. "_forum.txt", "w");
-	if (f == nil) then
-		LOG("Cannot dump forum info: " .. msg);
-		return;
-	end
-
-	-- Write the description:
-	f:write(g_PluginInfo.Description);
-	
-	-- Write the commands:
+local function DumpCommandsForum(f)
+	-- Copy all Categories from a dictionary into an array:
 	local Categories = {};
 	for name, cat in pairs(g_PluginInfo.Categories) do
 		table.insert(Categories, {Name = name, Info = cat});
 	end
+	
+	-- Sort the categories by name:
 	table.sort(Categories,
 		function(cat1, cat2)
 			return (string.lower(cat1.Name) < string.lower(cat2.Name));
 		end
 	);
+	
+	-- Dump per-category commands:
 	for idx, cat in ipairs(Categories) do
 		f:write("\n[size=Large]", cat.Name, "[/size]\n", cat.Info.Description, "\n");
 		for idx2, cmd in ipairs(cat.Info.Commands) do
@@ -92,6 +84,26 @@ function DumpPluginInfoForum()
 			f:write("\n");
 		end
 	end
+end
+
+
+
+
+
+function DumpPluginInfoForum()
+	-- Make sure the categories have their command lists:
+	BuildCategories();
+	
+	local f, msg = io.open(cPluginManager:GetCurrentPlugin():GetName() .. "_forum.txt", "w");
+	if (f == nil) then
+		LOG("Cannot dump forum info: " .. msg);
+		return;
+	end
+
+	-- Write the description:
+	f:write(g_PluginInfo.Description);
+	
+	DumpCommandsForum(f);
 	
 	-- TODO: Write the AdditionalInfo
 
