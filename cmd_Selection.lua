@@ -309,7 +309,7 @@ function HandleSchematicCommand(Split, Player)
 					Player:SendMessage(cChatColor.Green .. "Please state a schematic name")
 					return true
 				end
-	if string.upper(Split[2]) == "SAVE" or string.upper(Split[2]) == "L" then -- check if the player want to save a region.
+	if string.upper(Split[2]) == "SAVE" or string.upper(Split[2]) == "S" then -- check if the player want to save a region.
 		if Player:HasPermission("worldedit.schematic.save") or Player:HasPermission("worldedit.*") then -- check if the player has the permission to use the command
 			if string.upper(Split[3]) == "MCEDIT" then -- check if the player stated a name for the schematic.
 				if Split[4] == nil then
