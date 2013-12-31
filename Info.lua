@@ -123,11 +123,47 @@ g_PluginInfo =
 		
 		["//schematic"] =
 		{
-			Permission = "",
+			Permission = "",  -- Multi-commands shouldn't specify a permission
 			Handler = HandleSchematicCommand,
 			HelpString = " Schematic-related commands",
 			Category = "Clipboard",
-			-- TODO: This is a multicommand, list the subcommands here
+			Subcommands =
+			{
+				load =
+				{
+					Help = "loads an area from a file into the clipboard",
+					Handler = HandleSchematicLoadCommand,
+					Permission = "worldedit.schematic.load";
+					DetailedHelp =
+					{
+						{
+							Params = "FileName.Ext",
+							Help = "loads an area from the specified file into the clipboard. FileName.Ext is used as-is, the format is guessed from the extension.",
+						},
+						{
+							Params = "Format FileName",
+							Help = "loads an area from the specified file in the specified format into the clipboard. A Format-specific extension is appended to FileName.",
+						},
+					},
+				},
+				save =
+				{
+					Help = "saves the clipboard into a file",
+					Handler = HandleSchematicSaveCommand,
+					Permission = "worldedit.schematic.save",
+					DetailedHelp =
+					{
+						{
+							Params = "FileName.Ext",
+							Help = "saves the clipboard contents into the specified file. Filename.Ext is used as-is, the format is guessed from the extension.",
+						},
+						{
+							Params = "Format FileName",
+							Help = "saves the clipboard contents into the specified file in the specified format. A Format-specific extension is appended to FileName",
+						},
+					},
+				},
+			},
 		},
 		
 		["//set"] =
