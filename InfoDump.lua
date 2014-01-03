@@ -23,7 +23,7 @@ local function GetCategoryCommands(a_CategoryName)
 				end
 			end
 			if (info.Subcommands ~= nil) then
-				AppendCategory(a_Prefix .. cmd .. " ", info.Subcommands);
+				AppendCategoryCommand(a_Prefix .. cmd .. " ", info.Subcommands);
 			end
 		end
 	end
