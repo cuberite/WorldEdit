@@ -124,7 +124,7 @@ g_PluginInfo =
 		["//schematic"] =
 		{
 			Permission = "",  -- Multi-commands shouldn't specify a permission
-			Handler = HandleSchematicCommand,
+			Handler = nil,  -- Provide a standard multi-command handler
 			HelpString = " Schematic-related commands",
 			Category = "Clipboard",
 			Subcommands =

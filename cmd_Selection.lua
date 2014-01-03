@@ -352,3 +352,21 @@ function HandleSchematicCommand(Split, Player)
 	end
 	return true
 end
+
+-- Aliases for the schematic command
+-- TODO: These will become the main implementation once the InfoReg subcommand handling is written
+function HandleSchematicLoadCommand(a_Split, a_Player)
+	-- DEBUG:
+	LOG("HandleSchematicLoadCommand called");
+	return HandleSchematicCommand(a_Split, a_Player);
+end
+
+function HandleSchematicSaveCommand(a_Split, a_Player)
+	-- DEBUG:
+	LOG("HandleSchematicSaveCommand called");
+	return HandleSchematicCommand(a_Split, a_Player);
+end
+
+
+
+
