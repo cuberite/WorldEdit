@@ -125,13 +125,13 @@ g_PluginInfo =
 		{
 			Permission = "",  -- Multi-commands shouldn't specify a permission
 			Handler = nil,  -- Provide a standard multi-command handler
-			HelpString = " Schematic-related commands",
+			HelpString = "",  -- Don't show in help
 			Category = "Clipboard",
 			Subcommands =
 			{
 				load =
 				{
-					Help = "loads an area from a file into the clipboard",
+					HelpString= "loads an area from a file into the clipboard",
 					Handler = HandleSchematicLoadCommand,
 					Permission = "worldedit.schematic.load";
 					DetailedHelp =
@@ -148,7 +148,7 @@ g_PluginInfo =
 				},
 				save =
 				{
-					Help = "saves the clipboard into a file",
+					HelpString= "saves the clipboard into a file",
 					Handler = HandleSchematicSaveCommand,
 					Permission = "worldedit.schematic.save",
 					DetailedHelp =
