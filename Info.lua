@@ -134,7 +134,7 @@ g_PluginInfo =
 					HelpString= "loads an area from a file into the clipboard",
 					Handler = HandleSchematicLoadCommand,
 					Permission = "worldedit.schematic.load";
-					DetailedHelp =
+					ParameterCombinations =
 					{
 						{
 							Params = "FileName.Ext",
@@ -151,7 +151,7 @@ g_PluginInfo =
 					HelpString= "saves the clipboard into a file",
 					Handler = HandleSchematicSaveCommand,
 					Permission = "worldedit.schematic.save",
-					DetailedHelp =
+					ParameterCombinations =
 					{
 						{
 							Params = "FileName.Ext",
