@@ -98,7 +98,7 @@ function RegisterPluginInfoCommands()
 			if (Handler == nil) then
 				LOGWARNING(g_PluginInfo.Name .. ": Invalid handler for command " .. CmdName .. ", command will not be registered.");
 			else
-				cPluginManager.BindCommand(cmd, info.Permission or "", Handler, info.HelpString or "");
+				cPluginManager.BindCommand(CmdName, info.Permission or "", Handler, info.HelpString or "");
 				-- Register all aliases for the command:
 				if (info.Alias ~= nil) then
 					if (type(info.Alias) == "string") then
