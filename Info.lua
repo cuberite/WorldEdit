@@ -129,39 +129,65 @@ g_PluginInfo =
 			Category = "Clipboard",
 			Subcommands =
 			{
-				load =
-				{
-					HelpString= "loads an area from a file into the clipboard",
-					Handler = HandleSchematicLoadCommand,
-					Permission = "worldedit.schematic.load";
-					ParameterCombinations =
-					{
-						{
-							Params = "FileName.Ext",
-							Help = "loads an area from the specified file into the clipboard. FileName.Ext is used as-is, the format is guessed from the extension.",
-						},
-						{
-							Params = "Format FileName",
-							Help = "loads an area from the specified file in the specified format into the clipboard. A Format-specific extension is appended to FileName.",
-						},
-					},
-				},
 				save =
 				{
-					HelpString= "saves the clipboard into a file",
+					HelpString = "Saves the current clipboard to a file with the given filename.",
+					Permission = "",
 					Handler = HandleSchematicSaveCommand,
-					Permission = "worldedit.schematic.save",
-					ParameterCombinations =
-					{
-						{
-							Params = "FileName.Ext",
-							Help = "saves the clipboard contents into the specified file. Filename.Ext is used as-is, the format is guessed from the extension.",
-						},
-						{
-							Params = "Format FileName",
-							Help = "saves the clipboard contents into the specified file in the specified format. A Format-specific extension is appended to FileName",
-						},
-					},
+				},
+				s =
+				{
+					HelpString = "Saves the current clipboard to a file with the given filename.",
+					Permission = "",
+					Handler = HandleSchematicSaveCommand,
+				},
+				load =
+				{
+					HelpString = "Loads the given schematic file.",
+					Permission = "",
+					Handler = HandleSchematicLoadCommand,
+				},
+				l =
+				{
+					HelpString = "Loads the given schematic file.",
+					Permission = "",
+					Handler = HandleSchematicLoadCommand,
+				},
+				formats =
+				{
+					HelpString = "List available schematic formats",
+					Permission = "",
+					Handler = HandleSchematicFormatsCommand,
+				},
+				listformats =
+				{
+					HelpString = "List available schematic formats",
+					Permission = "",
+					Handler = HandleSchematicFormatsCommand,
+				},
+				f =
+				{
+					HelpString = "List available schematic formats",
+					Permission = "",
+					Handler = HandleSchematicFormatsCommand,
+				},
+				list =
+				{
+					HelpString = "List available schematics",
+					Permission = "",
+					Handler = HandleSchematicListCommand,
+				},
+				all =
+				{
+					HelpString = "List available schematics",
+					Permission = "",
+					Handler = HandleSchematicListCommand,
+				},
+				ls =
+				{
+					HelpString = "List available schematics",
+					Permission = "",
+					Handler = HandleSchematicListCommand,
 				},
 			},
 		},
@@ -369,10 +395,30 @@ g_PluginInfo =
 		["/we"] =
 		{
 			Permission = "",
-			Handler = HandleWorldEditCommand,
+			Handler = nil,
 			HelpString = " World edit command",
 			Category = "Special",
-			-- TODO: This is a multicommand, add subcommands documentation
+			Subcommands =
+			{
+				version =
+				{
+					HelpString = "Sends the plugin version to the player.",
+					Permission = "",
+					Handler = HandleWorldEditVersionCommand,
+				},
+				reload =
+				{
+					HelpString = "Reloads the WorldEdit plugin.",
+					Permission = "",
+					Handler = HandleWorldEditReloadCommand,
+				},
+				help =
+				{
+					HelpString = "Sends all the available commands to the player.",
+					Permission = "",
+					Handler = HandleWorldEditHelpCommand,
+				},
+			},
 		},
 		
 	},  -- Commands

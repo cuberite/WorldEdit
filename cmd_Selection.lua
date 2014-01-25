@@ -296,77 +296,72 @@ end
 -----------------------------------------------
 -------------------SCHEMATIC-------------------
 -----------------------------------------------
-function HandleSchematicCommand(Split, Player)
-	if Split[2] == nil then
-		Player:SendMessage(cChatColor.LightPurple .. "//schematic <save:load:delete>")
+-- Handles the schematic's save subcommand
+function HandleSchematicSaveCommand(Split, Player)
+	if not PlayerHasWEPermission(Player, "worldedit.schematic.save", "worldedit.clipboard.save") then
+		Player:SendMessage(cChatColor.Rose .. "You do not have permission to save schematic files.")
 		return true
 	end
-	if Split[3] == nil then
-		Player:SendMessage(cChatColor.Rose .. 'Too few arguments\n//schematic save [format] <filename>\n\nSave a schematic into your clipboard\nFormat is a format from "//schematic formats"')
+	if #Split ~= 4 then
+		Player:SendMessage(cChatColor.Rose .. "Usage: /schematic save <Format> <Name>")
 		return true
 	end
-	if Split[4] == nil then
-					Player:SendMessage(cChatColor.Green .. "Please state a schematic name")
-					return true
-				end
-	if string.upper(Split[2]) == "SAVE" or string.upper(Split[2]) == "S" then -- check if the player want to save a region.
-		if Player:HasPermission("worldedit.schematic.save") or Player:HasPermission("worldedit.*") then -- check if the player has the permission to use the command
-			if string.upper(Split[3]) == "MCEDIT" then -- check if the player stated a name for the schematic.
-				if Split[4] == nil then
-					Player:SendMessage(cChatColor.Green .. "Please state a schematic name")
-					return true
-				end
-				PersonalClipboard[Player:GetName()]:SaveToSchematicFile("Schematics/" .. Split[4] .. ".Schematic") -- save the schematic.
-				Player:SendMessage(cChatColor.LightPurple .. Split[4] .. " saved."	)		
-			end				
-		end
-	elseif string.upper(Split[2]) == "LOAD" or string.upper(Split[2]) == "L" then -- check if the player wants to load a schematic
-		if Player:HasPermission("worldedit.schematic.load") or Player:HasPermission("worldedit.*") then -- check if the player has the permission to use the command
-			if Split[3] == nil then -- check if the player stated a name of the schematic.
-				Player:SendMessage(cChatColor.Green .. "Please state a schematic name")
-				return true
-			end 	
-			local Schematic = io.open("Schematics\\" .. Split[3] .. ".Schematic", "r") -- check if the schematic file already exists.
-			if Schematic then -- check if the schematic exists
-				PersonalClipboard[Player:GetName()]:LoadFromSchematicFile("Schematics/" .. Split[3] .. ".Schematic") -- load the schematic file
-				Player:SendMessage(cChatColor.LightPurple .. "Clipboard " .. Split[3] .. " is loaded") 
-				Schematic:close() -- close the file
-				return true
-			else
-				Player:SendMessage(cChatColor.Rose .. "Schematic " .. Split[3] .. " does not exist")
-			end
-		end
-	elseif string.upper(Split[2]) == "DELETE" then -- check if the player wants to delete a file
-		if Player:HasPermission("worldedit.schematic.delete") or Player:HasPermission("worldedit.*") then
-			if Split[3] == nil then
-				Player:SendMessage(cChatColor.Green .. "Please state a schematic name")
-				return true
-			end
-			Schematic = io.open("Schematics\\" .. Split[3] .. ".Schematic", "r") -- check if the schematic file already exists.
-			if Schematic then
-				Schematic:close() -- close the schematic file
-				os.remove("Schematics\\" .. Split[3] .. ".Schematic") -- remove the schematic file
-				Player:SendMessage(cChatColor.LightPurple .. "Schematic " .. Split[3] .. " is deleted") 
-			end
-		end
+	local Scheme = string.upper(Split[3])
+	
+	if Scheme == "MCEDIT" then
+		local SchematicName = Split[4]
+		PersonalClipboard[Player:GetName()]:SaveToSchematicFile("Schematics/" .. Split[4] .. ".Schematic") -- save the schematic.
+		Player:SendMessage(cChatColor.LightPurple .. Split[4] .. " saved.")
+	else
+		Player:SendMessage("Scheme " .. Split[3] .. "Does not exist.")
 	end
 	return true
 end
 
--- Aliases for the schematic command
--- TODO: These will become the main implementation once the InfoReg subcommand handling is written
-function HandleSchematicLoadCommand(a_Split, a_Player)
-	-- DEBUG:
-	LOG("HandleSchematicLoadCommand called");
-	return HandleSchematicCommand(a_Split, a_Player);
+
+-- Handles the schematic's load subcommand.
+function HandleSchematicLoadCommand(Split, Player)
+	if not PlayerHasWEPermission(Player, "worldeidt.schematic.load", "worldedit.clipboard.load") then
+		Player:SendMessage(cChatColor.Rose .. "You do not have permission to load schematic file.")
+		return true
+	end
+	if #Split ~= 3 then
+		Player:SendMessage(cChatColor.Rose .. "Usage: /schematic load <name>")
+		return true
+	end
+	local Path = "Schematics/" .. Split[3] .. ".Schematic"
+	if not cFile:Exists(Path) then
+		Player:SendMessage(cChatColor.LightPurple .. "schematic does not exist.")
+		return true
+	end
+	PersonalClipboard[Player:GetName()]:LoadFromSchematicFile(Path) -- load the schematic file
+	Player:SendMessage(cChatColor.LightPurple .. "You loaded " .. Split[3])
+	return true
 end
 
-function HandleSchematicSaveCommand(a_Split, a_Player)
-	-- DEBUG:
-	LOG("HandleSchematicSaveCommand called");
-	return HandleSchematicCommand(a_Split, a_Player);
+
+-- Handles the schematic's formats subcommand.
+function HandleSchematicFormatsCommand(Split, Player)
+	if not PlayerHasWEPermission(Player, "worldedit.schematic.formats") then
+		Player:SendMessage(cChatColor.Rose .. "You do not have permission to use this command.")
+		return true
+	end
+	Player:SendMessage(cChatColor.LightPurple .. 'Available formats: "MCEdit"')
+	return true
 end
 
 
-
-
+-- Handles the schematic's list subcommand.
+function HandleSchematicListCommand(Split, Player)
+	if not PlayerHasWEPermission(Player, "worldeidt.schematic.list") then
+		Player:SendMessage(cChatColor.Rose .. "You do not have permission to use this command.")
+		return true
+	end
+	local FileList = cFile:GetFolderContents("Schematics")
+	for Idx, FileName in ipairs(FileList) do
+			FileList[Idx] = FileName:sub(1, FileName:len() - 10) -- Remove the extension part of the filename.
+	end
+	
+	Player:SendMessage(cChatColor.LightPurple .. "Available schematics: " .. table.concat(FileList, ", ", 3))
+	return true
+end

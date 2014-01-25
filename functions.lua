@@ -367,3 +367,20 @@ function GetBlockXYZFromTrace(Player)
 	Tracer:Trace(EyePos , EyeVector, 10)
 	return Tracer.BlockHitPosition.x, Tracer.BlockHitPosition.y, Tracer.BlockHitPosition.z
 end
+
+
+-----------------------------------------
+----------PLAYERHASWEPERMISSION----------
+-----------------------------------------
+function PlayerHasWEPermission(Player, ...)
+	local arg = {...}
+	if Player:HasPermission("worldedit.*") then
+		return true
+	end
+	for Idx, Permission in ipairs(arg) do
+		if Player:HasPermission(Permission) then
+			return true
+		end
+	end
+	return false
+end
