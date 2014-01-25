@@ -7,7 +7,7 @@ g_PluginInfo =
 {
 	Name = "WorldEdit",
 	Version = "0.1",
-	Date = "2013-12-29",
+	Date = "2014-01-25",
 	Description = [[This plugin allows you to easily manage the world, edit the world, navigate around or get information. It bears similarity to the Bukkit's WorldEdit plugin and aims to have the same set of commands,however, it has no affiliation to that plugin.
 	]],
 	Commands =
