@@ -72,6 +72,7 @@ function HandleDescendCommand(Split, Player)
 	if Player:GetPosY() > 1 then
 		local X = math.floor(Player:GetPosX())
 		local Z = math.floor(Player:GetPosZ())
+		local y = math.floor(Player:GetPosY()) -1
 		local Air = false
 		for Y=math.floor(Player:GetPosY()), 1, -1 do
 			if World:GetBlock(X, Y, Z) == E_BLOCK_AIR then
@@ -91,9 +92,7 @@ function HandleDescendCommand(Split, Player)
 		end
 		if y ~= nil then
 			if (Air) then
-				if Y ~= 1 then
-					Player:TeleportToCoords(Player:GetPosX(), y + 1, Player:GetPosZ())
-				end
+				Player:TeleportToCoords(Player:GetPosX(), y + 1, Player:GetPosZ())
 			end
 		end		
 	end
