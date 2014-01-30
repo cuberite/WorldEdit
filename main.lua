@@ -69,6 +69,8 @@ function Initialize(Plugin)
 	PluginManager:BindCommand("/",	            "worldedit.superpickaxe",              HandleSuperPickCommand,      "")
 	PluginManager:BindCommand("//pos1",         "worldedit.selection.pos",             HandlePos1Command,           " Set position 1")
 	PluginManager:BindCommand("//pos2",         "worldedit.selection.pos",             HandlePos2Command,           " Set position 2")
+	PluginManager:BindCommand("//hpos1",        "worldedit.selection.pos",             HandleHPos1Command,          " Set position 1")
+	PluginManager:BindCommand("//hpos2",        "worldedit.selection.pos",             HandleHPos2Command,          " Set position 2")
 	
 	-- Help commands:
 	PluginManager:BindCommand("/biomelist",	    "worldedit.biomelist",                 HandleBiomeListCommand,      " Gets all biomes available.")
