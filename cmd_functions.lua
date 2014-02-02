@@ -200,3 +200,29 @@ function LeftClickCompass(Player, World)
 	cLineBlockTracer.Trace(World, Callbacks, Start.x, Start.y, Start.z, End.x, End.y, End.z)
 	return HasHit
 end
+
+
+------------------------------------------------
+------------------HPOSSELECT--------------------
+------------------------------------------------
+function HPosSelect(Player, World)
+	local hpos = nil
+	local Callbacks = {
+	OnNextBlock = function(X, Y, Z, BlockType, BlockMeta)
+		if BlockType ~= E_BLOCK_AIR and not g_BlockOneHitDig[BlockType] then
+			hpos = Vector3i(X, Y, Z)
+			return true
+		end
+	end
+	};
+	local EyePos = Player:GetEyePosition()
+	local LookVector = Player:GetLookVector()
+	LookVector:Normalize()
+	local Start = EyePos + LookVector + LookVector;
+	local End = EyePos + LookVector * 150
+	
+	if cLineBlockTracer.Trace(World, Callbacks, Start.x, Start.y, Start.z, End.x, End.y, End.z) then
+		return nil
+	end
+	return hpos
+end

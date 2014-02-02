@@ -97,6 +97,22 @@ g_PluginInfo =
 			Category = "Selection",
 		},
 		
+		["//hpos1"] =
+		{
+			Permission = "worldedit.selection.pos",
+			Handler = HandleHPos1Command,
+			HelpString = " Set position 1 to the position you are looking at.",
+			Category = "Selection",
+		},
+		
+		["//hpos2"] =
+		{
+			Permission = "worldedit.selection.pos",
+			Handler = HandleHPos2Command,
+			HelpString = " Set position 2 to the position you are looking at.",
+			Category = "Selection",
+		},
+		
 		["//redo"] =
 		{
 			Permission = "worldedit.history.redo",
