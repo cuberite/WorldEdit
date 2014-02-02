@@ -6,7 +6,7 @@ function HandleRemoveCommand(Split, Player)
 		Player:SendMessage(cChatColor.Rose .. "Too few arguments.\n/remove <type>")
 		return true
 	end
-	Entitys = 0
+	local Entitys = 0
 	if string.upper(Split[2]) == "ITEMS" then -- check if the plugin has to destroy pickups
 		local LoopEntity = function(Entity)
 			if Entity:IsPickup() then -- if the entity is a pickup then destroy it.
@@ -44,7 +44,7 @@ function HandleButcherCommand(Split, Player)
 	else -- the radius is set to the given radius
 		Radius = tonumber(Split[2])
 	end
-	Cuboid = cCuboid()
+	local Cuboid = cCuboid()
 	Cuboid.p1 = Vector3i(Player:GetPosX() + Radius, Player:GetPosY() + Radius, Player:GetPosZ() + Radius)
 	Cuboid.p2 = Vector3i(Player:GetPosX() - Radius, Player:GetPosY() - Radius, Player:GetPosZ() - Radius)
 	Cuboid:Sort()

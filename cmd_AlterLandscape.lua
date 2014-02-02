@@ -6,13 +6,14 @@ function HandleRemoveBelowCommand(Split, Player)
 	local Y = math.floor(Player:GetPosY()) -- round the number (for example from 12.23423987 to 12)
 	local Z = math.floor(Player:GetPosZ()) -- round the number (for example from 12.23423987 to 12)
 	local World = Player:GetWorld() -- Get the world
+	local PlayerName = Player:GetName()
 	
-	if CheckIfInsideAreas(X, X, Y, Y, Z, Z, Player, Player:GetWorld(), "removebelow") then
+	if CheckIfInsideAreas(X, X, 1, Y, Z, Z, Player, Player:GetWorld(), "removebelow") then
 		return true
 	end
 	
-	LastCoords[Player:GetName()] = X .. "," .. 1 .. "," .. Z .. "," .. Player:GetWorld():GetName()
-	PersonalUndo[Player:GetName()]:Read(World, X, X, 1, Y, Z, Z)
+	LastCoords[PlayerName] = X .. "," .. 1 .. "," .. Z .. "," .. World:GetName()
+	PersonalUndo[PlayerName]:Read(World, X, X, 1, Y, Z, Z)
 	local BlockBelow = 0
 	for Y = 1, Y do
 		World:SetBlock(X, Y, Z, E_BLOCK_AIR, 0)
@@ -31,16 +32,18 @@ function HandleRemoveAboveCommand(Split, Player)
 	local y = math.floor(Player:GetPosY()) -- round the number (for example from 12.23423987 to 12)
 	local Z = math.floor(Player:GetPosZ()) -- round the number (for example from 12.23423987 to 12)
 	local World = Player:GetWorld()
+	local WorldHeight = World:GetHeight(X, Z)
+	local PlayerName = Player:GetName()
 	
-	if CheckIfInsideAreas(X, X, y, y, Z, Z, Player, World, "removeabove") then
+	if CheckIfInsideAreas(X, X, y, WorldHeight, Z, Z, Player, World, "removeabove") then
 		return true
 	end
 	
-	LastCoords[Player:GetName()] = X .. "," .. 1 .. "," .. Z .. "," .. Player:GetWorld():GetName()
-	PersonalUndo[Player:GetName()]:Read(World, X, X, 1, World:GetHeight(X, Z), Z, Z)
+	LastCoords[PlayerName] = X .. "," .. 1 .. "," .. Z .. "," .. World:GetName()
+	PersonalUndo[PlayerName]:Read(World, X, X, 1, World:GetHeight(X, Z), Z, Z)
 	
 	local BlocksAbove = 0
-	for Y = y, World:GetHeight(X, Z) do
+	for Y = y, WorldHeight do
 		World:SetBlock(X, Y, Z, E_BLOCK_AIR, 0)
 		BlocksAbove = BlocksAbove + 1
 	end
