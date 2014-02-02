@@ -2,12 +2,12 @@
 -----------------SELECTFIRSTPOINT------------------
 ---------------------------------------------------
 function SelectFirstPointHook(Player, BlockX, BlockY, BlockZ, BlockFace, BlockType, BlockMeta)
-	if not PlayerHasWEPermission(PLayer, "worldedit.selection.pos") then
+	if not PlayerHasWEPermission(Player, "worldedit.selection.pos") then
 		return false
 	end
 	
 	local PlayerName = Player:GetName()
-	if not WandActivated[Player:GetName()] then
+	if not WandActivated[PlayerName] then
 		return false
 	end
 	
@@ -93,7 +93,8 @@ function SelectSecondPointHook(Player, BlockX, BlockY, BlockZ, BlockFace, Cursor
 	if not WandActivated[PlayerName] then
 		return false
 	end
-		-- Check if the wand is equipped
+	
+	-- Check if the wand is equipped
 	if Player:GetEquippedItem().m_ItemType ~= Wand then
 		return false
 	end
