@@ -60,7 +60,7 @@ function ToolsHook(Player, BlockX, BlockY, BlockZ, BlockFace, CursorX, CursorY, 
 	local PlayerName = Player:GetName()
 	local World = Player:GetWorld()
 	if Player:GetEquippedItem().m_ItemType == ReplItem[PlayerName] then
-		Block = StringSplit(Repl[PlayerName], ":")
+		local Block = StringSplit(Repl[PlayerName], ":")
 		if Block[2] == nil then
 			Block[2] = 0
 		end
@@ -113,9 +113,10 @@ end
 -----------------RIGHTCLICKCOMPASS------------------
 ----------------------------------------------------
 function RightClickCompassHook(Player, BlockX, BlockY, BlockZ, BlockFace, CursorX, CursorY, CursorZ)
-	if (BlockX ~= -1) or (BlockY ~= 255) or (BlockZ ~= -1) then
+	if BlockFace == BLOCK_FACE_NONE then
 		return false
 	end
+
 	-- Check if the equipped item is a compass.
 	if (Player:GetEquippedItem().m_ItemType == E_ITEM_COMPASS) and PlayerHasWEPermission(Player, "worldedit.navigation.thru.tool") then
 		RightClickCompass(Player, Player:GetWorld())
