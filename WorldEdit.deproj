@@ -4,6 +4,9 @@
     <filename>Info.lua</filename>
   </file>
   <file>
+    <filename>InfoDump.lua</filename>
+  </file>
+  <file>
     <filename>InfoReg.lua</filename>
   </file>
   <file>
