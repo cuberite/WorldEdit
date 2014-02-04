@@ -14,12 +14,10 @@ function HandleRemoveBelowCommand(Split, Player)
 	
 	LastCoords[PlayerName] = X .. "," .. 1 .. "," .. Z .. "," .. World:GetName()
 	PersonalUndo[PlayerName]:Read(World, X, X, 1, Y, Z, Z)
-	local BlockBelow = 0
-	for Y = 1, Y do
-		World:SetBlock(X, Y, Z, E_BLOCK_AIR, 0)
-		BlockBelow = BlockBelow + 1
+	for y = 1, Y do
+		World:SetBlock(X, y, Z, E_BLOCK_AIR, 0)
 	end
-	Player:SendMessage(cChatColor.LightPurple .. BlockBelow .. " block(s) have been removed.")
+	Player:SendMessage(cChatColor.LightPurple .. Y + 1 .. " block(s) have been removed.")
 	return true
 end
 
@@ -40,14 +38,12 @@ function HandleRemoveAboveCommand(Split, Player)
 	end
 	
 	LastCoords[PlayerName] = X .. "," .. 1 .. "," .. Z .. "," .. World:GetName()
-	PersonalUndo[PlayerName]:Read(World, X, X, 1, World:GetHeight(X, Z), Z, Z)
+	PersonalUndo[PlayerName]:Read(World, X, X, 1, WorldHeight, Z, Z)
 	
-	local BlocksAbove = 0
 	for Y = y, WorldHeight do
 		World:SetBlock(X, Y, Z, E_BLOCK_AIR, 0)
-		BlocksAbove = BlocksAbove + 1
 	end
-	Player:SendMessage(cChatColor.LightPurple .. BlocksAbove .. " block(s) have been removed.")
+	Player:SendMessage(cChatColor.LightPurple .. WorldHeight - y .. " block(s) have been removed.")
 	return true
 end
 
