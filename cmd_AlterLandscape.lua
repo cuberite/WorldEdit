@@ -339,29 +339,45 @@ function HandlePumpkinsCommand(Split, Player)
 	else
 		Radius = Split[2]
 	end
+	
+	local PosX = math.floor(Player:GetPosX())
+	local PosZ = math.floor(Player:GetPosZ())
 	local World = Player:GetWorld()
+	
+	local YCheck = GetMultipleBlockChanges(PosX - Radius, PosX + Radius, PosZ - Radius, PosZ + Radius, Player, World, "pumpkins")
+	local PossibleBlockChanges = {}
+	
 	for I=1, Radius * 2 do
-		local X = math.floor(Player:GetPosX()) + math.random(-Radius, Radius)
-		local Z = math.floor(Player:GetPosZ()) + math.random(-Radius, Radius)
+		local X = PosX + math.random(-Radius, Radius)
+		local Z = PosZ + math.random(-Radius, Radius)
 		local Y = World:GetHeight(X, Z) + 1
 		if World:GetBlock(X, Y - 1, Z) == E_BLOCK_GRASS or World:GetBlock(X, Y, Z) - 1 == E_BLOCK_DIRT then
-			World:SetBlock(X, Y, Z, 17, 0)
+			YCheck:SetY(Y)
+			table.insert(PossibleBlockChanges, {X = X, Y = Y, Z = Z, BlockType = E_BLOCK_LOG, BlockMeta = 0})
 			for i=1, math.random(1, 6) do
 				X = X + math.random(-2, 2)
 				Z = Z + math.random(-2, 2)
 				Y = World:GetHeight(X, Z) + 1
+				YCheck:SetY(Y)
 				if World:GetBlock(X, Y - 1, Z) == E_BLOCK_GRASS or World:GetBlock(X, Y, Z) - 1 == E_BLOCK_DIRT then
-					World:SetBlock(X, Y, Z, 18, 0)
+					table.insert(PossibleBlockChanges, {X = X, Y = Y, Z = Z, BlockType = E_BLOCK_LEAVES, BlockMeta = 0})
 				end
 			end
 			for i=1, math.random(1, 4) do
 				X = X + math.random(-2, 2)
 				Z = Z + math.random(-2, 2)
 				if World:GetBlock(X, Y - 1, Z) == E_BLOCK_GRASS or World:GetBlock(X, Y, Z) - 1 == E_BLOCK_DIRT then
-					World:SetBlock(X, Y, Z, 86, math.random(0, 3))
+					table.insert(PossibleBlockChanges, {X = X, Y = Y, Z = Z, BlockType = E_BLOCK_PUMPKIN, BlockMeta = math.random(0, 3)})
 				end
 			end
 		end
+	end
+	
+	if not YCheck:Flush() then
+		for idx, value in ipairs(PossibleBlockChanges) do
+			World:SetBlock(value.X, value.Y, value.Z, value.BlockType, value.BlockMeta)
+		end
+		Player:SendMessage(cChatColor.LightPurple .. #PossibleBlockChanges .. "  surfaces thawed")
 	end
 	return true
 end		
