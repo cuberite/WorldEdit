@@ -63,6 +63,9 @@ function ToolsHook(Player, BlockX, BlockY, BlockZ, BlockFace, CursorX, CursorY, 
 	local PlayerName = Player:GetName()
 	local World = Player:GetWorld()
 	if Player:GetEquippedItem().m_ItemType == ReplItem[PlayerName] then
+		if CheckIfInsideAreas(BlockX, BlockX, BlockY, BlockY, BlockZ, BlockZ, Player, Player:GetWorld(), "replacetool") then
+			return true
+		end
 		local Block = StringSplit(Repl[PlayerName], ":")
 		if Block[2] == nil then
 			Block[2] = 0
