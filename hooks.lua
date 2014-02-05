@@ -128,7 +128,7 @@ end
 -----------------RIGHTCLICKCOMPASS------------------
 ----------------------------------------------------
 function RightClickCompassHook(Player, BlockX, BlockY, BlockZ, BlockFace, CursorX, CursorY, CursorZ)
-	if BlockFace == BLOCK_FACE_NONE then
+	if BlockFace ~= BLOCK_FACE_NONE then
 		return false
 	end
 
