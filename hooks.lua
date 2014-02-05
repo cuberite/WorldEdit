@@ -18,8 +18,49 @@ function SelectFirstPointHook(Player, BlockX, BlockY, BlockZ, BlockFace, BlockTy
 	OnePlayer[PlayerName] = Vector3i(BlockX, BlockY, BlockZ)
 	if OnePlayer[PlayerName] ~= nil and TwoPlayer[PlayerName] ~= nil then
 		Player:SendMessage(cChatColor.LightPurple .. 'First position set to (' .. BlockX .. ".0, " .. BlockY .. ".0, " .. BlockZ .. ".0) (" .. GetSize(Player) .. ").")
+		Player:GetClientHandle():SendPluginMessage("WECUI", string.format("p|0|%i|%i|%i|%i", BlockX, BlockY, BlockZ, BlockX * BlockY * BlockZ))
 	else
 		Player:SendMessage(cChatColor.LightPurple .. 'First position set to (' .. BlockX .. ".0, " .. BlockY .. ".0, " .. BlockZ .. ".0).")
+		Player:GetClientHandle():SendPluginMessage("WECUI", string.format("p|0|%i|%i|%i|-1", BlockX, BlockY, BlockZ))
+	end
+	
+	return true
+end
+
+
+----------------------------------------------------
+-----------------SELECTSECONDPOINT------------------
+----------------------------------------------------
+function SelectSecondPointHook(Player, BlockX, BlockY, BlockZ, BlockFace, CursorX, CursorY, CursorZ)
+	if BlockFace == BLOCK_FACE_NONE then
+		return false
+	end
+	
+	local PlayerName = Player:GetName()
+	if not PlayerHasWEPermission(Player, "worldedit.selection.pos") then
+		return false
+	end
+	
+	if not WandActivated[PlayerName] then
+		return false
+	end
+	
+	-- Check if the wand is equipped
+	if Player:GetEquippedItem().m_ItemType ~= Wand then
+		return false
+	end
+	
+	TwoPlayer[PlayerName] = Vector3i(BlockX, BlockY, BlockZ)
+	if OnePlayer[Player:GetName()] ~= nil and TwoPlayer[Player:GetName()] ~= nil then
+		Player:SendMessage(cChatColor.LightPurple .. 'Second position set to (' .. BlockX .. ".0, " .. BlockY .. ".0, " .. BlockZ .. ".0) (" .. GetSize(Player) .. ").")
+		if PlayerWECUIActivated[PlayerName] then
+			Player:GetClientHandle():SendPluginMessage("WECUI", string.format("p|1|%i|%i|%i|%i", BlockX, BlockY, BlockZ, BlockX * BlockY * BlockZ))
+		end
+	else
+		Player:SendMessage(cChatColor.LightPurple .. 'Second position set to (' .. BlockX .. ".0, " .. BlockY .. ".0, " .. BlockZ .. ".0).")
+		if PlayerWECUIActivated[PlayerName] then
+			Player:GetClientHandle():SendPluginMessage("WECUI", string.format("p|1|%i|%i|%i|-1", BlockX, BlockY, BlockZ))
+		end
 	end
 	return true
 end
@@ -84,38 +125,6 @@ end
 
 
 ----------------------------------------------------
------------------SELECTSECONDPOINT------------------
-----------------------------------------------------
-function SelectSecondPointHook(Player, BlockX, BlockY, BlockZ, BlockFace, CursorX, CursorY, CursorZ)
-	if BlockFace == BLOCK_FACE_NONE then
-		return false
-	end
-	
-	local PlayerName = Player:GetName()
-	if not PlayerHasWEPermission(Player, "worldedit.selection.pos") then
-		return false
-	end
-	
-	if not WandActivated[PlayerName] then
-		return false
-	end
-	
-	-- Check if the wand is equipped
-	if Player:GetEquippedItem().m_ItemType ~= Wand then
-		return false
-	end
-	
-	TwoPlayer[PlayerName] = Vector3i(BlockX, BlockY, BlockZ)
-	if OnePlayer[Player:GetName()] ~= nil and TwoPlayer[Player:GetName()] ~= nil then
-		Player:SendMessage(cChatColor.LightPurple .. 'Second position set to (' .. BlockX .. ".0, " .. BlockY .. ".0, " .. BlockZ .. ".0) (" .. GetSize(Player) .. ").")
-	else
-		Player:SendMessage(cChatColor.LightPurple .. 'Second position set to (' .. BlockX .. ".0, " .. BlockY .. ".0, " .. BlockZ .. ".0).")
-	end
-	return true
-end
-
-
-----------------------------------------------------
 -----------------RIGHTCLICKCOMPASS------------------
 ----------------------------------------------------
 function RightClickCompassHook(Player, BlockX, BlockY, BlockZ, BlockFace, CursorX, CursorY, CursorZ)
@@ -156,4 +165,15 @@ function OnPlayerAnimation(Player, Animation)
 		end
 	end
 	LeftClickCompassUsed[PlayerName] = true
+end
+
+
+
+----------------------------------------------------
+------------------ONPLUGINMESSAGE-------------------
+----------------------------------------------------
+function OnPluginMessage(a_Client, a_Channel, a_Message)
+	if (a_Channel == "REGISTER") and (a_Message:find("WECUI") ~= nil) then
+		PlayerWECUIActivated[a_Client:GetPlayer():GetName()] = true
+	end
 end

@@ -17,7 +17,7 @@ function Initialize(Plugin)
 	cPluginManager.AddHook(cPluginManager.HOOK_PLAYER_JOINED,         OnPlayerJoined);
 	cPluginManager.AddHook(cPluginManager.HOOK_PLAYER_ANIMATION,      OnPlayerAnimation);
 	
-	PluginManager = cRoot:Get():GetPluginManager()
+	cPluginManager:AddHook(cPluginManager.HOOK_PLUGIN_MESSAGE,        OnPluginMessage);
 	
 	--Bind all the commands:
 	RegisterPluginInfoCommands();

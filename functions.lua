@@ -35,6 +35,7 @@ function CreateTables()
 	WandActivated = {}
 	LeftClickCompassUsed = {}
 	ExclusionAreaPlugins = {}
+	PlayerWECUIActivated = {}
 	cRoot:Get():ForEachWorld(function(World)
 		ExclusionAreaPlugins[World:GetName()] = {}
 	end)
