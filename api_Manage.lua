@@ -13,7 +13,7 @@ function RegisterAreaCallback(a_PluginName, a_FunctionName, a_WorldName)
 		(type(a_WorldName)    ~= "string") or (a_WorldName    == "")
 	) then
 		LOGWARNING("[WorldEdit] Invalid callback registration parameters.")
-		LOGWARNING("  RegisterCallback() was called with params " ..
+		LOGWARNING("  RegisterAreaCallback() was called with params " ..
 			tostring(a_PluginName   or "<nil>") .. ", " ..
 			tostring(a_FunctionName or "<nil>") .. ", " ..
 			tostring(a_WorldName    or "<nil>")
