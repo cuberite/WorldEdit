@@ -139,13 +139,13 @@ end
 -------------------------------------------
 function RightClickCompass(Player, World)
 	local Teleported = false
-	local Air = false
+	local WentThroughBlock = false
 	local Callbacks = {
 		OnNextBlock = function(X, Y, Z, BlockType, BlockMeta)
 			if BlockType ~= E_BLOCK_AIR then
-				Air = true
+				WentThroughBlock = true
 			else
-				if Air then
+				if WentThroughBlock then
 					if BlockType == E_BLOCK_AIR and World:GetBlock(X, Y - 1, Z) ~= E_BLOCK_AIR then
 						Player:TeleportToCoords(X + 0.5, Y, Z + 0.5)
 						Teleported = true
