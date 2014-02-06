@@ -39,3 +39,14 @@ end
 
 
 
+
+function CheckIfAllowedToChangeSelection(a_Player, a_PosX, a_PosY, a_PosZ, a_PointNr)
+	for idx, callback in ipairs(PlayerSelectPointHooks) do
+		local res = cPluginManager:CallPlugin(callback.PluginName, callback.FunctionName, a_Player, a_PosX, a_PosY, a_PosZ, a_PointNr)
+		if (res) then
+			-- The plugin wants to abort the operation.
+			return true
+		end
+	end
+	return false
+end
