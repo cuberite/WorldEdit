@@ -80,19 +80,6 @@ function SuperPickaxeHook(Player, BlockX, BlockY, BlockZ, BlockFace, Status)
 end
 
 
----------------------------------------------------
------------------LeftClickCompass------------------
----------------------------------------------------
-function LeftClickCompassHook(Player, BlockX, BlockY, BlockZ, BlockFace, Status)
-	if Status == 0 then
-		if PlayerHasWEPermission(Player, "worldedit.navigation.jumpto.tool") and Player:GetEquippedItem().m_ItemType == E_ITEM_COMPASS then
-			LeftClickCompassUsed[Player:GetName()] = false
-			return false
-		end
-	end
-end
-
-
 ----------------------------------------------------
 ---------------------TOOLSHOOK----------------------
 ----------------------------------------------------
@@ -147,6 +134,28 @@ function OnPlayerJoined(Player)
 end
 
 
+---------------------------------------------------
+-----------------LeftClickCompass------------------
+---------------------------------------------------
+function LeftClickCompassHook(Player, BlockX, BlockY, BlockZ, BlockFace, Status)
+	if Status ~= 0 then
+		return false
+	end
+	
+	if not PlayerHasWEPermission(Player, "worldedit.navigation.jumpto.tool") then
+		return false
+	end
+	
+	if Player:GetEquippedItem().m_ItemType ~= E_ITEM_COMPASS then
+		return false
+	end
+	
+	if LeftClickCompassUsed[Player:GetName()] then
+		return false
+	end
+	return true
+end
+
 
 ----------------------------------------------------
 -----------------ONPLAYERANIMATION------------------
@@ -157,14 +166,33 @@ function OnPlayerAnimation(Player, Animation)
 	end
 	
 	local PlayerName = Player:GetName()
-	if LeftClickCompassUsed[PlayerName] or LeftClickCompassUsed[PlayerName] == nil then
-		if Player:GetEquippedItem().m_ItemType == E_ITEM_COMPASS and PlayerHasWEPermission(Player, "worldedit.navigation.jumpto.tool") then
+	
+	if not LeftClickCompassUsed[PlayerName] or (LeftClickCompassUsed[PlayerName] == nil) then
+		LeftClickCompassUsed[PlayerName] = true
+		return false
+	end
+	
+	if Player:GetEquippedItem().m_ItemType ~= E_ITEM_COMPASS then
+		return false
+	end
+	
+	if not PlayerHasWEPermission(Player, "worldedit.navigation.jumpto.tool") then
+		return false
+	end
+	
+	local World = Player:GetWorld()
+	local PlayerID = Player:GetUniqueID()
+	LeftClickCompassUsed[PlayerName] = false
+	World:ScheduleTask(1, function(World)
+		World:DoWithEntityByID(PlayerID, function(Player)
 			if not LeftClickCompass(Player, Player:GetWorld()) then
 				Player:SendMessage(cChatColor.Rose .. "No blocks in sight (or too far)!")
 			end
-		end
-	end
-	LeftClickCompassUsed[PlayerName] = true
+			LeftClickCompassUsed[PlayerName] = true
+		end)
+	end)
+				
+	return true
 end
 
 
