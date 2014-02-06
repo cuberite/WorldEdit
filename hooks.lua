@@ -167,7 +167,7 @@ function OnPlayerAnimation(Player, Animation)
 	
 	local PlayerName = Player:GetName()
 	
-	if not LeftClickCompassUsed[PlayerName] or (LeftClickCompassUsed[PlayerName] == nil) then
+	if (not LeftClickCompassUsed[PlayerName]) and (LeftClickCompassUsed[PlayerName] ~= nil) then
 		LeftClickCompassUsed[PlayerName] = true
 		return false
 	end
