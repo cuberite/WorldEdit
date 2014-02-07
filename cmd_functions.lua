@@ -9,13 +9,15 @@ function HandleCreateWalls(Player, World, BlockType, BlockMeta)
 	
 	local PlayerName = Player:GetName()
 	
-	LastCoords[PlayerName] = OneX .. "," .. OneY .. "," .. OneZ .. "," .. World:GetName()
+	LastCoords[PlayerName] = {X = OneX, Y = OneY, Z = OneZ, WorldName = World:GetName()}
+	
 	PersonalUndo[PlayerName]:Read(World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ)
 	PersonalBlockArea[PlayerName]:Read(World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ)
 	local Blocks = (2 * (PersonalBlockArea[PlayerName]:GetSizeX() - 1 + PersonalBlockArea[PlayerName]:GetSizeZ() - 1) * PersonalBlockArea[PlayerName]:GetSizeY()) -- Calculate the amount if blocks that are going to change
 	if Blocks == 0 then -- if the wall is 1x1x1 then the amout of blocks changed are 1
 		Blocks = 1
 	end
+	
 	local Y = 0
 	local Z = 0
 	local X = 0
@@ -45,7 +47,8 @@ function HandleCreateFaces(Player, World, BlockType, BlockMeta)
 	
 	local PlayerName = Player:GetName()
 	
-	LastCoords[PlayerName] = OneX .. "," .. OneY .. "," .. OneZ .. "," .. World:GetName()
+	LastCoords[PlayerName] = {X = OneX, Y = OneY, Z = OneZ, WorldName = World:GetName()}
+	
 	PersonalUndo[PlayerName]:Read(World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ)
 	PersonalBlockArea[PlayerName]:Read(World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ) -- read the area
 	local Blocks = (2 * (PersonalBlockArea[PlayerName]:GetSizeX() - 1 + PersonalBlockArea[PlayerName]:GetSizeZ() - 1) * PersonalBlockArea[PlayerName]:GetSizeY()) -- calculate the amount of changed blocks.
@@ -85,11 +88,13 @@ function HandleFillSelection(Player, World, BlockType, BlockMeta)
 	
 	local PlayerName = Player:GetName()
 	
-	LastCoords[PlayerName] = OneX .. "," .. OneY .. "," .. OneZ .. "," .. World:GetName()
+	LastCoords[PlayerName] = {X = OneX, Y = OneY, Z = OneZ, WorldName = World:GetName()}
+	
 	PersonalUndo[PlayerName]:Read(World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ)
 	PersonalBlockArea[PlayerName]:Read(World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ) -- read the area
 	PersonalBlockArea[PlayerName]:Fill(3, BlockType, BlockMeta) -- fill the area with the right blocks
 	PersonalBlockArea[PlayerName]:Write(World, OneX, OneY, OneZ) -- write the area in the world
+	
 	World:WakeUpSimulatorsInArea(OneX - 1, TwoX + 1, OneY - 1, TwoY + 1, OneZ - 1, TwoZ + 1)
 	return GetSize(Player)
 end
@@ -108,13 +113,15 @@ function HandleReplaceSelection(Player, World, ChangeBlockType, ChangeBlockMeta,
 	local Blocks = 0
 	local PlayerName = Player:GetName()
 	
-	LastCoords[PlayerName] = OneX .. "," .. OneY .. "," .. OneZ .. "," .. Player:GetWorld():GetName()
+	LastCoords[PlayerName] = {X = OneX, Y = OneY, Z = OneZ, WorldName = World:GetName()}
+	
 	PersonalUndo[PlayerName]:Read(World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ)
 	PersonalBlockArea[PlayerName]:Read(World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ) -- Read the area
 	
 	local XSize = PersonalBlockArea[PlayerName]:GetSizeX() - 1
 	local YSize = PersonalBlockArea[PlayerName]:GetSizeY() - 1
 	local ZSize = PersonalBlockArea[PlayerName]:GetSizeZ() - 1
+	
 	for X=0, XSize do
 		for Y=0, YSize do
 			for Z=0, ZSize do
@@ -128,6 +135,7 @@ function HandleReplaceSelection(Player, World, ChangeBlockType, ChangeBlockMeta,
 			end
 		end
 	end
+	
 	PersonalBlockArea[PlayerName]:Write(World, OneX, OneY, OneZ) -- write the area into the world.
 	World:WakeUpSimulatorsInArea(OneX - 1, TwoX + 1, OneY - 1, TwoY + 1, OneZ - 1, TwoZ + 1)
 	return Blocks

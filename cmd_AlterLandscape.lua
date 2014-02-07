@@ -12,7 +12,8 @@ function HandleRemoveBelowCommand(Split, Player)
 		return true
 	end
 	
-	LastCoords[PlayerName] = X .. "," .. 1 .. "," .. Z .. "," .. World:GetName()
+	LastCoords[PlayerName] = {X = X, Y = 1, Z = Z, WorldName = World:GetName()}
+	
 	PersonalUndo[PlayerName]:Read(World, X, X, 1, Y, Z, Z)
 	for y = 1, Y do
 		World:SetBlock(X, y, Z, E_BLOCK_AIR, 0)
@@ -37,8 +38,8 @@ function HandleRemoveAboveCommand(Split, Player)
 		return true
 	end
 	
-	LastCoords[PlayerName] = X .. "," .. 1 .. "," .. Z .. "," .. World:GetName()
-	PersonalUndo[PlayerName]:Read(World, X, X, 1, WorldHeight, Z, Z)
+	LastCoords[PlayerName] = {X = X, Y = y, Z = Z, WorldName = World:GetName()}
+	PersonalUndo[PlayerName]:Read(World, X, X, y, WorldHeight, Z, Z)
 	
 	for Y = y, WorldHeight do
 		World:SetBlock(X, Y, Z, E_BLOCK_AIR, 0)

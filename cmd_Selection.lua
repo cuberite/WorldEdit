@@ -63,11 +63,13 @@ function HandleRedoCommand(Split, Player)
 		return true
 	end
 	
-	local Coords = StringSplit(LastRedoCoords[PlayerName], ",")
-	local World = cRoot:Get():GetWorld(Coords[4])
-	PersonalUndo[PlayerName]:Read(World, Coords[1], Coords[1] + PersonalRedo[PlayerName]:GetSizeX() - 1, Coords[2], Coords[2] + PersonalRedo[PlayerName]:GetSizeY() - 1,Coords[3],  Coords[3] + PersonalRedo[PlayerName]:GetSizeZ() - 1)
+	local Coords = LastRedoCoords[PlayerName]
+	
+	local World = cRoot:Get():GetWorld(Coords.WorldName)
+	PersonalUndo[PlayerName]:Read(World, Coords.X, Coords.X + PersonalRedo[PlayerName]:GetSizeX() - 1, Coords.Y, Coords.Y + PersonalRedo[PlayerName]:GetSizeY() - 1,Coords.Z,  Coords.Z + PersonalRedo[PlayerName]:GetSizeZ() - 1)
 	LastCoords[PlayerName] = LastRedoCoords[PlayerName]
-	PersonalRedo[PlayerName]:Write(World, Coords[1], Coords[2], Coords[3], 3)
+	PersonalRedo[PlayerName]:Write(World, Coords.X, Coords.Y, Coords.Z, 3)
+	
 	LastRedoCoords[PlayerName] = nil
 	Player:SendMessage(cChatColor.LightPurple .. "Redo Successful.")
 	return true
@@ -84,12 +86,14 @@ function HandleUndoCommand(Split, Player)
 		Player:SendMessage(cChatColor.Rose .. "Nothing left to undo")
 		return true
 	end
-	local Coords = StringSplit(LastCoords[PlayerName], ",")
-	local World = cRoot:Get():GetWorld(Coords[4]) 
-	PersonalRedo[PlayerName]:Read(World, Coords[1], Coords[1] + PersonalUndo[PlayerName]:GetSizeX() - 1, Coords[2], Coords[2] + PersonalUndo[PlayerName]:GetSizeY() - 1,Coords[3],  Coords[3] + PersonalUndo[PlayerName]:GetSizeZ() - 1)
+	local Coords = LastCoords[PlayerName]
+	local World = cRoot:Get():GetWorld(Coords.WorldName)
+	
+	PersonalRedo[PlayerName]:Read(World, Coords.X, Coords.X + PersonalUndo[PlayerName]:GetSizeX() - 1, Coords.Y, Coords.Y + PersonalUndo[PlayerName]:GetSizeY() - 1, Coords.Z,  Coords.Z + PersonalUndo[PlayerName]:GetSizeZ() - 1)
 	LastRedoCoords[PlayerName] = LastCoords[PlayerName]
-	PersonalUndo[PlayerName]:Write(World, Coords[1], Coords[2], Coords[3], 3)
+	PersonalUndo[PlayerName]:Write(World, Coords.X, Coords.Y, Coords.Z, 3)
 	Player:SendMessage(cChatColor.LightPurple .. "Undo Successful.")
+	
 	LastCoords[PlayerName] = nil
 	return true
 end
@@ -130,7 +134,8 @@ function HandlePasteCommand(Split, Player)
 		return true
 	end
 	
-	LastCoords[PlayerName] = MinX .. "," .. MinY .. "," .. MinZ .. "," .. World:GetName()
+	LastCoords[PlayerName] = {X = MinX, Y = MinY, Z = MinZ, WorldName = World:GetName()}
+	
 	PersonalUndo[PlayerName]:Read(World, MinX, MaxX, MinY, MaxY, MinZ, MaxZ)
 	PersonalClipboard[PlayerName]:Write(World, MinX, MinY, MinZ, 3) -- paste the area that the player copied
 	World:WakeUpSimulatorsInArea(MinX - 1, MaxX + 1, MinY - 1, MaxY + 1, MinZ - 1, MaxZ + 1)
@@ -173,7 +178,9 @@ function HandleCutCommand(Split, Player)
 	end
 	
 	local World = Player:GetWorld() -- get the world
-	LastCoords[PlayerName] = OneX .. "," .. OneY .. "," .. OneZ .. "," .. Player:GetWorld():GetName()
+
+	LastCoords[PlayerName] = {X = OneX, Y = OneY, Z = OneZ, WorldName = World:GetName()}
+	
 	PersonalUndo[PlayerName]:Read(World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ)
 	local Cut = cBlockArea()
 	PersonalClipboard[PlayerName]:Read(World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ) -- read the area
