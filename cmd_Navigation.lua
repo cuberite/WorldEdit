@@ -89,7 +89,7 @@ function HandleDescendCommand(Split, Player)
 		else
 			if WentThroughBlock then
 				for y = Y, 1, -1 do
-					if g_BlockIsSolid[World:GetBlock(X, y, Z)] then
+					if g_BlockIsSolid[World:GetBlock(XPos, y, ZPos)] then
 						YPos = y
 						FoundYCoordinate = true
 						break
@@ -104,7 +104,7 @@ function HandleDescendCommand(Split, Player)
 	end
 	
 	if FoundYCoordinate then
-		Player:TeleportToCoords(Player:GetPosX(), YPos, Player:GetPosZ())
+		Player:TeleportToCoords(Player:GetPosX(), YPos + 1, Player:GetPosZ())
 	end
 	
 	Player:SendMessage(cChatColor.LightPurple .. "Descended a level.")
