@@ -68,13 +68,7 @@ end
 --------------------SETPOS1--------------------
 -----------------------------------------------
 function HandlePos1Command(Split, Player)
-	local PlayerName = Player:GetName()
-	OnePlayer[PlayerName] = Vector3i(math.floor(Player:GetPosX()), math.floor(Player:GetPosY()), math.floor(Player:GetPosZ()))
-	if OnePlayer[PlayerName] ~= nil and TwoPlayer[PlayerName] ~= nil then
-		Player:SendMessage(cChatColor.LightPurple .. 'First position set to (' .. OnePlayer[PlayerName].x .. ".0, " .. OnePlayer[PlayerName].y .. ".0, " .. OnePlayer[PlayerName].z .. ".0) (" .. GetSize(Player) .. ").")
-	else
-		Player:SendMessage(cChatColor.LightPurple .. 'First position set to (' .. OnePlayer[PlayerName].x .. ".0, " .. OnePlayer[PlayerName].y .. ".0, " .. OnePlayer[PlayerName].z .. ".0).")
-	end
+	SetPlayerSelectionPoint(Player, math.floor(Player:GetPosX()), math.floor(Player:GetPosY()), math.floor(Player:GetPosZ()), E_SELECTIONPOINT_LEFT)
 	return true
 end
 
@@ -83,28 +77,7 @@ end
 --------------------SETPOS2--------------------
 -----------------------------------------------
 function HandlePos2Command(Split, Player)
-	local PlayerName = Player:GetName()
-	TwoPlayer[PlayerName] = Vector3i(math.floor(Player:GetPosX()), math.floor(Player:GetPosY()), math.floor(Player:GetPosZ()))
-	if OnePlayer[PlayerName] ~= nil and TwoPlayer[PlayerName] ~= nil then
-		Player:SendMessage(cChatColor.LightPurple .. 'Second position set to (' .. TwoPlayer[PlayerName].x .. ".0, " .. TwoPlayer[PlayerName].y .. ".0, " .. TwoPlayer[PlayerName].z .. ".0) (" .. GetSize(Player) .. ").")
-	else
-		Player:SendMessage(cChatColor.LightPurple .. 'Second position set to (' .. TwoPlayer[PlayerName].x .. ".0, " .. TwoPlayer[PlayerName].y .. ".0, " .. TwoPlayer[PlayerName].z .. ".0).")
-	end
-	return true
-end
-
-
------------------------------------------------
---------------------SETPOS2--------------------
------------------------------------------------
-function HandlePos2Command(Split, Player)
-	local PlayerName = Player:GetName()
-	TwoPlayer[PlayerName] = Vector3i(math.floor(Player:GetPosX()), math.floor(Player:GetPosY()), math.floor(Player:GetPosZ()))
-	if OnePlayer[PlayerName] ~= nil and TwoPlayer[PlayerName] ~= nil then
-		Player:SendMessage(cChatColor.LightPurple .. 'Second position set to (' .. TwoPlayer[PlayerName].x .. ".0, " .. TwoPlayer[PlayerName].y .. ".0, " .. TwoPlayer[PlayerName].z .. ".0) (" .. GetSize(Player) .. ").")
-	else
-		Player:SendMessage(cChatColor.LightPurple .. 'Second position set to (' .. TwoPlayer[PlayerName].x .. ".0, " .. TwoPlayer[PlayerName].y .. ".0, " .. TwoPlayer[PlayerName].z .. ".0).")
-	end
+	SetPlayerSelectionPoint(Player, math.floor(Player:GetPosX()), math.floor(Player:GetPosY()), math.floor(Player:GetPosZ()), E_SELECTIONPOINT_RIGHT)
 	return true
 end
 
@@ -113,13 +86,13 @@ end
 --------------------SETHPOS1-------------------
 -----------------------------------------------
 function HandleHPos1Command(Split, Player)
-	local PlayerName = Player:GetName()
-	OnePlayer[PlayerName] = HPosSelect(Player, Player:GetWorld())
-	if OnePlayer[PlayerName] ~= nil and TwoPlayer[PlayerName] ~= nil then
-		Player:SendMessage(cChatColor.LightPurple .. 'First position set to (' .. OnePlayer[PlayerName].x .. ".0, " .. OnePlayer[PlayerName].y .. ".0, " .. OnePlayer[PlayerName].z .. ".0) (" .. GetSize(Player) .. ").")
-	else
-		Player:SendMessage(cChatColor.LightPurple .. 'First position set to (' .. OnePlayer[PlayerName].x .. ".0, " .. OnePlayer[PlayerName].y .. ".0, " .. OnePlayer[PlayerName].z .. ".0).")
+	local Succes, Target = HPosSelect(Player, Player:GetWorld())
+	if not Succes then
+		Player:SendMessage(cChatColor.Rose .. "You were not looking at a block.")
+		return true
 	end
+	
+	SetPlayerSelectionPoint(Player, Target.x, Target.y, Target.z, E_SELECTIONPOINT_LEFT)	
 	return true
 end
 
@@ -128,13 +101,12 @@ end
 --------------------SETHPOS2-------------------
 -----------------------------------------------
 function HandleHPos2Command(Split, Player)
-	local PlayerName = Player:GetName()
-	local target = HPosSelect(Player, Player:GetWorld())
-	TwoPlayer[PlayerName] = HPosSelect(Player, Player:GetWorld())
-	if OnePlayer[PlayerName] ~= nil and TwoPlayer[PlayerName] ~= nil then
-		Player:SendMessage(cChatColor.LightPurple .. 'Second position set to (' .. TwoPlayer[PlayerName].x .. ".0, " .. TwoPlayer[PlayerName].y .. ".0, " .. TwoPlayer[PlayerName].z .. ".0) (" .. GetSize(Player) .. ").")
-	else
-		Player:SendMessage(cChatColor.LightPurple .. 'Second position set to (' .. TwoPlayer[PlayerName].x .. ".0, " .. TwoPlayer[PlayerName].y .. ".0, " .. TwoPlayer[PlayerName].z .. ".0).")
+	local Succes, Target = HPosSelect(Player, Player:GetWorld())
+	if not Succes then
+		Player:SendMessage(cChatColor.Rose .. "You were not looking at a block.")
+		return true
 	end
+	
+	SetPlayerSelectionPoint(Player, Target.x, Target.y, Target.z, E_SELECTIONPOINT_RIGHT)	
 	return true
 end

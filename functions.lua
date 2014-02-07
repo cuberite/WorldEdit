@@ -36,6 +36,7 @@ function CreateTables()
 	LeftClickCompassUsed = {}
 	ExclusionAreaPlugins = {}
 	PlayerWECUIActivated = {}
+	PlayerSelectPointHooks = {}
 	cRoot:Get():ForEachWorld(function(World)
 		ExclusionAreaPlugins[World:GetName()] = {}
 	end)
@@ -384,4 +385,37 @@ function PlayerHasWEPermission(Player, ...)
 		end
 	end
 	return false
+end
+
+
+-----------------------------------------------
+------------SETPLAYERSELECTIONPOINT------------
+-----------------------------------------------
+function SetPlayerSelectionPoint(a_Player, a_PosX, a_PosY, a_PosZ, a_PointNr)
+	-- Check if other plugins agree with changing the players selection.
+	if CheckIfAllowedToChangeSelection(a_Player, a_PosX, a_PosY, a_PosZ, a_PointNr) then
+		return
+	end
+	
+	local PlayerName = a_Player:GetName()
+	local PointNrName = ""
+	if a_PointNr == E_SELECTIONPOINT_LEFT then
+		PointNrName = "First"
+		OnePlayer[PlayerName] = Vector3i(a_PosX, a_PosY, a_PosZ)
+	else
+		PointNrName = "Second"
+		TwoPlayer[PlayerName] = Vector3i(a_PosX, a_PosY, a_PosZ)
+	end
+	
+	if OnePlayer[PlayerName] ~= nil and TwoPlayer[PlayerName] ~= nil then
+		a_Player:SendMessage(cChatColor.LightPurple .. PointNrName .. ' position set to (' .. a_PosX .. ".0, " .. a_PosY .. ".0, " .. a_PosZ .. ".0) (" .. GetSize(a_Player) .. ").")
+		if PlayerWECUIActivated[PlayerName] then
+			a_Player:GetClientHandle():SendPluginMessage("WECUI", string.format("p|%i|%i|%i|%i|%i", a_PointNr, a_PosX, a_PosY, a_PosZ, a_PosX * a_PosY * a_PosZ))
+		end
+	else
+		a_Player:SendMessage(cChatColor.LightPurple .. PointNrName .. ' position set to (' .. a_PosX .. ".0, " .. a_PosY .. ".0, " .. a_PosZ .. ".0).")
+		if PlayerWECUIActivated[PlayerName] then
+			a_Player:GetClientHandle():SendPluginMessage("WECUI", string.format("p|%i|%i|%i|%i|-1", a_PointNr, a_PosX, a_PosY, a_PosZ))
+		end
+	end
 end

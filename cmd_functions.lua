@@ -229,7 +229,7 @@ function HPosSelect(Player, World)
 	local End = EyePos + LookVector * 150
 	
 	if cLineBlockTracer.Trace(World, Callbacks, Start.x, Start.y, Start.z, End.x, End.y, End.z) then
-		return nil
+		return false
 	end
-	return hpos
+	return true, hpos
 end

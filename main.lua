@@ -1,3 +1,5 @@
+E_SELECTIONPOINT_LEFT  = 0
+E_SELECTIONPOINT_RIGHT = 1
 PLUGIN = nil
 
 function Initialize(Plugin)

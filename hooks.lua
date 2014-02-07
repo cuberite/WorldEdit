@@ -15,15 +15,7 @@ function SelectFirstPointHook(Player, BlockX, BlockY, BlockZ, BlockFace, BlockTy
 		return false
 	end
 	
-	OnePlayer[PlayerName] = Vector3i(BlockX, BlockY, BlockZ)
-	if OnePlayer[PlayerName] ~= nil and TwoPlayer[PlayerName] ~= nil then
-		Player:SendMessage(cChatColor.LightPurple .. 'First position set to (' .. BlockX .. ".0, " .. BlockY .. ".0, " .. BlockZ .. ".0) (" .. GetSize(Player) .. ").")
-		Player:GetClientHandle():SendPluginMessage("WECUI", string.format("p|0|%i|%i|%i|%i", BlockX, BlockY, BlockZ, BlockX * BlockY * BlockZ))
-	else
-		Player:SendMessage(cChatColor.LightPurple .. 'First position set to (' .. BlockX .. ".0, " .. BlockY .. ".0, " .. BlockZ .. ".0).")
-		Player:GetClientHandle():SendPluginMessage("WECUI", string.format("p|0|%i|%i|%i|-1", BlockX, BlockY, BlockZ))
-	end
-	
+	SetPlayerSelectionPoint(Player, BlockX, BlockY, BlockZ, E_SELECTIONPOINT_LEFT)
 	return true
 end
 
@@ -50,18 +42,7 @@ function SelectSecondPointHook(Player, BlockX, BlockY, BlockZ, BlockFace, Cursor
 		return false
 	end
 	
-	TwoPlayer[PlayerName] = Vector3i(BlockX, BlockY, BlockZ)
-	if OnePlayer[Player:GetName()] ~= nil and TwoPlayer[Player:GetName()] ~= nil then
-		Player:SendMessage(cChatColor.LightPurple .. 'Second position set to (' .. BlockX .. ".0, " .. BlockY .. ".0, " .. BlockZ .. ".0) (" .. GetSize(Player) .. ").")
-		if PlayerWECUIActivated[PlayerName] then
-			Player:GetClientHandle():SendPluginMessage("WECUI", string.format("p|1|%i|%i|%i|%i", BlockX, BlockY, BlockZ, BlockX * BlockY * BlockZ))
-		end
-	else
-		Player:SendMessage(cChatColor.LightPurple .. 'Second position set to (' .. BlockX .. ".0, " .. BlockY .. ".0, " .. BlockZ .. ".0).")
-		if PlayerWECUIActivated[PlayerName] then
-			Player:GetClientHandle():SendPluginMessage("WECUI", string.format("p|1|%i|%i|%i|-1", BlockX, BlockY, BlockZ))
-		end
-	end
+	SetPlayerSelectionPoint(Player, BlockX, BlockY, BlockZ, E_SELECTIONPOINT_RIGHT)
 	return true
 end
 
