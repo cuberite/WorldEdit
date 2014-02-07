@@ -11,8 +11,9 @@ function HandleUpCommand(Split, Player)
 		Player:SendMessage(cChatColor.Rose .. "/up <block>")
 		return true
 	end
+	
 	local Height = tonumber(Split[2])
-	if Height == nil then
+	if Height == nil then -- The given string isn't a number. bail out.
 		Player:SendMessage(cChatColor.Rose .. 'Number expected; string"' .. Split[2] .. '" given.')
 		return true
 	end
@@ -43,6 +44,7 @@ function HandleJumpToCommand(Split, Player)
 		Player:SendMessage(cChatColor.Rose .. "/jumpto")
 		return true
 	end
+	
 	LeftClickCompass(Player, Player:GetWorld())
 	Player:SendMessage(cChatColor.LightPurple .. "Poof!!")
 	return true
@@ -58,6 +60,7 @@ function HandleThruCommand(Split, Player)
 		Player:SendMessage(cChatColor.Rose .. "/thru")
 		return true
 	end
+	
 	RightClickCompass(Player, Player:GetWorld())
 	Player:SendMessage(cChatColor.LightPurple .. "Whoosh!")
 	return true
@@ -69,34 +72,41 @@ end
 -----------------------------------------------
 function HandleDescendCommand(Split, Player)
 	local World = Player:GetWorld()
-	if Player:GetPosY() > 1 then
-		local X = math.floor(Player:GetPosX())
-		local Z = math.floor(Player:GetPosZ())
-		local Air = false
-		for Y=math.floor(Player:GetPosY()), 1, -1 do
-			if World:GetBlock(X, Y, Z) == E_BLOCK_AIR then
-				if (Air) then -- if the player went through blocks other then air then go further until you can teleport
-					for I=Y, 1 , -1 do
-						if g_BlockIsSolid[World:GetBlock(X, I, Z)] then
-							Y = I
-							break
-						end
+	if Player:GetPosY() < 1 then
+		Player:SendMessage(cChatColor.LightPurple .. "Descended a level.")
+		return true
+	end
+	
+	local FoundYCoordinate = false
+	local WentThroughBlock = false
+	local XPos = math.floor(Player:GetPosX())
+	local YPos = Player:GetPosY()
+	local ZPos = math.floor(Player:GetPosZ())
+
+	for Y = math.floor(YPos), 1, -1 do
+		if World:GetBlock(XPos, Y, ZPos) ~= E_BLOCK_AIR then
+			WentThroughBlock = true
+		else
+			if WentThroughBlock then
+				for y = Y, 1, -1 do
+					if g_BlockIsSolid[World:GetBlock(X, y, Z)] then
+						YPos = y
+						FoundYCoordinate = true
+						break
 					end
-					y = Y
+				end
+				
+				if FoundYCoordinate then
 					break
 				end
-			else
-				Air = true
 			end
 		end
-		if y ~= nil then
-			if (Air) then
-				if Y ~= 1 then
-					Player:TeleportToCoords(Player:GetPosX(), y + 1, Player:GetPosZ())
-				end
-			end
-		end		
 	end
+	
+	if FoundYCoordinate then
+		Player:TeleportToCoords(Player:GetPosX(), YPos, Player:GetPosZ())
+	end
+	
 	Player:SendMessage(cChatColor.LightPurple .. "Descended a level.")
 	return true
 end
@@ -109,26 +119,30 @@ function HandleAscendCommand(Split, Player)
 	local World = Player:GetWorld()
 	if Player:GetPosY() == World:GetHeight(math.floor(Player:GetPosX()), math.floor((Player:GetPosZ()))) then
 		Player:SendMessage(cChatColor.LightPurple .. "Ascended a level.")
-	else
-		local X = math.floor(Player:GetPosX())
-		local Z = math.floor(Player:GetPosZ())
-		local Air = false
-		for Y = math.floor(Player:GetPosY()), World:GetHeight(X, Z) + 1 do
-			if World:GetBlock(X, Y, Z) == E_BLOCK_AIR then
-				if (Air) then
-					y = Y
-					break
-				end
-			else
-				Air = true
+		return true
+	end
+	
+	
+	local XPos = math.floor(Player:GetPosX())
+	local YPos = Player:GetPosY()
+	local ZPos = math.floor(Player:GetPosZ())
+	local WentThroughBlock = false
+
+	for Y = math.floor(Player:GetPosY()), World:GetHeight(XPos, ZPos) + 1 do
+		if World:GetBlock(XPos, Y, ZPos) == E_BLOCK_AIR then
+			if WentThroughBlock then
+				YPos = Y
+				break
 			end
+		else
+			WentThroughBlock = true
 		end
-		if y ~= nil then
-			if (Air) then			
-				Player:TeleportToCoords(Player:GetPosX(), y, Player:GetPosZ())
-			end
-		end		
-	end	
+	end
+	
+	if WentThroughBlock then			
+		Player:TeleportToCoords(Player:GetPosX(), YPos, Player:GetPosZ())
+	end
+	
 	Player:SendMessage(cChatColor.LightPurple .. "Ascended a level.")
 	return true
 end
@@ -143,12 +157,15 @@ function HandleCeilCommand(Split, Player)
 		Player:SendMessage(cChatColor.Rose .. "/ceil [cleurance]")
 		return true
 	end
+	
+	local BlockFromCeil
 	if Split[2] == nil then
-		ClearAnce = 0
+		BlockFromCeil = 0
 	else
-		ClearAnce = tonumber(Split[2])
+		BlockFromCeil = tonumber(Split[2])
 	end
-	if ClearAnce == nil then
+	
+	if BlockFromCeil == nil then
 		Player:SendMessage(cChatColor.Rose .. 'Number expected; string "' .. Split[2] .. '" given.')
 		return true
 	end
@@ -157,14 +174,16 @@ function HandleCeilCommand(Split, Player)
 	local Y = math.floor(Player:GetPosY())
 	local Z = math.floor(Player:GetPosZ())
 	local WorldHeight = World:GetHeight(X, Z)
+	
 	if Y >= WorldHeight + 1 then
 		Player:SendMessage(cChatColor.Rose .. "No free spot above you found.")
 		return true
 	end
+	
 	for y=Y, WorldHeight do
 		if World:GetBlock(X, y, Z) ~= E_BLOCK_AIR then
-			World:SetBlock(X, y - ClearAnce - 3, Z, E_BLOCK_GLASS, 0)
-			local I = y - ClearAnce - 2
+			World:SetBlock(X, y - BlockFromCeil - 3, Z, E_BLOCK_GLASS, 0)
+			local I = y - BlockFromCeil - 2
 			if I == Y then
 				Player:SendMessage(cChatColor.Rose .. "No free spot above you found.")
 				return true
@@ -173,6 +192,7 @@ function HandleCeilCommand(Split, Player)
 			break
 		end
 	end
+	
 	Player:SendMessage(cChatColor.LightPurple .. "Whoosh!")
 	return true
 end
