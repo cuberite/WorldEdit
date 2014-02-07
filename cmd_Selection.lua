@@ -7,10 +7,13 @@ function HandleBiomeInfoCommand(Split, Player)
 		Player:SendMessage(cChatColor.LightPurple .. "Biome: " .. Biome)
 		return true
 	end
-	if OnePlayer[Player:GetName()] == nil or TwoPlayer[Player:GetName()] == nil then
+	
+	local PlayerName = Player:GetName()
+	if OnePlayer[PlayerName] == nil or TwoPlayer[PlayerName] == nil then
 		Player:SendMessage(cChatColor.Rose .. "Make a region selection first.")
 		return true
 	end
+	
 	local BiomeList = {}
 	local World = Player:GetWorld()
 	local OneX, TwoX, OneZ, TwoZ = GetXZCoords(Player)
@@ -34,14 +37,16 @@ function HandleExpandCommand(Split, Player)
 		Player:SendMessage(cChatColor.Rose .. "Invaild arguments.\n//expand <amount>")
 		return true
 	end
-	if OnePlayer[Player:GetName()] == nil or TwoPlayer[Player:GetName()] == nil then
+	
+	local PlayerName = Player:GetName()
+	if OnePlayer[PlayerName] == nil or TwoPlayer[PlayerName] == nil then
 		Player:SendMessage(cChatColor.Rose .. "Make a region selection first.")
 		return true
 	end
-	if OnePlayer[Player:GetName()].y > TwoPlayer[Player:GetName()].y then
-		OnePlayer[Player:GetName()].y = OnePlayer[Player:GetName()].y + tonumber(Split[2])
+	if OnePlayer[PlayerName].y > TwoPlayer[PlayerName].y then
+		OnePlayer[PlayerName].y = OnePlayer[PlayerName].y + tonumber(Split[2])
 	else
-		TwoPlayer[Player:GetName()].y = TwoPlayer[Player:GetName()].y + tonumber(Split[2])
+		TwoPlayer[PlayerName].y = TwoPlayer[PlayerName].y + tonumber(Split[2])
 	end
 	Player:SendMessage(cChatColor.LightPurple .. "Region expanded " .. Split[2] .. " blocks.")
 	return true
@@ -52,16 +57,18 @@ end
 ----------------------REDO----------------------
 ------------------------------------------------
 function HandleRedoCommand(Split, Player)
-	if PersonalRedo[Player:GetName()]:GetSizeX() == 0 and PersonalRedo[Player:GetName()]:GetSizeY() == 0 and PersonalRedo[Player:GetName()]:GetSizeZ() == 0 or LastRedoCoords[Player:GetName()] == nil then
+	local PlayerName = Player:GetName()
+	if PersonalRedo[PlayerName]:GetSizeX() == 0 and PersonalRedo[PlayerName]:GetSizeY() == 0 and PersonalRedo[PlayerName]:GetSizeZ() == 0 or LastRedoCoords[PlayerName] == nil then
 		Player:SendMessage(cChatColor.Rose .. "Nothing left to redo")
 		return true
 	end
-	local Coords = StringSplit(LastRedoCoords[Player:GetName()], ",")
+	
+	local Coords = StringSplit(LastRedoCoords[PlayerName], ",")
 	local World = cRoot:Get():GetWorld(Coords[4])
-	PersonalUndo[Player:GetName()]:Read(World, Coords[1], Coords[1] + PersonalRedo[Player:GetName()]:GetSizeX() - 1, Coords[2], Coords[2] + PersonalRedo[Player:GetName()]:GetSizeY() - 1,Coords[3],  Coords[3] + PersonalRedo[Player:GetName()]:GetSizeZ() - 1)
-	LastCoords[Player:GetName()] = LastRedoCoords[Player:GetName()]
-	PersonalRedo[Player:GetName()]:Write(World, Coords[1], Coords[2], Coords[3], 3)
-	LastRedoCoords[Player:GetName()] = nil
+	PersonalUndo[PlayerName]:Read(World, Coords[1], Coords[1] + PersonalRedo[PlayerName]:GetSizeX() - 1, Coords[2], Coords[2] + PersonalRedo[PlayerName]:GetSizeY() - 1,Coords[3],  Coords[3] + PersonalRedo[PlayerName]:GetSizeZ() - 1)
+	LastCoords[PlayerName] = LastRedoCoords[PlayerName]
+	PersonalRedo[PlayerName]:Write(World, Coords[1], Coords[2], Coords[3], 3)
+	LastRedoCoords[PlayerName] = nil
 	Player:SendMessage(cChatColor.LightPurple .. "Redo Successful.")
 	return true
 end
@@ -71,17 +78,19 @@ end
 ----------------------UNDO----------------------
 ------------------------------------------------
 function HandleUndoCommand(Split, Player)
-	if PersonalUndo[Player:GetName()]:GetSizeX() == 0 and PersonalUndo[Player:GetName()]:GetSizeY() == 0 and PersonalUndo[Player:GetName()]:GetSizeZ() == 0 or LastCoords[Player:GetName()] == nil then
+	local PlayerName = Player:GetName()
+	
+	if PersonalUndo[PlayerName]:GetSizeX() == 0 and PersonalUndo[PlayerName]:GetSizeY() == 0 and PersonalUndo[PlayerName]:GetSizeZ() == 0 or LastCoords[PlayerName] == nil then
 		Player:SendMessage(cChatColor.Rose .. "Nothing left to undo")
 		return true
 	end
-	local Coords = StringSplit(LastCoords[Player:GetName()], ",")
+	local Coords = StringSplit(LastCoords[PlayerName], ",")
 	local World = cRoot:Get():GetWorld(Coords[4]) 
-	PersonalRedo[Player:GetName()]:Read(World, Coords[1], Coords[1] + PersonalUndo[Player:GetName()]:GetSizeX() - 1, Coords[2], Coords[2] + PersonalUndo[Player:GetName()]:GetSizeY() - 1,Coords[3],  Coords[3] + PersonalUndo[Player:GetName()]:GetSizeZ() - 1)
-	LastRedoCoords[Player:GetName()] = LastCoords[Player:GetName()]
-	PersonalUndo[Player:GetName()]:Write(World, Coords[1], Coords[2], Coords[3], 3)
+	PersonalRedo[PlayerName]:Read(World, Coords[1], Coords[1] + PersonalUndo[PlayerName]:GetSizeX() - 1, Coords[2], Coords[2] + PersonalUndo[PlayerName]:GetSizeY() - 1,Coords[3],  Coords[3] + PersonalUndo[PlayerName]:GetSizeZ() - 1)
+	LastRedoCoords[PlayerName] = LastCoords[PlayerName]
+	PersonalUndo[PlayerName]:Write(World, Coords[1], Coords[2], Coords[3], 3)
 	Player:SendMessage(cChatColor.LightPurple .. "Undo Successful.")
-	LastCoords[Player:GetName()] = nil
+	LastCoords[PlayerName] = nil
 	return true
 end
 
@@ -103,11 +112,12 @@ end
 ----------------------PASTE----------------------
 -------------------------------------------------
 function HandlePasteCommand(Split, Player)
-	if PersonalClipboard[Player:GetName()]:GetSizeX() == 0 and PersonalClipboard[Player:GetName()]:GetSizeY() == 0 and PersonalClipboard[Player:GetName()]:GetSizeZ() == 0 then
+	local PlayerName = Player:GetName()
+	if PersonalClipboard[PlayerName]:GetSizeX() == 0 and PersonalClipboard[PlayerName]:GetSizeY() == 0 and PersonalClipboard[PlayerName]:GetSizeZ() == 0 then
 		Player:SendMessage(cChatColor.Rose .. "Your clipboard is empty. Use //copy first.")
 		return true
 	end
-	local PlayerName = Player:GetName()
+	
 	local World = Player:GetWorld()
 	local MinX = Player:GetPosX()
 	local MinY = Player:GetPosY()
@@ -133,13 +143,14 @@ end
 ----------------------COPY----------------------
 ------------------------------------------------
 function HandleCopyCommand(Split, Player)
-	if OnePlayer[Player:GetName()] == nil or TwoPlayer[Player:GetName()] == nil then -- Check if there is a region selected
+	local PlayerName = Player:GetName()
+	if OnePlayer[PlayerName] == nil or TwoPlayer[PlayerName] == nil then -- Check if there is a region selected
 		Player:SendMessage(cChatColor.Rose .. "No Region set")
 		return true
 	end
 	local OneX, TwoX, OneY, TwoY, OneZ, TwoZ = GetXYZCoords(Player) -- get the right coordinates
 	local World = Player:GetWorld()
-	PersonalClipboard[Player:GetName()]:Read(World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ) -- read the area
+	PersonalClipboard[PlayerName]:Read(World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ) -- read the area
 	Player:SendMessage(cChatColor.LightPurple .. "Block(s) copied.")
 	return true
 end
@@ -149,7 +160,9 @@ end
 ----------------------CUT----------------------
 -----------------------------------------------
 function HandleCutCommand(Split, Player)
-	if OnePlayer[Player:GetName()] == nil or TwoPlayer[Player:GetName()] == nil then -- Check if there is a region selected
+	local PlayerName = Player:GetName()
+	
+	if OnePlayer[PlayerName] == nil or TwoPlayer[PlayerName] == nil then -- Check if there is a region selected
 		Player:SendMessage(cChatColor.Rose .. "No Region set")
 		return true
 	end
@@ -160,10 +173,10 @@ function HandleCutCommand(Split, Player)
 	end
 	
 	local World = Player:GetWorld() -- get the world
-	LastCoords[Player:GetName()] = OneX .. "," .. OneY .. "," .. OneZ .. "," .. Player:GetWorld():GetName()
-	PersonalUndo[Player:GetName()]:Read(World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ)
+	LastCoords[PlayerName] = OneX .. "," .. OneY .. "," .. OneZ .. "," .. Player:GetWorld():GetName()
+	PersonalUndo[PlayerName]:Read(World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ)
 	local Cut = cBlockArea()
-	PersonalClipboard[Player:GetName()]:Read(World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ) -- read the area
+	PersonalClipboard[PlayerName]:Read(World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ) -- read the area
 	Cut:Read(World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ) -- read the area
 	Cut:Fill(3, 0, 0) -- delete the area
 	Cut:Write(World, OneX, OneY, OneZ) -- write the area
@@ -177,7 +190,9 @@ end
 ----------------------SET----------------------
 -----------------------------------------------
 function HandleSetCommand(Split, Player)
-	if OnePlayer[Player:GetName()] == nil or TwoPlayer[Player:GetName()] == nil then -- Check if there is a region selected
+	local PlayerName = Player:GetName()
+	
+	if OnePlayer[PlayerName] == nil or TwoPlayer[PlayerName] == nil then -- Check if there is a region selected
 		Player:SendMessage(cChatColor.Rose .. "No Region set")
 		return true
 	end
@@ -202,7 +217,9 @@ end
 ---------------------REPLACE---------------------
 -------------------------------------------------
 function HandleReplaceCommand(Split, Player)
-	if OnePlayer[Player:GetName()] == nil or TwoPlayer[Player:GetName()] == nil then -- Check if there is a region selected
+	local PlayerName = Player:GetName()
+	
+	if OnePlayer[PlayerName] == nil or TwoPlayer[PlayerName] == nil then -- Check if there is a region selected
 		Player:SendMessage(cChatColor.Rose .. "No Region set")
 		return true
 	end
@@ -227,7 +244,9 @@ end
 ----------------------FACES----------------------
 -------------------------------------------------
 function HandleFacesCommand(Split, Player)
-	if OnePlayer[Player:GetName()] == nil or TwoPlayer[Player:GetName()] == nil then -- Check if there is a region selected
+	local PlayerName = Player:GetName()
+	
+	if OnePlayer[PlayerName] == nil or TwoPlayer[PlayerName] == nil then -- Check if there is a region selected
 		Player:SendMessage(cChatColor.Rose .. "No Region set")
 		return true -- stop
 	end
@@ -252,7 +271,9 @@ end
 ----------------------WALLS----------------------
 -------------------------------------------------
 function HandleWallsCommand(Split, Player)
-	if OnePlayer[Player:GetName()] == nil or TwoPlayer[Player:GetName()] == nil then -- Check if there is a region selected
+	local PlayerName = Player:GetName()
+	
+	if OnePlayer[PlayerName] == nil or TwoPlayer[PlayerName] == nil then -- Check if there is a region selected
 		Player:SendMessage(cChatColor.Rose .. "No Region set")
 		return true
 	end
