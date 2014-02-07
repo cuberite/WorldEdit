@@ -43,9 +43,9 @@ function RegisterPlayerSelectingPoint(a_PluginName, a_FunctionName)
 		(type(a_FunctionName) ~= "string") or (a_FunctionName == "")
 	) then
 		LOGWARNING("[WorldEdit] Invalid callback registration parameters.")
-		LOGWARNING("  RegisterCallback() was called with params " ..
+		LOGWARNING("  RegisterPlayerSelectingPoint() was called with params " ..
 			tostring(a_PluginName   or "<nil>") .. ", " ..
-			tostring(a_FunctionName or "<nil>") .. ", "
+			tostring(a_FunctionName or "<nil>")
 		)
 		return false
 	end
