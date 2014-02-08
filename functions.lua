@@ -76,6 +76,10 @@ end
 ---------------------------------------------
 function GetSize(Player)
 	local PlayerName = Player:GetName()
+	if OnePlayer[PlayerName] == nil or TwoPlayer[PlayerName] == nil then
+		return -1 -- The player doesn't have anything selected. return -1
+	end
+	
 	if OnePlayer[PlayerName].x > TwoPlayer[PlayerName].x then -- check what number is bigger becouse otherwise you can get a negative number.
 		X = OnePlayer[PlayerName].x - TwoPlayer[PlayerName].x + 1
 	else
@@ -417,5 +421,19 @@ function SetPlayerSelectionPoint(a_Player, a_PosX, a_PosY, a_PosZ, a_PointNr)
 		if PlayerWECUIActivated[PlayerName] then
 			a_Player:GetClientHandle():SendPluginMessage("WECUI", string.format("p|%i|%i|%i|%i|-1", a_PointNr, a_PosX, a_PosY, a_PosZ))
 		end
+	end
+end
+
+
+-----------------------------------------------
+---------------------ROUND---------------------
+-----------------------------------------------
+function Round(GivenNumber)
+	assert(type(GivenNumber) == 'number')
+	local Number, Decimal = math.modf(GivenNumber)
+	if Decimal >= 0.5 then
+		return math.ceil(GivenNumber)
+	else
+		return Number
 	end
 end

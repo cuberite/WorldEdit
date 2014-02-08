@@ -48,6 +48,14 @@ g_PluginInfo =
 			Category = "Terraforming",
 		},
 		
+		["//expand"] =
+		{
+			Permission = "worldedit.selection.expand",
+			Handler = HandleExpandCommand,
+			HelpString = " Expand the selection area",
+			Category = "Clipboard",
+		},
+		
 		["//extinguish"] =
 		{
 			Alias = { "//ex", "//ext", "/ex", "/ext", "/extinguish", },
