@@ -103,7 +103,7 @@ end
 ----------------------SIZE----------------------
 ------------------------------------------------
 function HandleSizeCommand(Split, Player)
-	if OnePlayerX[Player:GetName()] ~= nil and TwoPlayerX[Player:GetName()] ~= nil then -- Check if there is a region selected 
+	if OnePlayer[Player:GetName()] ~= nil and TwoPlayer[Player:GetName()] ~= nil then -- Check if there is a region selected 
 		Player:SendMessage(cChatColor.LightPurple .. "the selection is " .. GetSize(Player) .. " block(s) big")
 	else
 		Player:SendMessage(cChatColor.LightPurple .. "Please select a region first")
