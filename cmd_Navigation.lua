@@ -199,7 +199,7 @@ function HandleCeilCommand(Split, Player)
 	
 	for y=Y, WorldHeight do
 		if World:GetBlock(X, y, Z) ~= E_BLOCK_AIR then
-			if not CheckIfInsideAreas(X, X, y, y, Z, Z, Player, PlayerWorld, "ceil") then
+			if not CheckIfInsideAreas(X, X, y - BlockFromCeil - 3, y - BlockFromCeil - 3, Z, Z, Player, PlayerWorld, "ceil") then
 				World:SetBlock(X, y - BlockFromCeil - 3, Z, E_BLOCK_GLASS, 0)
 			end
 			local I = y - BlockFromCeil - 2
