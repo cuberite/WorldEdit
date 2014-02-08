@@ -28,7 +28,11 @@ function HandleUpCommand(Split, Player)
 			return true
 		end
 	end
-	World:SetBlock(X, y - 1, Z, 20, 0)
+	
+	if not CheckIfInsideAreas(X, X, y - 1, y - 1, Z, Z, Player, World, "up") then
+		World:SetBlock(X, y - 1, Z, 20, 0)
+	end
+	
 	Player:TeleportToCoords(X + 0.5, y, Z + 0.5)
 	Player:SendMessage(cChatColor.LightPurple .. "Whoosh!")
 	return true
@@ -195,7 +199,9 @@ function HandleCeilCommand(Split, Player)
 	
 	for y=Y, WorldHeight do
 		if World:GetBlock(X, y, Z) ~= E_BLOCK_AIR then
-			World:SetBlock(X, y - BlockFromCeil - 3, Z, E_BLOCK_GLASS, 0)
+			if not CheckIfInsideAreas(X, X, y, y, Z, Z, Player, PlayerWorld, "ceil") then
+				World:SetBlock(X, y - BlockFromCeil - 3, Z, E_BLOCK_GLASS, 0)
+			end
 			local I = y - BlockFromCeil - 2
 			if I == Y then
 				Player:SendMessage(cChatColor.Rose .. "No free spot above you found.")
