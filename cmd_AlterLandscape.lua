@@ -31,8 +31,13 @@ function HandleRemoveAboveCommand(Split, Player)
 	local y = math.floor(Player:GetPosY()) -- round the number (for example from 12.23423987 to 12)
 	local Z = math.floor(Player:GetPosZ()) -- round the number (for example from 12.23423987 to 12)
 	local World = Player:GetWorld()
-	local WorldHeight = World:GetHeight(X, Z)
 	local PlayerName = Player:GetName()
+	local IsValid, WorldHeight = World:TryGetHeight(X, Z)
+	
+	if not IsValid then
+		Player:SendMessage(cChatColor.LightPurple .. "0 block(s) have been removed.")
+		return true
+	end
 	
 	if CheckIfInsideAreas(X, X, y, WorldHeight, Z, Z, Player, World, "removeabove") then
 		return true
@@ -59,6 +64,7 @@ function HandleDrainCommand(Split, Player)
 	else
 		Radius = tonumber(Split[2]) -- set the radius to the given radius
 	end
+	
 	local MinX = math.floor(Player:GetPosX()) - Radius
 	local MinY = math.floor(Player:GetPosY()) - Radius
 	local MinZ = math.floor(Player:GetPosZ()) - Radius
@@ -147,10 +153,12 @@ function HandleGreenCommand(Split, Player)
 	
 	for x=MinX, MaxX do
 		for z=MinZ, MaxZ do
-			local y = World:GetHeight(x, z)
-			YCheck:SetY(y)
-			if World:GetBlock(x, y, z) == E_BLOCK_DIRT then -- if the block is dirt
-				table.insert(PossibleBlockChanges, {X = x, Y = y, Z = z, BlockType = E_BLOCK_GRASS})
+			local IsValid, y = World:TryGetHeight(x, z)
+			if IsValid then
+				YCheck:SetY(y)
+				if World:GetBlock(x, y, z) == E_BLOCK_DIRT then -- if the block is dirt
+					table.insert(PossibleBlockChanges, {X = x, Y = y, Z = z, BlockType = E_BLOCK_GRASS})
+				end
 			end
 		end
 	end
@@ -186,15 +194,17 @@ function HandleSnowCommand(Split, Player)
 	
 	for x=MinX, MaxX do
 		for z=MinZ, MaxZ do
-			local y = World:GetHeight(x, z)
-			YCheck:SetY(y)
-			if World:GetBlock(x, y , z) == E_BLOCK_STATIONARY_WATER then -- check if the block is water
-				table.insert(PossibleBlockChanges, {X = x, Y = y, Z = z, BlockType = E_BLOCK_ICE})
-			elseif World:GetBlock(x, y , z) == E_BLOCK_LAVA then -- check if the block is lava
-				table.insert(PossibleBlockChanges, {X = x, Y = y, Z = z, BlockType = E_BLOCK_OBSIDIAN})
-			else
-				if g_BlockIsSnowable[World:GetBlock(x, y, z)] then
-					table.insert(PossibleBlockChanges, {X = x, Y = y + 1, Z = z, BlockType = E_BLOCK_SNOW})
+			local IsValid, y = World:TryGetHeight(x, z)
+			if IsValid then
+				YCheck:SetY(y)
+				if World:GetBlock(x, y , z) == E_BLOCK_STATIONARY_WATER then -- check if the block is water
+					table.insert(PossibleBlockChanges, {X = x, Y = y, Z = z, BlockType = E_BLOCK_ICE})
+				elseif World:GetBlock(x, y , z) == E_BLOCK_LAVA then -- check if the block is lava
+					table.insert(PossibleBlockChanges, {X = x, Y = y, Z = z, BlockType = E_BLOCK_OBSIDIAN})
+				else
+					if g_BlockIsSnowable[World:GetBlock(x, y, z)] then
+						table.insert(PossibleBlockChanges, {X = x, Y = y + 1, Z = z, BlockType = E_BLOCK_SNOW})
+					end
 				end
 			end
 		end
@@ -231,12 +241,14 @@ function HandleThawCommand(Split, Player)
 	
 	for x=MinX, MaxX do
 		for z=MinZ, MaxZ do
-			local y = World:GetHeight(x, z)
-			YCheck:SetY(y)
-			if World:GetBlock(x, y, z) == E_BLOCK_SNOW then -- check if the block is snow
-				table.insert(PossibleBlockChanges, {X = x, Y = y, Z = z, BlockType = E_BLOCK_AIR})
-			elseif World:GetBlock(x, y, z) == E_BLOCK_ICE then -- check if the block is ice
-				table.insert(PossibleBlockChanges, {X = x, Y = y, Z = z, BlockType = E_BLOCK_WATER})
+			local IsValid, y = World:TryGetHeight(x, z)
+			if IsValid then
+				YCheck:SetY(y)
+				if World:GetBlock(x, y, z) == E_BLOCK_SNOW then -- check if the block is snow
+					table.insert(PossibleBlockChanges, {X = x, Y = y, Z = z, BlockType = E_BLOCK_AIR})
+				elseif World:GetBlock(x, y, z) == E_BLOCK_ICE then -- check if the block is ice
+					table.insert(PossibleBlockChanges, {X = x, Y = y, Z = z, BlockType = E_BLOCK_WATER})
+				end
 			end
 		end
 	end
@@ -347,24 +359,26 @@ function HandlePumpkinsCommand(Split, Player)
 	for I=1, Radius * 2 do
 		local X = PosX + math.random(-Radius, Radius)
 		local Z = PosZ + math.random(-Radius, Radius)
-		local Y = World:GetHeight(X, Z) + 1
-		if World:GetBlock(X, Y - 1, Z) == E_BLOCK_GRASS or World:GetBlock(X, Y, Z) - 1 == E_BLOCK_DIRT then
-			YCheck:SetY(Y)
-			table.insert(PossibleBlockChanges, {X = X, Y = Y, Z = Z, BlockType = E_BLOCK_LOG, BlockMeta = 0})
-			for i=1, math.random(1, 6) do
-				X = X + math.random(-2, 2)
-				Z = Z + math.random(-2, 2)
-				Y = World:GetHeight(X, Z) + 1
+		local IsValid, Y = World:TryGetHeight(X, Z) + 1
+		if IsValid then
+			if World:GetBlock(X, Y - 1, Z) == E_BLOCK_GRASS or World:GetBlock(X, Y, Z) - 1 == E_BLOCK_DIRT then
 				YCheck:SetY(Y)
-				if World:GetBlock(X, Y - 1, Z) == E_BLOCK_GRASS or World:GetBlock(X, Y, Z) - 1 == E_BLOCK_DIRT then
-					table.insert(PossibleBlockChanges, {X = X, Y = Y, Z = Z, BlockType = E_BLOCK_LEAVES, BlockMeta = 0})
+				table.insert(PossibleBlockChanges, {X = X, Y = Y, Z = Z, BlockType = E_BLOCK_LOG, BlockMeta = 0})
+				for i=1, math.random(1, 6) do
+					X = X + math.random(-2, 2)
+					Z = Z + math.random(-2, 2)
+					Y = World:GetHeight(X, Z) + 1
+					YCheck:SetY(Y)
+					if World:GetBlock(X, Y - 1, Z) == E_BLOCK_GRASS or World:GetBlock(X, Y, Z) - 1 == E_BLOCK_DIRT then
+						table.insert(PossibleBlockChanges, {X = X, Y = Y, Z = Z, BlockType = E_BLOCK_LEAVES, BlockMeta = 0})
+					end
 				end
-			end
-			for i=1, math.random(1, 4) do
-				X = X + math.random(-2, 2)
-				Z = Z + math.random(-2, 2)
-				if World:GetBlock(X, Y - 1, Z) == E_BLOCK_GRASS or World:GetBlock(X, Y, Z) - 1 == E_BLOCK_DIRT then
-					table.insert(PossibleBlockChanges, {X = X, Y = Y, Z = Z, BlockType = E_BLOCK_PUMPKIN, BlockMeta = math.random(0, 3)})
+				for i=1, math.random(1, 4) do
+					X = X + math.random(-2, 2)
+					Z = Z + math.random(-2, 2)
+					if World:GetBlock(X, Y - 1, Z) == E_BLOCK_GRASS or World:GetBlock(X, Y, Z) - 1 == E_BLOCK_DIRT then
+						table.insert(PossibleBlockChanges, {X = X, Y = Y, Z = Z, BlockType = E_BLOCK_PUMPKIN, BlockMeta = math.random(0, 3)})
+					end
 				end
 			end
 		end

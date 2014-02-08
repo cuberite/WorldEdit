@@ -117,18 +117,26 @@ end
 ------------------------------------------------
 function HandleAscendCommand(Split, Player)
 	local World = Player:GetWorld()
-	if Player:GetPosY() == World:GetHeight(math.floor(Player:GetPosX()), math.floor((Player:GetPosZ()))) then
+	local XPos = math.floor(Player:GetPosX())
+	local YPos = Player:GetPosY()
+	local ZPos = math.floor(Player:GetPosZ())
+	
+	local IsValid, WorldHeight = World:TryGetHeight(XPos, ZPos)
+	
+	if not IsValid then
+		Player:SendMessage(cChatColor.LightPurple .. "Ascended a level.")
+		return true
+	end
+	
+	if Player:GetPosY() == WorldHeight then
 		Player:SendMessage(cChatColor.LightPurple .. "Ascended a level.")
 		return true
 	end
 	
 	
-	local XPos = math.floor(Player:GetPosX())
-	local YPos = Player:GetPosY()
-	local ZPos = math.floor(Player:GetPosZ())
 	local WentThroughBlock = false
 
-	for Y = math.floor(Player:GetPosY()), World:GetHeight(XPos, ZPos) + 1 do
+	for Y = math.floor(Player:GetPosY()), WorldHeight + 1 do
 		if World:GetBlock(XPos, Y, ZPos) == E_BLOCK_AIR then
 			if WentThroughBlock then
 				YPos = Y
@@ -173,7 +181,12 @@ function HandleCeilCommand(Split, Player)
 	local X = math.floor(Player:GetPosX())
 	local Y = math.floor(Player:GetPosY())
 	local Z = math.floor(Player:GetPosZ())
-	local WorldHeight = World:GetHeight(X, Z)
+	local IsValid, WorldHeight = World:TryGetHeight(X, Z)
+	
+	if not IsValid then
+		Player:SendMessage(cChatColor.LightPurple .. "Whoosh!")
+		return true
+	end
 	
 	if Y >= WorldHeight + 1 then
 		Player:SendMessage(cChatColor.Rose .. "No free spot above you found.")

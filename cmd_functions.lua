@@ -145,9 +145,11 @@ end
 -------------------------------------------
 ------------RIGHTCLICKCOMPASS--------------
 -------------------------------------------
-function RightClickCompass(Player, World)
+function RightClickCompass(Player)
+	local World = Player:GetWorld()
 	local Teleported = false
 	local WentThroughBlock = false
+	
 	local Callbacks = {
 		OnNextBlock = function(X, Y, Z, BlockType, BlockMeta)
 			if BlockType ~= E_BLOCK_AIR then
@@ -188,12 +190,15 @@ end
 ------------------------------------------
 ------------LEFTCLICKCOMPASS--------------
 ------------------------------------------
-function LeftClickCompass(Player, World)
+function LeftClickCompass(Player)
+	local World = Player:GetWorld()
 	local HasHit = false
+	
 	local Callbacks = {
 		OnNextBlock = function(X, Y, Z, BlockType, BlockMeta)
 			if BlockType ~= E_BLOCK_AIR and not g_BlockOneHitDig[BlockType] then
-				for y = Y, World:GetHeight(X, Z) + 1 do
+				local IsValid, WorldHeight = World:TryGetHeight(X, Z)
+				for y = Y, WorldHeight + 1 do
 					if World:GetBlock(X, y, Z) == E_BLOCK_AIR then
 						Y = y
 						break
