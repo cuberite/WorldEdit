@@ -15,7 +15,7 @@ function HandleWorldEditReloadCommand(Split, Player)
 		return true
 	end
 	Player:SendMessage(cChatColor.LightPurple .. "Worldedit is reloading")
-	PluginManager:DisablePlugin(PLUGIN:GetName()) -- disable the plugin
+	cRoot:Get():GetPluginManager():DisablePlugin(PLUGIN:GetName()) -- disable the plugin
 	DisablePlugin = true -- make sure the plugin loads again ;)
 	return true
 end
