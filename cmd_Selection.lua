@@ -4,13 +4,13 @@
 function HandleBiomeInfoCommand(Split, Player)
 	if Split[2] == "-p" then
 		local Biome = GetStringFromBiome(Player:GetWorld():GetBiomeAt(math.floor(Player:GetPosX()), math.floor(Player:GetPosZ())))
-		Player:SendMessage(cChatColor.LightPurple .. "Biome: " .. Biome)
+		Player:SendMessageInfo("Biome: " .. Biome)
 		return true
 	end
 	
 	local PlayerName = Player:GetName()
 	if OnePlayer[PlayerName] == nil or TwoPlayer[PlayerName] == nil then
-		Player:SendMessage(cChatColor.Rose .. "Make a region selection first.")
+		Player:SendMessageFailure("Make a region selection first.")
 		return true
 	end
 	
@@ -24,7 +24,12 @@ function HandleBiomeInfoCommand(Split, Player)
 			end
 		end
 	end
-	Player:SendMessage(cChatColor.LightPurple .. "Biomes:\n " .. table.concat(BiomeList, "\n "))
+	
+	Player:SendMessageInfo("Biomes:")
+	
+	for idx, msg in ipairs(BiomeList) do
+		Player:SendMessage(msg) -- Send plain message without an [INFO]
+	end
 	return true
 end
 
@@ -35,7 +40,7 @@ end
 function HandleRedoCommand(Split, Player)
 	local PlayerName = Player:GetName()
 	if PersonalRedo[PlayerName]:GetSizeX() == 0 and PersonalRedo[PlayerName]:GetSizeY() == 0 and PersonalRedo[PlayerName]:GetSizeZ() == 0 or LastRedoCoords[PlayerName] == nil then
-		Player:SendMessage(cChatColor.Rose .. "Nothing left to redo")
+		Player:SendMessageFailure("Nothing left to redo")
 		return true
 	end
 	
@@ -47,7 +52,7 @@ function HandleRedoCommand(Split, Player)
 	PersonalRedo[PlayerName]:Write(World, Coords.X, Coords.Y, Coords.Z, 3)
 	
 	LastRedoCoords[PlayerName] = nil
-	Player:SendMessage(cChatColor.LightPurple .. "Redo Successful.")
+	Player:SendMessageSuccess("Redo successful.")
 	return true
 end
 
@@ -59,7 +64,7 @@ function HandleUndoCommand(Split, Player)
 	local PlayerName = Player:GetName()
 	
 	if PersonalUndo[PlayerName]:GetSizeX() == 0 and PersonalUndo[PlayerName]:GetSizeY() == 0 and PersonalUndo[PlayerName]:GetSizeZ() == 0 or LastCoords[PlayerName] == nil then
-		Player:SendMessage(cChatColor.Rose .. "Nothing left to undo")
+		Player:SendMessageFailure("Nothing left to undo")
 		return true
 	end
 	local Coords = LastCoords[PlayerName]
@@ -68,7 +73,7 @@ function HandleUndoCommand(Split, Player)
 	PersonalRedo[PlayerName]:Read(World, Coords.X, Coords.X + PersonalUndo[PlayerName]:GetSizeX() - 1, Coords.Y, Coords.Y + PersonalUndo[PlayerName]:GetSizeY() - 1, Coords.Z,  Coords.Z + PersonalUndo[PlayerName]:GetSizeZ() - 1)
 	LastRedoCoords[PlayerName] = LastCoords[PlayerName]
 	PersonalUndo[PlayerName]:Write(World, Coords.X, Coords.Y, Coords.Z, 3)
-	Player:SendMessage(cChatColor.LightPurple .. "Undo Successful.")
+	Player:SendMessageSuccess("Undo Successful.")
 	
 	LastCoords[PlayerName] = nil
 	return true
@@ -80,9 +85,9 @@ end
 ------------------------------------------------
 function HandleSizeCommand(Split, Player)
 	if OnePlayer[Player:GetName()] ~= nil and TwoPlayer[Player:GetName()] ~= nil then -- Check if there is a region selected 
-		Player:SendMessage(cChatColor.LightPurple .. "the selection is " .. GetSize(Player) .. " block(s) big")
+		Player:SendMessageInfo("The selection is " .. GetSize(Player) .. " block(s) big")
 	else
-		Player:SendMessage(cChatColor.LightPurple .. "Please select a region first")
+		Player:SendMessageFailure("Please select a region first")
 	end
 	return true
 end
@@ -94,7 +99,7 @@ end
 function HandlePasteCommand(Split, Player)
 	local PlayerName = Player:GetName()
 	if PersonalClipboard[PlayerName]:GetSizeX() == 0 and PersonalClipboard[PlayerName]:GetSizeY() == 0 and PersonalClipboard[PlayerName]:GetSizeZ() == 0 then
-		Player:SendMessage(cChatColor.Rose .. "Your clipboard is empty. Use //copy first.")
+		Player:SendMessageFailure("Your clipboard is empty. Use //copy first.")
 		return true
 	end
 	
@@ -115,7 +120,7 @@ function HandlePasteCommand(Split, Player)
 	PersonalUndo[PlayerName]:Read(World, MinX, MaxX, MinY, MaxY, MinZ, MaxZ)
 	PersonalClipboard[PlayerName]:Write(World, MinX, MinY, MinZ, 3) -- paste the area that the player copied
 	World:WakeUpSimulatorsInArea(MinX - 1, MaxX + 1, MinY - 1, MaxY + 1, MinZ - 1, MaxZ + 1)
-	Player:SendMessage(cChatColor.LightPurple .. "Pasted relative to you.")
+	Player:SendMessageSuccess("Pasted relative to you.")
 	return true
 end
 
@@ -126,13 +131,13 @@ end
 function HandleCopyCommand(Split, Player)
 	local PlayerName = Player:GetName()
 	if OnePlayer[PlayerName] == nil or TwoPlayer[PlayerName] == nil then -- Check if there is a region selected
-		Player:SendMessage(cChatColor.Rose .. "No Region set")
+		Player:SendMessageFailure("No regions set")
 		return true
 	end
 	local OneX, TwoX, OneY, TwoY, OneZ, TwoZ = GetXYZCoords(Player) -- get the right coordinates
 	local World = Player:GetWorld()
 	PersonalClipboard[PlayerName]:Read(World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ) -- read the area
-	Player:SendMessage(cChatColor.LightPurple .. "Block(s) copied.")
+	Player:SendMessageSuccess("Block(s) copied.")
 	return true
 end
 
@@ -144,7 +149,7 @@ function HandleCutCommand(Split, Player)
 	local PlayerName = Player:GetName()
 	
 	if OnePlayer[PlayerName] == nil or TwoPlayer[PlayerName] == nil then -- Check if there is a region selected
-		Player:SendMessage(cChatColor.Rose .. "No Region set")
+		Player:SendMessageFailure("No region set")
 		return true
 	end
 	local OneX, TwoX, OneY, TwoY, OneZ, TwoZ = GetXYZCoords(Player) -- get the right coordinates
@@ -164,7 +169,7 @@ function HandleCutCommand(Split, Player)
 	Cut:Fill(3, 0, 0) -- delete the area
 	Cut:Write(World, OneX, OneY, OneZ) -- write the area
 	World:WakeUpSimulatorsInArea(OneX - 1, TwoX + 1, OneY - 1, TwoY + 1, OneZ - 1, TwoZ + 1)
-	Player:SendMessage(cChatColor. LightPurple .. "Block(s) cut.")
+	Player:SendMessageSuccess("Block(s) cut.")
 	return true
 end
 
@@ -176,12 +181,12 @@ function HandleSetCommand(Split, Player)
 	local PlayerName = Player:GetName()
 	
 	if OnePlayer[PlayerName] == nil or TwoPlayer[PlayerName] == nil then -- Check if there is a region selected
-		Player:SendMessage(cChatColor.Rose .. "No Region set")
+		Player:SendMessageFailure("No region set")
 		return true
 	end
 	
 	if Split[2] == nil then
-		Player:SendMessage(cChatColor.Rose .. "Please say a block ID")
+		Player:SendMessageInfo("Usage: /set <block ID>")
 		return true
 	end
 	
@@ -189,7 +194,7 @@ function HandleSetCommand(Split, Player)
 	if BlockType ~= false then
 		local Blocks = HandleFillSelection(Player, Player:GetWorld(), BlockType, BlockMeta)
 		if Blocks then
-			Player:SendMessage(cChatColor.LightPurple .. Blocks .. " block(s) have been changed.")
+			Player:SendMessageSuccess(Blocks .. " block(s) have been changed.")
 		end
 	end
 	return true
@@ -203,11 +208,11 @@ function HandleReplaceCommand(Split, Player)
 	local PlayerName = Player:GetName()
 	
 	if OnePlayer[PlayerName] == nil or TwoPlayer[PlayerName] == nil then -- Check if there is a region selected
-		Player:SendMessage(cChatColor.Rose .. "No Region set")
+		Player:SendMessageFailure("No region set")
 		return true
 	end
 	if Split[2] == nil or Split[3] == nil then -- check if the player noted a blocktype
-		Player:SendMessage(cChatColor.Rose .. "Please say a block ID")
+		Player:SendMessageInfo("Usage: //replace <block ID>")
 		return true
 	end
 	local ChangeBlockType, ChangeBlockMeta, TypeOnly = GetBlockTypeMeta(Player, Split[2])
@@ -215,7 +220,7 @@ function HandleReplaceCommand(Split, Player)
 	if ChangeBlockType ~= false and ToChangeBlockType ~= false then
 		local Blocks = HandleReplaceSelection(Player, Player:GetWorld(), ChangeBlockType, ChangeBlockMeta, ToChangeBlockType, ToChangeBlockMeta, TypeOnly)
 		if Blocks then
-			Player:SendMessage(cChatColor.LightPurple .. Blocks .. " block(s) have been changed.")
+			Player:SendMessageSuccess(Blocks .. " block(s) have been changed.")
 		end
 	end
 	return true
@@ -230,20 +235,20 @@ function HandleFacesCommand(Split, Player)
 	local PlayerName = Player:GetName()
 	
 	if OnePlayer[PlayerName] == nil or TwoPlayer[PlayerName] == nil then -- Check if there is a region selected
-		Player:SendMessage(cChatColor.Rose .. "No Region set")
+		Player:SendMessageFailure("No region set")
 		return true -- stop
 	end
 	if Split[2] == nil then
-		Player:SendMessage(cChatColor.Rose .. "Please say a block ID")
+		Player:SendMessageInfo("Usage: //faces <block ID>")
 		return true
 	end
 	local BlockType, BlockMeta = GetBlockTypeMeta(Player, Split[2])
 	if BlockType ~= false then
 		local Blocks = HandleCreateFaces(Player, Player:GetWorld(), BlockType, BlockMeta)
 		if not Blocks then
-			Player:SendMessage(cChatColor.Rose .. "Region intersects with an area")
+			Player:SendMessageFailure("Region intersects with a protected area!")
 		else
-			Player:SendMessage(cChatColor.LightPurple .. Blocks .. " block(s) have been changed.")
+			Player:SendMessageSuccess(Blocks .. " block(s) have been changed.")
 		end
 	end
 	return true
@@ -257,20 +262,20 @@ function HandleWallsCommand(Split, Player)
 	local PlayerName = Player:GetName()
 	
 	if OnePlayer[PlayerName] == nil or TwoPlayer[PlayerName] == nil then -- Check if there is a region selected
-		Player:SendMessage(cChatColor.Rose .. "No Region set")
+		Player:SendMessageFailure("No region set")
 		return true
 	end
 	if Split[2] == nil then
-		Player:SendMessage(cChatColor.Rose .. "Please say a block ID")
+		Player:SendMessageInfo("Usage: //walls <block ID>")
 		return true
 	end
 	local BlockType, BlockMeta = GetBlockTypeMeta(Player, Split[2])
 	if BlockType ~= false then
 		local Blocks = HandleCreateWalls(Player, Player:GetWorld(), BlockType, BlockMeta)
 		if not Blocks then
-			Player:SendMessage(cChatColor.Rose .. "Region intersects with an area")
+			Player:SendMessageFailure("Region intersects with a protected area!")
 		else
-			Player:SendMessage(cChatColor.LightPurple .. Blocks .. " block(s) have been changed.")
+			Player:SendMessageSuccess(Blocks .. " block(s) have been changed.")
 		end
 	end
 	return true
@@ -282,16 +287,16 @@ end
 ------------------------------------------------
 function HandleRotateCommand(Split, Player)
 	if Split[2] == nil or tonumber(Split[2]) == nil then -- Check if the player gave an angle
-		Player:SendMessage(cChatColor.Rose .. "Too few arguments.\n//rotate [90, 180, 270]")
+		Player:SendMessageInfo("Usage: //rotate <rotation as multiples of 90>")
 		return true
 	end
-	if tonumber(Split[2]) == 90 or tonumber(Split[2]) == 180 or tonumber(Split[2]) == 270 then
-		for I =1, tonumber(Split[2]) / 90 do -- rotate the area some times.
+	if tonumber(Split[2]) % 90 == 0 then -- A multiple of 90
+		for I = 1, tonumber(Split[2]) / 90 do -- rotate the area some times.
 			PersonalClipboard[Player:GetName()]:RotateCCW() -- Rotate the area
 		end
-		Player:SendMessage(cChatColor.Rose .. "Rotated clipboard " .. Split[2] .. " degrees")
+		Player:SendMessageSuccess("Rotated clipboard " .. Split[2] .. " degrees")
 	else
-		Player:SendMessage(cChatColor.Rose .. "usage: /rotate [90, 180, 270]")
+		Player:SendMessageInfo("Usage: //rotate <rotation as multiples of 90>")
 	end
 	return true
 end
@@ -303,11 +308,11 @@ end
 -- Handles the schematic's save subcommand
 function HandleSchematicSaveCommand(Split, Player)
 	if not PlayerHasWEPermission(Player, "worldedit.schematic.save", "worldedit.clipboard.save") then
-		Player:SendMessage(cChatColor.Rose .. "You do not have permission to save schematic files.")
+		Player:SendMessageFailure("You do not have permission to save schematic files.")
 		return true
 	end
 	if #Split ~= 4 then
-		Player:SendMessage(cChatColor.Rose .. "Usage: /schematic save <Format> <Name>")
+		Player:SendMessageInfo("Usage: /schematic save <format> <name>")
 		return true
 	end
 	local Scheme = string.upper(Split[3])
@@ -315,9 +320,9 @@ function HandleSchematicSaveCommand(Split, Player)
 	if Scheme == "MCEDIT" then
 		local SchematicName = Split[4]
 		PersonalClipboard[Player:GetName()]:SaveToSchematicFile("Schematics/" .. Split[4] .. ".Schematic") -- save the schematic.
-		Player:SendMessage(cChatColor.LightPurple .. Split[4] .. " saved.")
+		Player:SendMessageSuccess(Split[4] .. " saved.")
 	else
-		Player:SendMessage("Scheme " .. Split[3] .. "Does not exist.")
+		Player:SendMessageFailure("Unsupported scheme: " .. Split[3])
 	end
 	return true
 end
@@ -326,20 +331,20 @@ end
 -- Handles the schematic's load subcommand.
 function HandleSchematicLoadCommand(Split, Player)
 	if not PlayerHasWEPermission(Player, "worldeidt.schematic.load", "worldedit.clipboard.load") then
-		Player:SendMessage(cChatColor.Rose .. "You do not have permission to load schematic file.")
+		Player:SendMessageFailure("You do not have permission to load schematic files.")
 		return true
 	end
 	if #Split ~= 3 then
-		Player:SendMessage(cChatColor.Rose .. "Usage: /schematic load <name>")
+		Player:SendMessageInfo("Usage: /schematic load <name>")
 		return true
 	end
 	local Path = "Schematics/" .. Split[3] .. ".Schematic"
 	if not cFile:Exists(Path) then
-		Player:SendMessage(cChatColor.LightPurple .. "schematic does not exist.")
+		Player:SendMessageFailure("Schematic file does not exist.")
 		return true
 	end
 	PersonalClipboard[Player:GetName()]:LoadFromSchematicFile(Path) -- load the schematic file
-	Player:SendMessage(cChatColor.LightPurple .. "You loaded " .. Split[3])
+	Player:SendMessageSuccess("You loaded " .. Split[3])
 	return true
 end
 
@@ -347,18 +352,18 @@ end
 -- Handles the schematic's formats subcommand.
 function HandleSchematicFormatsCommand(Split, Player)
 	if not PlayerHasWEPermission(Player, "worldedit.schematic.formats") then
-		Player:SendMessage(cChatColor.Rose .. "You do not have permission to use this command.")
+		Player:SendMessageFailure("You do not have permission to use this command.")
 		return true
 	end
-	Player:SendMessage(cChatColor.LightPurple .. 'Available formats: "MCEdit"')
+	Player:SendMessageInfo('Available formats: "MCEdit"')
 	return true
 end
 
 
 -- Handles the schematic's list subcommand.
 function HandleSchematicListCommand(Split, Player)
-	if not PlayerHasWEPermission(Player, "worldeidt.schematic.list") then
-		Player:SendMessage(cChatColor.Rose .. "You do not have permission to use this command.")
+	if not PlayerHasWEPermission(Player, "worldedit.schematic.list") then
+		Player:SendMessageFailure("You do not have permission to use this command.")
 		return true
 	end
 	local FileList = cFile:GetFolderContents("Schematics")
@@ -366,7 +371,7 @@ function HandleSchematicListCommand(Split, Player)
 		FileList[Idx] = FileName:sub(1, FileName:len() - 10) -- Remove the extension part of the filename.
 	end
 	
-	Player:SendMessage(cChatColor.LightPurple .. "Available schematics: " .. table.concat(FileList, ", ", 3))
+	Player:SendMessageInfo("Available schematics: " .. table.concat(FileList, ", ", 3))
 	return true
 end
 
@@ -376,13 +381,12 @@ end
 ----------------------------------------------
 function HandleExpandCommand(Split, Player)
 	if #Split == 1 then
-		Player:SendMessage("More parameters needed.")
-		Player:SendMessage("//expand <Direction> [Blocks]")
+		Player:SendMessageInfo("Usage: //expand <direction> [blocks as number]")
 		return true
 	end
 	
 	if GetSize(Player) == -1 then
-		Player:SendMessage(cChatColor.Rose .. "You don't have anything selected.")
+		Player:SendMessageFailure("Make a selection first.")
 		return true
 	end
 	
@@ -392,7 +396,7 @@ function HandleExpandCommand(Split, Player)
 	
 	if #Split == 3 then
 		if tonumber(Split[3]) == nil then
-			Player:SendMessage(cChatColor.Rose .. "Unknown char \"" .. Split[3] .. "\" number expected.")
+			Player:SendMessageInfo("Usage: //expand <direction> [blocks as number]")
 			return true
 		end
 		Blocks = tonumber(Split[3])

@@ -3,7 +3,7 @@
 ------------------------------------------------
 function HandleRemoveCommand(Split, Player)
 	if Split[2] == nil then -- check if the player gave a radius
-		Player:SendMessage(cChatColor.Rose .. "Too few arguments.\n/remove <type>")
+		Player:SendMessageInfo("Usage: /remove <type of entity>")
 		return true
 	end
 	local Entitys = 0
@@ -24,10 +24,10 @@ function HandleRemoveCommand(Split, Player)
 		end
 		Player:GetWorld():ForEachEntity(LoopEntity)	
 	else
-		Player:SendMessage(cChatColor.Rose .. "Acceptable types: items, minecarts") -- the entity that the player wants to destroy does not exist.
+		Player:SendMessageInfo("Acceptable types: items, minecarts") -- the entity that the player wants to destroy is not supported
 		return true
 	end
-	Player:SendMessage(cChatColor.LightPurple .. "Marked " .. Entitys .. " entit(ies) for removal.")
+	Player:SendMessageSuccess("Marked " .. Entitys .. " entit(ies) for removal.")
 	return true
 end
 
@@ -39,7 +39,7 @@ function HandleButcherCommand(Split, Player)
 	if Split[2] == nil then -- if the player did not give a radius then the radius is the normal radius
 		Radius = ButcherRadius
 	elseif tonumber(Split[2]) == nil then -- if the player gave a string as radius then stop
-		Player:SendMessage(cChatColor.Rose .. 'Number expected; string "' .. Split[2] .. '" given')
+		Player:SendMessageInfo('Usage: /butcher <radius as number>')
 		return true
 	else -- the radius is set to the given radius
 		Radius = tonumber(Split[2])
@@ -64,6 +64,6 @@ function HandleButcherCommand(Split, Player)
 	end
 	local World = Player:GetWorld()
 	World:ForEachEntity(EachEntity) -- loop through all the entitys
-	Player:SendMessage(cChatColor.LightPurple .. "Killed " .. Mobs .. " mobs.")
+	Player:SendMessageSuccess("Killed " .. Mobs .. " mobs.")
 	return true
 end

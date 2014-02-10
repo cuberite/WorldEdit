@@ -433,13 +433,13 @@ g_PluginInfo =
 				reload =
 				{
 					HelpString = "Reloads the WorldEdit plugin.",
-					Permission = "",
+					Permission = "worldedit.reload",
 					Handler = HandleWorldEditReloadCommand,
 				},
 				help =
 				{
 					HelpString = "Sends all the available commands to the player.",
-					Permission = "",
+					Permission = "core.help",
 					Handler = HandleWorldEditHelpCommand,
 				},
 			},

@@ -18,7 +18,7 @@ function HandleRemoveBelowCommand(Split, Player)
 	for y = 1, Y do
 		World:SetBlock(X, y, Z, E_BLOCK_AIR, 0)
 	end
-	Player:SendMessage(cChatColor.LightPurple .. Y + 1 .. " block(s) have been removed.")
+	Player:SendMessageSuccess(Y + 1 .. " block(s) have been removed.")
 	return true
 end
 
@@ -35,7 +35,7 @@ function HandleRemoveAboveCommand(Split, Player)
 	local IsValid, WorldHeight = World:TryGetHeight(X, Z)
 	
 	if not IsValid then
-		Player:SendMessage(cChatColor.LightPurple .. "0 block(s) have been removed.")
+		Player:SendMessageFailure("No blocks have been removed, chunk not loaded?")
 		return true
 	end
 	
@@ -49,7 +49,7 @@ function HandleRemoveAboveCommand(Split, Player)
 	for Y = y, WorldHeight do
 		World:SetBlock(X, Y, Z, E_BLOCK_AIR, 0)
 	end
-	Player:SendMessage(cChatColor.LightPurple .. WorldHeight - y .. " block(s) have been removed.")
+	Player:SendMessageSuccess(WorldHeight - y .. " block(s) have been removed.")
 	return true
 end
 
@@ -59,7 +59,7 @@ end
 -----------------------------------------------
 function HandleDrainCommand(Split, Player)
 	if tonumber(Split[2]) == nil or Split[2] == nil then -- check if the player gave a radius
-		Player:SendMessage(cChatColor.Rose .. "Too few arguments.\n//drain <radius>")
+		Player:SendMessageInfo("Usage: //drain <radius>")
 		return true
 	else
 		Radius = tonumber(Split[2]) -- set the radius to the given radius
@@ -96,15 +96,13 @@ end
 -------------------EXTINGUISH-------------------
 ------------------------------------------------
 function HandleExtinguishCommand(Split, Player)
-	if Split[2] == nil then
-		Player:SendMessage(cChatColor.Rose .. "usage: /ex [Radius]")
-		return true
-	elseif tonumber(Split[2]) == nil then
-		Player:SendMessage(cChatColor.Rose .. 'Number expected; string "' .. Split[2] .. '" given')
+	if Split[2] == nil or tonumber(Split[2]) == nil then
+		Player:SendMessageInfo("Usage: /ex <radius as number>")
 		return true
 	else
 		Radius = tonumber(Split[2])
 	end
+	
 	local MinX = math.floor(Player:GetPosX()) - Radius
 	local MinY = math.floor(Player:GetPosY()) - Radius
 	local MinZ = math.floor(Player:GetPosZ()) - Radius
@@ -137,7 +135,7 @@ end
 -------------------------------------------------
 function HandleGreenCommand(Split, Player)
 	if tonumber(Split[2]) == nil or Split[2] == nil then -- check if the player gave a radius
-		Player:SendMessage(cChatColor.Rose .. "Too few arguments.\n//green <radius>")
+		Player:SendMessageInfo("Usage: //green <radius>")
 		return true
 	else
 		Radius = tonumber(Split[2]) -- set the radius to the given radius
@@ -167,7 +165,7 @@ function HandleGreenCommand(Split, Player)
 		for idx, value in ipairs(PossibleBlockChanges) do
 			World:SetBlock(value.X, value.Y, value.Z, value.BlockType, 0)
 		end
-		Player:SendMessage(cChatColor.LightPurple .. #PossibleBlockChanges .. " surfaces greened.")
+		Player:SendMessageSuccess(#PossibleBlockChanges .. " surfaces greened.")
 	end
 	return true
 end
@@ -178,7 +176,7 @@ end
 ------------------------------------------------
 function HandleSnowCommand(Split, Player)	
 	if tonumber(Split[2]) == nil or Split[2] == nil then -- check if the player gave a radius
-		Player:SendMessage(cChatColor.Rose .. "Too few arguments.\n//snow <radius>")
+		Player:SendMessageInfo("Usage: /snow <radius>")
 		return true
 	else
 		Radius = tonumber(Split[2]) -- set the radius to the given radius
@@ -214,7 +212,7 @@ function HandleSnowCommand(Split, Player)
 		for idx, value in ipairs(PossibleBlockChanges) do
 			World:SetBlock(value.X, value.Y, value.Z, value.BlockType, 0)
 		end
-		Player:SendMessage(cChatColor.LightPurple .. #PossibleBlockChanges .. " surfaces covered. Let is snow~")
+		Player:SendMessageSuccess(#PossibleBlockChanges .. " surfaces covered. Let is snow~")
 	end
 	return true
 end
@@ -225,7 +223,7 @@ end
 ------------------------------------------------
 function HandleThawCommand(Split, Player)
 	if tonumber(Split[2]) == nil or Split[2] == nil then -- check if the player gave a radius
-		Player:SendMessage(cChatColor.Rose .. "Too few arguments.\n//thaw <radius>")
+		Player:SendMessageInfo("Usage: /thaw <radius>")
 		return true
 	else
 		Radius = tonumber(Split[2]) -- set the radius to the given radius
@@ -257,7 +255,7 @@ function HandleThawCommand(Split, Player)
 		for idx, value in ipairs(PossibleBlockChanges) do
 			World:SetBlock(value.X, value.Y, value.Z, value.BlockType, 0)
 		end
-		Player:SendMessage(cChatColor.LightPurple .. #PossibleBlockChanges .. "  surfaces thawed")
+		Player:SendMessageSuccess(#PossibleBlockChanges .. "  surfaces thawed")
 	end
 	return true
 end
@@ -271,7 +269,7 @@ function HandleBiomeListCommand(Split, Player)
 		Split[2] = 1 
 	end
 	if tonumber(Split[2]) == 1 then -- Page 1
-		Player:SendMessage(cChatColor.Green .. "Page 1")
+		Player:SendMessageInfo("Biomes List | Page 1")
 		Player:SendMessage("Ocean")
 		Player:SendMessage("Plains")
 		Player:SendMessage("Desert")
@@ -281,7 +279,7 @@ function HandleBiomeListCommand(Split, Player)
 		Player:SendMessage("Swampland")
 		Player:SendMessage("River")
 	elseif tonumber(Split[2]) == 2 then -- Page 2
-		Player:SendMessage(cChatColor.Green .. "Page 2")
+		Player:SendMessageInfo("Biomes List | Page 2")
 		Player:SendMessage("Hell")
 		Player:SendMessage("Sky")
 		Player:SendMessage("FrozenOcean")
@@ -291,7 +289,7 @@ function HandleBiomeListCommand(Split, Player)
 		Player:SendMessage("MushroomIsland")
 		Player:SendMessage("MushroomIslandShore")
 	elseif tonumber(Split[2]) == 3 then -- Page 3
-		Player:SendMessage(cChatColor.Green .. "Page 3")
+		Player:SendMessageInfo("Biomes List | Page 3")
 		Player:SendMessage("Beach")
 		Player:SendMessage("DesertHills")
 		Player:SendMessage("ForestHills")
@@ -310,7 +308,7 @@ end
 --------------------SETBIOME--------------------
 ------------------------------------------------
 function HandleSetBiomeCommand(Split, Player)
-	Player:SendMessage(cChatColor.Red .. "This command does not work.")
+	Player:SendMessageFailure("This command is currently non-functional.")
 	return true
 	--[[if Split[2] == nil then
 		Player:SendMessage(cChatColor.Rose .. "Please say a biome")
@@ -343,7 +341,7 @@ function HandlePumpkinsCommand(Split, Player)
 	if Split[2] == nil then
 		Radius = 10
 	elseif tonumber(Split[2]) == nil then
-		Player:SendMessage(cChatColor.Rose .. "invaild argument")
+		Player:SendMessageInfo("Usage: /pumpkins <radius as number>")
 		return true
 	else
 		Radius = Split[2]
@@ -388,7 +386,7 @@ function HandlePumpkinsCommand(Split, Player)
 		for idx, value in ipairs(PossibleBlockChanges) do
 			World:SetBlock(value.X, value.Y, value.Z, value.BlockType, value.BlockMeta)
 		end
-		Player:SendMessage(cChatColor.LightPurple .. #PossibleBlockChanges .. "  surfaces thawed")
+		Player:SendMessageSuccess(#PossibleBlockChanges .. "  surfaces pumpkinfied")
 	end
 	return true
 end		

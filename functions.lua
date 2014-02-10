@@ -223,14 +223,14 @@ function GetBlockTypeMeta(Player, Blocks)
 	if Tonumber == nil then	
 		local Item = cItem()
 		if StringToItem(Blocks, Item) == false then
-			Player:SendMessage(cChatColor.Rose .. "unexpected character.")
+			Player:SendMessageFailure("Unexpected character!")
 			return false
 		else
 			return Item.m_ItemType, Item.m_ItemDamage
 		end
 		local Block = StringSplit(Blocks, ":")		
 		if tonumber(Block[1]) == nil then
-			Player:SendMessage(cChatColor.Rose .. "unexpected character.")
+			Player:SendMessageFailure("Unexpected character!")
 			return false
 		else
 			if Block[2] == nil then
@@ -412,12 +412,12 @@ function SetPlayerSelectionPoint(a_Player, a_PosX, a_PosY, a_PosZ, a_PointNr)
 	end
 	
 	if OnePlayer[PlayerName] ~= nil and TwoPlayer[PlayerName] ~= nil then
-		a_Player:SendMessage(cChatColor.LightPurple .. PointNrName .. ' position set to (' .. a_PosX .. ".0, " .. a_PosY .. ".0, " .. a_PosZ .. ".0) (" .. GetSize(a_Player) .. ").")
+		a_Player:SendMessageSuccess(PointNrName .. ' position set to (' .. a_PosX .. ".0, " .. a_PosY .. ".0, " .. a_PosZ .. ".0) (" .. GetSize(a_Player) .. ").")
 		if PlayerWECUIActivated[PlayerName] then
 			a_Player:GetClientHandle():SendPluginMessage("WECUI", string.format("p|%i|%i|%i|%i|%i", a_PointNr, a_PosX, a_PosY, a_PosZ, a_PosX * a_PosY * a_PosZ))
 		end
 	else
-		a_Player:SendMessage(cChatColor.LightPurple .. PointNrName .. ' position set to (' .. a_PosX .. ".0, " .. a_PosY .. ".0, " .. a_PosZ .. ".0).")
+		a_Player:SendMessageSuccess(PointNrName .. ' position set to (' .. a_PosX .. ".0, " .. a_PosY .. ".0, " .. a_PosZ .. ".0).")
 		if PlayerWECUIActivated[PlayerName] then
 			a_Player:GetClientHandle():SendPluginMessage("WECUI", string.format("p|%i|%i|%i|%i|-1", a_PointNr, a_PosX, a_PosY, a_PosZ))
 		end
