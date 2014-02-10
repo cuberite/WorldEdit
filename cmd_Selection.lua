@@ -30,30 +30,6 @@ end
 
 
 ------------------------------------------------
----------------------EXPAND---------------------
-------------------------------------------------
-function HandleExpandCommand(Split, Player)
-	if Split[2] == nil or tonumber(Split[2]) == nil then
-		Player:SendMessage(cChatColor.Rose .. "Invaild arguments.\n//expand <amount>")
-		return true
-	end
-	
-	local PlayerName = Player:GetName()
-	if OnePlayer[PlayerName] == nil or TwoPlayer[PlayerName] == nil then
-		Player:SendMessage(cChatColor.Rose .. "Make a region selection first.")
-		return true
-	end
-	if OnePlayer[PlayerName].y > TwoPlayer[PlayerName].y then
-		OnePlayer[PlayerName].y = OnePlayer[PlayerName].y + tonumber(Split[2])
-	else
-		TwoPlayer[PlayerName].y = TwoPlayer[PlayerName].y + tonumber(Split[2])
-	end
-	Player:SendMessage(cChatColor.LightPurple .. "Region expanded " .. Split[2] .. " blocks.")
-	return true
-end
-
-
-------------------------------------------------
 ----------------------REDO----------------------
 ------------------------------------------------
 function HandleRedoCommand(Split, Player)
