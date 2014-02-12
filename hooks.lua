@@ -15,6 +15,10 @@ function SelectFirstPointHook(Player, BlockX, BlockY, BlockZ, BlockFace, BlockTy
 		return false
 	end
 	
+	if Player:IsCrouched() then
+		BlockX, BlockY, BlockZ = AddFaceDirection(BlockX, BlockY, BlockZ, BlockFace)
+	end
+	
 	SetPlayerSelectionPoint(Player, BlockX, BlockY, BlockZ, E_SELECTIONPOINT_LEFT)
 	return true
 end
@@ -40,6 +44,10 @@ function SelectSecondPointHook(Player, BlockX, BlockY, BlockZ, BlockFace, Cursor
 	-- Check if the wand is equipped
 	if Player:GetEquippedItem().m_ItemType ~= Wand then
 		return false
+	end
+	
+	if Player:IsCrouched() then
+		BlockX, BlockY, BlockZ = AddFaceDirection(BlockX, BlockY, BlockZ, BlockFace)
 	end
 	
 	SetPlayerSelectionPoint(Player, BlockX, BlockY, BlockZ, E_SELECTIONPOINT_RIGHT)
