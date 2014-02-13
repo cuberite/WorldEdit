@@ -177,7 +177,7 @@ function RightClickCompass(Player)
 	local LookVector = Player:GetLookVector()
 	LookVector:Normalize()	
 
-	local Start = EyePos + LookVector + LookVector;
+	local Start = EyePos
 	local End = EyePos + LookVector * 75
 	
 	cLineBlockTracer.Trace(World, Callbacks, Start.x, Start.y, Start.z, End.x, End.y, End.z)
@@ -215,7 +215,7 @@ function LeftClickCompass(Player)
 	local LookVector = Player:GetLookVector()
 	LookVector:Normalize()
 	
-	local Start = EyePos + LookVector + LookVector;
+	local Start = EyePos
 	local End = EyePos + LookVector * 75
 	cLineBlockTracer.Trace(World, Callbacks, Start.x, Start.y, Start.z, End.x, End.y, End.z)
 	return HasHit
@@ -238,7 +238,7 @@ function HPosSelect(Player, World)
 	local EyePos = Player:GetEyePosition()
 	local LookVector = Player:GetLookVector()
 	LookVector:Normalize()
-	local Start = EyePos + LookVector + LookVector;
+	local Start = EyePos
 	local End = EyePos + LookVector * 150
 	
 	if cLineBlockTracer.Trace(World, Callbacks, Start.x, Start.y, Start.z, End.x, End.y, End.z) then
