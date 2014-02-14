@@ -152,7 +152,7 @@ function RightClickCompass(Player)
 	
 	local Callbacks = {
 		OnNextBlock = function(X, Y, Z, BlockType, BlockMeta)
-			if g_BlockIsSolid[BlockType] then
+			if not g_BlockOneHitDig[BlockType] then
 				WentThroughBlock = true
 			else
 				if WentThroughBlock then
