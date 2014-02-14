@@ -152,17 +152,17 @@ function RightClickCompass(Player)
 	
 	local Callbacks = {
 		OnNextBlock = function(X, Y, Z, BlockType, BlockMeta)
-			if BlockType ~= E_BLOCK_AIR then
+			if g_BlockIsSolid[BlockType] then
 				WentThroughBlock = true
 			else
 				if WentThroughBlock then
-					if BlockType == E_BLOCK_AIR and World:GetBlock(X, Y - 1, Z) ~= E_BLOCK_AIR then
+					if BlockType == E_BLOCK_AIR and g_BlockIsSolid[World:GetBlock(X, Y - 1, Z)] then
 						Player:TeleportToCoords(X + 0.5, Y, Z + 0.5)
 						Teleported = true
 						return true
 					else
 						for y = Y, 1, -1 do
-							if World:GetBlock(X, y, Z) ~= E_BLOCK_AIR then
+							if g_BlockIsSolid[World:GetBlock(X, y, Z)] then
 								Player:TeleportToCoords(X + 0.5, y + 1, Z + 0.5)
 								Teleported = true
 								return true
@@ -199,7 +199,7 @@ function LeftClickCompass(Player)
 			if BlockType ~= E_BLOCK_AIR and not g_BlockOneHitDig[BlockType] then
 				local IsValid, WorldHeight = World:TryGetHeight(X, Z)
 				for y = Y, WorldHeight + 1 do
-					if World:GetBlock(X, y, Z) == E_BLOCK_AIR then
+					if not g_BlockIsSolid[World:GetBlock(X, y, Z)] then
 						Y = y
 						break
 					end
