@@ -105,6 +105,14 @@ g_PluginInfo =
 			Category = "Selection",
 		},
 		
+		["//hsphere"] =
+		{
+			Permission = "worldedit.generation.hsphere",
+			Handler = HandleHSphereCommand,
+			HelpString = " Generates a hollow sphere.",
+			Category = "Generation",
+		},
+		
 		["//hpos1"] =
 		{
 			Permission = "worldedit.selection.pos",
@@ -238,6 +246,14 @@ g_PluginInfo =
 			Handler = HandleSizeCommand,
 			HelpString = " Get the size of the selection",
 			Category = "Selection",
+		},
+		
+		["//sphere"] =
+		{
+			Permission = "worldedit.generation.sphere",
+			Handler = HandleSphereCommand,
+			HelpString = " Generates a filled sphere.",
+			Category = "Generation",
 		},
 		
 		["//undo"] =
@@ -468,6 +484,10 @@ g_PluginInfo =
 		Selection =
 		{
 			Description = "Commands that give info/help setting the region you have selected.",
+		},
+		Generation =
+		{
+			Description = "Commands that generates structures.",
 		},
 		History =
 		{

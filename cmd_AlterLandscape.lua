@@ -391,4 +391,128 @@ function HandlePumpkinsCommand(Split, Player)
 		Player:SendMessage(cChatColor.LightPurple .. #PossibleBlockChanges .. "  surfaces thawed")
 	end
 	return true
-end		
+end
+
+
+------------------------------------------------
+---------------------SPHERE---------------------
+------------------------------------------------
+function HandleSphereCommand(Split, Player)
+	if Split[2] == nil or Split[3] == nil then
+		Player:SendMessage(cChatColor.Rose .. "Not enough parameters.")
+		Player:SendMessage(cChatColor.Rose .. "Usage: //sphere [BlockID] [Radius]")
+		return true
+	end
+	
+	local BlockType, BlockMeta = GetBlockTypeMeta(Player, Split[2])
+
+	if not BlockType then
+		Player:SendMessage(cChatColor.Rose .. "Unknown parameter \"" .. Split[2] .. "\"")
+		return true
+	end
+	
+	local Radius = tonumber(Split[3])
+	if not Radius then
+		Player:SendMessage(cChatColor.Rose .. "Unknown parameter \"" .. Split[3] .. "\"")
+		return true
+	end
+	
+	local World = Player:GetWorld()
+	local PosX = math.floor(Player:GetPosX())
+	local PosY = math.floor(Player:GetPosY())
+	local PosZ = math.floor(Player:GetPosZ())
+	
+	if PosY + Radius > 256 then
+		Player:SendMessage(cChatColor.Rose .. "You are at the top of the world. You can't build here.")
+		return true
+	end
+	
+	if CheckIfInsideAreas(PosX - Radius, PosX + Radius, PosY - Radius, PosY + Radius, PosZ - Radius, PosZ + Radius, Player, World, "sphere") then
+		return true
+	end
+	
+	local BlockArea = cBlockArea()
+	BlockArea:Read(World, PosX - Radius, PosX + Radius, PosY - Radius, PosY + Radius, PosZ - Radius, PosZ + Radius, 3)
+	local BlockAreaRadius = BlockArea:GetSizeX() - 1 -- All sides are the same size so we can use the GetSizeX function
+	
+	local MidPoint = Vector3d(BlockAreaRadius / 2, BlockAreaRadius / 2, BlockAreaRadius / 2)
+	
+	local Blocks = 0
+	for X=0, BlockAreaRadius do
+		for Y=0, BlockAreaRadius do
+			for Z=0, BlockAreaRadius do
+				local Distance = math.floor((MidPoint - Vector3d(X, Y, Z)):Length())
+				if Distance <= Radius then
+					BlockArea:SetRelBlockTypeMeta(X, Y, Z, BlockType, BlockMeta)
+					Blocks = Blocks + 1
+				end
+			end
+		end
+	end
+
+	BlockArea:Write(World, PosX - Radius, PosY - Radius, PosZ - Radius)
+	Player:SendMessage(cChatColor.LightPurple .. Blocks .. " block(s) were created.")
+	return true
+end
+
+
+-------------------------------------------------
+---------------------HSPHERE---------------------
+-------------------------------------------------
+function HandleHSphereCommand(Split, Player)
+	if Split[2] == nil or Split[3] == nil then
+		Player:SendMessage(cChatColor.Rose .. "Not enough parameters.")
+		Player:SendMessage(cChatColor.Rose .. "Usage: //hsphere [BlockID] [Radius]")
+		return true
+	end
+	
+	local BlockType, BlockMeta = GetBlockTypeMeta(Player, Split[2])
+
+	if not BlockType then
+		Player:SendMessage(cChatColor.Rose .. "Unknown parameter \"" .. Split[2] .. "\"")
+		return true
+	end
+	
+	local Radius = tonumber(Split[3])
+	if not Radius then
+		Player:SendMessage(cChatColor.Rose .. "Unknown parameter \"" .. Split[3] .. "\"")
+		return true
+	end
+	
+	local World = Player:GetWorld()
+	local PosX = math.floor(Player:GetPosX())
+	local PosY = math.floor(Player:GetPosY())
+	local PosZ = math.floor(Player:GetPosZ())
+	
+	if PosY + Radius > 256 then
+		Player:SendMessage(cChatColor.Rose .. "You are at the top of the world. You can't build here.")
+		return true
+	end
+	
+	if CheckIfInsideAreas(PosX - Radius, PosX + Radius, PosY - Radius, PosY + Radius, PosZ - Radius, PosZ + Radius, Player, World, "hsphere") then
+		return true
+	end
+	
+	local BlockArea = cBlockArea()
+	BlockArea:Read(World, PosX - Radius, PosX + Radius, PosY - Radius, PosY + Radius, PosZ - Radius, PosZ + Radius, 3)
+	local BlockAreaRadius = BlockArea:GetSizeX() - 1 -- All sides are the same size so we can use the GetSizeX function
+	
+	local MidPoint = Vector3d(BlockAreaRadius / 2, BlockAreaRadius / 2, BlockAreaRadius / 2)
+	
+	local Blocks = 0
+	for X=0, BlockAreaRadius do
+		for Y=0, BlockAreaRadius do
+			for Z=0, BlockAreaRadius do
+				local Distance = math.floor((MidPoint - Vector3d(X, Y, Z)):Length())
+				if Distance == Radius then
+					BlockArea:SetRelBlockTypeMeta(X, Y, Z, BlockType, BlockMeta)
+					Blocks = Blocks + 1
+				end
+			end
+		end
+	end
+
+	BlockArea:Write(World, PosX - Radius, PosY - Radius, PosZ - Radius)
+	Player:SendMessage(cChatColor.LightPurple .. Blocks .. " block(s) were created.")
+	return true
+end
