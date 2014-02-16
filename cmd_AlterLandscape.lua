@@ -359,8 +359,9 @@ function HandlePumpkinsCommand(Split, Player)
 	for I=1, Radius * 2 do
 		local X = PosX + math.random(-Radius, Radius)
 		local Z = PosZ + math.random(-Radius, Radius)
-		local IsValid, Y = World:TryGetHeight(X, Z) + 1
+		local IsValid, Y = World:TryGetHeight(X, Z)
 		if IsValid then
+			Y = Y + 1
 			if World:GetBlock(X, Y - 1, Z) == E_BLOCK_GRASS or World:GetBlock(X, Y, Z) - 1 == E_BLOCK_DIRT then
 				YCheck:SetY(Y)
 				table.insert(PossibleBlockChanges, {X = X, Y = Y, Z = Z, BlockType = E_BLOCK_LOG, BlockMeta = 0})
@@ -388,7 +389,7 @@ function HandlePumpkinsCommand(Split, Player)
 		for idx, value in ipairs(PossibleBlockChanges) do
 			World:SetBlock(value.X, value.Y, value.Z, value.BlockType, value.BlockMeta)
 		end
-		Player:SendMessage(cChatColor.LightPurple .. #PossibleBlockChanges .. "  surfaces thawed")
+		Player:SendMessage(cChatColor.LightPurple .. #PossibleBlockChanges .. " pumpkin patches created")
 	end
 	return true
 end
