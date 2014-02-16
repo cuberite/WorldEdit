@@ -427,12 +427,14 @@ function HandleSphereCommand(Split, Player)
 		return true
 	end
 	
-	if CheckIfInsideAreas(PosX - Radius, PosX + Radius, PosY - Radius, PosY + Radius, PosZ - Radius, PosZ + Radius, Player, World, "sphere") then
+	local MinX, MaxX, MinY, MaxY, MinZ, MaxZ = PosX - Radius, PosX + Radius, PosY - Radius, PosY + Radius, PosZ - Radius, PosZ + Radius
+	
+	if CheckIfInsideAreas(MinX, MaxX, MinY, MaxY, MinZ, MaxZ, Player, World, "sphere") then
 		return true
 	end
 	
 	local BlockArea = cBlockArea()
-	BlockArea:Read(World, PosX - Radius, PosX + Radius, PosY - Radius, PosY + Radius, PosZ - Radius, PosZ + Radius, 3)
+	BlockArea:Read(World, MinX, MaxX, MinY, MaxY, MinZ, MaxZ, 3)
 	local BlockAreaRadius = BlockArea:GetSizeX() - 1 -- All sides are the same size so we can use the GetSizeX function
 	
 	local MidPoint = Vector3d(BlockAreaRadius / 2, BlockAreaRadius / 2, BlockAreaRadius / 2)
@@ -450,7 +452,7 @@ function HandleSphereCommand(Split, Player)
 		end
 	end
 
-	BlockArea:Write(World, PosX - Radius, PosY - Radius, PosZ - Radius)
+	BlockArea:Write(World, MinX, MinY, MinZ)
 	Player:SendMessage(cChatColor.LightPurple .. Blocks .. " block(s) were created.")
 	return true
 end
@@ -489,12 +491,14 @@ function HandleHSphereCommand(Split, Player)
 		return true
 	end
 	
-	if CheckIfInsideAreas(PosX - Radius, PosX + Radius, PosY - Radius, PosY + Radius, PosZ - Radius, PosZ + Radius, Player, World, "hsphere") then
+	local MinX, MaxX, MinY, MaxY, MinZ, MaxZ = PosX - Radius, PosX + Radius, PosY - Radius, PosY + Radius, PosZ - Radius, PosZ + Radius
+	
+	if CheckIfInsideAreas(MinX, MaxX, MinY, MaxY, MinZ, MaxZ, Player, World, "hsphere") then
 		return true
 	end
 	
 	local BlockArea = cBlockArea()
-	BlockArea:Read(World, PosX - Radius, PosX + Radius, PosY - Radius, PosY + Radius, PosZ - Radius, PosZ + Radius, 3)
+	BlockArea:Read(World, MinX, MaxX, MinY, MaxY, MinZ, MaxZ, 3)
 	local BlockAreaRadius = BlockArea:GetSizeX() - 1 -- All sides are the same size so we can use the GetSizeX function
 	
 	local MidPoint = Vector3d(BlockAreaRadius / 2, BlockAreaRadius / 2, BlockAreaRadius / 2)
@@ -511,8 +515,8 @@ function HandleHSphereCommand(Split, Player)
 			end
 		end
 	end
-
-	BlockArea:Write(World, PosX - Radius, PosY - Radius, PosZ - Radius)
+	
+	BlockArea:Write(World, MinX, MinY, MinZ)
 	Player:SendMessage(cChatColor.LightPurple .. Blocks .. " block(s) were created.")
 	return true
 end
