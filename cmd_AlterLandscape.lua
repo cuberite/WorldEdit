@@ -433,6 +433,9 @@ function HandleSphereCommand(Split, Player)
 		return true
 	end
 	
+	LastCoords[Player:GetName()] = {X = MinX, Y = MinY, Z = MinZ, WorldName = World:GetName()}
+	PersonalUndo[Player:GetName()]:Read(World, MinX, MaxX, MinY, MaxY, MinZ, MaxZ)
+	
 	local BlockArea = cBlockArea()
 	BlockArea:Read(World, MinX, MaxX, MinY, MaxY, MinZ, MaxZ, 3)
 	local BlockAreaRadius = BlockArea:GetSizeX() - 1 -- All sides are the same size so we can use the GetSizeX function
@@ -492,10 +495,12 @@ function HandleHSphereCommand(Split, Player)
 	end
 	
 	local MinX, MaxX, MinY, MaxY, MinZ, MaxZ = PosX - Radius, PosX + Radius, PosY - Radius, PosY + Radius, PosZ - Radius, PosZ + Radius
-	
 	if CheckIfInsideAreas(MinX, MaxX, MinY, MaxY, MinZ, MaxZ, Player, World, "hsphere") then
 		return true
 	end
+	
+	LastCoords[Player:GetName()] = {X = MinX, Y = MinY, Z = MinZ, WorldName = World:GetName()}
+	PersonalUndo[Player:GetName()]:Read(World, MinX, MaxX, MinY, MaxY, MinZ, MaxZ)
 	
 	local BlockArea = cBlockArea()
 	BlockArea:Read(World, MinX, MaxX, MinY, MaxY, MinZ, MaxZ, 3)
