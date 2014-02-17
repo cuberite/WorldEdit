@@ -3,6 +3,8 @@ E_SELECTIONPOINT_RIGHT = 1
 PLUGIN = nil
 
 function Initialize(Plugin)
+	-- Load the InfoReg shared library:
+	dofile(cPluginManager:GetPluginsPath() .. "/InfoReg.lua")
 	
 	PLUGIN = Plugin
 	PLUGIN:SetName(g_PluginInfo.Name)
