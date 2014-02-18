@@ -1,37 +1,51 @@
+
 -----------------------------------------------
--------------------BIOMEINFO-------------------
------------------------------------------------
+-- /biomeinfo
 function HandleBiomeInfoCommand(Split, Player)
-	if Split[2] == "-p" then
+	-- If a "-p" param is present, report the biome at player's position:
+	if (Split[2] == "-p") then
 		local Biome = GetStringFromBiome(Player:GetWorld():GetBiomeAt(math.floor(Player:GetPosX()), math.floor(Player:GetPosZ())))
 		Player:SendMessage(cChatColor.LightPurple .. "Biome: " .. Biome)
 		return true
 	end
 	
-	local PlayerName = Player:GetName()
-	if OnePlayer[PlayerName] == nil or TwoPlayer[PlayerName] == nil then
+	-- Get the player state:
+	local State = GetPlayerState(Player)
+	if not(State.Selection:IsValid()) then
 		Player:SendMessage(cChatColor.Rose .. "Make a region selection first.")
 		return true
 	end
 	
-	local BiomeList = {}
+	-- Retrieve set of biomes in the selection:
+	local BiomesSet = {}
+	local MinX, MaxX = State.Selection:GetXCoordsSorted()
+	local MinZ, MaxZ = State.Selection:GetZCoordsSorted()
 	local World = Player:GetWorld()
-	local OneX, TwoX, OneZ, TwoZ = GetXZCoords(Player)
-	for X = OneX, TwoX do
-		for Z = OneZ, TwoZ do
-			if not table.contains(BiomeList, GetStringFromBiome(World:GetBiomeAt(X, Z))) then
-				BiomeList[#BiomeList + 1] = GetStringFromBiome(World:GetBiomeAt(X, Z))
-			end
+	for X = MinX, MaxX do
+		for Z = MinZ, MaxZ do
+			BiomesSet[World:GetBiomeAt(X, Z)] = true
 		end
 	end
-	Player:SendMessage(cChatColor.LightPurple .. "Biomes:\n " .. table.concat(BiomeList, "\n "))
+	
+	-- Convert set to array of names:
+	local BiomesArr = {}
+	for b, val in pairs(BiomesSet) do
+		if (val) then
+			table.insert(BiomesArr, GetStringFromBiome(b))
+		end
+	end
+	
+	-- Send the list to the player:
+	Player:SendMessage(cChatColor.LightPurple .. "Biomes: " .. table.concat(BiomesArr, ", "))
 	return true
 end
 
 
+
+
+
 ------------------------------------------------
-----------------------REDO----------------------
-------------------------------------------------
+-- //redo
 function HandleRedoCommand(Split, Player)
 	local PlayerName = Player:GetName()
 	if PersonalRedo[PlayerName]:GetSizeX() == 0 and PersonalRedo[PlayerName]:GetSizeY() == 0 and PersonalRedo[PlayerName]:GetSizeZ() == 0 or LastRedoCoords[PlayerName] == nil then
