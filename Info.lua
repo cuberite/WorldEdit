@@ -81,6 +81,30 @@ g_PluginInfo =
 			Category = "Terraforming",
 		},
 		
+		["//hpos1"] =
+		{
+			Permission = "worldedit.selection.pos",
+			Handler = HandleHPos1Command,
+			HelpString = " Set position 1 to the position you are looking at.",
+			Category = "Selection",
+		},
+		
+		["//hpos2"] =
+		{
+			Permission = "worldedit.selection.pos",
+			Handler = HandleHPos2Command,
+			HelpString = " Set position 2 to the position you are looking at.",
+			Category = "Selection",
+		},
+		
+		["//hsphere"] =
+		{
+			Permission = "worldedit.generation.hsphere",
+			Handler = HandleHSphereCommand,
+			HelpString = " Generates a hollow sphere.",
+			Category = "Generation",
+		},
+		
 		["//paste"] =
 		{
 			Permission = "worldedit.clipboard.paste",
@@ -102,30 +126,6 @@ g_PluginInfo =
 			Permission = "worldedit.selection.pos",
 			Handler = HandlePos2Command,
 			HelpString = " Set position 2",
-			Category = "Selection",
-		},
-		
-		["//hsphere"] =
-		{
-			Permission = "worldedit.generation.hsphere",
-			Handler = HandleHSphereCommand,
-			HelpString = " Generates a hollow sphere.",
-			Category = "Generation",
-		},
-		
-		["//hpos1"] =
-		{
-			Permission = "worldedit.selection.pos",
-			Handler = HandleHPos1Command,
-			HelpString = " Set position 1 to the position you are looking at.",
-			Category = "Selection",
-		},
-		
-		["//hpos2"] =
-		{
-			Permission = "worldedit.selection.pos",
-			Handler = HandleHPos2Command,
-			HelpString = " Set position 2 to the position you are looking at.",
 			Category = "Selection",
 		},
 		
