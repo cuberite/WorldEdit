@@ -48,7 +48,7 @@ end
 
 
 --- Returns the two Y coords, smaller first
-function cPlayerSelection:GetXCoordsSorted()
+function cPlayerSelection:GetYCoordsSorted()
 	if (self.Cuboid.p1.y < self.Cuboid.p2.y) then
 		return self.Cuboid.p1.y, self.Cuboid.p2.y
 	else
