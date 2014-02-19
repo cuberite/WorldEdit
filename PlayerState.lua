@@ -101,7 +101,13 @@ end
 
 
 
-local function SetPos(a_Player, a_BlockX, a_BlockY, a_BlockZ, a_BlockFace, a_SetFn)
+--- Common code to set selection position based on player clicking somewhere
+local function SetPos(a_Player, a_BlockX, a_BlockY, a_BlockZ, a_BlockFace, a_SetFn, a_PosName)
+	-- Check if a valid click:
+	if (a_BlockFace == BLOCK_FACE_NONE) then
+		return false
+	end
+	
 	-- Check if a wand is used:
 	if (a_Player:GetEquippedItem().m_ItemType ~= Wand) then
 		return false
@@ -123,7 +129,12 @@ local function SetPos(a_Player, a_BlockX, a_BlockY, a_BlockZ, a_BlockFace, a_Set
 		a_BlockX, a_BlockY, a_BlockZ = AddFaceDirection(a_BlockX, a_BlockY, a_BlockZ, a_BlockFace)
 	end
 	
+	-- Set the position in the internal representation:
 	a_SetFn(State.Selection, a_BlockX, a_BlockY, a_BlockZ)
+	
+	-- Send a success message to the player:
+	a_Player:SendMessage(a_PosName .. " position set to {" .. a_BlockX .. ", " .. a_BlockY .. ", " .. a_BlockZ .. "}.")
+	
 	return true
 end
 
@@ -132,7 +143,7 @@ end
 
 
 local function OnPlayerRightClick(Player, BlockX, BlockY, BlockZ, BlockFace, CursorX, CursorY, CursorZ)
-	return SetPos(Player, BlockX, BlockY, BlockZ, BlockFace, cPlayerSelection.SetSecondPoint)
+	return SetPos(Player, BlockX, BlockY, BlockZ, BlockFace, cPlayerSelection.SetSecondPoint, "Second")
 end
 
 
@@ -140,7 +151,7 @@ end
 
 
 local function OnPlayerLeftClick(Player, BlockX, BlockY, BlockZ, BlockFace, BlockType, BlockMeta)
-	return SetPos(Player, BlockX, BlockY, BlockZ, BlockFace, cPlayerSelection.SetFirstPoint)
+	return SetPos(Player, BlockX, BlockY, BlockZ, BlockFace, cPlayerSelection.SetFirstPoint, "First")
 end
 
 
