@@ -57,6 +57,31 @@ end
 
 
 
+--- Returns the smaller of each coord-pair
+function cPlayerSelection:GetMinCoords()
+	local MinX, MinY, MinZ
+	if (self.Cuboid.p1.x < self.Cuboid.p2.x) then
+		MinX = self.Cuboid.p1.x
+	else
+		MinX = self.Cuboid.p2.x
+	end
+	if (self.Cuboid.p1.y < self.Cuboid.p2.y) then
+		MinX = self.Cuboid.p1.y
+	else
+		MinX = self.Cuboid.p2.y
+	end
+	if (self.Cuboid.p1.z < self.Cuboid.p2.z) then
+		MinX = self.Cuboid.p1.z
+	else
+		MinX = self.Cuboid.p2.z
+	end
+	return MinX, MinY, MinZ
+end
+
+
+
+
+
 --- Returns a string describing the selection size ("X * Y * Z, volume V blocks")
 function cPlayerSelection:GetSizeDesc()
 	assert(self:IsValid())

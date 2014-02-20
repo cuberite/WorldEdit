@@ -37,6 +37,7 @@ function cPlayerState:new(a_Obj, a_PlayerKey)
 	-- Initialize the object members to their defaults:
 	a_Obj.PlayerKey = a_PlayerKey
 	a_Obj.Selection = cPlayerSelection:new({}, a_Obj)
+	a_Obj.UndoStack = cUndoStack:new({}, 10, a_Obj)  -- TODO: Settable Undo depth (2nd param)
 	
 	return a_Obj
 end
@@ -48,6 +49,24 @@ end
 --- Loads the state from persistent storage (if so configured)
 function cPlayerState:Load()
 	-- TODO
+end
+
+
+
+
+
+--- Pushes one level of Undo onto the Undo stack, by cloning the BlockArea within the Selection
+-- a_World is the cWorld where the selection is being copied, a_UndoName is a user-visible name that can be listed
+function cPlayerState:PushUndoInSelection(a_World, a_UndoName)
+	-- Read the BlockArea:
+	local Area = cBlockArea()
+	local MinX, MaxX = self.Selection:GetXCoordsSorted()
+	local MinY, MaxY = self.Selection:GetYCoordsSorted()
+	local MinZ, MaxZ = self.Selection:GetZCoordsSorted()
+	Area:Read(a_World, MinX, MaxX, MinY, MaxY, MinZ, MaxZ)
+	
+	-- Push the Undo onto the stack:
+	self.UndoStack:PushUndo(a_World, Area, a_UndoName)
 end
 
 

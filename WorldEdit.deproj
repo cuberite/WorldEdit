@@ -4,7 +4,13 @@
     <filename>Info.lua</filename>
   </file>
   <file>
-    <filename>InfoDump.lua</filename>
+    <filename>PlayerSelection.lua</filename>
+  </file>
+  <file>
+    <filename>PlayerState.lua</filename>
+  </file>
+  <file>
+    <filename>UndoStack.lua</filename>
   </file>
   <file>
     <filename>api_Check.lua</filename>
