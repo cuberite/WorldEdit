@@ -99,6 +99,7 @@ function FillSelection(a_PlayerState, a_Player, a_World, a_BlockType, a_BlockMet
 	Area:Create(MaxX - MinX + 1, MaxY - MinY + 1, MaxZ - MinZ + 1)
 	Area:Fill(cBlockArea.baTypes + cBlockArea.baMetas, a_BlockType, a_BlockMeta)
 	Area:Write(a_World, MinX, MinY, MinZ)
+	Area:Clear()
 	a_World:WakeUpSimulatorsInArea(MinX - 1, MaxX + 1, MinY - 1, MaxY + 1, MinZ - 1, MaxZ + 1)
 	
 	return (MaxX - MinX + 1) * (MaxY - MinY + 1) * (MaxZ - MinZ + 1)
@@ -108,46 +109,65 @@ end
 
 
 
--------------------------------------------------
------------------REPLACEFUNCTION-----------------
--------------------------------------------------
-function HandleReplaceSelection(Player, World, ChangeBlockType, ChangeBlockMeta, ToChangeBlockType, ToChangeBlockMeta, TypeOnly)
-	local OneX, TwoX, OneY, TwoY, OneZ, TwoZ = GetXYZCoords(Player)
-	
-	if CheckIfInsideAreas(OneX, TwoX, OneY, TwoY, OneZ, TwoZ, Player, World, "replace") then -- Check if the region intersects with any of the areas.
-		return false
+--- Replaces the specified blocks in the selection stored in the specified cPlayerState
+-- Returns the number of blocks changed, or no value if disallowed
+-- The original contents are pushed onto PlayerState's Undo stack
+-- If a_TypeOnly is set, the block meta is ignored and conserved
+function ReplaceSelection(a_PlayerState, a_Player, a_World, a_SrcBlockType, a_SrcBlockMeta, a_DstBlockType, a_DstBlockMeta, a_TypeOnly)
+	-- Check with other plugins if the operation is okay:
+	if not(CheckAreaCallbacks(a_PlayerState, a_Player, a_World, "fill")) then -- Check if the region intersects with any of the areas.
+		return
 	end
 	
-	local Blocks = 0
-	local PlayerName = Player:GetName()
+	-- Push an Undo onto the stack:
+	a_PlayerState:PushUndoInSelection(a_World, "replace")
+
+	-- Read the area to be replaced:
+	local Area = cBlockArea()
+	local MinX, MaxX = a_PlayerState.Selection:GetXCoordsSorted()
+	local MinY, MaxY = a_PlayerState.Selection:GetYCoordsSorted()
+	local MinZ, MaxZ = a_PlayerState.Selection:GetZCoordsSorted()
+	Area:Read(a_World, MinX, MaxX, MinY, MaxY, MinZ, MaxZ)
 	
-	LastCoords[PlayerName] = {X = OneX, Y = OneY, Z = OneZ, WorldName = World:GetName()}
-	
-	PersonalUndo[PlayerName]:Read(World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ)
-	PersonalBlockArea[PlayerName]:Read(World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ) -- Read the area
-	
-	local XSize = PersonalBlockArea[PlayerName]:GetSizeX() - 1
-	local YSize = PersonalBlockArea[PlayerName]:GetSizeY() - 1
-	local ZSize = PersonalBlockArea[PlayerName]:GetSizeZ() - 1
-	
-	for X=0, XSize do
-		for Y=0, YSize do
-			for Z=0, ZSize do
-				if PersonalBlockArea[PlayerName]:GetRelBlockType(X, Y, Z) == ChangeBlockType then -- if the blocktype is the same as the block that needs to change then
-					if PersonalBlockArea[PlayerName]:GetRelBlockMeta(X, Y, Z) == ChangeBlockMeta or (TypeOnly) then -- check if the blockmeta is the same as the meta that has to change
-						PersonalBlockArea[PlayerName]:SetRelBlockType(X, Y, Z, ToChangeBlockType) -- change the block
-						PersonalBlockArea[PlayerName]:SetRelBlockMeta(X, Y, Z, ToChangeBlockMeta) -- change the meta
-						Blocks = Blocks + 1 -- add a 1 to the amount of changed blocks.
+	-- Replace the blocks:
+	local XSize = MaxX - MinX
+	local YSize = MaxY - MinY
+	local ZSize = MaxZ - MinZ
+	local NumBlocks = 0
+	if (a_TypeOnly) then
+		for X = 0, XSize do
+			for Y = 0, YSize do
+				for Z = 0, ZSize do
+					if (Area:GetRelBlockType(X, Y, Z) == a_SrcBlockType) then
+						Area:SetRelBlockType(X, Y, Z, a_DstBlockType)
+						NumBlocks = NumBlocks + 1
+					end
+				end
+			end
+		end
+	else
+		for X = 0, XSize do
+			for Y = 0, YSize do
+				for Z = 0, ZSize do
+					local BlockType, BlockMeta = Area:GetRelBlockTypeMeta(X, Y, Z)
+					if ((BlockType == a_SrcBlockType) and (BlockMeta == a_SrcBlockMeta)) then
+						Area:SetRelBlockTypeMeta(X, Y, Z, a_DstBlockType, a_DstBlockMeta)
+						NumBlocks = NumBlocks + 1
 					end
 				end
 			end
 		end
 	end
 	
-	PersonalBlockArea[PlayerName]:Write(World, OneX, OneY, OneZ) -- write the area into the world.
-	World:WakeUpSimulatorsInArea(OneX - 1, TwoX + 1, OneY - 1, TwoY + 1, OneZ - 1, TwoZ + 1)
-	return Blocks
+	-- Write the area back to world:
+	Area:Write(a_World, MinX, MinY, MinZ)
+	a_World:WakeUpSimulatorsInArea(MinX - 1, MaxX + 1, MinY - 1, MaxY + 1, MinZ - 1, MaxZ + 1)
+	
+	return NumBlocks
 end
+
+
+
 
 
 -------------------------------------------

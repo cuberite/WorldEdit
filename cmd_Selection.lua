@@ -220,30 +220,47 @@ function HandleSetCommand(a_Split, a_Player)
 end
 
 
--------------------------------------------------
----------------------REPLACE---------------------
--------------------------------------------------
-function HandleReplaceCommand(Split, Player)
-	local PlayerName = Player:GetName()
+
+
+
+function HandleReplaceCommand(a_Split, a_Player)
+	-- //replace <srcblocktype> <dstblocktype>
 	
-	if OnePlayer[PlayerName] == nil or TwoPlayer[PlayerName] == nil then -- Check if there is a region selected
-		Player:SendMessage(cChatColor.Rose .. "No Region set")
+	local State = GetPlayerState(a_Player)
+	
+	-- Check the selection:
+	if not(State.Selection:IsValid()) then
+		a_Player:SendMessage(cChatColor.Rose .. "No region set")
 		return true
 	end
-	if Split[2] == nil or Split[3] == nil then -- check if the player noted a blocktype
-		Player:SendMessage(cChatColor.Rose .. "Please say a block ID")
+	
+	-- Check the params:
+	if ((a_Split[2] == nil) or (a_Split[3] == nil)) then
+		a_Player:SendMessage(cChatColor.Rose .. "Usage: //replace <SrcBlockType> <DstBlockType>")
 		return true
 	end
-	local ChangeBlockType, ChangeBlockMeta, TypeOnly = GetBlockTypeMeta(Player, Split[2])
-	local ToChangeBlockType, ToChangeBlockMeta = GetBlockTypeMeta(Player, Split[3])
-	if ChangeBlockType ~= false and ToChangeBlockType ~= false then
-		local Blocks = HandleReplaceSelection(Player, Player:GetWorld(), ChangeBlockType, ChangeBlockMeta, ToChangeBlockType, ToChangeBlockMeta, TypeOnly)
-		if Blocks then
-			Player:SendMessage(cChatColor.LightPurple .. Blocks .. " block(s) have been changed.")
-		end
+	
+	-- Retrieve the blocktypes from the params:
+	local SrcBlockType, SrcBlockMeta, TypeOnly = GetBlockTypeMeta(a_Player, a_Split[2])
+	if not(SrcBlockType) then
+		a_Player:SendMessage(cChatColor.LightPurple .. "Unknown src block type: '" .. a_Split[2] .. "'.")
+		return true
+	end
+	local DstBlockType, DstBlockMeta = GetBlockTypeMeta(a_Player, a_Split[3])
+	if not(DstBlockType) then
+		a_Player:SendMessage(cChatColor.LightPurple .. "Unknown dst block type: '" .. a_Split[3] .. "'.")
+		return true
+	end
+	
+	-- Replace the blocks:
+	local NumBlocks = ReplaceSelection(State, a_Player, a_Player:GetWorld(), SrcBlockType, SrcBlockMeta, DstBlockType, DstBlockMeta, TypeOnly)
+	if (NumBlocks) then
+		a_Player:SendMessage(cChatColor.LightPurple .. NumBlocks .. " block(s) have been changed.")
 	end
 	return true
 end
+
+
 
 
 
