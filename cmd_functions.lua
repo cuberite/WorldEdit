@@ -76,28 +76,36 @@ function HandleCreateFaces(Player, World, BlockType, BlockMeta)
 end
 
 
-------------------------------------------------
-------------------FILLFUNCTION------------------
-------------------------------------------------
-function HandleFillSelection(Player, World, BlockType, BlockMeta)
-	local OneX, TwoX, OneY, TwoY, OneZ, TwoZ = GetXYZCoords(Player)
-	
-	if CheckIfInsideAreas(OneX, TwoX, OneY, TwoY, OneZ, TwoZ, Player, World, "fill") then -- Check if the region intersects with any of the areas.
-		return false
+
+
+
+--- Fills the selection stored in the specified cPlayerState with the specified block type
+-- Returns the number of blocks changed, or no value if disallowed
+-- The original contents are pushed onto PlayerState's Undo stack
+function FillSelection(a_PlayerState, a_Player, a_World, a_BlockType, a_BlockMeta)
+	-- Check with other plugins if the operation is okay:
+	if not(CheckAreaCallbacks(a_PlayerState, a_Player, a_World, "fill")) then -- Check if the region intersects with any of the areas.
+		return
 	end
 	
-	local PlayerName = Player:GetName()
+	-- Push an Undo onto the stack:
+	a_PlayerState:PushUndoInSelection(a_World, "fill")
+
+	-- Fill the selection:
+	local Area = cBlockArea()
+	local MinX, MaxX = a_PlayerState.Selection:GetXCoordsSorted()
+	local MinY, MaxY = a_PlayerState.Selection:GetYCoordsSorted()
+	local MinZ, MaxZ = a_PlayerState.Selection:GetZCoordsSorted()
+	Area:Create(MaxX - MinX + 1, MaxY - MinY + 1, MaxZ - MinZ + 1)
+	Area:Fill(cBlockArea.baTypes + cBlockArea.baMetas, a_BlockType, a_BlockMeta)
+	Area:Write(a_World, MinX, MinY, MinZ)
+	a_World:WakeUpSimulatorsInArea(MinX - 1, MaxX + 1, MinY - 1, MaxY + 1, MinZ - 1, MaxZ + 1)
 	
-	LastCoords[PlayerName] = {X = OneX, Y = OneY, Z = OneZ, WorldName = World:GetName()}
-	
-	PersonalUndo[PlayerName]:Read(World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ)
-	PersonalBlockArea[PlayerName]:Read(World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ) -- read the area
-	PersonalBlockArea[PlayerName]:Fill(3, BlockType, BlockMeta) -- fill the area with the right blocks
-	PersonalBlockArea[PlayerName]:Write(World, OneX, OneY, OneZ) -- write the area in the world
-	
-	World:WakeUpSimulatorsInArea(OneX - 1, TwoX + 1, OneY - 1, TwoY + 1, OneZ - 1, TwoZ + 1)
-	return GetSize(Player)
+	return (MaxX - MinX + 1) * (MaxY - MinY + 1) * (MaxZ - MinZ + 1)
 end
+
+
+
 
 
 -------------------------------------------------

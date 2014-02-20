@@ -17,6 +17,27 @@ end
 
 
 
+--- Called before each operation to check with the callbacks whether other plugins allow the operation
+-- Returns false if the operation is to be aborted, true to continue
+-- Uses the cPlayerState for a parameter
+function CheckAreaCallbacks(a_PlayerState, a_Player, a_World, a_Operation)
+	local MinX, MaxX = a_PlayerState.Selection:GetXCoordsSorted()
+	local MinY, MaxY = a_PlayerState.Selection:GetYCoordsSorted()
+	local MinZ, MaxZ = a_PlayerState.Selection:GetZCoordsSorted()
+	for idx, callback in ipairs(ExclusionAreaPlugins[a_World:GetName()]) do
+		local res = cPluginManager:CallPlugin(callback.PluginName, callback.FunctionName, MinX, MaxX, MinY, MaxY, MinZ, MaxZ, a_Player, a_World, a_Operation)
+		if (res) then
+			-- The callback wants to abort the operation
+			return false
+		end
+	end
+	return true
+end
+
+
+
+
+
 function GetMultipleBlockChanges(MinX, MaxX, MinZ, MaxZ, Player, World, Operation)
 	local MinY = 256
 	local MaxY = 0

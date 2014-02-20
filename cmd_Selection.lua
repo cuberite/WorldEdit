@@ -184,28 +184,37 @@ function HandleCutCommand(Split, Player)
 end
 
 
------------------------------------------------
-----------------------SET----------------------
------------------------------------------------
-function HandleSetCommand(Split, Player)
-	local PlayerName = Player:GetName()
+
+
+
+function HandleSetCommand(a_Split, a_Player)
+	-- //set <blocktype>
 	
-	if OnePlayer[PlayerName] == nil or TwoPlayer[PlayerName] == nil then -- Check if there is a region selected
-		Player:SendMessage(cChatColor.Rose .. "No Region set")
+	local State = GetPlayerState(a_Player)
+
+	-- Check the selection:
+	if not(State.Selection:IsValid()) then
+		a_Player:SendMessage(cChatColor.Rose .. "No region set")
 		return true
 	end
 	
-	if Split[2] == nil then
-		Player:SendMessage(cChatColor.Rose .. "Please say a block ID")
+	-- Check the params:
+	if (a_Split[2] == nil) then
+		a_Player:SendMessage(cChatColor.Rose .. "Usage: //set <BlockType>")
 		return true
 	end
 	
-	local BlockType, BlockMeta = GetBlockTypeMeta(Player, Split[2])
-	if BlockType ~= false then
-		local Blocks = HandleFillSelection(Player, Player:GetWorld(), BlockType, BlockMeta)
-		if Blocks then
-			Player:SendMessage(cChatColor.LightPurple .. Blocks .. " block(s) have been changed.")
-		end
+	-- Retrieve the blocktype from the params:
+	local BlockType, BlockMeta = GetBlockTypeMeta(a_Player, a_Split[2])
+	if not(BlockType) then
+		a_Player:SendMessage(cChatColor.LightPurple .. "Unknown block type: '" .. a_Split[2] .. "'.")
+		return true
+	end
+	
+	-- Fill the selection:
+	local NumBlocks = FillSelection(State, a_Player, a_Player:GetWorld(), BlockType, BlockMeta)
+	if (NumBlocks) then
+		a_Player:SendMessage(cChatColor.LightPurple .. NumBlocks .. " block(s) have been changed.")
 	end
 	return true
 end
