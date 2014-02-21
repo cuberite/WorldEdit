@@ -29,17 +29,45 @@ local cPlayerState = {}
 
 
 --- Creates a new PlayerState object
-function cPlayerState:new(a_Obj, a_PlayerKey)
+function cPlayerState:new(a_Obj, a_PlayerKey, a_Player)
+	assert(a_PlayerKey ~= nil)
+	assert(a_Player ~= nil)
+	
 	a_Obj = a_Obj or {}
 	setmetatable(a_Obj, cPlayerState)
 	self.__index = self
 	
 	-- Initialize the object members to their defaults:
+	local ClientHandle = a_Player:GetClientHandle()
+	if (ClientHandle ~= nil) then
+		a_Obj.IsWECUIActivated = ClientHandle:HasPluginChannel("WECUI")
+		LOG("WECUI: " .. tostring(a_Obj.IsWECUIActivated))
+	end
 	a_Obj.PlayerKey = a_PlayerKey
 	a_Obj.Selection = cPlayerSelection:new({}, a_Obj)
 	a_Obj.UndoStack = cUndoStack:new({}, 10, a_Obj)  -- TODO: Settable Undo depth (2nd param)
+	a_Obj.WandActivated = true
 	
 	return a_Obj
+end
+
+
+
+
+
+--- Calls the specified callback with the cPlayer instance of the player to whom this state belongs
+-- Returns true if the callback has been called, false otherwise
+function cPlayerState:DoWithPlayer(a_Callback)
+	cRoot:Get():ForEachPlayer(
+		function(a_Player)
+			if (a_Player:GetName() == self.PlayerKey) then
+				HasCalled = true
+				a_Callback(a_Player)
+				return true
+			end
+		end
+	)
+	return HasCalled
 end
 
 
@@ -92,8 +120,7 @@ function GetPlayerState(a_Player)
 	end
 	
 	-- The player state doesn't exist yet, create a new one:
-	res = cPlayerState:new()
-	res.WandActivated = true
+	res = cPlayerState:new({}, Key, a_Player)
 	g_PlayerStates[Key] = res
 	res:Load()
 	
@@ -177,10 +204,33 @@ end
 
 
 
+local function OnPluginMessage(a_Client, a_Channel, a_Message)
+	if (a_Channel ~= "REGISTER") then
+		return
+	end
+	
+	-- The client has registered for some channels, if they did register for WECUI, send the selection to them:
+	-- Find the cPlayer object for this client, if available:
+	local Player = a_Client:GetPlayer()
+	if (Player == nil) then
+		return
+	end
+	
+	-- Send the selection (if there is one):
+	local State = GetPlayerState(Player)
+	State.IsWECUIActivated = a_Client:HasPluginChannel("WECUI")
+	State.Selection:NotifySelectionChanged()
+end
+
+
+
+
+
 -- Register the hooks needed:
 cPluginManager.AddHook(cPluginManager.HOOK_PLAYER_DESTROYED,   OnPlayerDestroyed)
 cPluginManager.AddHook(cPluginManager.HOOK_PLAYER_RIGHT_CLICK, OnPlayerRightClick)
 cPluginManager.AddHook(cPluginManager.HOOK_PLAYER_LEFT_CLICK,  OnPlayerLeftClick)
+cPluginManager.AddHook(cPluginManager.HOOK_PLUGIN_MESSAGE,     OnPluginMessage)
 
 
 

@@ -172,8 +172,39 @@ end
 
 
 --- Notifies all registered callbacks that the selection has changed
-function cPlayerSelection:NotifySelectionChanged()
+-- a_PointChanged is optional, assigned to the point that has just changed
+-- If nil, the entire selection is assumed changed
+function cPlayerSelection:NotifySelectionChanged(a_PointChanged)
 	-- TODO: Call the registered callbacks
+	
+	-- Set the player's WECUI, if present:
+	if (self.PlayerState.IsWECUIActivated) then
+		local Volume = -1
+		if (self:IsValid()) then
+			Volume = self:GetVolume()
+		end
+		local c = self.Cuboid
+		if (self.IsFirstPointSet and ((a_PointChanged == nil) or (a_PointChanged == 1))) then
+			self.PlayerState:DoWithPlayer(
+				function(a_Player)
+					a_Player:GetClientHandle():SendPluginMessage("WECUI", string.format(
+						"p|0|%i|%i|%i|%i",
+						c.p1.x, c.p1.y, c.p1.z, Volume
+					))
+				end
+			)
+		end
+		if (self.IsSecondPointSet and ((a_PointChanged == nil) or (a_PointChanged == 2))) then
+			self.PlayerState:DoWithPlayer(
+				function(a_Player)
+					a_Player:GetClientHandle():SendPluginMessage("WECUI", string.format(
+						"p|1|%i|%i|%i|%i",
+						c.p2.x, c.p2.y, c.p2.z, Volume
+					))
+				end
+			)
+		end
+	end
 end
 
 
@@ -193,7 +224,7 @@ function cPlayerSelection:SetFirstPoint(a_BlockX, a_BlockY, a_BlockZ)
 	-- Set the point:
 	self.Cuboid.p1:Set(BlockX, BlockY, BlockZ)
 	self.IsFirstPointSet = true
-	self:NotifySelectionChanged()
+	self:NotifySelectionChanged(1)
 end
 
 
@@ -213,7 +244,7 @@ function cPlayerSelection:SetSecondPoint(a_BlockX, a_BlockY, a_BlockZ)
 	-- Set the point:
 	self.Cuboid.p2:Set(BlockX, BlockY, BlockZ)
 	self.IsSecondPointSet = true
-	self:NotifySelectionChanged()
+	self:NotifySelectionChanged(2)
 end
 
 
