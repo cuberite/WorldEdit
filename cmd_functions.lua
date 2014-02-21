@@ -35,44 +35,47 @@ function HandleCreateWalls(Player, World, BlockType, BlockMeta)
 end
 
 
--------------------------------------------------
----------------CREATEFACESFUNCTION---------------
--------------------------------------------------
-function HandleCreateFaces(Player, World, BlockType, BlockMeta)
-	local OneX, TwoX, OneY, TwoY, OneZ, TwoZ = GetXYZCoords(Player) -- get the coordinates
-	
-	if CheckIfInsideAreas(OneX, TwoX, OneY, TwoY, OneZ, TwoZ, Player, World, "faces") then -- Check if the region intersects with any of the areas.
-		return false
-	end
-	
-	local PlayerName = Player:GetName()
-	
-	LastCoords[PlayerName] = {X = OneX, Y = OneY, Z = OneZ, WorldName = World:GetName()}
-	
-	PersonalUndo[PlayerName]:Read(World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ)
-	PersonalBlockArea[PlayerName]:Read(World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ) -- read the area
-	local Blocks = (2 * (PersonalBlockArea[PlayerName]:GetSizeX() - 1 + PersonalBlockArea[PlayerName]:GetSizeZ() - 1) * PersonalBlockArea[PlayerName]:GetSizeY()) -- calculate the amount of changed blocks.
-	if Blocks == 0 then
-		Blocks = 1
-	end
-	local Y = 0
-	local Z = 0
-	local X = 0
-	local XX = PersonalBlockArea[PlayerName]:GetSizeX() - 1
-	local YY = PersonalBlockArea[PlayerName]:GetSizeY() - 1
-	local ZZ = PersonalBlockArea[PlayerName]:GetSizeZ() - 1
-	
-	PersonalBlockArea[PlayerName]:FillRelCuboid(X, XX, Y, YY, Z, Z, 3, BlockType, BlockMeta) -- Walls
-	PersonalBlockArea[PlayerName]:FillRelCuboid(X, XX, Y, YY, ZZ, ZZ, 3, BlockType, BlockMeta)
-	PersonalBlockArea[PlayerName]:FillRelCuboid(XX, XX, Y, YY, Z, ZZ, 3, BlockType, BlockMeta)
-	PersonalBlockArea[PlayerName]:FillRelCuboid(X, X, Y, YY, Z, ZZ, 3, BlockType, BlockMeta)
-	
-	PersonalBlockArea[PlayerName]:FillRelCuboid(X, XX, Y, Y, Z, ZZ, 3, BlockType, BlockMeta) -- Floor
-	PersonalBlockArea[PlayerName]:FillRelCuboid(X, XX, YY, YY, Z, ZZ, 3, BlockType, BlockMeta) -- Ceiling
 
-	PersonalBlockArea[PlayerName]:Write(World, OneX, OneY, OneZ) -- write the area in the world.
-	World:WakeUpSimulatorsInArea(OneX - 1, TwoX + 1, OneY - 1, TwoY + 1, OneZ - 1, TwoZ + 1)
-	return Blocks
+
+
+--- Fills the faces of the selection stored in the specified cPlayerState with the specified block type
+-- Returns the number of blocks changed, or no value if disallowed
+-- The original contents are pushed onto PlayerState's Undo stack
+function FillFaces(a_PlayerState, a_Player, a_World, a_BlockType, a_BlockMeta)
+	-- Check with other plugins if the operation is okay:
+	if not(CheckAreaCallbacks(a_PlayerState, a_Player, a_World, "faces")) then
+		return
+	end
+	
+	-- Push an Undo onto the stack:
+	a_PlayerState:PushUndoInSelection(a_World, "fill")
+
+	-- Fill the faces:
+	local Area = cBlockArea()
+	local MinX, MaxX = a_PlayerState.Selection:GetXCoordsSorted()
+	local MinY, MaxY = a_PlayerState.Selection:GetYCoordsSorted()
+	local MinZ, MaxZ = a_PlayerState.Selection:GetZCoordsSorted()
+	local XSize = MaxX - MinX
+	local YSize = MaxY - MinY
+	local ZSize = MaxZ - MinZ
+	Area:Create(XSize + 1, YSize + 1, ZSize + 1)
+	Area:FillRelCuboid(0,     XSize, 0,     YSize, 0,     0,     cBlockArea.baTypes + cBlockArea.baMetas, a_BlockType, a_BlockMeta)  -- XY wall at MinZ
+	Area:FillRelCuboid(0,     XSize, 0,     YSize, ZSize, ZSize, cBlockArea.baTypes + cBlockArea.baMetas, a_BlockType, a_BlockMeta)  -- XY wall at MaxZ
+	Area:FillRelCuboid(0,     0,     0,     YSize, 0,     ZSize, cBlockArea.baTypes + cBlockArea.baMetas, a_BlockType, a_BlockMeta)  -- YZ wall at MinX
+	Area:FillRelCuboid(XSize, XSize, 0,     YSize, 0,     ZSize, cBlockArea.baTypes + cBlockArea.baMetas, a_BlockType, a_BlockMeta)  -- YZ wall at MinX
+	Area:FillRelCuboid(0,     XSize, 0,     0,     0,     ZSize, cBlockArea.baTypes + cBlockArea.baMetas, a_BlockType, a_BlockMeta)  -- XZ floor
+	Area:FillRelCuboid(0,     XSize, YSize, YSize, 0,     ZSize, cBlockArea.baTypes + cBlockArea.baMetas, a_BlockType, a_BlockMeta)  -- XZ ceiling
+	Area:Write(a_World, MinX, MinY, MinZ)
+	Area:Clear()
+	a_World:WakeUpSimulatorsInArea(MinX - 1, MaxX + 1, MinY - 1, MaxY + 1, MinZ - 1, MaxZ + 1)
+	
+	-- Calculate the number of changed blocks:
+	local VolumeIncluding = (XSize + 1) * (YSize + 1) * (ZSize + 1)  -- Volume of the cuboid INcluding the faces
+	local VolumeExcluding = (XSize - 1) * (YSize - 1) * (ZSize - 1)  -- Volume of the cuboid EXcluding the faces
+	if (VolumeExcluding < 0) then
+		VolumeExcluding = 0
+	end
+	return VolumeIncluding - VolumeExcluding
 end
 
 
@@ -84,7 +87,7 @@ end
 -- The original contents are pushed onto PlayerState's Undo stack
 function FillSelection(a_PlayerState, a_Player, a_World, a_BlockType, a_BlockMeta)
 	-- Check with other plugins if the operation is okay:
-	if not(CheckAreaCallbacks(a_PlayerState, a_Player, a_World, "fill")) then -- Check if the region intersects with any of the areas.
+	if not(CheckAreaCallbacks(a_PlayerState, a_Player, a_World, "fill")) then
 		return
 	end
 	
