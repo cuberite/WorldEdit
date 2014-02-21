@@ -297,28 +297,37 @@ function HandleFacesCommand(a_Split, a_Player)
 end
 
 
--------------------------------------------------
-----------------------WALLS----------------------
--------------------------------------------------
-function HandleWallsCommand(Split, Player)
-	local PlayerName = Player:GetName()
+
+
+
+function HandleWallsCommand(a_Split, a_Player)
+	-- //walls <blocktype>
 	
-	if OnePlayer[PlayerName] == nil or TwoPlayer[PlayerName] == nil then -- Check if there is a region selected
-		Player:SendMessage(cChatColor.Rose .. "No Region set")
+	local State = GetPlayerState(a_Player)
+
+	-- Check the selection:
+	if not(State.Selection:IsValid()) then
+		a_Player:SendMessage(cChatColor.Rose .. "No region set")
 		return true
 	end
-	if Split[2] == nil then
-		Player:SendMessage(cChatColor.Rose .. "Please say a block ID")
+	
+	-- Check the params:
+	if (a_Split[2] == nil) then
+		a_Player:SendMessage(cChatColor.Rose .. "Usage: //walls <BlockType>")
 		return true
 	end
-	local BlockType, BlockMeta = GetBlockTypeMeta(Player, Split[2])
-	if BlockType ~= false then
-		local Blocks = HandleCreateWalls(Player, Player:GetWorld(), BlockType, BlockMeta)
-		if not Blocks then
-			Player:SendMessage(cChatColor.Rose .. "Region intersects with an area")
-		else
-			Player:SendMessage(cChatColor.LightPurple .. Blocks .. " block(s) have been changed.")
-		end
+	
+	-- Retrieve the blocktype from the params:
+	local BlockType, BlockMeta = GetBlockTypeMeta(a_Player, a_Split[2])
+	if not(BlockType) then
+		a_Player:SendMessage(cChatColor.LightPurple .. "Unknown block type: '" .. a_Split[2] .. "'.")
+		return true
+	end
+	
+	-- Fill the selection:
+	local NumBlocks = FillWalls(State, a_Player, a_Player:GetWorld(), BlockType, BlockMeta)
+	if (NumBlocks) then
+		a_Player:SendMessage(cChatColor.LightPurple .. NumBlocks .. " block(s) have been changed.")
 	end
 	return true
 end

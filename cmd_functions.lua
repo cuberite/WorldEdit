@@ -1,37 +1,48 @@
--------------------------------------------------
----------------CREATEWALLSFUNCTION---------------
--------------------------------------------------
-function HandleCreateWalls(Player, World, BlockType, BlockMeta)
-	local OneX, TwoX, OneY, TwoY, OneZ, TwoZ = GetXYZCoords(Player) -- Get the right X, Y and Z coordinates
-	if CheckIfInsideAreas(OneX, TwoX, OneY, TwoY, OneZ, TwoZ, Player, World, "walls") then -- Check if the region intersects with any of the areas.
-		return false
+
+-- cmd_functions.lua
+
+-- Implements the helper functions that do the actual filling / replacing / blocktracing work
+
+
+
+
+
+--- Fills the walls of the selection stored in the specified cPlayerState with the specified block type
+-- Returns the number of blocks changed, or no value if disallowed
+-- The original contents are pushed onto PlayerState's Undo stack
+function FillWalls(a_PlayerState, a_Player, a_World, a_BlockType, a_BlockMeta)
+	-- Check with other plugins if the operation is okay:
+	if not(CheckAreaCallbacks(a_PlayerState, a_Player, a_World, "walls")) then
+		return
 	end
 	
-	local PlayerName = Player:GetName()
+	-- Push an Undo onto the stack:
+	a_PlayerState:PushUndoInSelection(a_World, "walls")
+
+	-- Fill the walls:
+	local Area = cBlockArea()
+	local MinX, MaxX = a_PlayerState.Selection:GetXCoordsSorted()
+	local MinY, MaxY = a_PlayerState.Selection:GetYCoordsSorted()
+	local MinZ, MaxZ = a_PlayerState.Selection:GetZCoordsSorted()
+	local XSize = MaxX - MinX
+	local YSize = MaxY - MinY
+	local ZSize = MaxZ - MinZ
+	Area:Read(a_World, MinX, MaxX, MinY, MaxY, MinZ, MaxZ, cBlockArea.baTypes + cBlockArea.baMetas)
+	Area:FillRelCuboid(0,     XSize, 0,     YSize, 0,     0,     cBlockArea.baTypes + cBlockArea.baMetas, a_BlockType, a_BlockMeta)  -- XY wall at MinZ
+	Area:FillRelCuboid(0,     XSize, 0,     YSize, ZSize, ZSize, cBlockArea.baTypes + cBlockArea.baMetas, a_BlockType, a_BlockMeta)  -- XY wall at MaxZ
+	Area:FillRelCuboid(0,     0,     0,     YSize, 0,     ZSize, cBlockArea.baTypes + cBlockArea.baMetas, a_BlockType, a_BlockMeta)  -- YZ wall at MinX
+	Area:FillRelCuboid(XSize, XSize, 0,     YSize, 0,     ZSize, cBlockArea.baTypes + cBlockArea.baMetas, a_BlockType, a_BlockMeta)  -- YZ wall at MinX
+	Area:Write(a_World, MinX, MinY, MinZ)
+	Area:Clear()
+	a_World:WakeUpSimulatorsInArea(MinX - 1, MaxX + 1, MinY - 1, MaxY + 1, MinZ - 1, MaxZ + 1)
 	
-	LastCoords[PlayerName] = {X = OneX, Y = OneY, Z = OneZ, WorldName = World:GetName()}
-	
-	PersonalUndo[PlayerName]:Read(World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ)
-	PersonalBlockArea[PlayerName]:Read(World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ)
-	local Blocks = (2 * (PersonalBlockArea[PlayerName]:GetSizeX() - 1 + PersonalBlockArea[PlayerName]:GetSizeZ() - 1) * PersonalBlockArea[PlayerName]:GetSizeY()) -- Calculate the amount if blocks that are going to change
-	if Blocks == 0 then -- if the wall is 1x1x1 then the amout of blocks changed are 1
-		Blocks = 1
+	-- Calculate the number of changed blocks:
+	local VolumeIncluding = (XSize + 1) * (YSize + 1) * (ZSize + 1)  -- Volume of the cuboid INcluding the walls
+	local VolumeExcluding = (XSize - 1) * (YSize + 1) * (ZSize - 1)  -- Volume of the cuboid EXcluding the walls
+	if (VolumeExcluding < 0) then
+		VolumeExcluding = 0
 	end
-	
-	local Y = 0
-	local Z = 0
-	local X = 0
-	local XX = PersonalBlockArea[PlayerName]:GetSizeX() - 1
-	local YY = PersonalBlockArea[PlayerName]:GetSizeY() - 1
-	local ZZ = PersonalBlockArea[PlayerName]:GetSizeZ() - 1
-	
-	PersonalBlockArea[PlayerName]:FillRelCuboid(X, XX, Y, YY, Z, Z, 3, BlockType, BlockMeta)
-	PersonalBlockArea[PlayerName]:FillRelCuboid(X, XX, Y, YY, ZZ, ZZ, 3, BlockType, BlockMeta)
-	PersonalBlockArea[PlayerName]:FillRelCuboid(XX, XX, Y, YY, Z, ZZ, 3, BlockType, BlockMeta)
-	PersonalBlockArea[PlayerName]:FillRelCuboid(X, X, Y, YY, Z, ZZ, 3, BlockType, BlockMeta)
-	PersonalBlockArea[PlayerName]:Write(World, OneX, OneY, OneZ) -- Write the region into the world
-	World:WakeUpSimulatorsInArea(OneX - 1, TwoX + 1, OneY - 1, TwoY + 1, OneZ - 1, TwoZ + 1)
-	return Blocks
+	return VolumeIncluding - VolumeExcluding
 end
 
 
@@ -48,7 +59,7 @@ function FillFaces(a_PlayerState, a_Player, a_World, a_BlockType, a_BlockMeta)
 	end
 	
 	-- Push an Undo onto the stack:
-	a_PlayerState:PushUndoInSelection(a_World, "fill")
+	a_PlayerState:PushUndoInSelection(a_World, "faces")
 
 	-- Fill the faces:
 	local Area = cBlockArea()
@@ -58,7 +69,7 @@ function FillFaces(a_PlayerState, a_Player, a_World, a_BlockType, a_BlockMeta)
 	local XSize = MaxX - MinX
 	local YSize = MaxY - MinY
 	local ZSize = MaxZ - MinZ
-	Area:Create(XSize + 1, YSize + 1, ZSize + 1)
+	Area:Read(a_World, MinX, MaxX, MinY, MaxY, MinZ, MaxZ, cBlockArea.baTypes + cBlockArea.baMetas)
 	Area:FillRelCuboid(0,     XSize, 0,     YSize, 0,     0,     cBlockArea.baTypes + cBlockArea.baMetas, a_BlockType, a_BlockMeta)  -- XY wall at MinZ
 	Area:FillRelCuboid(0,     XSize, 0,     YSize, ZSize, ZSize, cBlockArea.baTypes + cBlockArea.baMetas, a_BlockType, a_BlockMeta)  -- XY wall at MaxZ
 	Area:FillRelCuboid(0,     0,     0,     YSize, 0,     ZSize, cBlockArea.baTypes + cBlockArea.baMetas, a_BlockType, a_BlockMeta)  -- YZ wall at MinX
@@ -118,7 +129,7 @@ end
 -- If a_TypeOnly is set, the block meta is ignored and conserved
 function ReplaceSelection(a_PlayerState, a_Player, a_World, a_SrcBlockType, a_SrcBlockMeta, a_DstBlockType, a_DstBlockMeta, a_TypeOnly)
 	-- Check with other plugins if the operation is okay:
-	if not(CheckAreaCallbacks(a_PlayerState, a_Player, a_World, "fill")) then -- Check if the region intersects with any of the areas.
+	if not(CheckAreaCallbacks(a_PlayerState, a_Player, a_World, "replace")) then -- Check if the region intersects with any of the areas.
 		return
 	end
 	
@@ -277,3 +288,7 @@ function HPosSelect(Player, World)
 	end
 	return true, hpos
 end
+
+
+
+
