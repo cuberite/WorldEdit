@@ -51,23 +51,15 @@ end
 
 
 
-function HandleRedoCommand(Split, Player)
+function HandleRedoCommand(a_Split, a_Player)
 	-- //redo
-	local PlayerName = Player:GetName()
-	if PersonalRedo[PlayerName]:GetSizeX() == 0 and PersonalRedo[PlayerName]:GetSizeY() == 0 and PersonalRedo[PlayerName]:GetSizeZ() == 0 or LastRedoCoords[PlayerName] == nil then
-		Player:SendMessage(cChatColor.Rose .. "Nothing left to redo")
-		return true
+	local State = GetPlayerState(a_Player)
+	local IsSuccess, Msg = State.UndoStack:Redo(a_Player:GetWorld())
+	if (IsSuccess) then
+		a_Player:SendMessage(cChatColor.LightPurple .. "Redo Successful.")
+	else
+		a_Player:SendMessage(cChatColor.Rose .. "Cannot redo: " .. (Msg or "<unknown error>"))
 	end
-	
-	local Coords = LastRedoCoords[PlayerName]
-	
-	local World = cRoot:Get():GetWorld(Coords.WorldName)
-	PersonalUndo[PlayerName]:Read(World, Coords.X, Coords.X + PersonalRedo[PlayerName]:GetSizeX() - 1, Coords.Y, Coords.Y + PersonalRedo[PlayerName]:GetSizeY() - 1,Coords.Z,  Coords.Z + PersonalRedo[PlayerName]:GetSizeZ() - 1)
-	LastCoords[PlayerName] = LastRedoCoords[PlayerName]
-	PersonalRedo[PlayerName]:Write(World, Coords.X, Coords.Y, Coords.Z, 3)
-	
-	LastRedoCoords[PlayerName] = nil
-	Player:SendMessage(cChatColor.LightPurple .. "Redo Successful.")
 	return true
 end
 
@@ -78,12 +70,11 @@ end
 function HandleUndoCommand(a_Split, a_Player)
 	-- //undo
 	local State = GetPlayerState(a_Player)
-	
 	local IsSuccess, Msg = State.UndoStack:Undo(a_Player:GetWorld())
 	if (IsSuccess) then
 		a_Player:SendMessage(cChatColor.LightPurple .. "Undo Successful.")
 	else
-		a_Player:SendMessage(cChatColor.Rose .. "Cannot undo: " .. (Msg or "<unknown reason>"))
+		a_Player:SendMessage(cChatColor.Rose .. "Cannot undo: " .. (Msg or "<unknown error>"))
 	end
 	return true
 end

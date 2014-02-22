@@ -44,7 +44,7 @@ function cUndoStack:ApplySnapshot(a_SrcStack, a_DstStack, a_World)
 	assert(a_World ~= nil)
 	
 	-- Find the src snapshot to apply:
-	local Src = PopLastSnapshotInWorld(a_SrcStack, a_World:GetName())
+	local Src = self:PopLastSnapshotInWorld(a_SrcStack, a_World:GetName())
 	if (Src == nil) then
 		-- There's no snapshot to apply
 		return false, "No snapshot to apply"
@@ -90,10 +90,10 @@ end
 
 
 
---- Returns the last snapshot that matches the worldname
+--- Returns the last snapshot from the stack that matches the worldname
 -- Removes the snapshot from the stack.
 -- Returns nil if no matching snapshot
-function PopLastSnapshotInWorld(a_Stack, a_WorldName)
+function cUndoStack:PopLastSnapshotInWorld(a_Stack, a_WorldName)
 	assert(type(a_Stack) == "table")
 	assert(type(a_WorldName) == "string")
 	
@@ -135,6 +135,17 @@ function cUndoStack:PushUndo(a_World, a_Area, a_Name)
 		self.UndoStack[1].Area:Clear()
 		table.remove(self.UndoStack, 1)
 	end
+end
+
+
+
+
+
+--- Redoes one operation from the UndoStack (pushes previous to UndoStack)
+-- Returns true if successful, false + reason if not
+function cUndoStack:Redo(a_World)
+	-- Apply one snapshot from RedoStack to UndoStack:
+	return self:ApplySnapshot(self.RedoStack, self.UndoStack, a_World)
 end
 
 
