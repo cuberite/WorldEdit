@@ -1,7 +1,14 @@
 
------------------------------------------------
--- /biomeinfo
+-- cmd_Selection.lua
+
+-- Implements handlers for the selection-related commands
+
+
+
+
 function HandleBiomeInfoCommand(Split, Player)
+	-- /biomeinfo
+
 	-- If a "-p" param is present, report the biome at player's position:
 	if (Split[2] == "-p") then
 		local Biome = GetStringFromBiome(Player:GetWorld():GetBiomeAt(math.floor(Player:GetPosX()), math.floor(Player:GetPosZ())))
@@ -44,9 +51,8 @@ end
 
 
 
-------------------------------------------------
--- //redo
 function HandleRedoCommand(Split, Player)
+	-- //redo
 	local PlayerName = Player:GetName()
 	if PersonalRedo[PlayerName]:GetSizeX() == 0 and PersonalRedo[PlayerName]:GetSizeY() == 0 and PersonalRedo[PlayerName]:GetSizeZ() == 0 or LastRedoCoords[PlayerName] == nil then
 		Player:SendMessage(cChatColor.Rose .. "Nothing left to redo")
@@ -66,33 +72,28 @@ function HandleRedoCommand(Split, Player)
 end
 
 
-------------------------------------------------
-----------------------UNDO----------------------
-------------------------------------------------
-function HandleUndoCommand(Split, Player)
-	local PlayerName = Player:GetName()
+
+
+
+function HandleUndoCommand(a_Split, a_Player)
+	-- //undo
+	local State = GetPlayerState(a_Player)
 	
-	if PersonalUndo[PlayerName]:GetSizeX() == 0 and PersonalUndo[PlayerName]:GetSizeY() == 0 and PersonalUndo[PlayerName]:GetSizeZ() == 0 or LastCoords[PlayerName] == nil then
-		Player:SendMessage(cChatColor.Rose .. "Nothing left to undo")
-		return true
+	local IsSuccess, Msg = State.UndoStack:Undo(a_Player:GetWorld())
+	if (IsSuccess) then
+		a_Player:SendMessage(cChatColor.LightPurple .. "Undo Successful.")
+	else
+		a_Player:SendMessage(cChatColor.Rose .. "Cannot undo: " .. (Msg or "<unknown reason>"))
 	end
-	local Coords = LastCoords[PlayerName]
-	local World = cRoot:Get():GetWorld(Coords.WorldName)
-	
-	PersonalRedo[PlayerName]:Read(World, Coords.X, Coords.X + PersonalUndo[PlayerName]:GetSizeX() - 1, Coords.Y, Coords.Y + PersonalUndo[PlayerName]:GetSizeY() - 1, Coords.Z,  Coords.Z + PersonalUndo[PlayerName]:GetSizeZ() - 1)
-	LastRedoCoords[PlayerName] = LastCoords[PlayerName]
-	PersonalUndo[PlayerName]:Write(World, Coords.X, Coords.Y, Coords.Z, 3)
-	Player:SendMessage(cChatColor.LightPurple .. "Undo Successful.")
-	
-	LastCoords[PlayerName] = nil
 	return true
 end
 
 
-------------------------------------------------
-----------------------SIZE----------------------
-------------------------------------------------
+
+
+
 function HandleSizeCommand(a_Split, a_Player)
+	-- //size
 	local State = GetPlayerState(a_Player)
 	if (State.Selection:IsValid()) then
 		a_Player:SendMessage(cChatColor.LightPurple .. "The selection size is " .. State.Selection:GetSizeDesc() .. ".")
@@ -101,6 +102,9 @@ function HandleSizeCommand(a_Split, a_Player)
 	end
 	return true
 end
+
+
+
 
 
 -------------------------------------------------
