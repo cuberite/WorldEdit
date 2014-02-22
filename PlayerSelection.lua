@@ -100,6 +100,19 @@ end
 
 
 
+--- Returns a new cuboid with the selection's bounds, sorted
+function cPlayerSelection:GetSortedCuboid()
+	assert(self:IsValid())
+	
+	local SCuboid = cCuboid(self.Cuboid)
+	SCuboid:Sort()
+	return SCuboid;
+end
+
+
+
+
+
 --- Returns the 3D volume of the selection
 function cPlayerSelection:GetVolume()
 	assert(self:IsValid())

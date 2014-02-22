@@ -19,13 +19,18 @@ end
 
 --- Called before each operation to check with the callbacks whether other plugins allow the operation
 -- Returns false if the operation is to be aborted, true to continue
--- Uses the cPlayerState for a parameter
-function CheckAreaCallbacks(a_PlayerState, a_Player, a_World, a_Operation)
-	local MinX, MaxX = a_PlayerState.Selection:GetXCoordsSorted()
-	local MinY, MaxY = a_PlayerState.Selection:GetYCoordsSorted()
-	local MinZ, MaxZ = a_PlayerState.Selection:GetZCoordsSorted()
+-- Uses a sorted cCuboid for the affected region coords
+function CheckAreaCallbacks(a_Cuboid, a_Player, a_World, a_Operation)
+	assert(tolua.type(a_Cuboid) == "cCuboid")
+	
 	for idx, callback in ipairs(ExclusionAreaPlugins[a_World:GetName()]) do
-		local res = cPluginManager:CallPlugin(callback.PluginName, callback.FunctionName, MinX, MaxX, MinY, MaxY, MinZ, MaxZ, a_Player, a_World, a_Operation)
+		local res = cPluginManager:CallPlugin(
+			callback.PluginName, callback.FunctionName,
+			a_Cuboid.p1.x, a_Cuboid.p2.x,
+			a_Cuboid.p1.y, a_Cuboid.p2.y,
+			a_Cuboid.p1.z, a_Cuboid.p2.z,
+			a_Player, a_World, a_Operation
+		)
 		if (res) then
 			-- The callback wants to abort the operation
 			return false

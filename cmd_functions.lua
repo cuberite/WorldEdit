@@ -12,7 +12,7 @@
 -- The original contents are pushed onto PlayerState's Undo stack
 function FillWalls(a_PlayerState, a_Player, a_World, a_BlockType, a_BlockMeta)
 	-- Check with other plugins if the operation is okay:
-	if not(CheckAreaCallbacks(a_PlayerState, a_Player, a_World, "walls")) then
+	if not(CheckAreaCallbacks(a_PlayerState.Selection:GetSortedCuboid(), a_Player, a_World, "walls")) then
 		return
 	end
 	
@@ -54,7 +54,7 @@ end
 -- The original contents are pushed onto PlayerState's Undo stack
 function FillFaces(a_PlayerState, a_Player, a_World, a_BlockType, a_BlockMeta)
 	-- Check with other plugins if the operation is okay:
-	if not(CheckAreaCallbacks(a_PlayerState, a_Player, a_World, "faces")) then
+	if not(CheckAreaCallbacks(a_PlayerState.Selection:GetSortedCuboid(), a_Player, a_World, "faces")) then
 		return
 	end
 	
@@ -98,7 +98,7 @@ end
 -- The original contents are pushed onto PlayerState's Undo stack
 function FillSelection(a_PlayerState, a_Player, a_World, a_BlockType, a_BlockMeta)
 	-- Check with other plugins if the operation is okay:
-	if not(CheckAreaCallbacks(a_PlayerState, a_Player, a_World, "fill")) then
+	if not(CheckAreaCallbacks(a_PlayerState.Selection:GetSortedCuboid(), a_Player, a_World, "fill")) then
 		return
 	end
 	
@@ -129,7 +129,7 @@ end
 -- If a_TypeOnly is set, the block meta is ignored and conserved
 function ReplaceSelection(a_PlayerState, a_Player, a_World, a_SrcBlockType, a_SrcBlockMeta, a_DstBlockType, a_DstBlockMeta, a_TypeOnly)
 	-- Check with other plugins if the operation is okay:
-	if not(CheckAreaCallbacks(a_PlayerState, a_Player, a_World, "replace")) then -- Check if the region intersects with any of the areas.
+	if not(CheckAreaCallbacks(a_PlayerState.Selection:GetSortedCuboid(), a_Player, a_World, "replace")) then -- Check if the region intersects with any of the areas.
 		return
 	end
 	
