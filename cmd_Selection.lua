@@ -375,29 +375,21 @@ end
 --------------------EXPAND--------------------
 ----------------------------------------------
 function HandleExpandCommand(Split, Player)
-	if #Split == 1 then
-		Player:SendMessage("More parameters needed.")
-		Player:SendMessage("//expand <Direction> [Blocks]")
-		return true
-	end
-	
 	if GetSize(Player) == -1 then
 		Player:SendMessage(cChatColor.Rose .. "You don't have anything selected.")
 		return true
 	end
 	
-	local PlayerName = Player:GetName()
-	local Direction = string.upper(Split[2])
-	local Blocks = 1
-	
-	if #Split == 3 then
-		if tonumber(Split[3]) == nil then
-			Player:SendMessage(cChatColor.Rose .. "Unknown char \"" .. Split[3] .. "\" number expected.")
-			return true
-		end
-		Blocks = tonumber(Split[3])
+	if Split[2] ~= nil and tonumber(Split[2]) == nil then
+		Player:SendMessage(cChatColor.Rose .. "Usage: //expand [Blocks] [Direction]")
+		return true
 	end
 	
+	local Blocks = Split[2] or 1 -- Use the given amount or 1 if nil
+	local Direction = string.upper(Split[3] or "forward")
+	
+	local PlayerName = Player:GetName()
+		
 	if Direction == "UP" then
 		if OnePlayer[PlayerName].y < TwoPlayer[PlayerName].y then
 			SetPlayerSelectionPoint(Player, TwoPlayer[PlayerName].x, TwoPlayer[PlayerName].y + Blocks, TwoPlayer[PlayerName].z, E_SELECTIONPOINT_RIGHT)
@@ -456,6 +448,9 @@ function HandleExpandCommand(Split, Player)
 		elseif LookDirection == E_DIRECTION_WEST then
 			FinalDirection = E_DIRECTION_EAST
 		end
+	else
+		Player:SendMessage(cChatColor.Rose .. "Unknown direction \"" .. Direction .. "\".")
+		return true
 	end
 	
 	if FinalDirection == E_DIRECTION_EAST then
