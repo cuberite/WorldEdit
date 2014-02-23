@@ -51,9 +51,7 @@ function cUndoStack:ApplySnapshot(a_SrcStack, a_DstStack, a_World)
 	end
 	
 	-- Save a snapshot to dst stack:
-	local MinX = Src.Area:GetOriginX()
-	local MinY = Src.Area:GetOriginY()
-	local MinZ = Src.Area:GetOriginZ()
+	local MinX, MinY, MinZ = Src.Area:GetOrigin()
 	local MaxX = MinX + Src.Area:GetSizeX()
 	local MaxY = MinY + Src.Area:GetSizeY()
 	local MaxZ = MinZ + Src.Area:GetSizeZ()
@@ -135,6 +133,31 @@ function cUndoStack:PushUndo(a_World, a_Area, a_Name)
 		self.UndoStack[1].Area:Clear()
 		table.remove(self.UndoStack, 1)
 	end
+end
+
+
+
+
+
+--- Pushes one level of Undo onto the Undo stack and clears the Redo stack
+-- Reads the area for the undo from the specified world in the specified cuboid
+-- a_Name is the optional display name for the Undo
+function cUndoStack:PushUndoFromCuboid(a_World, a_Cuboid, a_Name)
+	assert(tolua.type(a_World) == "cWorld")
+	assert(tolua.type(a_Cuboid) == "cCuboid")
+	
+	-- Read the area:
+	local Area = cBlockArea()
+	Area:Read(
+		a_World,
+		a_Cuboid.p1.x, a_Cuboid.p2.x,
+		a_Cuboid.p1.y, a_Cuboid.p2.y,
+		a_Cuboid.p1.z, a_Cuboid.p2.z,
+		cBlockArea.baTypes + cBlockArea.baMetas
+	)
+	
+	-- Push the Undo:
+	return self:PushUndo(a_World, Area, a_Name)
 end
 
 

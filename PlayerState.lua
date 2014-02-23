@@ -39,9 +39,9 @@ function cPlayerState:new(a_Obj, a_PlayerKey, a_Player)
 	
 	-- Initialize the object members to their defaults:
 	local ClientHandle = a_Player:GetClientHandle()
+	a_Obj.Clipboard = cClipboard:new()
 	if (ClientHandle ~= nil) then
 		a_Obj.IsWECUIActivated = ClientHandle:HasPluginChannel("WECUI")
-		LOG("WECUI: " .. tostring(a_Obj.IsWECUIActivated))
 	end
 	a_Obj.PlayerKey = a_PlayerKey
 	a_Obj.Selection = cPlayerSelection:new({}, a_Obj)
@@ -113,6 +113,8 @@ end
 --- Returns a PlayerState object for the specified Player
 -- Creates one if it doesn't exist yet
 function GetPlayerState(a_Player)
+	assert(tolua.type(a_Player) == "cPlayer")
+	
 	local Key = a_Player:GetName()
 	local res = g_PlayerStates[Key]
 	if (res ~= nil) then

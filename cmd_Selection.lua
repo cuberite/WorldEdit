@@ -98,83 +98,83 @@ end
 
 
 
--------------------------------------------------
-----------------------PASTE----------------------
--------------------------------------------------
-function HandlePasteCommand(Split, Player)
-	local PlayerName = Player:GetName()
-	if PersonalClipboard[PlayerName]:GetSizeX() == 0 and PersonalClipboard[PlayerName]:GetSizeY() == 0 and PersonalClipboard[PlayerName]:GetSizeZ() == 0 then
-		Player:SendMessage(cChatColor.Rose .. "Your clipboard is empty. Use //copy first.")
+function HandlePasteCommand(a_Split, a_Player)
+	-- //paste
+
+	-- Check if there's anything in the clipboard:
+	local State = GetPlayerState(a_Player)
+	if not(State.Clipboard:IsValid()) then
+		a_Player:SendMessage(cChatColor.Rose .. "Your clipboard is empty. Use //copy or //cut first.")
 		return true
 	end
 	
-	local World = Player:GetWorld()
-	local MinX = Player:GetPosX()
-	local MinY = Player:GetPosY()
-	local MinZ = Player:GetPosZ()
-	local MaxX = MinX + PersonalClipboard[PlayerName]:GetSizeX()
-	local MaxY = MinY + PersonalClipboard[PlayerName]:GetSizeY()
-	local MaxZ = MinZ + PersonalClipboard[PlayerName]:GetSizeZ()
-	
-	if CheckIfInsideAreas(MinX, MaxX, MinY, MaxY, MinZ, MaxZ, Player, Player:GetWorld(), "paste") then -- Check if the clipboard intersects with any of the areas.
-		return true
+	-- Check with other plugins if the operation is okay:
+	local DstCuboid = State.Clipboard:GetPasteDestCuboid(a_Player)
+	if not(CheckAreaCallbacks(DstCuboid, a_Player, a_Player:GetWorld(), "paste")) then
+		return
 	end
 	
-	LastCoords[PlayerName] = {X = MinX, Y = MinY, Z = MinZ, WorldName = World:GetName()}
-	
-	PersonalUndo[PlayerName]:Read(World, MinX, MaxX, MinY, MaxY, MinZ, MaxZ)
-	PersonalClipboard[PlayerName]:Write(World, MinX, MinY, MinZ, 3) -- paste the area that the player copied
-	World:WakeUpSimulatorsInArea(MinX - 1, MaxX + 1, MinY - 1, MaxY + 1, MinZ - 1, MaxZ + 1)
-	Player:SendMessage(cChatColor.LightPurple .. "Pasted relative to you.")
+	-- Paste:
+	State.UndoStack:PushUndoFromCuboid(a_Player:GetWorld(), DstCuboid, "paste")
+	local NumBlocks = State.Clipboard:Paste(a_Player, DstCuboid.p1)
+	a_Player:SendMessage(cChatColor.LightPurple .. NumBlocks .. " block(s) pasted relative to you.")
 	return true
 end
 
 
-------------------------------------------------
-----------------------COPY----------------------
-------------------------------------------------
-function HandleCopyCommand(Split, Player)
-	local PlayerName = Player:GetName()
-	if OnePlayer[PlayerName] == nil or TwoPlayer[PlayerName] == nil then -- Check if there is a region selected
-		Player:SendMessage(cChatColor.Rose .. "No Region set")
+
+
+
+function HandleCopyCommand(a_Split, a_Player)
+	-- //copy
+	
+	-- Get the player state:
+	local State = GetPlayerState(a_Player)
+	if not(State.Selection:IsValid()) then
+		a_Player:SendMessage(cChatColor.Rose .. "Make a region selection first.")
 		return true
 	end
-	local OneX, TwoX, OneY, TwoY, OneZ, TwoZ = GetXYZCoords(Player) -- get the right coordinates
-	local World = Player:GetWorld()
-	PersonalClipboard[PlayerName]:Read(World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ) -- read the area
-	Player:SendMessage(cChatColor.LightPurple .. "Block(s) copied.")
+	
+	-- Check with other plugins if the operation is okay:
+	local SrcCuboid = State.Selection:GetSortedCuboid()
+	local World = a_Player:GetWorld()
+	if not(CheckAreaCallbacks(SrcCuboid, a_Player, World, "copy")) then
+		return
+	end
+	
+	-- Cut into the clipboard:
+	local NumBlocks = State.Clipboard:Copy(World, SrcCuboid)
+	a_Player:SendMessage(cChatColor.LightPurple .. NumBlocks .. " block(s) copied.")
 	return true
 end
 
 
------------------------------------------------
-----------------------CUT----------------------
------------------------------------------------
-function HandleCutCommand(Split, Player)
-	local PlayerName = Player:GetName()
-	
-	if OnePlayer[PlayerName] == nil or TwoPlayer[PlayerName] == nil then -- Check if there is a region selected
-		Player:SendMessage(cChatColor.Rose .. "No Region set")
-		return true
-	end
-	local OneX, TwoX, OneY, TwoY, OneZ, TwoZ = GetXYZCoords(Player) -- get the right coordinates
-	
-	if CheckIfInsideAreas(OneX, TwoX, OneY, TwoY, OneZ, TwoZ, Player, Player:GetWorld(), "cut") then -- Check if the clipboard intersects with any of the areas.
-		return true
-	end
-	
-	local World = Player:GetWorld() -- get the world
 
-	LastCoords[PlayerName] = {X = OneX, Y = OneY, Z = OneZ, WorldName = World:GetName()}
+
+
+function HandleCutCommand(a_Split, a_Player)
+	-- //cut
 	
-	PersonalUndo[PlayerName]:Read(World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ)
-	local Cut = cBlockArea()
-	PersonalClipboard[PlayerName]:Read(World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ) -- read the area
-	Cut:Read(World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ) -- read the area
-	Cut:Fill(3, 0, 0) -- delete the area
-	Cut:Write(World, OneX, OneY, OneZ) -- write the area
-	World:WakeUpSimulatorsInArea(OneX - 1, TwoX + 1, OneY - 1, TwoY + 1, OneZ - 1, TwoZ + 1)
-	Player:SendMessage(cChatColor. LightPurple .. "Block(s) cut.")
+	-- Get the player state:
+	local State = GetPlayerState(a_Player)
+	if not(State.Selection:IsValid()) then
+		a_Player:SendMessage(cChatColor.Rose .. "Make a region selection first.")
+		return true
+	end
+	
+	-- Check with other plugins if the operation is okay:
+	local SrcCuboid = State.Selection:GetSortedCuboid()
+	local World = a_Player:GetWorld()
+	if not(CheckAreaCallbacks(SrcCuboid, a_Player, World, "copy")) then
+		return
+	end
+	
+	-- Push an undo snapshot:
+	State.UndoStack:PushUndoFromCuboid(World, SrcCuboid, "cut")
+	
+	-- Cut into the clipboard:
+	local NumBlocks = State.Clipboard:Cut(World, SrcCuboid)
+	a_Player:SendMessage(cChatColor.LightPurple .. NumBlocks .. " block(s) cut.")
 	return true
 end
 

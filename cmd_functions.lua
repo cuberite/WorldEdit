@@ -129,7 +129,7 @@ end
 -- If a_TypeOnly is set, the block meta is ignored and conserved
 function ReplaceSelection(a_PlayerState, a_Player, a_World, a_SrcBlockType, a_SrcBlockMeta, a_DstBlockType, a_DstBlockMeta, a_TypeOnly)
 	-- Check with other plugins if the operation is okay:
-	if not(CheckAreaCallbacks(a_PlayerState.Selection:GetSortedCuboid(), a_Player, a_World, "replace")) then -- Check if the region intersects with any of the areas.
+	if not(CheckAreaCallbacks(a_PlayerState.Selection:GetSortedCuboid(), a_Player, a_World, "replace")) then
 		return
 	end
 	
