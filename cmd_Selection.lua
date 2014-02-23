@@ -426,8 +426,13 @@ end
 --------------------EXPAND--------------------
 ----------------------------------------------
 function HandleExpandCommand(Split, Player)
-	if GetSize(Player) == -1 then
-		Player:SendMessage(cChatColor.Rose .. "You don't have anything selected.")
+	-- //expand [Amount] [Direction]
+	
+	local State = GetPlayerState(Player)
+
+	-- Check the selection:
+	if not(State.Selection:IsValid()) then
+		a_Player:SendMessage(cChatColor.Rose .. "No region set")
 		return true
 	end
 	
@@ -437,97 +442,68 @@ function HandleExpandCommand(Split, Player)
 	end
 	
 	local Blocks = Split[2] or 1 -- Use the given amount or 1 if nil
-	local Direction = string.upper(Split[3] or "forward")
-	
-	local PlayerName = Player:GetName()
-		
-	if Direction == "UP" then
-		if OnePlayer[PlayerName].y < TwoPlayer[PlayerName].y then
-			SetPlayerSelectionPoint(Player, TwoPlayer[PlayerName].x, TwoPlayer[PlayerName].y + Blocks, TwoPlayer[PlayerName].z, E_SELECTIONPOINT_RIGHT)
-		else
-			SetPlayerSelectionPoint(Player, OnePlayer[PlayerName].x, OnePlayer[PlayerName].y + Blocks, OnePlayer[PlayerName].z, E_SELECTIONPOINT_LEFT)
-		end
-		return true
-	elseif Direction == "DOWN" then
-		if OnePlayer[PlayerName].y > TwoPlayer[PlayerName].y then
-			SetPlayerSelectionPoint(Player, TwoPlayer[PlayerName].x, TwoPlayer[PlayerName].y - Blocks, TwoPlayer[PlayerName].z, E_SELECTIONPOINT_RIGHT)
-		else
-			SetPlayerSelectionPoint(Player, OnePlayer[PlayerName].x, OnePlayer[PlayerName].y - Blocks, OnePlayer[PlayerName].z, E_SELECTIONPOINT_LEFT)
-		end
-		return true
-	end
-	
+	local Direction = string.lower(Split[3] or "forward")
+	local SubMinX, SubMinY, SubMinZ, AddMaxX, AddMaxY, AddMaxZ = 0, 0, 0, 0, 0, 0
 	local LookDirection = Round((Player:GetYaw() + 180) / 90)
-	local FinalDirection = 0
-	if Direction == "LEFT" then
+	
+	if Direction == "up" then
+		AddMaxY = Blocks
+	elseif Direction == "down" then
+		SubMinY = Blocks
+	elseif Direction == "left" then
 		if LookDirection == E_DIRECTION_SOUTH then
-			FinalDirection = E_DIRECTION_EAST
+			AddMaxX = Blocks
 		elseif LookDirection == E_DIRECTION_EAST then
-			FinalDirection = E_DIRECTION_NORTH1
+			SubMinZ = Blocks
 		elseif LookDirection == E_DIRECTION_NORTH1 or LookDirection == E_DIRECTION_NORTH2 then
-			FinalDirection = E_DIRECTION_WEST
+			SubMinX = Blocks
 		elseif LookDirection == E_DIRECTION_WEST then
-			FinalDirection = E_DIRECTION_SOUTH
+			AddMaxZ = Blocks
 		end
-	elseif Direction == "RIGHT" then
+	elseif Direction == "right" then
 		if LookDirection == E_DIRECTION_SOUTH then
-			FinalDirection = E_DIRECTION_WEST
+			SubMinX = Blocks
 		elseif LookDirection == E_DIRECTION_EAST then
-			FinalDirection = E_DIRECTION_SOUTH
+			AddMaxZ = Blocks
 		elseif LookDirection == E_DIRECTION_NORTH1 or LookDirection == E_DIRECTION_NORTH2 then
-			FinalDirection = E_DIRECTION_EAST
+			AddMaxX = Blocks
 		elseif LookDirection == E_DIRECTION_WEST then
-			FinalDirection = E_DIRECTION_NORTH1
+			SubMinZ = Blocks
 		end
-	elseif Direction == "SOUTH" then
-		FinalDirection = E_DIRECTION_SOUTH
-	elseif Direction == "EAST" then
-		FinalDirection = E_DIRECTION_EAST
-	elseif Direction == "NORTH" then
-		FinalDirection = E_DIRECTION_NORTH1
-	elseif Direction == "WEST" then
-		FinalDirection = E_DIRECTION_WEST
-	elseif Direction == "FORWARD" then
-		FinalDirection = LookDirection
-	elseif Direction == "BACKWARDS" or Direction == "BACK" then
+	elseif Direction == "south" then
+		AddMaxZ = Blocks
+	elseif Direction == "east" then
+		AddMaxX = Blocks
+	elseif Direction == "north" then
+		SubMinZ = Blocks
+	elseif Direction == "west" then
+		SubMinX = Blocks
+	elseif Direction == "forward" then
 		if LookDirection == E_DIRECTION_SOUTH then
-			FinalDirection = E_DIRECTION_NORTH1
+			AddMaxZ = Blocks
 		elseif LookDirection == E_DIRECTION_EAST then
-			FinalDirection = E_DIRECTION_WEST
+			AddMaxX = Blocks
 		elseif LookDirection == E_DIRECTION_NORTH1 or LookDirection == E_DIRECTION_NORTH2 then
-			FinalDirection = E_DIRECTION_SOUTH
+			SubMinZ = Blocks
 		elseif LookDirection == E_DIRECTION_WEST then
-			FinalDirection = E_DIRECTION_EAST
+			SubMinX = Blocks
+		end
+	elseif Direction == "backwards" or Direction == "back" then
+		if LookDirection == E_DIRECTION_SOUTH then
+			SubMinZ = Blocks
+		elseif LookDirection == E_DIRECTION_EAST then
+			SubMinX = Blocks
+		elseif LookDirection == E_DIRECTION_NORTH1 or LookDirection == E_DIRECTION_NORTH2 then
+			AddMaxZ = Blocks
+		elseif LookDirection == E_DIRECTION_WEST then
+			AddMaxX = Blocks
 		end
 	else
 		Player:SendMessage(cChatColor.Rose .. "Unknown direction \"" .. Direction .. "\".")
 		return true
 	end
 	
-	if FinalDirection == E_DIRECTION_EAST then
-		if OnePlayer[PlayerName].x < TwoPlayer[PlayerName].x then
-			SetPlayerSelectionPoint(Player, TwoPlayer[PlayerName].x + Blocks, TwoPlayer[PlayerName].y, TwoPlayer[PlayerName].z, E_SELECTIONPOINT_RIGHT)
-		else
-			SetPlayerSelectionPoint(Player, OnePlayer[PlayerName].x + Blocks, OnePlayer[PlayerName].y, OnePlayer[PlayerName].z, E_SELECTIONPOINT_LEFT)
-		end
-	elseif FinalDirection == E_DIRECTION_SOUTH then
-		if OnePlayer[PlayerName].z < TwoPlayer[PlayerName].z then
-			SetPlayerSelectionPoint(Player, TwoPlayer[PlayerName].x, TwoPlayer[PlayerName].y, TwoPlayer[PlayerName].z + Blocks, E_SELECTIONPOINT_RIGHT)
-		else
-			SetPlayerSelectionPoint(Player, OnePlayer[PlayerName].x, OnePlayer[PlayerName].y, OnePlayer[PlayerName].z + Blocks, E_SELECTIONPOINT_LEFT)
-		end
-	elseif FinalDirection == E_DIRECTION_NORTH1  or FinalDirection == E_DIRECTION_NORTH2 then
-		if OnePlayer[PlayerName].z > TwoPlayer[PlayerName].z then
-			SetPlayerSelectionPoint(Player, TwoPlayer[PlayerName].x, TwoPlayer[PlayerName].y, TwoPlayer[PlayerName].z - Blocks, E_SELECTIONPOINT_RIGHT)
-		else
-			SetPlayerSelectionPoint(Player, OnePlayer[PlayerName].x, OnePlayer[PlayerName].y, OnePlayer[PlayerName].z - Blocks, E_SELECTIONPOINT_LEFT)
-		end
-	elseif FinalDirection == E_DIRECTION_WEST then
-		if OnePlayer[PlayerName].x > TwoPlayer[PlayerName].x then
-			SetPlayerSelectionPoint(Player, TwoPlayer[PlayerName].x - Blocks, TwoPlayer[PlayerName].y, TwoPlayer[PlayerName].z, E_SELECTIONPOINT_RIGHT)
-		else
-			SetPlayerSelectionPoint(Player, OnePlayer[PlayerName].x - Blocks, OnePlayer[PlayerName].y, OnePlayer[PlayerName].z, E_SELECTIONPOINT_LEFT)
-		end
-	end
+	State.Selection:Expand(SubMinX, SubMinY, SubMinZ, AddMaxX, AddMaxY, AddMaxZ)
+	Player:SendMessage(cChatColor.LightPurple .. "Expaned the area " .. Blocks .. " block(s) " .. Direction)
 	return true
 end

@@ -263,3 +263,68 @@ end
 
 
 
+
+-- Expands the selection to the given direction.
+function cPlayerSelection:Expand(a_SubMinX, a_SubMinY, a_SubMinZ, a_AddMaxX, a_AddMaxY, a_AddMaxZ)
+	-- Check the params:
+	assert(a_SubMinX ~= nil)
+	assert(a_SubMinY ~= nil)
+	assert(a_SubMinZ ~= nil)
+	assert(a_AddMaxX ~= nil)
+	assert(a_AddMaxY ~= nil)
+	assert(a_AddMaxZ ~= nil)
+	 
+	
+	if (self.Cuboid.p1.x < self.Cuboid.p2.x) then
+		self.Cuboid.p1.x = self.Cuboid.p1.x - a_SubMinX
+		self:NotifySelectionChanged(1)
+	else
+		self.Cuboid.p2.x = self.Cuboid.p2.x - a_SubMinX
+		self:NotifySelectionChanged(2)
+	end
+	
+	if (self.Cuboid.p1.y < self.Cuboid.p2.y) then
+		self.Cuboid.p1.y = self.Cuboid.p1.y - a_SubMinY
+		self:NotifySelectionChanged(1)
+	else
+		self.Cuboid.p2.y = self.Cuboid.p2.y - a_SubMinY
+		self:NotifySelectionChanged(2)
+	end
+	
+	if (self.Cuboid.p1.z < self.Cuboid.p2.z) then
+		self.Cuboid.p1.z = self.Cuboid.p1.z - a_SubMinZ
+		self:NotifySelectionChanged(1)
+	else
+		self.Cuboid.p2.z = self.Cuboid.p2.z - a_SubMinZ
+		self:NotifySelectionChanged(2)
+	end
+	
+	
+	if (self.Cuboid.p1.x > self.Cuboid.p2.x) then
+		self.Cuboid.p1.x = self.Cuboid.p1.x + a_AddMaxX
+		self:NotifySelectionChanged(1)
+	else
+		self.Cuboid.p2.x = self.Cuboid.p2.x + a_AddMaxX
+		self:NotifySelectionChanged(2)
+	end
+	
+	if (self.Cuboid.p1.y > self.Cuboid.p2.y) then
+		self.Cuboid.p1.y = self.Cuboid.p1.y + a_AddMaxY
+		self:NotifySelectionChanged(1)
+	else
+		self.Cuboid.p2.y = self.Cuboid.p2.y + a_AddMaxY
+		self:NotifySelectionChanged(2)
+	end
+	
+	if (self.Cuboid.p1.z > self.Cuboid.p2.z) then
+		self.Cuboid.p1.z = self.Cuboid.p1.z + a_AddMaxZ
+		self:NotifySelectionChanged(1)
+	else
+		self.Cuboid.p2.z = self.Cuboid.p2.z + a_AddMaxZ
+		self:NotifySelectionChanged(2)
+	end
+end
+
+
+
+
