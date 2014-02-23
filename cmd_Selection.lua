@@ -426,96 +426,108 @@ end
 --------------------EXPAND--------------------
 ----------------------------------------------
 function HandleExpandCommand(Split, Player)
-	if #Split == 1 then
-		Player:SendMessage("More parameters needed.")
-		Player:SendMessage("//expand <Direction> [Blocks]")
-		return true
-	end
-	
 	if GetSize(Player) == -1 then
 		Player:SendMessage(cChatColor.Rose .. "You don't have anything selected.")
 		return true
 	end
 	
-	local PlayerName = Player:GetName()
-	local Direction = string.upper(Split[2])
-	local Blocks = 1
-	
-	if #Split == 3 then
-		if tonumber(Split[3]) == nil then
-			Player:SendMessage(cChatColor.Rose .. "Unknown char \"" .. Split[3] .. "\" number expected.")
-			return true
-		end
-		Blocks = tonumber(Split[3])
+	if Split[2] ~= nil and tonumber(Split[2]) == nil then
+		Player:SendMessage(cChatColor.Rose .. "Usage: //expand [Blocks] [Direction]")
+		return true
 	end
 	
-	local LookDirection = Round((Player:GetYaw() + 180) / 90)
+	local Blocks = Split[2] or 1 -- Use the given amount or 1 if nil
+	local Direction = string.upper(Split[3] or "forward")
 	
+	local PlayerName = Player:GetName()
+		
 	if Direction == "UP" then
 		if OnePlayer[PlayerName].y < TwoPlayer[PlayerName].y then
 			SetPlayerSelectionPoint(Player, TwoPlayer[PlayerName].x, TwoPlayer[PlayerName].y + Blocks, TwoPlayer[PlayerName].z, E_SELECTIONPOINT_RIGHT)
 		else
 			SetPlayerSelectionPoint(Player, OnePlayer[PlayerName].x, OnePlayer[PlayerName].y + Blocks, OnePlayer[PlayerName].z, E_SELECTIONPOINT_LEFT)
 		end
+		return true
 	elseif Direction == "DOWN" then
 		if OnePlayer[PlayerName].y > TwoPlayer[PlayerName].y then
 			SetPlayerSelectionPoint(Player, TwoPlayer[PlayerName].x, TwoPlayer[PlayerName].y - Blocks, TwoPlayer[PlayerName].z, E_SELECTIONPOINT_RIGHT)
 		else
 			SetPlayerSelectionPoint(Player, OnePlayer[PlayerName].x, OnePlayer[PlayerName].y - Blocks, OnePlayer[PlayerName].z, E_SELECTIONPOINT_LEFT)
 		end
-	elseif Direction == "LEFT" then
-		if LookDirection == E_DIRECTION_NORTH1 or LookDirection == E_DIRECTION_NORTH2 then
-			if OnePlayer[PlayerName].x > TwoPlayer[PlayerName].x then
-				SetPlayerSelectionPoint(Player, TwoPlayer[PlayerName].x - Blocks, TwoPlayer[PlayerName].y, TwoPlayer[PlayerName].z, E_SELECTIONPOINT_RIGHT)
-			else
-				SetPlayerSelectionPoint(Player, OnePlayer[PlayerName].x - Blocks, OnePlayer[PlayerName].y, OnePlayer[PlayerName].z, E_SELECTIONPOINT_LEFT)
-			end
-		elseif LookDirection == E_DIRECTION_EAST then
-			if OnePlayer[PlayerName].z > TwoPlayer[PlayerName].z then
-				SetPlayerSelectionPoint(Player, TwoPlayer[PlayerName].x, TwoPlayer[PlayerName].y, TwoPlayer[PlayerName].z - Blocks, E_SELECTIONPOINT_RIGHT)
-			else
-				SetPlayerSelectionPoint(Player, OnePlayer[PlayerName].x, OnePlayer[PlayerName].y, OnePlayer[PlayerName].z - Blocks, E_SELECTIONPOINT_LEFT)
-			end
-		elseif LookDirection == E_DIRECTION_SOUTH then
-			if OnePlayer[PlayerName].x < TwoPlayer[PlayerName].x then
-				SetPlayerSelectionPoint(Player, TwoPlayer[PlayerName].x + Blocks, TwoPlayer[PlayerName].y, TwoPlayer[PlayerName].z, E_SELECTIONPOINT_RIGHT)
-			else
-				SetPlayerSelectionPoint(Player, OnePlayer[PlayerName].x + Blocks, OnePlayer[PlayerName].y, OnePlayer[PlayerName].z, E_SELECTIONPOINT_LEFT)
-			end
-		elseif LookDirection == E_DIRECTION_WEST then
-			if OnePlayer[PlayerName].z < TwoPlayer[PlayerName].z then
-				SetPlayerSelectionPoint(Player, TwoPlayer[PlayerName].x, TwoPlayer[PlayerName].y, TwoPlayer[PlayerName].z + Blocks, E_SELECTIONPOINT_RIGHT)
-			else
-				SetPlayerSelectionPoint(Player, OnePlayer[PlayerName].x, OnePlayer[PlayerName].y, OnePlayer[PlayerName].z + Blocks, E_SELECTIONPOINT_LEFT)
-			end
-		end
-	elseif Direction == "RIGHT" then
-		if LookDirection == E_DIRECTION_NORTH1 or LookDirection == E_DIRECTION_NORTH2 then
-			if OnePlayer[PlayerName].x < TwoPlayer[PlayerName].x then
-				SetPlayerSelectionPoint(Player, TwoPlayer[PlayerName].x + Blocks, TwoPlayer[PlayerName].y, TwoPlayer[PlayerName].z, E_SELECTIONPOINT_RIGHT)
-			else
-				SetPlayerSelectionPoint(Player, OnePlayer[PlayerName].x + Blocks, OnePlayer[PlayerName].y, OnePlayer[PlayerName].z, E_SELECTIONPOINT_LEFT)
-			end
-		elseif LookDirection == E_DIRECTION_EAST then
-			if OnePlayer[PlayerName].z < TwoPlayer[PlayerName].z then
-				SetPlayerSelectionPoint(Player, TwoPlayer[PlayerName].x, TwoPlayer[PlayerName].y, TwoPlayer[PlayerName].z + Blocks, E_SELECTIONPOINT_RIGHT)
-			else
-				SetPlayerSelectionPoint(Player, OnePlayer[PlayerName].x, OnePlayer[PlayerName].y, OnePlayer[PlayerName].z + Blocks, E_SELECTIONPOINT_LEFT)
-			end
-		elseif LookDirection == E_DIRECTION_SOUTH then
-			if OnePlayer[PlayerName].x > TwoPlayer[PlayerName].x then
-				SetPlayerSelectionPoint(Player, TwoPlayer[PlayerName].x - Blocks, TwoPlayer[PlayerName].y, TwoPlayer[PlayerName].z, E_SELECTIONPOINT_RIGHT)
-			else
-				SetPlayerSelectionPoint(Player, OnePlayer[PlayerName].x - Blocks, OnePlayer[PlayerName].y, OnePlayer[PlayerName].z, E_SELECTIONPOINT_LEFT)
-			end
-		elseif LookDirection == E_DIRECTION_WEST then
-			if OnePlayer[PlayerName].z > TwoPlayer[PlayerName].z then
-				SetPlayerSelectionPoint(Player, TwoPlayer[PlayerName].x, TwoPlayer[PlayerName].y, TwoPlayer[PlayerName].z - Blocks, E_SELECTIONPOINT_RIGHT)
-			else
-				SetPlayerSelectionPoint(Player, OnePlayer[PlayerName].x, OnePlayer[PlayerName].y, OnePlayer[PlayerName].z - Blocks, E_SELECTIONPOINT_LEFT)
-			end
-		end
+		return true
 	end
 	
+	local LookDirection = Round((Player:GetYaw() + 180) / 90)
+	local FinalDirection = 0
+	if Direction == "LEFT" then
+		if LookDirection == E_DIRECTION_SOUTH then
+			FinalDirection = E_DIRECTION_EAST
+		elseif LookDirection == E_DIRECTION_EAST then
+			FinalDirection = E_DIRECTION_NORTH1
+		elseif LookDirection == E_DIRECTION_NORTH1 or LookDirection == E_DIRECTION_NORTH2 then
+			FinalDirection = E_DIRECTION_WEST
+		elseif LookDirection == E_DIRECTION_WEST then
+			FinalDirection = E_DIRECTION_SOUTH
+		end
+	elseif Direction == "RIGHT" then
+		if LookDirection == E_DIRECTION_SOUTH then
+			FinalDirection = E_DIRECTION_WEST
+		elseif LookDirection == E_DIRECTION_EAST then
+			FinalDirection = E_DIRECTION_SOUTH
+		elseif LookDirection == E_DIRECTION_NORTH1 or LookDirection == E_DIRECTION_NORTH2 then
+			FinalDirection = E_DIRECTION_EAST
+		elseif LookDirection == E_DIRECTION_WEST then
+			FinalDirection = E_DIRECTION_NORTH1
+		end
+	elseif Direction == "SOUTH" then
+		FinalDirection = E_DIRECTION_SOUTH
+	elseif Direction == "EAST" then
+		FinalDirection = E_DIRECTION_EAST
+	elseif Direction == "NORTH" then
+		FinalDirection = E_DIRECTION_NORTH1
+	elseif Direction == "WEST" then
+		FinalDirection = E_DIRECTION_WEST
+	elseif Direction == "FORWARD" then
+		FinalDirection = LookDirection
+	elseif Direction == "BACKWARDS" or Direction == "BACK" then
+		if LookDirection == E_DIRECTION_SOUTH then
+			FinalDirection = E_DIRECTION_NORTH1
+		elseif LookDirection == E_DIRECTION_EAST then
+			FinalDirection = E_DIRECTION_WEST
+		elseif LookDirection == E_DIRECTION_NORTH1 or LookDirection == E_DIRECTION_NORTH2 then
+			FinalDirection = E_DIRECTION_SOUTH
+		elseif LookDirection == E_DIRECTION_WEST then
+			FinalDirection = E_DIRECTION_EAST
+		end
+	else
+		Player:SendMessage(cChatColor.Rose .. "Unknown direction \"" .. Direction .. "\".")
+		return true
+	end
+	
+	if FinalDirection == E_DIRECTION_EAST then
+		if OnePlayer[PlayerName].x < TwoPlayer[PlayerName].x then
+			SetPlayerSelectionPoint(Player, TwoPlayer[PlayerName].x + Blocks, TwoPlayer[PlayerName].y, TwoPlayer[PlayerName].z, E_SELECTIONPOINT_RIGHT)
+		else
+			SetPlayerSelectionPoint(Player, OnePlayer[PlayerName].x + Blocks, OnePlayer[PlayerName].y, OnePlayer[PlayerName].z, E_SELECTIONPOINT_LEFT)
+		end
+	elseif FinalDirection == E_DIRECTION_SOUTH then
+		if OnePlayer[PlayerName].z < TwoPlayer[PlayerName].z then
+			SetPlayerSelectionPoint(Player, TwoPlayer[PlayerName].x, TwoPlayer[PlayerName].y, TwoPlayer[PlayerName].z + Blocks, E_SELECTIONPOINT_RIGHT)
+		else
+			SetPlayerSelectionPoint(Player, OnePlayer[PlayerName].x, OnePlayer[PlayerName].y, OnePlayer[PlayerName].z + Blocks, E_SELECTIONPOINT_LEFT)
+		end
+	elseif FinalDirection == E_DIRECTION_NORTH1  or FinalDirection == E_DIRECTION_NORTH2 then
+		if OnePlayer[PlayerName].z > TwoPlayer[PlayerName].z then
+			SetPlayerSelectionPoint(Player, TwoPlayer[PlayerName].x, TwoPlayer[PlayerName].y, TwoPlayer[PlayerName].z - Blocks, E_SELECTIONPOINT_RIGHT)
+		else
+			SetPlayerSelectionPoint(Player, OnePlayer[PlayerName].x, OnePlayer[PlayerName].y, OnePlayer[PlayerName].z - Blocks, E_SELECTIONPOINT_LEFT)
+		end
+	elseif FinalDirection == E_DIRECTION_WEST then
+		if OnePlayer[PlayerName].x > TwoPlayer[PlayerName].x then
+			SetPlayerSelectionPoint(Player, TwoPlayer[PlayerName].x - Blocks, TwoPlayer[PlayerName].y, TwoPlayer[PlayerName].z, E_SELECTIONPOINT_RIGHT)
+		else
+			SetPlayerSelectionPoint(Player, OnePlayer[PlayerName].x - Blocks, OnePlayer[PlayerName].y, OnePlayer[PlayerName].z, E_SELECTIONPOINT_LEFT)
+		end
+	end
 	return true
 end

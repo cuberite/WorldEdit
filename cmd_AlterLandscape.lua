@@ -310,28 +310,67 @@ end
 --------------------SETBIOME--------------------
 ------------------------------------------------
 function HandleSetBiomeCommand(Split, Player)
-	Player:SendMessage(cChatColor.Red .. "This command does not work.")
-	return true
-	--[[if Split[2] == nil then
-		Player:SendMessage(cChatColor.Rose .. "Please say a biome")
+	local function SendWrongArguments(Reason)
+		Player:SendMessage(cChatColor.Rose .. "Too " .. Reason .. " arguments.")
+		Player:SendMessage(cChatColor.Rose .. "//setbiome [-p] <biome>")
+		Player:SendMessage(cChatColor.Rose .. "") -- Extra space
+		Player:SendMessage(cChatColor.Rose .. "Set the bimoe of the region.")
+		Player:SendMessage(cChatColor.Rose .. "By default use all the blocks contained in your selection.")
+		Player:SendMessage(cChatColor.Rose .. "-p use the block you are currently in")
+	end
+	
+	if #Split == 1 then
+		SendWrongArguments("few")
 		return true
 	end
-	if OnePlayer[Player:GetName()] == nil or TwoPlayer[Player:GetName()] == nil then
-		Player:SendMessage(cChatColor.Rose .. "No Region set")
+	
+	if #Split > 3 then
+		SendWrongArguments("many")
 		return true
 	end
-	Biome = GetBiomeFromString(Split, Player)
-	if Biome == false then
-		Player:SendMessage("Please specify a valid biome")
-		return true
-	end
-	--local World = Player:GetWorld()
-	OneX, TwoX, OneZ, TwoZ = GetXZCoords(Player)
-	for X=OneX, TwoX do
-		for Z=OneZ, TwoZ do
-			cChunkDesc:SetBiome(X, Z, Biome)
+	
+	local World = Player:GetWorld()
+	local PosX = math.floor(Player:GetPosX())
+	local PosZ = math.floor(Player:GetPosZ())
+	
+	if #Split == 3 then
+		if Split[2] ~= "-p" then
+			SendWrongArguments("many")
+			return true
 		end
-	end]]
+		
+		if Split[3] == nil then
+			SendWrongArguments("few")
+			return true
+		end
+		
+		local NewBiome = StringToBiome(Split[3])
+		if NewBiome == biInvalidBiome then
+			Player:SendMessage(cChatColor.Rose .. "Unknown " .. Split[3] .. " biome type.")
+			return true
+		end
+		
+		World:SetAreaBiome(PosX, PosX, PosZ, PosZ, NewBiome)
+		Player:SendMessage(cChatColor.LightPurple .. "Biome changed to " .. Split[3] .. " at your current location.")
+		return true
+	elseif #Split == 2 then
+		local NewBiome = StringToBiome(Split[2])
+		if NewBiome == biInvalidBiome then
+			Player:SendMessage(cChatColor.Rose .. "Unknown " .. Split[2] .. " biome type.")
+			return true
+		end
+		
+		local MinX, MaxX, MinZ, MaxZ = GetXZCoords(Player)
+		if not MinX then
+			Player:SendMessage(cChatColor.Rose .. "No region selected.")
+			return true
+		end
+			
+		World:SetAreaBiome(MinX, MaxX, MinZ, MaxZ, NewBiome)
+		Player:SendMessage(cChatColor.LightPurple .. "Biome changed to " .. Split[2] .. ". " .. (1 + MaxX - MinX) * (1 + MaxZ - MinZ) .. " columns affected.")
+		return true
+	end
+	return true
 end
 
 
