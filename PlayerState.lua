@@ -58,6 +58,7 @@ end
 --- Calls the specified callback with the cPlayer instance of the player to whom this state belongs
 -- Returns true if the callback has been called, false otherwise
 function cPlayerState:DoWithPlayer(a_Callback)
+	local HasCalled = false
 	cRoot:Get():ForEachPlayer(
 		function(a_Player)
 			if (a_Player:GetName() == self.PlayerKey) then

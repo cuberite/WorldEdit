@@ -55,7 +55,7 @@ function cUndoStack:ApplySnapshot(a_SrcStack, a_DstStack, a_World)
 	local MaxX = MinX + Src.Area:GetSizeX()
 	local MaxY = MinY + Src.Area:GetSizeY()
 	local MaxZ = MinZ + Src.Area:GetSizeZ()
-	BackupArea = cBlockArea()
+	local BackupArea = cBlockArea()
 	if not(BackupArea:Read(a_World, MinX, MaxX, MinY, MaxY, MinZ, MaxZ, cBlockArea.baTypes + cBlockArea.baMetas)) then
 		return false, "Cannot backup the destination"
 	end
@@ -77,7 +77,7 @@ end
 --- Removes all items from the Redo stack
 function cUndoStack:DropAllRedo()
 	-- Clear all the areas now so that they don't keep their blocktypes in memory until GC kicks in
-	for idx, redo in ipairs(self.RedoStack) do
+	for _, redo in ipairs(self.RedoStack) do
 		redo.Area:Clear()
 	end
 	
