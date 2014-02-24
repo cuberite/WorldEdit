@@ -145,6 +145,7 @@ function HandleCopyCommand(a_Split, a_Player)
 	-- Cut into the clipboard:
 	local NumBlocks = State.Clipboard:Copy(World, SrcCuboid)
 	a_Player:SendMessage(cChatColor.LightPurple .. NumBlocks .. " block(s) copied.")
+	a_Player:SendMessage(cChatColor.LightPurple .. "Clipboard size: " .. State.Clipboard:GetSizeDesc())
 	return true
 end
 
@@ -175,6 +176,7 @@ function HandleCutCommand(a_Split, a_Player)
 	-- Cut into the clipboard:
 	local NumBlocks = State.Clipboard:Cut(World, SrcCuboid)
 	a_Player:SendMessage(cChatColor.LightPurple .. NumBlocks .. " block(s) cut.")
+	a_Player:SendMessage(cChatColor.LightPurple .. "Clipboard size: " .. State.Clipboard:GetSizeDesc())
 	return true
 end
 
@@ -328,22 +330,31 @@ function HandleWallsCommand(a_Split, a_Player)
 end
 
 
-------------------------------------------------
----------------------ROTATE---------------------
-------------------------------------------------
-function HandleRotateCommand(Split, Player)
-	if Split[2] == nil or tonumber(Split[2]) == nil then -- Check if the player gave an angle
-		Player:SendMessage(cChatColor.Rose .. "Too few arguments.\n//rotate [90, 180, 270]")
+
+
+
+function HandleRotateCommand(a_Split, a_Player)
+	-- //rotate [NumDegrees]
+	
+	-- Check if the clipboard is valid:
+	local State = GetPlayerState(a_Player)
+	if not(State.Clipboard:IsValid()) then
+		a_Player:SendMessage(cChatColor.Rose .. "Nothing in the clipboard. Use //copy or //cut first.")
 		return true
 	end
-	if tonumber(Split[2]) == 90 or tonumber(Split[2]) == 180 or tonumber(Split[2]) == 270 then
-		for I =1, tonumber(Split[2]) / 90 do -- rotate the area some times.
-			PersonalClipboard[Player:GetName()]:RotateCCW() -- Rotate the area
-		end
-		Player:SendMessage(cChatColor.Rose .. "Rotated clipboard " .. Split[2] .. " degrees")
-	else
-		Player:SendMessage(cChatColor.Rose .. "usage: /rotate [90, 180, 270]")
+	
+	-- Check if the player gave an angle:
+	local Angle = tonumber(a_Split[2])
+	if (Angle == nil) then
+		a_Player:SendMessage(cChatColor.Rose .. "Usage: //rotate [90, 180, 270, -90, -180, -270]")
+		return true
 	end
+	
+	-- Rotate the clipboard:
+	local NumRots = math.floor(Angle / 90 + 0.5)  -- round to nearest 90-degree step
+	State.Clipboard:Rotate(NumRots)
+	a_Player:SendMessage(cChatColor.LightPurple .. "Rotated the clipboard by " .. (NumRots * 90) .. " degrees CCW")
+	a_Player:SendMessage(cChatColor.LightPurple .. "Clipboard size: " .. State.Clipboard:GetSizeDesc())
 	return true
 end
 

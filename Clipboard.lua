@@ -91,6 +91,28 @@ end
 
 
 
+--- Returns a string describing the clipboard size
+-- Format: "X * Y * Z (volume: N blocks)"
+-- If the clipboard isn't valid, returns a placeholder text
+function cClipboard:GetSizeDesc()
+	if not(self:IsValid()) then
+		return "no clipboard data"
+	end
+	
+	local XSize, YSize, ZSize = self.Area:GetSize()
+	local Volume = XSize * YSize * ZSize
+	local Dimensions = XSize .. " * " .. YSize .. " * " .. ZSize .. " (volume: "
+	if (Volume == 1) then
+		return Dimensions .. "1 block)"
+	else
+		return Dimensions .. Volume .. " blocks)"
+	end
+end
+
+
+
+
+
 --- Returns true if there's any content in the clipboard
 function cClipboard:IsValid()
 	return (self.Area:GetDataTypes() ~= 0)
@@ -108,8 +130,6 @@ function cClipboard:Paste(a_Player, a_DstPoint)
 	a_DstPoint = a_DstPoint or Vector3i(a_Player:GetPosition())
 	
 	-- Write the area:
-	LOG("Pasting at {" .. a_DstPoint.x .. ", " .. a_DstPoint.y .. ", " .. a_DstPoint.z .. "}.")
-	LOG("Size: " .. self.Area:GetSizeX() .. " * " .. self.Area:GetSizeY() .. " * " .. self.Area:GetSizeZ())
 	self.Area:Write(World, a_DstPoint.x, a_DstPoint.y, a_DstPoint.z)
 	
 	-- Wake up simulators in the area:
@@ -121,6 +141,33 @@ function cClipboard:Paste(a_Player, a_DstPoint)
 	)
 	
 	return XSize * YSize * ZSize
+end
+
+
+
+
+
+--- Rotates the clipboard around the Y axis the specified number of quarter-rotations (90 degrees)
+-- Positive number of rotations turn CCW, negative number of rotations turn CW
+-- Intelligent rotating - does CW instead of 3 CCW rotations etc.
+-- TODO: Also rotates the player-relative offsets
+function cClipboard:Rotate(a_NumCCWQuarterRotations)
+	local NumRots = math.fmod(a_NumCCWQuarterRotations, 4)
+	if ((NumRots == -3) or (NumRots == 1)) then
+		-- 3 CW rotations = 1 CCW rotation
+		self.Area:RotateCCW()
+	elseif ((NumRots == -2) or (NumRots == 2)) then
+		-- -2 or 2 rotations is the same, use any rotation function twice
+		self.Area:RotateCCW()
+		self.Area:RotateCCW()
+	elseif ((NumRots == -1) or (NumRots == 3)) then
+		-- 3 CCW rotation = 1 CW rotation
+		self.Area:RotateCW()
+	elseif (NumRots == 0) then
+		-- No rotation needed
+	else
+		error("Bad fmod result: " .. NumRots)
+	end
 end
 
 
