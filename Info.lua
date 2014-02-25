@@ -166,60 +166,28 @@ g_PluginInfo =
 					HelpString = "Saves the current clipboard to a file with the given filename.",
 					Permission = "",
 					Handler = HandleSchematicSaveCommand,
-				},
-				s =
-				{
-					HelpString = "Saves the current clipboard to a file with the given filename.",
-					Permission = "",
-					Handler = HandleSchematicSaveCommand,
+					Alias = "s",
 				},
 				load =
 				{
 					HelpString = "Loads the given schematic file.",
 					Permission = "",
 					Handler = HandleSchematicLoadCommand,
-				},
-				l =
-				{
-					HelpString = "Loads the given schematic file.",
-					Permission = "",
-					Handler = HandleSchematicLoadCommand,
+					Alias = "l",
 				},
 				formats =
 				{
 					HelpString = "List available schematic formats",
 					Permission = "",
 					Handler = HandleSchematicFormatsCommand,
-				},
-				listformats =
-				{
-					HelpString = "List available schematic formats",
-					Permission = "",
-					Handler = HandleSchematicFormatsCommand,
-				},
-				f =
-				{
-					HelpString = "List available schematic formats",
-					Permission = "",
-					Handler = HandleSchematicFormatsCommand,
+					Alias = {"listformats", "f" },
 				},
 				list =
 				{
 					HelpString = "List available schematics",
 					Permission = "",
 					Handler = HandleSchematicListCommand,
-				},
-				all =
-				{
-					HelpString = "List available schematics",
-					Permission = "",
-					Handler = HandleSchematicListCommand,
-				},
-				ls =
-				{
-					HelpString = "List available schematics",
-					Permission = "",
-					Handler = HandleSchematicListCommand,
+					Alias = { "all", "ls", },
 				},
 			},
 		},
