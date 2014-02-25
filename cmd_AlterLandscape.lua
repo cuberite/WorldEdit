@@ -444,8 +444,7 @@ function HandleSphereCommand(Split, Player)
 		return true
 	end
 	
-	local BlockType, BlockMeta = GetBlockTypeMeta(Player, Split[2])
-
+	local BlockType, BlockMeta = GetBlockTypeMeta(Split[2])
 	if not BlockType then
 		Player:SendMessage(cChatColor.Rose .. "Unknown parameter \"" .. Split[2] .. "\"")
 		return true
@@ -511,8 +510,7 @@ function HandleHSphereCommand(Split, Player)
 		return true
 	end
 	
-	local BlockType, BlockMeta = GetBlockTypeMeta(Player, Split[2])
-
+	local BlockType, BlockMeta = GetBlockTypeMeta(Split[2])
 	if not BlockType then
 		Player:SendMessage(cChatColor.Rose .. "Unknown parameter \"" .. Split[2] .. "\"")
 		return true

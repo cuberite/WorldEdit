@@ -185,12 +185,15 @@ function HandleSetCommand(Split, Player)
 		return true
 	end
 	
-	local BlockType, BlockMeta = GetBlockTypeMeta(Player, Split[2])
-	if BlockType ~= false then
-		local Blocks = HandleFillSelection(Player, Player:GetWorld(), BlockType, BlockMeta)
-		if Blocks then
-			Player:SendMessage(cChatColor.LightPurple .. Blocks .. " block(s) have been changed.")
-		end
+	local BlockType, BlockMeta = GetBlockTypeMeta(Split[2])
+	if not BlockType then
+		Player:SendMessage(cChatColor.Rose .. "Unknown character \"" .. Split[2] .. "\"")
+		return true
+	end
+	
+	local Blocks = HandleFillSelection(Player, Player:GetWorld(), BlockType, BlockMeta)
+	if Blocks then
+		Player:SendMessage(cChatColor.LightPurple .. Blocks .. " block(s) have been changed.")
 	end
 	return true
 end
@@ -210,13 +213,22 @@ function HandleReplaceCommand(Split, Player)
 		Player:SendMessage(cChatColor.Rose .. "Please say a block ID")
 		return true
 	end
-	local ChangeBlockType, ChangeBlockMeta, TypeOnly = GetBlockTypeMeta(Player, Split[2])
-	local ToChangeBlockType, ToChangeBlockMeta = GetBlockTypeMeta(Player, Split[3])
-	if ChangeBlockType ~= false and ToChangeBlockType ~= false then
-		local Blocks = HandleReplaceSelection(Player, Player:GetWorld(), ChangeBlockType, ChangeBlockMeta, ToChangeBlockType, ToChangeBlockMeta, TypeOnly)
-		if Blocks then
-			Player:SendMessage(cChatColor.LightPurple .. Blocks .. " block(s) have been changed.")
-		end
+
+	local ChangeBlockType, ChangeBlockMeta, TypeOnly = GetBlockTypeMeta(Split[2])
+	if not ChangeBlockType then
+		Player:SendMessage(cChatColor.Rose .. "Unknown character \"" .. Split[2] .. "\"")
+		return true
+	end
+	
+	local ToChangeBlockType, ToChangeBlockMeta = GetBlockTypeMeta(Split[3])
+	if not ToChangeBlockType then
+		Player:SendMessage(cChatColor.Rose .. "Unknown character \"" .. Split[2] .. "\"")
+		return true
+	end
+	
+	local Blocks = HandleReplaceSelection(Player, Player:GetWorld(), ChangeBlockType, ChangeBlockMeta, ToChangeBlockType, ToChangeBlockMeta, TypeOnly)
+	if Blocks then
+		Player:SendMessage(cChatColor.LightPurple .. Blocks .. " block(s) have been changed.")
 	end
 	return true
 end
@@ -237,14 +249,18 @@ function HandleFacesCommand(Split, Player)
 		Player:SendMessage(cChatColor.Rose .. "Please say a block ID")
 		return true
 	end
-	local BlockType, BlockMeta = GetBlockTypeMeta(Player, Split[2])
-	if BlockType ~= false then
-		local Blocks = HandleCreateFaces(Player, Player:GetWorld(), BlockType, BlockMeta)
-		if not Blocks then
-			Player:SendMessage(cChatColor.Rose .. "Region intersects with an area")
-		else
-			Player:SendMessage(cChatColor.LightPurple .. Blocks .. " block(s) have been changed.")
-		end
+	
+	local BlockType, BlockMeta = GetBlockTypeMeta(Split[2])
+	if not BlockType then
+		Player:SendMessage(cChatColor.Rose .. "Unknown character \"" .. Split[2] .. "\"")
+		return true
+	end
+	
+	local Blocks = HandleCreateFaces(Player, Player:GetWorld(), BlockType, BlockMeta)
+	if not Blocks then
+		Player:SendMessage(cChatColor.Rose .. "Region intersects with an area")
+	else
+		Player:SendMessage(cChatColor.LightPurple .. Blocks .. " block(s) have been changed.")
 	end
 	return true
 end
@@ -264,14 +280,18 @@ function HandleWallsCommand(Split, Player)
 		Player:SendMessage(cChatColor.Rose .. "Please say a block ID")
 		return true
 	end
-	local BlockType, BlockMeta = GetBlockTypeMeta(Player, Split[2])
-	if BlockType ~= false then
-		local Blocks = HandleCreateWalls(Player, Player:GetWorld(), BlockType, BlockMeta)
-		if not Blocks then
-			Player:SendMessage(cChatColor.Rose .. "Region intersects with an area")
-		else
-			Player:SendMessage(cChatColor.LightPurple .. Blocks .. " block(s) have been changed.")
-		end
+	
+	local BlockType, BlockMeta = GetBlockTypeMeta(Split[2])
+	if not BlockType then
+		Player:SendMessage(cChatColor.Rose .. "Unknown character \"" .. Split[2] .. "\"")
+		return true
+	end
+	
+	local Blocks = HandleCreateWalls(Player, Player:GetWorld(), BlockType, BlockMeta)
+	if not Blocks then
+		Player:SendMessage(cChatColor.Rose .. "Region intersects with an area")
+	else
+		Player:SendMessage(cChatColor.LightPurple .. Blocks .. " block(s) have been changed.")
 	end
 	return true
 end
