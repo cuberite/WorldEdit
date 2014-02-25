@@ -2,20 +2,35 @@
 ----------------------REPL----------------------
 ------------------------------------------------
 function HandleReplCommand(Split, Player)
-	if Split[2] == nil or tonumber(Split[2]) == nil then -- check if the player gave a block id
+	if Split[2] == nil then -- check if the player gave a block id
 		Player:SendMessage(cChatColor.Rose .. "Too few arguments.")
 		Player:SendMessage(cChatColor.Rose .. "/repl <block ID>")
-	elseif IsValidBlock(tonumber(Split[2])) == true and ItemCategory.IsTool(Player:GetEquippedItem().m_ItemType) == true then -- check if the player gave a valid block id and has a tool in his hand
-		Repl[Player:GetName()] = tonumber(Split[2]) 
-		ReplItem[Player:GetName()] = Player:GetEquippedItem().m_ItemType -- bind tool to //repl
-		Player:SendMessage(cChatColor.LightPurple .. "Block replacer tool bound to " .. ItemToString(Player:GetEquippedItem()))
-	else
-		if not IsValidBlock(tonumber(Split[2])) then
-			Player:SendMessage(cChatColor.Rose .. Split[2] .. " isn't a valid block")
-			return true
-		end
-		Player:SendMessage(cChatColor.Rose .. "Can't bind tool to " .. ItemToString(Player:GetEquippedItem()) .. ": Blocks can't be used")
+		return true
 	end
+	
+	local BlockType = tonumber(Split[2]) -- ToDo: block metas
+	
+	if BlockType == nil then
+		Player:SendMessage(cChatColor.Rose .. "Unknown character \"" .. Split[2] .. "\"")
+		return true
+	end
+	
+	local PlayerName = Player:GetName()
+	
+	if not IsValidBlock(BlockType) then -- check if the player gave a valid block id
+		Player:SendMessage(cChatColor.Rose .. Split[2] .. " isn't a valid block")
+		return true
+	end
+	
+	if not ItemCategory.IsTool(Player:GetEquippedItem().m_ItemType) then -- Check if the player has a tool in equipped
+		Player:SendMessage(cChatColor.Rose .. "Can't bind tool to \"" .. ItemToString(Player:GetEquippedItem()) .. "\": Blocks can't be used")
+		return true
+	end
+
+	-- ToDo: Check if another tool is using the equipped item.
+	Repl[PlayerName] = BlockType
+	ReplItem[PlayerName] = Player:GetEquippedItem().m_ItemType -- bind tool to the "repl" tool
+	Player:SendMessage(cChatColor.LightPurple .. "Block replacer tool bound to " .. ItemToString(Player:GetEquippedItem()))
 	return true
 end
 
