@@ -467,6 +467,36 @@ end
 
 
 
+function HandlePos1Command(a_Split, a_Player)
+	-- //pos1
+	local State = GetPlayerState(a_Player)
+	local BlockX = math.floor(a_Player:GetPosX())
+	local BlockY = math.floor(a_Player:GetPosY())
+	local BlockZ = math.floor(a_Player:GetPosZ())
+	State.Selection:SetFirstPoint(BlockX, BlockY, BlockZ)
+	a_Player:SendMessage("First position set to {" .. BlockX .. ", " .. BlockY .. ", " .. BlockZ .. "}.")
+	return true
+end
+
+
+
+
+
+function HandlePos2Command(a_Split, a_Player)
+	-- //pos2
+	local State = GetPlayerState(a_Player)
+	local BlockX = math.floor(a_Player:GetPosX())
+	local BlockY = math.floor(a_Player:GetPosY())
+	local BlockZ = math.floor(a_Player:GetPosZ())
+	State.Selection:SetSecondPoint(BlockX, BlockY, BlockZ)
+	a_Player:SendMessage("Second position set to {" .. BlockX .. ", " .. BlockY .. ", " .. BlockZ .. "}.")
+	return true
+end
+
+
+
+
+
 function HandleExpandCommand(a_Split, a_Player)
 	-- //expand [Amount] [Direction]
 	

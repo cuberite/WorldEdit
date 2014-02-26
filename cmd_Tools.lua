@@ -64,22 +64,6 @@ function HandleSuperPickCommand(Split, Player)
 end
 
 
------------------------------------------------
---------------------SETPOS1--------------------
------------------------------------------------
-function HandlePos1Command(Split, Player)
-	SetPlayerSelectionPoint(Player, math.floor(Player:GetPosX()), math.floor(Player:GetPosY()), math.floor(Player:GetPosZ()), E_SELECTIONPOINT_LEFT)
-	return true
-end
-
-
------------------------------------------------
---------------------SETPOS2--------------------
------------------------------------------------
-function HandlePos2Command(Split, Player)
-	SetPlayerSelectionPoint(Player, math.floor(Player:GetPosX()), math.floor(Player:GetPosY()), math.floor(Player:GetPosZ()), E_SELECTIONPOINT_RIGHT)
-	return true
-end
 
 
 -----------------------------------------------
