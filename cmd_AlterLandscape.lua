@@ -311,21 +311,21 @@ end
 ------------------------------------------------
 function HandleSetBiomeCommand(Split, Player)
 	local function SendWrongArguments(Reason)
-		Player:SendMessage(cChatColor.Rose .. "Too " .. Reason .. " arguments.")
+		Player:SendMessage(cChatColor.Rose .. Reason .. " arguments.")
 		Player:SendMessage(cChatColor.Rose .. "//setbiome [-p] <biome>")
 		Player:SendMessage(cChatColor.Rose .. "") -- Extra space
-		Player:SendMessage(cChatColor.Rose .. "Set the bimoe of the region.")
-		Player:SendMessage(cChatColor.Rose .. "By default use all the blocks contained in your selection.")
-		Player:SendMessage(cChatColor.Rose .. "-p use the block you are currently in")
+		Player:SendMessage(cChatColor.Rose .. "Sets the biome of the region.")
+		Player:SendMessage(cChatColor.Rose .. "By default sets the biome in your selected area.")
+		Player:SendMessage(cChatColor.Rose .. "-p sets biome in the column you are currently standing in.")
 	end
 	
 	if #Split == 1 then
-		SendWrongArguments("few")
+		SendWrongArguments("Too few")
 		return true
 	end
 	
 	if #Split > 3 then
-		SendWrongArguments("many")
+		SendWrongArguments("Too many")
 		return true
 	end
 	
@@ -335,18 +335,13 @@ function HandleSetBiomeCommand(Split, Player)
 	
 	if #Split == 3 then
 		if Split[2] ~= "-p" then
-			SendWrongArguments("many")
-			return true
-		end
-		
-		if Split[3] == nil then
-			SendWrongArguments("few")
+			SendWrongArguments("Too many")
 			return true
 		end
 		
 		local NewBiome = StringToBiome(Split[3])
 		if NewBiome == biInvalidBiome then
-			Player:SendMessage(cChatColor.Rose .. "Unknown " .. Split[3] .. " biome type.")
+			Player:SendMessage(cChatColor.Rose .. "Unknown biome type: '" .. Split[3] .. "'.")
 			return true
 		end
 		
@@ -360,11 +355,13 @@ function HandleSetBiomeCommand(Split, Player)
 			return true
 		end
 		
-		local MinX, MaxX, MinZ, MaxZ = GetXZCoords(Player)
-		if not MinX then
-			Player:SendMessage(cChatColor.Rose .. "No region selected.")
+		local State = GetPlayerState(Player)
+		if not(State.Selection:IsValid()) then
+			Player:SendMessage(cChatColor.Rose .. "You need to select a region first.")
 			return true
 		end
+		local MinX, MaxX = State.Selection:GetXCoordsSorted()
+		local MinZ, MaxZ = State.Selection:GetZCoordsSorted()
 			
 		World:SetAreaBiome(MinX, MaxX, MinZ, MaxZ, NewBiome)
 		Player:SendMessage(cChatColor.LightPurple .. "Biome changed to " .. Split[2] .. ". " .. (1 + MaxX - MinX) * (1 + MaxZ - MinZ) .. " columns affected.")
