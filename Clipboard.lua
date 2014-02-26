@@ -122,6 +122,16 @@ end
 
 
 
+--- Loads the specified schematic file into the clipboard
+-- Returns true if successful, false if not
+function cClipboard:LoadFromSchematicFile(a_FileName)
+	return self.Area:LoadFromSchematicFile(a_FileName)
+end
+
+
+
+
+
 --- Pastes the clipboard contents into the world relative to the player
 -- a_DstPoint is the optional min-coord Vector3i where to paste; if not specified, the default is used
 -- Returns the number of blocks pasted
@@ -168,6 +178,19 @@ function cClipboard:Rotate(a_NumCCWQuarterRotations)
 	else
 		error("Bad fmod result: " .. NumRots)
 	end
+end
+
+
+
+
+
+--- Saves the clipboard to the specified .schematic file
+-- Assumes the clipboard is valid
+-- Returns true on success, false on failure
+function cClipboard:SaveToSchematicFile(a_FileName)
+	assert(self:IsValid())
+	
+	return self.Area:SaveToSchematicFile(a_FileName)
 end
 
 

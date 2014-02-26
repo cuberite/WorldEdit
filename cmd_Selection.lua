@@ -359,162 +359,197 @@ function HandleRotateCommand(a_Split, a_Player)
 end
 
 
------------------------------------------------
--------------------SCHEMATIC-------------------
------------------------------------------------
--- Handles the schematic's save subcommand
-function HandleSchematicSaveCommand(Split, Player)
-	if not PlayerHasWEPermission(Player, "worldedit.schematic.save", "worldedit.clipboard.save") then
-		Player:SendMessage(cChatColor.Rose .. "You do not have permission to save schematic files.")
-		return true
-	end
-	if #Split ~= 4 then
-		Player:SendMessage(cChatColor.Rose .. "Usage: /schematic save <Format> <Name>")
-		return true
-	end
-	local Scheme = string.upper(Split[3])
-	
-	if Scheme == "MCEDIT" then
-		local SchematicName = Split[4]
-		PersonalClipboard[Player:GetName()]:SaveToSchematicFile("Schematics/" .. Split[4] .. ".Schematic") -- save the schematic.
-		Player:SendMessage(cChatColor.LightPurple .. Split[4] .. " saved.")
+
+
+
+function HandleSchematicSaveCommand(a_Split, a_Player)
+	-- //schematic save [<format>] <FileName>
+
+	-- Get the parameters from the command arguments:
+	local FileName
+	if (#a_Split == 4) then
+		FileName = a_Split[4]
+	elseif (#a_Split == 3) then
+		FileName = a_Split[3]
 	else
-		Player:SendMessage("Scheme " .. Split[3] .. "Does not exist.")
-	end
-	return true
-end
-
-
--- Handles the schematic's load subcommand.
-function HandleSchematicLoadCommand(Split, Player)
-	if not PlayerHasWEPermission(Player, "worldeidt.schematic.load", "worldedit.clipboard.load") then
-		Player:SendMessage(cChatColor.Rose .. "You do not have permission to load schematic file.")
+		a_Player:SendMessage(cChatColor.Rose .. "Usage: //schematic save [<format>] <FileName>")
 		return true
-	end
-	if #Split ~= 3 then
-		Player:SendMessage(cChatColor.Rose .. "Usage: /schematic load <name>")
-		return true
-	end
-	local Path = "Schematics/" .. Split[3] .. ".Schematic"
-	if not cFile:Exists(Path) then
-		Player:SendMessage(cChatColor.LightPurple .. "schematic does not exist.")
-		return true
-	end
-	PersonalClipboard[Player:GetName()]:LoadFromSchematicFile(Path) -- load the schematic file
-	Player:SendMessage(cChatColor.LightPurple .. "You loaded " .. Split[3])
-	return true
-end
-
-
--- Handles the schematic's formats subcommand.
-function HandleSchematicFormatsCommand(Split, Player)
-	if not PlayerHasWEPermission(Player, "worldedit.schematic.formats") then
-		Player:SendMessage(cChatColor.Rose .. "You do not have permission to use this command.")
-		return true
-	end
-	Player:SendMessage(cChatColor.LightPurple .. 'Available formats: "MCEdit"')
-	return true
-end
-
-
--- Handles the schematic's list subcommand.
-function HandleSchematicListCommand(Split, Player)
-	if not PlayerHasWEPermission(Player, "worldeidt.schematic.list") then
-		Player:SendMessage(cChatColor.Rose .. "You do not have permission to use this command.")
-		return true
-	end
-	local FileList = cFile:GetFolderContents("Schematics")
-	for Idx, FileName in ipairs(FileList) do
-		FileList[Idx] = FileName:sub(1, FileName:len() - 10) -- Remove the extension part of the filename.
 	end
 	
-	Player:SendMessage(cChatColor.LightPurple .. "Available schematics: " .. table.concat(FileList, ", ", 3))
+	-- Check that there's data in the clipboard:
+	local State = GetPlayerState(a_Player)
+	if not(State.Clipboard:IsValid()) then
+		a_Player:SendMessage(cChatColor.Rose .. "There's no data in the clipboard. Use //copy or //cut first.")
+		return true
+	end
+
+	-- Save the clipboard:
+	State.Clipboard:SaveToSchematicFile("schematics/" .. FileName .. ".schematic")
+	a_Player:SendMessage(cChatColor.LightPurple .. "Clipboard saved to " .. FileName .. ".")
 	return true
 end
 
 
-----------------------------------------------
---------------------EXPAND--------------------
-----------------------------------------------
-function HandleExpandCommand(Split, Player)
+
+
+
+function HandleSchematicLoadCommand(a_Split, a_Player)
+	-- //schematic load <FileName>
+	
+	-- Check the FileName parameter:
+	if (#a_Split ~= 3) then
+		a_Player:SendMessage(cChatColor.Rose .. "Usage: /schematic load <FileName>")
+		return true
+	end
+	local FileName = a_Split[3]
+	
+	-- Check if the file exists:
+	local Path = "schematics/" .. FileName .. ".schematic"
+	if not(cFile:Exists(Path)) then
+		a_Player:SendMessage(cChatColor.Rose .. FileName .. " schematic does not exist.")
+		return true
+	end
+	
+	-- Load the file into clipboard:
+	local State = GetPlayerState(a_Player)
+	if not(State.Clipboard:LoadFromSchematicFile(Path)) then
+		a_Player:SendMessage(cChatColor.Rose .. FileName .. " schematic does not exist.")
+		return true
+	end
+	a_Player:SendMessage(cChatColor.LightPurple .. FileName .. " schematic was loaded into your clipboard.")
+	a_Player:SendMessage(cChatColor.LightPurple .. "Clipboard size: " .. State.Clipboard:GetSizeDesc())
+	return true
+end
+
+
+
+
+
+function HandleSchematicFormatsCommand(a_Split, a_Player)
+	-- //schematic listformats
+	
+	-- We support only one format, MCEdit:
+	a_Player:SendMessage(cChatColor.LightPurple .. 'Available formats: "MCEdit"')
+	return true
+end
+
+
+
+
+
+function HandleSchematicListCommand(Split, Player)
+	-- //schematic list
+	
+	-- Retrieve all the objects in the folder:
+	local FolderContents = cFile:GetFolderContents("schematics")
+	
+	-- Filter out non-files and non-".schematic" files:
+	local FileList = {}
+	for idx, fnam in ipairs(FolderContents) do
+		if (
+			cFile:IsFile("schematics/" .. fnam) and
+			fnam:match(".*%.schematic")
+		) then
+			table.insert(FileList, fnam:sub(1, fnam:len() - 10))  -- cut off the ".schematic" part of the name
+		end
+	end
+	table.sort(FileList,
+		function(f1, f2)
+			return (string.lower(f1) < string.lower(f2))
+		end
+	)
+	
+	Player:SendMessage(cChatColor.LightPurple .. "Available schematics: " .. table.concat(FileList, ", "))
+	return true
+end
+
+
+
+
+
+function HandleExpandCommand(a_Split, a_Player)
 	-- //expand [Amount] [Direction]
 	
-	local State = GetPlayerState(Player)
-
 	-- Check the selection:
+	local State = GetPlayerState(a_Player)
 	if not(State.Selection:IsValid()) then
 		a_Player:SendMessage(cChatColor.Rose .. "No region set")
 		return true
 	end
 	
-	if Split[2] ~= nil and tonumber(Split[2]) == nil then
-		Player:SendMessage(cChatColor.Rose .. "Usage: //expand [Blocks] [Direction]")
+	if (a_Split[2] ~= nil) and (tonumber(a_Split[2]) == nil) then
+		a_Player:SendMessage(cChatColor.Rose .. "Usage: //expand [Blocks] [Direction]")
 		return true
 	end
 	
-	local Blocks = Split[2] or 1 -- Use the given amount or 1 if nil
-	local Direction = string.lower(Split[3] or "forward")
+	local NumBlocks = a_Split[2] or 1 -- Use the given amount or 1 if nil
+	local Direction = string.lower(a_Split[3] or "forward")
 	local SubMinX, SubMinY, SubMinZ, AddMaxX, AddMaxY, AddMaxZ = 0, 0, 0, 0, 0, 0
-	local LookDirection = Round((Player:GetYaw() + 180) / 90)
+	local LookDirection = Round((a_Player:GetYaw() + 180) / 90)
 	
-	if Direction == "up" then
-		AddMaxY = Blocks
-	elseif Direction == "down" then
-		SubMinY = Blocks
-	elseif Direction == "left" then
-		if LookDirection == E_DIRECTION_SOUTH then
-			AddMaxX = Blocks
-		elseif LookDirection == E_DIRECTION_EAST then
-			SubMinZ = Blocks
-		elseif LookDirection == E_DIRECTION_NORTH1 or LookDirection == E_DIRECTION_NORTH2 then
-			SubMinX = Blocks
-		elseif LookDirection == E_DIRECTION_WEST then
-			AddMaxZ = Blocks
+	if (Direction == "up") then
+		AddMaxY = NumBlocks
+	elseif (Direction == "down") then
+		SubMinY = NumBlocks
+	elseif (Direction == "left") then
+		if (LookDirection == E_DIRECTION_SOUTH) then
+			AddMaxX = NumBlocks
+		elseif (LookDirection == E_DIRECTION_EAST) then
+			SubMinZ = NumBlocks
+		elseif (LookDirection == E_DIRECTION_NORTH1) or (LookDirection == E_DIRECTION_NORTH2) then
+			SubMinX = NumBlocks
+		elseif (LookDirection == E_DIRECTION_WEST) then
+			AddMaxZ = NumBlocks
 		end
-	elseif Direction == "right" then
-		if LookDirection == E_DIRECTION_SOUTH then
-			SubMinX = Blocks
-		elseif LookDirection == E_DIRECTION_EAST then
-			AddMaxZ = Blocks
-		elseif LookDirection == E_DIRECTION_NORTH1 or LookDirection == E_DIRECTION_NORTH2 then
-			AddMaxX = Blocks
-		elseif LookDirection == E_DIRECTION_WEST then
-			SubMinZ = Blocks
+	elseif (Direction == "right") then
+		if (LookDirection == E_DIRECTION_SOUTH) then
+			SubMinX = NumBlocks
+		elseif (LookDirection == E_DIRECTION_EAST) then
+			AddMaxZ = NumBlocks
+		elseif (LookDirection == E_DIRECTION_NORTH1) or (LookDirection == E_DIRECTION_NORTH2) then
+			AddMaxX = NumBlocks
+		elseif (LookDirection == E_DIRECTION_WEST) then
+			SubMinZ = NumBlocks
 		end
-	elseif Direction == "south" then
-		AddMaxZ = Blocks
-	elseif Direction == "east" then
-		AddMaxX = Blocks
-	elseif Direction == "north" then
-		SubMinZ = Blocks
-	elseif Direction == "west" then
-		SubMinX = Blocks
-	elseif Direction == "forward" then
-		if LookDirection == E_DIRECTION_SOUTH then
-			AddMaxZ = Blocks
-		elseif LookDirection == E_DIRECTION_EAST then
-			AddMaxX = Blocks
-		elseif LookDirection == E_DIRECTION_NORTH1 or LookDirection == E_DIRECTION_NORTH2 then
-			SubMinZ = Blocks
-		elseif LookDirection == E_DIRECTION_WEST then
-			SubMinX = Blocks
+	elseif (Direction == "south") then
+		AddMaxZ = NumBlocks
+	elseif (Direction == "east") then
+		AddMaxX = NumBlocks
+	elseif (Direction == "north") then
+		SubMinZ = NumBlocks
+	elseif (Direction == "west") then
+		SubMinX = NumBlocks
+	elseif ((Direction == "forward") or (Direction == "me")) then
+		if (LookDirection == E_DIRECTION_SOUTH) then
+			AddMaxZ = NumBlocks
+		elseif (LookDirection == E_DIRECTION_EAST) then
+			AddMaxX = NumBlocks
+		elseif ((LookDirection == E_DIRECTION_NORTH1) or (LookDirection == E_DIRECTION_NORTH2)) then
+			SubMinZ = NumBlocks
+		elseif (LookDirection == E_DIRECTION_WEST) then
+			SubMinX = NumBlocks
 		end
-	elseif Direction == "backwards" or Direction == "back" then
-		if LookDirection == E_DIRECTION_SOUTH then
-			SubMinZ = Blocks
-		elseif LookDirection == E_DIRECTION_EAST then
-			SubMinX = Blocks
-		elseif LookDirection == E_DIRECTION_NORTH1 or LookDirection == E_DIRECTION_NORTH2 then
-			AddMaxZ = Blocks
-		elseif LookDirection == E_DIRECTION_WEST then
-			AddMaxX = Blocks
+	elseif ((Direction == "backwards") or (Direction == "back")) then
+		if (LookDirection == E_DIRECTION_SOUTH) then
+			SubMinZ = NumBlocks
+		elseif (LookDirection == E_DIRECTION_EAST) then
+			SubMinX = NumBlocks
+		elseif ((LookDirection == E_DIRECTION_NORTH1) or (LookDirection == E_DIRECTION_NORTH2)) then
+			AddMaxZ = NumBlocks
+		elseif (LookDirection == E_DIRECTION_WEST) then
+			AddMaxX = NumBlocks
 		end
 	else
-		Player:SendMessage(cChatColor.Rose .. "Unknown direction \"" .. Direction .. "\".")
+		a_Player:SendMessage(cChatColor.Rose .. "Unknown direction \"" .. Direction .. "\".")
 		return true
 	end
 	
 	State.Selection:Expand(SubMinX, SubMinY, SubMinZ, AddMaxX, AddMaxY, AddMaxZ)
-	Player:SendMessage(cChatColor.LightPurple .. "Expaned the area " .. Blocks .. " block(s) " .. Direction)
+	a_Player:SendMessage(cChatColor.LightPurple .. "Expaned the selection.")
+	a_Player:SendMessage(cChatColor.LightPurple .. "Selection is now " .. State.Selection:GetSizeDesc())
 	return true
 end
+
+
+
+
