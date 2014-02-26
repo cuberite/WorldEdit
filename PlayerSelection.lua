@@ -87,6 +87,9 @@ function cPlayerSelection:GetSizeDesc()
 	assert(self:IsValid())
 	
 	local DifX, DifY, DifZ = self:GetCoordDiffs()
+	DifX = DifX + 1
+	DifY = DifY + 1
+	DifZ = DifZ + 1
 	local Volume = DifX * DifY * DifZ
 	local Dimensions = tostring(DifX) .. " * " .. DifY .. " * " .. DifZ
 	if (Volume == 1) then
