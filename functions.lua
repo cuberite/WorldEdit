@@ -19,7 +19,6 @@ end
 -----------------------------------------------
 function CreateTables()
 	Blocks = {}
-	PersonalBlockArea = {}
 	PersonalUndo = {}
 	PersonalRedo = {}
 	PersonalClipboard = {}

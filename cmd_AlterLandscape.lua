@@ -1,57 +1,94 @@
--------------------------------------------------
--------------------REMOVEBELOW-------------------
--------------------------------------------------
-function HandleRemoveBelowCommand(Split, Player)
-	local X = math.floor(Player:GetPosX()) -- round the number (for example from 12.23423987 to 12)
-	local Y = math.floor(Player:GetPosY()) -- round the number (for example from 12.23423987 to 12)
-	local Z = math.floor(Player:GetPosZ()) -- round the number (for example from 12.23423987 to 12)
-	local World = Player:GetWorld() -- Get the world
-	local PlayerName = Player:GetName()
+
+-- cmd_AlterLandscape.lua
+
+-- Implements the commands and functions for altering the landscape
+
+
+
+
+
+--- Common code for RemoveAbove and RemoveBelow
+-- Checks with plugins if the operation is allowed
+-- Pushes the column in Undo stack
+-- Removes the blocks
+-- a_Cuboid is expected to be sorted
+-- Returns true if successful, false if not
+function RemoveColumnPart(a_Player, a_Cuboid, a_OperationName, a_UndoName)
+	assert(tolua.type(a_Player) == "cPlayer")
+	assert(tolua.type(a_Cuboid) == "cCuboid")
+	assert(type(a_OperationName) == "string")
+	assert(type(a_UndoName) == "string")
 	
-	if CheckIfInsideAreas(X, X, 1, Y, Z, Z, Player, Player:GetWorld(), "removebelow") then
-		return true
+	-- DEBUG:
+	LOG(string.format("%s cuboid: {%d, %d, %d} - {%d, %d, %d}",
+		a_UndoName,
+		a_Cuboid.p1.x, a_Cuboid.p1.y, a_Cuboid.p1.z,
+		a_Cuboid.p2.x, a_Cuboid.p2.y, a_Cuboid.p2.z
+	))
+	
+	-- Check if other plugins allow the operation:
+	local World = a_Player:GetWorld()
+	if not(CheckAreaCallbacks(a_Cuboid, a_Player, World, a_OperationName)) then
+		return false
 	end
 	
-	LastCoords[PlayerName] = {X = X, Y = 1, Z = Z, WorldName = World:GetName()}
+	-- Push in Undo stack:
+	local State = GetPlayerState(a_Player)
+	State.UndoStack:PushUndoFromCuboid(World, a_Cuboid, a_UndoName)
 	
-	PersonalUndo[PlayerName]:Read(World, X, X, 1, Y, Z, Z)
-	for y = 1, Y do
-		World:SetBlock(X, y, Z, E_BLOCK_AIR, 0)
-	end
-	Player:SendMessage(cChatColor.LightPurple .. Y + 1 .. " block(s) have been removed.")
+	-- Clear the blocks by writing an empty cBlockArea over them:
+	local Area = cBlockArea()
+	Area:Create(a_Cuboid:DifX() + 1, a_Cuboid:DifY() + 1, a_Cuboid:DifZ() + 1, cBlockArea.baTypes + cBlockArea.baMetas)
+	Area:Write(World, a_Cuboid.p1)
+	Area:Clear()
 	return true
 end
 
 
--------------------------------------------------
--------------------REMOVEABOVE-------------------
--------------------------------------------------
-function HandleRemoveAboveCommand(Split, Player)
-	local X = math.floor(Player:GetPosX()) -- round the number (for example from 12.23423987 to 12)
-	local y = math.floor(Player:GetPosY()) -- round the number (for example from 12.23423987 to 12)
-	local Z = math.floor(Player:GetPosZ()) -- round the number (for example from 12.23423987 to 12)
-	local World = Player:GetWorld()
-	local PlayerName = Player:GetName()
-	local IsValid, WorldHeight = World:TryGetHeight(X, Z)
+
+
+
+function HandleRemoveBelowCommand(a_Split, a_Player)
+	-- //removebelow
 	
-	if not IsValid then
-		Player:SendMessage(cChatColor.LightPurple .. "0 block(s) have been removed.")
-		return true
+	local X = math.floor(a_Player:GetPosX())
+	local Y = math.floor(a_Player:GetPosY())
+	local Z = math.floor(a_Player:GetPosZ())
+	local Cuboid = cCuboid(X, 1, Z, X, Y, Z)
+	
+	if (RemoveColumnPart(a_Player, Cuboid, "removebelow", "//removebelow")) then
+		a_Player:SendMessage(cChatColor.LightPurple .. Y + 1 .. " block(s) have been removed.")
 	end
-	
-	if CheckIfInsideAreas(X, X, y, WorldHeight, Z, Z, Player, World, "removeabove") then
-		return true
-	end
-	
-	LastCoords[PlayerName] = {X = X, Y = y, Z = Z, WorldName = World:GetName()}
-	PersonalUndo[PlayerName]:Read(World, X, X, y, WorldHeight, Z, Z)
-	
-	for Y = y, WorldHeight do
-		World:SetBlock(X, Y, Z, E_BLOCK_AIR, 0)
-	end
-	Player:SendMessage(cChatColor.LightPurple .. WorldHeight - y .. " block(s) have been removed.")
 	return true
 end
+
+
+
+
+
+function HandleRemoveAboveCommand(a_Split, a_Player)
+	-- //removeabove
+	local X = math.floor(a_Player:GetPosX())
+	local Y = math.floor(a_Player:GetPosY())
+	local Z = math.floor(a_Player:GetPosZ())
+	
+	-- Try to determine the world height at this column:
+	local IsValid, WorldHeight = a_Player:GetWorld():TryGetHeight(X, Z)
+	if not(IsValid) then
+		a_Player:SendMessage(cChatColor.LightPurple .. "0 block(s) have been removed.")
+		return true
+	end
+
+	-- Remove the blocks:
+	local Cuboid = cCuboid(X, Y, Z, X, WorldHeight, Z)
+	if (RemoveColumnPart(a_Player, Cuboid, "removeabove", "//removeabove")) then
+		a_Player:SendMessage(cChatColor.LightPurple .. WorldHeight - Y + 1 .. " block(s) have been removed.")
+	end
+	return true
+end
+
+
+
 
 
 -----------------------------------------------
