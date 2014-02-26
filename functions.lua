@@ -18,8 +18,6 @@ end
 ------------------CREATETABLES-----------------
 -----------------------------------------------
 function CreateTables()
-	OnePlayer = {}
-	TwoPlayer = {}
 	Blocks = {}
 	PersonalBlockArea = {}
 	PersonalUndo = {}
@@ -42,18 +40,6 @@ function CreateTables()
 	end)
 end
 
-
-
-
----------------------------------------------
---------------LOADONLINEPLAYERS--------------
----------------------------------------------
-function LoadOnlinePlayers()
-	cRoot:Get():ForEachPlayer(
-	function(Player)
-		LoadPlayer(Player)
-	end)
-end
 
 
 
@@ -115,63 +101,7 @@ function GetBiomeFromString(Split, Player) -- this simply checks what the player
 end
 
 
----------------------------------------------
------------------GETXZCOORDS-----------------
----------------------------------------------
-function GetXZCoords(Player)
-	local PlayerName = Player:GetName()
-	if OnePlayer[PlayerName] == nil or TwoPlayer[PlayerName] == nil then -- check if there is a region. Needed for plugins that are going to use this plugin.
-		return false
-	end
-	if OnePlayer[PlayerName].x < TwoPlayer[PlayerName].x then -- check what number is bigger becouse otherwise you can get a negative number.
-		OneX = OnePlayer[PlayerName].x
-		TwoX = TwoPlayer[PlayerName].x
-	else
-		OneX = TwoPlayer[PlayerName].x
-		TwoX = OnePlayer[PlayerName].x
-	end
-	if OnePlayer[PlayerName].z < TwoPlayer[PlayerName].z then -- check what number is bigger becouse otherwise you can get a negative number.
-		OneZ = OnePlayer[PlayerName].z
-		TwoZ = TwoPlayer[PlayerName].z
-	else
-		OneZ = TwoPlayer[PlayerName].z
-		TwoZ = OnePlayer[PlayerName].z
-	end
-	return OneX, TwoX, OneZ, TwoZ -- return the right coordinates
-end
 
-
-----------------------------------------------
------------------GETXYZCOORDS-----------------
-----------------------------------------------
-function GetXYZCoords(Player)
-	local PlayerName = Player:GetName()
-	if OnePlayer[PlayerName] == nil or TwoPlayer[PlayerName] == nil then -- check if there is a region. Needed for plugins that are going to use this plugin.
-		return false
-	end
-	if OnePlayer[PlayerName].x < TwoPlayer[PlayerName].x then -- check what number is bigger becouse otherwise you can get a negative number.
-		OneX = OnePlayer[PlayerName].x
-		TwoX = TwoPlayer[PlayerName].x
-	else
-		OneX = TwoPlayer[PlayerName].x
-		TwoX = OnePlayer[PlayerName].x
-	end
-	if OnePlayer[PlayerName].y < TwoPlayer[PlayerName].y then -- check what number is bigger becouse otherwise you can get a negative number.
-		OneY = OnePlayer[PlayerName].y
-		TwoY = TwoPlayer[PlayerName].y
-	else
-		OneY = TwoPlayer[PlayerName].y
-		TwoY = OnePlayer[PlayerName].y
-	end
-	if OnePlayer[PlayerName].z < TwoPlayer[PlayerName].z then -- check what number is bigger becouse otherwise you can get a negative number.
-		OneZ = OnePlayer[PlayerName].z
-		TwoZ = TwoPlayer[PlayerName].z
-	else
-		OneZ = TwoPlayer[PlayerName].z
-		TwoZ = OnePlayer[PlayerName].z
-	end
-	return OneX, TwoX, OneY, TwoY, OneZ, TwoZ -- return the right coordinates
-end
 
 
 ----------------------------------------------
@@ -297,27 +227,6 @@ function table.contains(table, element)
 end
 
 
---------------------------------------------
-----------------LOADPLAYER------------------
---------------------------------------------
-function LoadPlayer(Player)
-	local PlayerName = Player:GetName()
-	if PersonalBlockArea[PlayerName] == nil then
-		PersonalBlockArea[PlayerName] = cBlockArea()
-	end
-	if PersonalUndo[PlayerName] == nil then
-		PersonalUndo[PlayerName] = cBlockArea()
-	end
-	if PersonalRedo[PlayerName] == nil then
-		PersonalRedo[PlayerName] = cBlockArea()
-	end
-	if PersonalClipboard[PlayerName] == nil then
-		PersonalClipboard[PlayerName] = cBlockArea()
-	end
-	if WandActivated[PlayerName] == nil then
-		WandActivated[PlayerName] = true
-	end
-end
 
 
 --------------------------------------------

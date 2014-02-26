@@ -10,11 +10,11 @@ E_DIRECTION_WEST = 3
 PLUGIN = nil
 
 
-function Initialize(Plugin)
+function Initialize(a_Plugin)
 	-- Load the InfoReg shared library:
 	dofile(cPluginManager:GetPluginsPath() .. "/InfoReg.lua")
 	
-	PLUGIN = Plugin
+	PLUGIN = a_Plugin
 	PLUGIN:SetName(g_PluginInfo.Name)
 	PLUGIN:SetVersion(g_PluginInfo.Version)
 		
@@ -23,19 +23,17 @@ function Initialize(Plugin)
 	
 	cPluginManager.AddHook(cPluginManager.HOOK_PLAYER_LEFT_CLICK,     LeftClickCompassHook);
 	cPluginManager.AddHook(cPluginManager.HOOK_PLAYER_LEFT_CLICK,     SuperPickaxeHook);
-	cPluginManager.AddHook(cPluginManager.HOOK_PLAYER_JOINED,         OnPlayerJoined);
 	cPluginManager.AddHook(cPluginManager.HOOK_PLAYER_ANIMATION,      OnPlayerAnimation);
 	
 	--Bind all the commands:
 	RegisterPluginInfoCommands();
 	
 	CreateTables() -- create all the tables
-	LoadOnlinePlayers() -- Load all the online players
-	LoadSettings(PLUGIN:GetLocalDirectory() .. "/Config.ini") -- load all the settings
+	LoadSettings(a_Plugin:GetLocalDirectory() .. "/Config.ini") -- load all the settings
 	
-	cFile:CreateFolder("Schematics")
+	cFile:CreateFolder("schematics")
 	
-	LOG("[WorldEdit] Enabling WorldEdit v" .. PLUGIN:GetVersion())
+	LOG("[WorldEdit] Enabling WorldEdit v" .. a_Plugin:GetVersion())
 	return true
 end
 

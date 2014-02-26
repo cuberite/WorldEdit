@@ -68,12 +68,6 @@ function RightClickCompassHook(Player, BlockX, BlockY, BlockZ, BlockFace, Cursor
 end
 
 
------------------------------------------------------
--------------------ONPLAYERJOINED--------------------
------------------------------------------------------
-function OnPlayerJoined(Player)
-	LoadPlayer(Player)
-end
 
 
 ---------------------------------------------------
