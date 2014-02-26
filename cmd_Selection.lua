@@ -497,6 +497,48 @@ end
 
 
 
+function HandleHPos1Command(a_Split, a_Player)
+	-- //hpos1
+	
+	-- Trace the blocks along the player's look vector until a hit is found:
+	local Target = HPosSelect(a_Player)
+	if not(Target) then
+		a_Player:SendMessage(cChatColor.Rose .. "You were not looking at a block.")
+		return true
+	end
+	
+	-- Select the block:
+	local State = GetPlayerState(a_Player)
+	State.Selection:SetFirstPoint(Target.x, Target.y, Target.z)
+	a_Player:SendMessage("First position set to {" .. Target.x .. ", " .. Target.y .. ", " .. Target.z .. "}.")
+	return true
+end
+
+
+
+
+
+function HandleHPos2Command(a_Split, a_Player)
+	-- //hpos2
+	
+	-- Trace the blocks along the player's look vector until a hit is found:
+	local Target = HPosSelect(a_Player)
+	if not(Target) then
+		a_Player:SendMessage(cChatColor.Rose .. "You were not looking at a block.")
+		return true
+	end
+	
+	-- Select the block:
+	local State = GetPlayerState(a_Player)
+	State.Selection:SetSecondPoint(Target.x, Target.y, Target.z)
+	a_Player:SendMessage("Second position set to {" .. Target.x .. ", " .. Target.y .. ", " .. Target.z .. "}.")
+	return true
+end
+
+
+
+
+
 function HandleExpandCommand(a_Split, a_Player)
 	-- //expand [Amount] [Direction]
 	

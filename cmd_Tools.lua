@@ -66,31 +66,3 @@ end
 
 
 
------------------------------------------------
---------------------SETHPOS1-------------------
------------------------------------------------
-function HandleHPos1Command(Split, Player)
-	local Succes, Target = HPosSelect(Player, Player:GetWorld())
-	if not Succes then
-		Player:SendMessage(cChatColor.Rose .. "You were not looking at a block.")
-		return true
-	end
-	
-	SetPlayerSelectionPoint(Player, Target.x, Target.y, Target.z, E_SELECTIONPOINT_LEFT)	
-	return true
-end
-
-
------------------------------------------------
---------------------SETHPOS2-------------------
------------------------------------------------
-function HandleHPos2Command(Split, Player)
-	local Succes, Target = HPosSelect(Player, Player:GetWorld())
-	if not Succes then
-		Player:SendMessage(cChatColor.Rose .. "You were not looking at a block.")
-		return true
-	end
-	
-	SetPlayerSelectionPoint(Player, Target.x, Target.y, Target.z, E_SELECTIONPOINT_RIGHT)	
-	return true
-end

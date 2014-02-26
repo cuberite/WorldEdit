@@ -264,29 +264,40 @@ function LeftClickCompass(Player)
 end
 
 
-------------------------------------------------
-------------------HPOSSELECT--------------------
-------------------------------------------------
-function HPosSelect(Player, World)
-	local hpos = nil
-	local Callbacks = {
-	OnNextBlock = function(X, Y, Z, BlockType, BlockMeta)
-		if BlockType ~= E_BLOCK_AIR and not g_BlockOneHitDig[BlockType] then
-			hpos = Vector3i(X, Y, Z)
-			return true
-		end
-	end
-	};
-	local EyePos = Player:GetEyePosition()
-	local LookVector = Player:GetLookVector()
-	LookVector:Normalize()
-	local Start = EyePos
-	local End = EyePos + LookVector * 150
+
+
+
+--- Traces blocks in a line-of-sight of the player until it hits a non-air non-1-hit-dig block
+-- Returns the coords of the block as a table {x = ..., y = ..., z = ... }
+-- If nothing is hit within the specified distance, returns nil
+function HPosSelect(a_Player, a_MaxDistance)
+	assert(tolua.type(a_Player) == "cPlayer")
+	a_MaxDistance = a_MaxDistance or 150
 	
-	if cLineBlockTracer.Trace(World, Callbacks, Start.x, Start.y, Start.z, End.x, End.y, End.z) then
-		return false
+	-- Prepare the vectors to be used for the tracing:
+	local Start = a_Player:GetEyePosition()
+	local LookVector = a_Player:GetLookVector()
+	LookVector:Normalize()
+	local End = Start + LookVector * a_MaxDistance
+	
+	-- The callback checks the blocktype of the hit, saves coords if true hit and aborts:
+	local hpos = nil
+	local Callbacks =
+	{
+		OnNextBlock = function(a_X, a_Y, a_Z, a_BlockType, a_BlockMeta)
+			if ((a_BlockType ~= E_BLOCK_AIR) and not(g_BlockOneHitDig[a_BlockType])) then
+				hpos = {x = a_X, y = a_Y, z = a_Z }
+				return true
+			end
+		end
+	}
+	
+	-- Trace:
+	if (cLineBlockTracer.Trace(a_Player:GetWorld(), Callbacks, Start.x, Start.y, Start.z, End.x, End.y, End.z)) then
+		-- Nothing reached within the distance, return nil for failure
+		return nil
 	end
-	return true, hpos
+	return hpos
 end
 
 
