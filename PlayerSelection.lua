@@ -34,6 +34,59 @@ end
 
 
 
+-- Expands the selection in each direction by the specified amount of blocks
+function cPlayerSelection:Expand(a_SubMinX, a_SubMinY, a_SubMinZ, a_AddMaxX, a_AddMaxY, a_AddMaxZ)
+	-- Check the params:
+	assert(a_SubMinX ~= nil)
+	assert(a_SubMinY ~= nil)
+	assert(a_SubMinZ ~= nil)
+	assert(a_AddMaxX ~= nil)
+	assert(a_AddMaxY ~= nil)
+	assert(a_AddMaxZ ~= nil)
+	
+	if (self.Cuboid.p1.x < self.Cuboid.p2.x) then
+		self.Cuboid.p1.x = self.Cuboid.p1.x - a_SubMinX
+	else
+		self.Cuboid.p2.x = self.Cuboid.p2.x - a_SubMinX
+	end
+	
+	if (self.Cuboid.p1.y < self.Cuboid.p2.y) then
+		self.Cuboid.p1.y = self.Cuboid.p1.y - a_SubMinY
+	else
+		self.Cuboid.p2.y = self.Cuboid.p2.y - a_SubMinY
+	end
+	
+	if (self.Cuboid.p1.z < self.Cuboid.p2.z) then
+		self.Cuboid.p1.z = self.Cuboid.p1.z - a_SubMinZ
+	else
+		self.Cuboid.p2.z = self.Cuboid.p2.z - a_SubMinZ
+	end
+	
+	if (self.Cuboid.p1.x > self.Cuboid.p2.x) then
+		self.Cuboid.p1.x = self.Cuboid.p1.x + a_AddMaxX
+	else
+		self.Cuboid.p2.x = self.Cuboid.p2.x + a_AddMaxX
+	end
+	
+	if (self.Cuboid.p1.y > self.Cuboid.p2.y) then
+		self.Cuboid.p1.y = self.Cuboid.p1.y + a_AddMaxY
+	else
+		self.Cuboid.p2.y = self.Cuboid.p2.y + a_AddMaxY
+	end
+	
+	if (self.Cuboid.p1.z > self.Cuboid.p2.z) then
+		self.Cuboid.p1.z = self.Cuboid.p1.z + a_AddMaxZ
+	else
+		self.Cuboid.p2.z = self.Cuboid.p2.z + a_AddMaxZ
+	end
+
+	self:NotifySelectionChanged() -- Notify the changes to the client.
+end
+
+
+
+
+
 --- Returns the absolute differences in each coord, as three numbers
 function cPlayerSelection:GetCoordDiffs()
 	assert(self:IsValid())
@@ -261,61 +314,6 @@ function cPlayerSelection:SetSecondPoint(a_BlockX, a_BlockY, a_BlockZ)
 	self.Cuboid.p2:Set(BlockX, BlockY, BlockZ)
 	self.IsSecondPointSet = true
 	self:NotifySelectionChanged(2)
-end
-
-
-
-
-
--- Expands the selection in each direction by the specified amount of blocks
-function cPlayerSelection:Expand(a_SubMinX, a_SubMinY, a_SubMinZ, a_AddMaxX, a_AddMaxY, a_AddMaxZ)
-	-- Check the params:
-	assert(a_SubMinX ~= nil)
-	assert(a_SubMinY ~= nil)
-	assert(a_SubMinZ ~= nil)
-	assert(a_AddMaxX ~= nil)
-	assert(a_AddMaxY ~= nil)
-	assert(a_AddMaxZ ~= nil)
-	 
-	
-	if (self.Cuboid.p1.x < self.Cuboid.p2.x) then
-		self.Cuboid.p1.x = self.Cuboid.p1.x - a_SubMinX
-	else
-		self.Cuboid.p2.x = self.Cuboid.p2.x - a_SubMinX
-	end
-	
-	if (self.Cuboid.p1.y < self.Cuboid.p2.y) then
-		self.Cuboid.p1.y = self.Cuboid.p1.y - a_SubMinY
-	else
-		self.Cuboid.p2.y = self.Cuboid.p2.y - a_SubMinY
-	end
-	
-	if (self.Cuboid.p1.z < self.Cuboid.p2.z) then
-		self.Cuboid.p1.z = self.Cuboid.p1.z - a_SubMinZ
-	else
-		self.Cuboid.p2.z = self.Cuboid.p2.z - a_SubMinZ
-	end
-	
-	
-	if (self.Cuboid.p1.x > self.Cuboid.p2.x) then
-		self.Cuboid.p1.x = self.Cuboid.p1.x + a_AddMaxX
-	else
-		self.Cuboid.p2.x = self.Cuboid.p2.x + a_AddMaxX
-	end
-	
-	if (self.Cuboid.p1.y > self.Cuboid.p2.y) then
-		self.Cuboid.p1.y = self.Cuboid.p1.y + a_AddMaxY
-	else
-		self.Cuboid.p2.y = self.Cuboid.p2.y + a_AddMaxY
-	end
-	
-	if (self.Cuboid.p1.z > self.Cuboid.p2.z) then
-		self.Cuboid.p1.z = self.Cuboid.p1.z + a_AddMaxZ
-	else
-		self.Cuboid.p2.z = self.Cuboid.p2.z + a_AddMaxZ
-	end
-
-	self:NotifySelectionChanged() -- Notify the changes to the client.
 end
 
 
