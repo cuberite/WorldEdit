@@ -9,6 +9,7 @@ E_DIRECTION_WEST = 3
 
 PLUGIN = nil
 
+
 function Initialize(Plugin)
 	-- Load the InfoReg shared library:
 	dofile(cPluginManager:GetPluginsPath() .. "/InfoReg.lua")
@@ -17,9 +18,6 @@ function Initialize(Plugin)
 	PLUGIN:SetName(g_PluginInfo.Name)
 	PLUGIN:SetVersion(g_PluginInfo.Version)
 		
-	cPluginManager.AddHook(cPluginManager.HOOK_PLAYER_BREAKING_BLOCK, SelectFirstPointHook);
-	
-	cPluginManager.AddHook(cPluginManager.HOOK_PLAYER_RIGHT_CLICK,    SelectSecondPointHook);
 	cPluginManager.AddHook(cPluginManager.HOOK_PLAYER_RIGHT_CLICK,    RightClickCompassHook);
 	cPluginManager.AddHook(cPluginManager.HOOK_PLAYER_RIGHT_CLICK,    ToolsHook);
 	
@@ -27,8 +25,6 @@ function Initialize(Plugin)
 	cPluginManager.AddHook(cPluginManager.HOOK_PLAYER_LEFT_CLICK,     SuperPickaxeHook);
 	cPluginManager.AddHook(cPluginManager.HOOK_PLAYER_JOINED,         OnPlayerJoined);
 	cPluginManager.AddHook(cPluginManager.HOOK_PLAYER_ANIMATION,      OnPlayerAnimation);
-	
-	cPluginManager:AddHook(cPluginManager.HOOK_PLUGIN_MESSAGE,        OnPluginMessage);
 	
 	--Bind all the commands:
 	RegisterPluginInfoCommands();
