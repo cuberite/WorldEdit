@@ -18,21 +18,13 @@ end
 ------------------CREATETABLES-----------------
 -----------------------------------------------
 function CreateTables()
-	Blocks = {}
-	PersonalUndo = {}
-	PersonalRedo = {}
-	PersonalClipboard = {}
-	LastRedoCoords = {}
-	LastCoords = {}
 	SP = {}
 	Repl = {}
 	ReplItem = {}
 	Count = {}
 	GrowTreeItem = {}
-	WandActivated = {}
 	LeftClickCompassUsed = {}
 	ExclusionAreaPlugins = {}
-	PlayerWECUIActivated = {}
 	PlayerSelectPointHooks = {}
 	cRoot:Get():ForEachWorld(function(World)
 		ExclusionAreaPlugins[World:GetName()] = {}
