@@ -7,6 +7,9 @@
     <filename>Info.lua</filename>
   </file>
   <file>
+    <filename>..\InfoReg.lua</filename>
+  </file>
+  <file>
     <filename>PlayerSelection.lua</filename>
   </file>
   <file>
