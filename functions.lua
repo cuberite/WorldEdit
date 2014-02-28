@@ -21,7 +21,6 @@ function CreateTables()
 	SP = {}
 	Repl = {}
 	ReplItem = {}
-	Count = {}
 	GrowTreeItem = {}
 	LeftClickCompassUsed = {}
 	ExclusionAreaPlugins = {}
