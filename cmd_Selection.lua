@@ -202,7 +202,7 @@ function HandleSetCommand(a_Split, a_Player)
 	end
 	
 	-- Retrieve the blocktype from the params:
-	local BlockType, BlockMeta = GetBlockTypeMeta(a_Player, a_Split[2])
+	local BlockType, BlockMeta = GetBlockTypeMeta(a_Split[2])
 	if not(BlockType) then
 		a_Player:SendMessage(cChatColor.LightPurple .. "Unknown block type: '" .. a_Split[2] .. "'.")
 		return true
@@ -238,12 +238,12 @@ function HandleReplaceCommand(a_Split, a_Player)
 	end
 	
 	-- Retrieve the blocktypes from the params:
-	local SrcBlockType, SrcBlockMeta, TypeOnly = GetBlockTypeMeta(a_Player, a_Split[2])
+	local SrcBlockType, SrcBlockMeta, TypeOnly = GetBlockTypeMeta(a_Split[2])
 	if not(SrcBlockType) then
 		a_Player:SendMessage(cChatColor.LightPurple .. "Unknown src block type: '" .. a_Split[2] .. "'.")
 		return true
 	end
-	local DstBlockType, DstBlockMeta = GetBlockTypeMeta(a_Player, a_Split[3])
+	local DstBlockType, DstBlockMeta = GetBlockTypeMeta(a_Split[3])
 	if not(DstBlockType) then
 		a_Player:SendMessage(cChatColor.LightPurple .. "Unknown dst block type: '" .. a_Split[3] .. "'.")
 		return true
@@ -279,7 +279,7 @@ function HandleFacesCommand(a_Split, a_Player)
 	end
 	
 	-- Retrieve the blocktype from the params:
-	local BlockType, BlockMeta = GetBlockTypeMeta(a_Player, a_Split[2])
+	local BlockType, BlockMeta = GetBlockTypeMeta(a_Split[2])
 	if not(BlockType) then
 		a_Player:SendMessage(cChatColor.LightPurple .. "Unknown block type: '" .. a_Split[2] .. "'.")
 		return true
@@ -315,7 +315,7 @@ function HandleWallsCommand(a_Split, a_Player)
 	end
 	
 	-- Retrieve the blocktype from the params:
-	local BlockType, BlockMeta = GetBlockTypeMeta(a_Player, a_Split[2])
+	local BlockType, BlockMeta = GetBlockTypeMeta(a_Split[2])
 	if not(BlockType) then
 		a_Player:SendMessage(cChatColor.LightPurple .. "Unknown block type: '" .. a_Split[2] .. "'.")
 		return true

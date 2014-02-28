@@ -496,7 +496,7 @@ function HandleSphereCommand(a_Split, a_Player)
 	end
 	
 	-- Convert the blocktype param:
-	local BlockType, BlockMeta = GetBlockTypeMeta(a_Player, a_Split[2])
+	local BlockType, BlockMeta = GetBlockTypeMeta(a_Split[2])
 	if not(BlockType) then
 		a_Player:SendMessage(cChatColor.Rose .. "Unknown block type: \"" .. a_Split[2] .. "\"")
 		return true
@@ -565,7 +565,7 @@ function HandleHSphereCommand(a_Split, a_Player)
 	end
 	
 	-- Convert the blocktype param:
-	local BlockType, BlockMeta = GetBlockTypeMeta(a_Player, a_Split[2])
+	local BlockType, BlockMeta = GetBlockTypeMeta(a_Split[2])
 	if not(BlockType) then
 		a_Player:SendMessage(cChatColor.Rose .. "Unknown block type: \"" .. a_Split[2] .. "\"")
 		return true

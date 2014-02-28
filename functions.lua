@@ -97,19 +97,17 @@ end
 ----------------------------------------------
 ---------------GETBLOCKTYPEMETA---------------
 ----------------------------------------------
-function GetBlockTypeMeta(Player, Blocks)
+function GetBlockTypeMeta(Blocks)
 	local Tonumber = tonumber(Blocks)
 	if Tonumber == nil then	
 		local Item = cItem()
 		if StringToItem(Blocks, Item) == false then
-			Player:SendMessage(cChatColor.Rose .. "unexpected character.")
 			return false
 		else
 			return Item.m_ItemType, Item.m_ItemDamage
 		end
 		local Block = StringSplit(Blocks, ":")		
 		if tonumber(Block[1]) == nil then
-			Player:SendMessage(cChatColor.Rose .. "unexpected character.")
 			return false
 		else
 			if Block[2] == nil then
