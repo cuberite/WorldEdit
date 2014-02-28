@@ -1,502 +1,627 @@
------------------------------------------------
--------------------BIOMEINFO-------------------
------------------------------------------------
+
+-- cmd_Selection.lua
+
+-- Implements handlers for the selection-related commands
+
+
+
+
 function HandleBiomeInfoCommand(Split, Player)
-	if Split[2] == "-p" then
+	-- /biomeinfo
+
+	-- If a "-p" param is present, report the biome at player's position:
+	if (Split[2] == "-p") then
 		local Biome = GetStringFromBiome(Player:GetWorld():GetBiomeAt(math.floor(Player:GetPosX()), math.floor(Player:GetPosZ())))
 		Player:SendMessage(cChatColor.LightPurple .. "Biome: " .. Biome)
 		return true
 	end
 	
-	local PlayerName = Player:GetName()
-	if OnePlayer[PlayerName] == nil or TwoPlayer[PlayerName] == nil then
+	-- Get the player state:
+	local State = GetPlayerState(Player)
+	if not(State.Selection:IsValid()) then
 		Player:SendMessage(cChatColor.Rose .. "Make a region selection first.")
 		return true
 	end
 	
-	local BiomeList = {}
+	-- Retrieve set of biomes in the selection:
+	local BiomesSet = {}
+	local MinX, MaxX = State.Selection:GetXCoordsSorted()
+	local MinZ, MaxZ = State.Selection:GetZCoordsSorted()
 	local World = Player:GetWorld()
-	local OneX, TwoX, OneZ, TwoZ = GetXZCoords(Player)
-	for X = OneX, TwoX do
-		for Z = OneZ, TwoZ do
-			if not table.contains(BiomeList, GetStringFromBiome(World:GetBiomeAt(X, Z))) then
-				BiomeList[#BiomeList + 1] = GetStringFromBiome(World:GetBiomeAt(X, Z))
-			end
+	for X = MinX, MaxX do
+		for Z = MinZ, MaxZ do
+			BiomesSet[World:GetBiomeAt(X, Z)] = true
 		end
 	end
-	Player:SendMessage(cChatColor.LightPurple .. "Biomes:\n " .. table.concat(BiomeList, "\n "))
-	return true
-end
-
-
-------------------------------------------------
-----------------------REDO----------------------
-------------------------------------------------
-function HandleRedoCommand(Split, Player)
-	local PlayerName = Player:GetName()
-	if PersonalRedo[PlayerName]:GetSizeX() == 0 and PersonalRedo[PlayerName]:GetSizeY() == 0 and PersonalRedo[PlayerName]:GetSizeZ() == 0 or LastRedoCoords[PlayerName] == nil then
-		Player:SendMessage(cChatColor.Rose .. "Nothing left to redo")
-		return true
-	end
 	
-	local Coords = LastRedoCoords[PlayerName]
-	
-	local World = cRoot:Get():GetWorld(Coords.WorldName)
-	PersonalUndo[PlayerName]:Read(World, Coords.X, Coords.X + PersonalRedo[PlayerName]:GetSizeX() - 1, Coords.Y, Coords.Y + PersonalRedo[PlayerName]:GetSizeY() - 1,Coords.Z,  Coords.Z + PersonalRedo[PlayerName]:GetSizeZ() - 1)
-	LastCoords[PlayerName] = LastRedoCoords[PlayerName]
-	PersonalRedo[PlayerName]:Write(World, Coords.X, Coords.Y, Coords.Z, 3)
-	
-	LastRedoCoords[PlayerName] = nil
-	Player:SendMessage(cChatColor.LightPurple .. "Redo Successful.")
-	return true
-end
-
-
-------------------------------------------------
-----------------------UNDO----------------------
-------------------------------------------------
-function HandleUndoCommand(Split, Player)
-	local PlayerName = Player:GetName()
-	
-	if PersonalUndo[PlayerName]:GetSizeX() == 0 and PersonalUndo[PlayerName]:GetSizeY() == 0 and PersonalUndo[PlayerName]:GetSizeZ() == 0 or LastCoords[PlayerName] == nil then
-		Player:SendMessage(cChatColor.Rose .. "Nothing left to undo")
-		return true
-	end
-	local Coords = LastCoords[PlayerName]
-	local World = cRoot:Get():GetWorld(Coords.WorldName)
-	
-	PersonalRedo[PlayerName]:Read(World, Coords.X, Coords.X + PersonalUndo[PlayerName]:GetSizeX() - 1, Coords.Y, Coords.Y + PersonalUndo[PlayerName]:GetSizeY() - 1, Coords.Z,  Coords.Z + PersonalUndo[PlayerName]:GetSizeZ() - 1)
-	LastRedoCoords[PlayerName] = LastCoords[PlayerName]
-	PersonalUndo[PlayerName]:Write(World, Coords.X, Coords.Y, Coords.Z, 3)
-	Player:SendMessage(cChatColor.LightPurple .. "Undo Successful.")
-	
-	LastCoords[PlayerName] = nil
-	return true
-end
-
-
-------------------------------------------------
-----------------------SIZE----------------------
-------------------------------------------------
-function HandleSizeCommand(Split, Player)
-	if OnePlayer[Player:GetName()] ~= nil and TwoPlayer[Player:GetName()] ~= nil then -- Check if there is a region selected 
-		Player:SendMessage(cChatColor.LightPurple .. "the selection is " .. GetSize(Player) .. " block(s) big")
-	else
-		Player:SendMessage(cChatColor.LightPurple .. "Please select a region first")
-	end
-	return true
-end
-
-
--------------------------------------------------
-----------------------PASTE----------------------
--------------------------------------------------
-function HandlePasteCommand(Split, Player)
-	local PlayerName = Player:GetName()
-	if PersonalClipboard[PlayerName]:GetSizeX() == 0 and PersonalClipboard[PlayerName]:GetSizeY() == 0 and PersonalClipboard[PlayerName]:GetSizeZ() == 0 then
-		Player:SendMessage(cChatColor.Rose .. "Your clipboard is empty. Use //copy first.")
-		return true
-	end
-	
-	local World = Player:GetWorld()
-	local MinX = Player:GetPosX()
-	local MinY = Player:GetPosY()
-	local MinZ = Player:GetPosZ()
-	local MaxX = MinX + PersonalClipboard[PlayerName]:GetSizeX()
-	local MaxY = MinY + PersonalClipboard[PlayerName]:GetSizeY()
-	local MaxZ = MinZ + PersonalClipboard[PlayerName]:GetSizeZ()
-	
-	if CheckIfInsideAreas(MinX, MaxX, MinY, MaxY, MinZ, MaxZ, Player, Player:GetWorld(), "paste") then -- Check if the clipboard intersects with any of the areas.
-		return true
-	end
-	
-	LastCoords[PlayerName] = {X = MinX, Y = MinY, Z = MinZ, WorldName = World:GetName()}
-	
-	PersonalUndo[PlayerName]:Read(World, MinX, MaxX, MinY, MaxY, MinZ, MaxZ)
-	PersonalClipboard[PlayerName]:Write(World, MinX, MinY, MinZ, 3) -- paste the area that the player copied
-	World:WakeUpSimulatorsInArea(MinX - 1, MaxX + 1, MinY - 1, MaxY + 1, MinZ - 1, MaxZ + 1)
-	Player:SendMessage(cChatColor.LightPurple .. "Pasted relative to you.")
-	return true
-end
-
-
-------------------------------------------------
-----------------------COPY----------------------
-------------------------------------------------
-function HandleCopyCommand(Split, Player)
-	local PlayerName = Player:GetName()
-	if OnePlayer[PlayerName] == nil or TwoPlayer[PlayerName] == nil then -- Check if there is a region selected
-		Player:SendMessage(cChatColor.Rose .. "No Region set")
-		return true
-	end
-	local OneX, TwoX, OneY, TwoY, OneZ, TwoZ = GetXYZCoords(Player) -- get the right coordinates
-	local World = Player:GetWorld()
-	PersonalClipboard[PlayerName]:Read(World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ) -- read the area
-	Player:SendMessage(cChatColor.LightPurple .. "Block(s) copied.")
-	return true
-end
-
-
------------------------------------------------
-----------------------CUT----------------------
------------------------------------------------
-function HandleCutCommand(Split, Player)
-	local PlayerName = Player:GetName()
-	
-	if OnePlayer[PlayerName] == nil or TwoPlayer[PlayerName] == nil then -- Check if there is a region selected
-		Player:SendMessage(cChatColor.Rose .. "No Region set")
-		return true
-	end
-	local OneX, TwoX, OneY, TwoY, OneZ, TwoZ = GetXYZCoords(Player) -- get the right coordinates
-	
-	if CheckIfInsideAreas(OneX, TwoX, OneY, TwoY, OneZ, TwoZ, Player, Player:GetWorld(), "cut") then -- Check if the clipboard intersects with any of the areas.
-		return true
-	end
-	
-	local World = Player:GetWorld() -- get the world
-
-	LastCoords[PlayerName] = {X = OneX, Y = OneY, Z = OneZ, WorldName = World:GetName()}
-	
-	PersonalUndo[PlayerName]:Read(World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ)
-	local Cut = cBlockArea()
-	PersonalClipboard[PlayerName]:Read(World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ) -- read the area
-	Cut:Read(World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ) -- read the area
-	Cut:Fill(3, 0, 0) -- delete the area
-	Cut:Write(World, OneX, OneY, OneZ) -- write the area
-	World:WakeUpSimulatorsInArea(OneX - 1, TwoX + 1, OneY - 1, TwoY + 1, OneZ - 1, TwoZ + 1)
-	Player:SendMessage(cChatColor. LightPurple .. "Block(s) cut.")
-	return true
-end
-
-
------------------------------------------------
-----------------------SET----------------------
------------------------------------------------
-function HandleSetCommand(Split, Player)
-	local PlayerName = Player:GetName()
-	
-	if OnePlayer[PlayerName] == nil or TwoPlayer[PlayerName] == nil then -- Check if there is a region selected
-		Player:SendMessage(cChatColor.Rose .. "No Region set")
-		return true
-	end
-	
-	if Split[2] == nil then
-		Player:SendMessage(cChatColor.Rose .. "Please say a block ID")
-		return true
-	end
-	
-	local BlockType, BlockMeta = GetBlockTypeMeta(Split[2])
-	if not BlockType then
-		Player:SendMessage(cChatColor.Rose .. "Unknown character \"" .. Split[2] .. "\"")
-		return true
-	end
-	
-	local Blocks = HandleFillSelection(Player, Player:GetWorld(), BlockType, BlockMeta)
-	if Blocks then
-		Player:SendMessage(cChatColor.LightPurple .. Blocks .. " block(s) have been changed.")
-	end
-	return true
-end
-
-
--------------------------------------------------
----------------------REPLACE---------------------
--------------------------------------------------
-function HandleReplaceCommand(Split, Player)
-	local PlayerName = Player:GetName()
-	
-	if OnePlayer[PlayerName] == nil or TwoPlayer[PlayerName] == nil then -- Check if there is a region selected
-		Player:SendMessage(cChatColor.Rose .. "No Region set")
-		return true
-	end
-	if Split[2] == nil or Split[3] == nil then -- check if the player noted a blocktype
-		Player:SendMessage(cChatColor.Rose .. "Please say a block ID")
-		return true
-	end
-
-	local ChangeBlockType, ChangeBlockMeta, TypeOnly = GetBlockTypeMeta(Split[2])
-	if not ChangeBlockType then
-		Player:SendMessage(cChatColor.Rose .. "Unknown character \"" .. Split[2] .. "\"")
-		return true
-	end
-	
-	local ToChangeBlockType, ToChangeBlockMeta = GetBlockTypeMeta(Split[3])
-	if not ToChangeBlockType then
-		Player:SendMessage(cChatColor.Rose .. "Unknown character \"" .. Split[2] .. "\"")
-		return true
-	end
-	
-	local Blocks = HandleReplaceSelection(Player, Player:GetWorld(), ChangeBlockType, ChangeBlockMeta, ToChangeBlockType, ToChangeBlockMeta, TypeOnly)
-	if Blocks then
-		Player:SendMessage(cChatColor.LightPurple .. Blocks .. " block(s) have been changed.")
-	end
-	return true
-end
-
-
-
--------------------------------------------------
-----------------------FACES----------------------
--------------------------------------------------
-function HandleFacesCommand(Split, Player)
-	local PlayerName = Player:GetName()
-	
-	if OnePlayer[PlayerName] == nil or TwoPlayer[PlayerName] == nil then -- Check if there is a region selected
-		Player:SendMessage(cChatColor.Rose .. "No Region set")
-		return true -- stop
-	end
-	if Split[2] == nil then
-		Player:SendMessage(cChatColor.Rose .. "Please say a block ID")
-		return true
-	end
-	
-	local BlockType, BlockMeta = GetBlockTypeMeta(Split[2])
-	if not BlockType then
-		Player:SendMessage(cChatColor.Rose .. "Unknown character \"" .. Split[2] .. "\"")
-		return true
-	end
-	
-	local Blocks = HandleCreateFaces(Player, Player:GetWorld(), BlockType, BlockMeta)
-	if not Blocks then
-		Player:SendMessage(cChatColor.Rose .. "Region intersects with an area")
-	else
-		Player:SendMessage(cChatColor.LightPurple .. Blocks .. " block(s) have been changed.")
-	end
-	return true
-end
-
-
--------------------------------------------------
-----------------------WALLS----------------------
--------------------------------------------------
-function HandleWallsCommand(Split, Player)
-	local PlayerName = Player:GetName()
-	
-	if OnePlayer[PlayerName] == nil or TwoPlayer[PlayerName] == nil then -- Check if there is a region selected
-		Player:SendMessage(cChatColor.Rose .. "No Region set")
-		return true
-	end
-	if Split[2] == nil then
-		Player:SendMessage(cChatColor.Rose .. "Please say a block ID")
-		return true
-	end
-	
-	local BlockType, BlockMeta = GetBlockTypeMeta(Split[2])
-	if not BlockType then
-		Player:SendMessage(cChatColor.Rose .. "Unknown character \"" .. Split[2] .. "\"")
-		return true
-	end
-	
-	local Blocks = HandleCreateWalls(Player, Player:GetWorld(), BlockType, BlockMeta)
-	if not Blocks then
-		Player:SendMessage(cChatColor.Rose .. "Region intersects with an area")
-	else
-		Player:SendMessage(cChatColor.LightPurple .. Blocks .. " block(s) have been changed.")
-	end
-	return true
-end
-
-
-------------------------------------------------
----------------------ROTATE---------------------
-------------------------------------------------
-function HandleRotateCommand(Split, Player)
-	if Split[2] == nil or tonumber(Split[2]) == nil then -- Check if the player gave an angle
-		Player:SendMessage(cChatColor.Rose .. "Too few arguments.\n//rotate [90, 180, 270]")
-		return true
-	end
-	if tonumber(Split[2]) == 90 or tonumber(Split[2]) == 180 or tonumber(Split[2]) == 270 then
-		for I =1, tonumber(Split[2]) / 90 do -- rotate the area some times.
-			PersonalClipboard[Player:GetName()]:RotateCCW() -- Rotate the area
+	-- Convert set to array of names:
+	local BiomesArr = {}
+	for b, val in pairs(BiomesSet) do
+		if (val) then
+			table.insert(BiomesArr, GetStringFromBiome(b))
 		end
-		Player:SendMessage(cChatColor.Rose .. "Rotated clipboard " .. Split[2] .. " degrees")
-	else
-		Player:SendMessage(cChatColor.Rose .. "usage: /rotate [90, 180, 270]")
 	end
-	return true
-end
-
-
------------------------------------------------
--------------------SCHEMATIC-------------------
------------------------------------------------
--- Handles the schematic's save subcommand
-function HandleSchematicSaveCommand(Split, Player)
-	if not PlayerHasWEPermission(Player, "worldedit.schematic.save", "worldedit.clipboard.save") then
-		Player:SendMessage(cChatColor.Rose .. "You do not have permission to save schematic files.")
-		return true
-	end
-	if #Split ~= 4 then
-		Player:SendMessage(cChatColor.Rose .. "Usage: /schematic save <Format> <Name>")
-		return true
-	end
-	local Scheme = string.upper(Split[3])
 	
-	if Scheme == "MCEDIT" then
-		local SchematicName = Split[4]
-		PersonalClipboard[Player:GetName()]:SaveToSchematicFile("Schematics/" .. Split[4] .. ".Schematic") -- save the schematic.
-		Player:SendMessage(cChatColor.LightPurple .. Split[4] .. " saved.")
+	-- Send the list to the player:
+	Player:SendMessage(cChatColor.LightPurple .. "Biomes: " .. table.concat(BiomesArr, ", "))
+	return true
+end
+
+
+
+
+
+function HandleRedoCommand(a_Split, a_Player)
+	-- //redo
+	local State = GetPlayerState(a_Player)
+	local IsSuccess, Msg = State.UndoStack:Redo(a_Player:GetWorld())
+	if (IsSuccess) then
+		a_Player:SendMessage(cChatColor.LightPurple .. "Redo Successful.")
 	else
-		Player:SendMessage("Scheme " .. Split[3] .. "Does not exist.")
+		a_Player:SendMessage(cChatColor.Rose .. "Cannot redo: " .. (Msg or "<unknown error>"))
 	end
 	return true
 end
 
 
--- Handles the schematic's load subcommand.
-function HandleSchematicLoadCommand(Split, Player)
-	if not PlayerHasWEPermission(Player, "worldeidt.schematic.load", "worldedit.clipboard.load") then
-		Player:SendMessage(cChatColor.Rose .. "You do not have permission to load schematic file.")
-		return true
+
+
+
+function HandleUndoCommand(a_Split, a_Player)
+	-- //undo
+	local State = GetPlayerState(a_Player)
+	local IsSuccess, Msg = State.UndoStack:Undo(a_Player:GetWorld())
+	if (IsSuccess) then
+		a_Player:SendMessage(cChatColor.LightPurple .. "Undo Successful.")
+	else
+		a_Player:SendMessage(cChatColor.Rose .. "Cannot undo: " .. (Msg or "<unknown error>"))
 	end
-	if #Split ~= 3 then
-		Player:SendMessage(cChatColor.Rose .. "Usage: /schematic load <name>")
-		return true
-	end
-	local Path = "Schematics/" .. Split[3] .. ".Schematic"
-	if not cFile:Exists(Path) then
-		Player:SendMessage(cChatColor.LightPurple .. "schematic does not exist.")
-		return true
-	end
-	PersonalClipboard[Player:GetName()]:LoadFromSchematicFile(Path) -- load the schematic file
-	Player:SendMessage(cChatColor.LightPurple .. "You loaded " .. Split[3])
 	return true
 end
 
 
--- Handles the schematic's formats subcommand.
-function HandleSchematicFormatsCommand(Split, Player)
-	if not PlayerHasWEPermission(Player, "worldedit.schematic.formats") then
-		Player:SendMessage(cChatColor.Rose .. "You do not have permission to use this command.")
-		return true
+
+
+
+function HandleSizeCommand(a_Split, a_Player)
+	-- //size
+	local State = GetPlayerState(a_Player)
+	if (State.Selection:IsValid()) then
+		a_Player:SendMessage(cChatColor.LightPurple .. "The selection size is " .. State.Selection:GetSizeDesc() .. ".")
+	else
+		a_Player:SendMessage(cChatColor.LightPurple .. "Please select a region first")
 	end
-	Player:SendMessage(cChatColor.LightPurple .. 'Available formats: "MCEdit"')
 	return true
 end
 
 
--- Handles the schematic's list subcommand.
+
+
+
+function HandlePasteCommand(a_Split, a_Player)
+	-- //paste
+
+	-- Check if there's anything in the clipboard:
+	local State = GetPlayerState(a_Player)
+	if not(State.Clipboard:IsValid()) then
+		a_Player:SendMessage(cChatColor.Rose .. "Your clipboard is empty. Use //copy or //cut first.")
+		return true
+	end
+	
+	-- Check with other plugins if the operation is okay:
+	local DstCuboid = State.Clipboard:GetPasteDestCuboid(a_Player)
+	if not(CheckAreaCallbacks(DstCuboid, a_Player, a_Player:GetWorld(), "paste")) then
+		return
+	end
+	
+	-- Paste:
+	State.UndoStack:PushUndoFromCuboid(a_Player:GetWorld(), DstCuboid, "paste")
+	local NumBlocks = State.Clipboard:Paste(a_Player, DstCuboid.p1)
+	a_Player:SendMessage(cChatColor.LightPurple .. NumBlocks .. " block(s) pasted relative to you.")
+	return true
+end
+
+
+
+
+
+function HandleCopyCommand(a_Split, a_Player)
+	-- //copy
+	
+	-- Get the player state:
+	local State = GetPlayerState(a_Player)
+	if not(State.Selection:IsValid()) then
+		a_Player:SendMessage(cChatColor.Rose .. "Make a region selection first.")
+		return true
+	end
+	
+	-- Check with other plugins if the operation is okay:
+	local SrcCuboid = State.Selection:GetSortedCuboid()
+	local World = a_Player:GetWorld()
+	if not(CheckAreaCallbacks(SrcCuboid, a_Player, World, "copy")) then
+		return
+	end
+	
+	-- Cut into the clipboard:
+	local NumBlocks = State.Clipboard:Copy(World, SrcCuboid)
+	a_Player:SendMessage(cChatColor.LightPurple .. NumBlocks .. " block(s) copied.")
+	a_Player:SendMessage(cChatColor.LightPurple .. "Clipboard size: " .. State.Clipboard:GetSizeDesc())
+	return true
+end
+
+
+
+
+
+function HandleCutCommand(a_Split, a_Player)
+	-- //cut
+	
+	-- Get the player state:
+	local State = GetPlayerState(a_Player)
+	if not(State.Selection:IsValid()) then
+		a_Player:SendMessage(cChatColor.Rose .. "Make a region selection first.")
+		return true
+	end
+	
+	-- Check with other plugins if the operation is okay:
+	local SrcCuboid = State.Selection:GetSortedCuboid()
+	local World = a_Player:GetWorld()
+	if not(CheckAreaCallbacks(SrcCuboid, a_Player, World, "copy")) then
+		return
+	end
+	
+	-- Push an undo snapshot:
+	State.UndoStack:PushUndoFromCuboid(World, SrcCuboid, "cut")
+	
+	-- Cut into the clipboard:
+	local NumBlocks = State.Clipboard:Cut(World, SrcCuboid)
+	a_Player:SendMessage(cChatColor.LightPurple .. NumBlocks .. " block(s) cut.")
+	a_Player:SendMessage(cChatColor.LightPurple .. "Clipboard size: " .. State.Clipboard:GetSizeDesc())
+	return true
+end
+
+
+
+
+
+function HandleSetCommand(a_Split, a_Player)
+	-- //set <blocktype>
+	
+	local State = GetPlayerState(a_Player)
+
+	-- Check the selection:
+	if not(State.Selection:IsValid()) then
+		a_Player:SendMessage(cChatColor.Rose .. "No region set")
+		return true
+	end
+	
+	-- Check the params:
+	if (a_Split[2] == nil) then
+		a_Player:SendMessage(cChatColor.Rose .. "Usage: //set <BlockType>")
+		return true
+	end
+	
+	-- Retrieve the blocktype from the params:
+	local BlockType, BlockMeta = GetBlockTypeMeta(a_Split[2])
+	if not(BlockType) then
+		a_Player:SendMessage(cChatColor.LightPurple .. "Unknown block type: '" .. a_Split[2] .. "'.")
+		return true
+	end
+	
+	-- Fill the selection:
+	local NumBlocks = FillSelection(State, a_Player, a_Player:GetWorld(), BlockType, BlockMeta)
+	if (NumBlocks) then
+		a_Player:SendMessage(cChatColor.LightPurple .. NumBlocks .. " block(s) have been changed.")
+	end
+	return true
+end
+
+
+
+
+
+function HandleReplaceCommand(a_Split, a_Player)
+	-- //replace <srcblocktype> <dstblocktype>
+	
+	local State = GetPlayerState(a_Player)
+	
+	-- Check the selection:
+	if not(State.Selection:IsValid()) then
+		a_Player:SendMessage(cChatColor.Rose .. "No region set")
+		return true
+	end
+	
+	-- Check the params:
+	if ((a_Split[2] == nil) or (a_Split[3] == nil)) then
+		a_Player:SendMessage(cChatColor.Rose .. "Usage: //replace <SrcBlockType> <DstBlockType>")
+		return true
+	end
+	
+	-- Retrieve the blocktypes from the params:
+	local SrcBlockType, SrcBlockMeta, TypeOnly = GetBlockTypeMeta(a_Split[2])
+	if not(SrcBlockType) then
+		a_Player:SendMessage(cChatColor.LightPurple .. "Unknown src block type: '" .. a_Split[2] .. "'.")
+		return true
+	end
+	local DstBlockType, DstBlockMeta = GetBlockTypeMeta(a_Split[3])
+	if not(DstBlockType) then
+		a_Player:SendMessage(cChatColor.LightPurple .. "Unknown dst block type: '" .. a_Split[3] .. "'.")
+		return true
+	end
+	
+	-- Replace the blocks:
+	local NumBlocks = ReplaceSelection(State, a_Player, a_Player:GetWorld(), SrcBlockType, SrcBlockMeta, DstBlockType, DstBlockMeta, TypeOnly)
+	if (NumBlocks) then
+		a_Player:SendMessage(cChatColor.LightPurple .. NumBlocks .. " block(s) have been changed.")
+	end
+	return true
+end
+
+
+
+
+
+function HandleFacesCommand(a_Split, a_Player)
+	-- //faces <blocktype>
+	
+	local State = GetPlayerState(a_Player)
+
+	-- Check the selection:
+	if not(State.Selection:IsValid()) then
+		a_Player:SendMessage(cChatColor.Rose .. "No region set")
+		return true
+	end
+	
+	-- Check the params:
+	if (a_Split[2] == nil) then
+		a_Player:SendMessage(cChatColor.Rose .. "Usage: //faces <BlockType>")
+		return true
+	end
+	
+	-- Retrieve the blocktype from the params:
+	local BlockType, BlockMeta = GetBlockTypeMeta(a_Split[2])
+	if not(BlockType) then
+		a_Player:SendMessage(cChatColor.LightPurple .. "Unknown block type: '" .. a_Split[2] .. "'.")
+		return true
+	end
+	
+	-- Fill the selection:
+	local NumBlocks = FillFaces(State, a_Player, a_Player:GetWorld(), BlockType, BlockMeta)
+	if (NumBlocks) then
+		a_Player:SendMessage(cChatColor.LightPurple .. NumBlocks .. " block(s) have been changed.")
+	end
+	return true
+end
+
+
+
+
+
+function HandleWallsCommand(a_Split, a_Player)
+	-- //walls <blocktype>
+	
+	local State = GetPlayerState(a_Player)
+
+	-- Check the selection:
+	if not(State.Selection:IsValid()) then
+		a_Player:SendMessage(cChatColor.Rose .. "No region set")
+		return true
+	end
+	
+	-- Check the params:
+	if (a_Split[2] == nil) then
+		a_Player:SendMessage(cChatColor.Rose .. "Usage: //walls <BlockType>")
+		return true
+	end
+	
+	-- Retrieve the blocktype from the params:
+	local BlockType, BlockMeta = GetBlockTypeMeta(a_Split[2])
+	if not(BlockType) then
+		a_Player:SendMessage(cChatColor.LightPurple .. "Unknown block type: '" .. a_Split[2] .. "'.")
+		return true
+	end
+	
+	-- Fill the selection:
+	local NumBlocks = FillWalls(State, a_Player, a_Player:GetWorld(), BlockType, BlockMeta)
+	if (NumBlocks) then
+		a_Player:SendMessage(cChatColor.LightPurple .. NumBlocks .. " block(s) have been changed.")
+	end
+	return true
+end
+
+
+
+
+
+function HandleRotateCommand(a_Split, a_Player)
+	-- //rotate [NumDegrees]
+	
+	-- Check if the clipboard is valid:
+	local State = GetPlayerState(a_Player)
+	if not(State.Clipboard:IsValid()) then
+		a_Player:SendMessage(cChatColor.Rose .. "Nothing in the clipboard. Use //copy or //cut first.")
+		return true
+	end
+	
+	-- Check if the player gave an angle:
+	local Angle = tonumber(a_Split[2])
+	if (Angle == nil) then
+		a_Player:SendMessage(cChatColor.Rose .. "Usage: //rotate [90, 180, 270, -90, -180, -270]")
+		return true
+	end
+	
+	-- Rotate the clipboard:
+	local NumRots = math.floor(Angle / 90 + 0.5)  -- round to nearest 90-degree step
+	State.Clipboard:Rotate(NumRots)
+	a_Player:SendMessage(cChatColor.LightPurple .. "Rotated the clipboard by " .. (NumRots * 90) .. " degrees CCW")
+	a_Player:SendMessage(cChatColor.LightPurple .. "Clipboard size: " .. State.Clipboard:GetSizeDesc())
+	return true
+end
+
+
+
+
+
+function HandleSchematicSaveCommand(a_Split, a_Player)
+	-- //schematic save [<format>] <FileName>
+
+	-- Get the parameters from the command arguments:
+	local FileName
+	if (#a_Split == 4) then
+		FileName = a_Split[4]
+	elseif (#a_Split == 3) then
+		FileName = a_Split[3]
+	else
+		a_Player:SendMessage(cChatColor.Rose .. "Usage: //schematic save [<format>] <FileName>")
+		return true
+	end
+	
+	-- Check that there's data in the clipboard:
+	local State = GetPlayerState(a_Player)
+	if not(State.Clipboard:IsValid()) then
+		a_Player:SendMessage(cChatColor.Rose .. "There's no data in the clipboard. Use //copy or //cut first.")
+		return true
+	end
+
+	-- Save the clipboard:
+	State.Clipboard:SaveToSchematicFile("schematics/" .. FileName .. ".schematic")
+	a_Player:SendMessage(cChatColor.LightPurple .. "Clipboard saved to " .. FileName .. ".")
+	return true
+end
+
+
+
+
+
+function HandleSchematicLoadCommand(a_Split, a_Player)
+	-- //schematic load <FileName>
+	
+	-- Check the FileName parameter:
+	if (#a_Split ~= 3) then
+		a_Player:SendMessage(cChatColor.Rose .. "Usage: /schematic load <FileName>")
+		return true
+	end
+	local FileName = a_Split[3]
+	
+	-- Check if the file exists:
+	local Path = "schematics/" .. FileName .. ".schematic"
+	if not(cFile:Exists(Path)) then
+		a_Player:SendMessage(cChatColor.Rose .. FileName .. " schematic does not exist.")
+		return true
+	end
+	
+	-- Load the file into clipboard:
+	local State = GetPlayerState(a_Player)
+	if not(State.Clipboard:LoadFromSchematicFile(Path)) then
+		a_Player:SendMessage(cChatColor.Rose .. FileName .. " schematic does not exist.")
+		return true
+	end
+	a_Player:SendMessage(cChatColor.LightPurple .. FileName .. " schematic was loaded into your clipboard.")
+	a_Player:SendMessage(cChatColor.LightPurple .. "Clipboard size: " .. State.Clipboard:GetSizeDesc())
+	return true
+end
+
+
+
+
+
+function HandleSchematicFormatsCommand(a_Split, a_Player)
+	-- //schematic listformats
+	
+	-- We support only one format, MCEdit:
+	a_Player:SendMessage(cChatColor.LightPurple .. 'Available formats: "MCEdit"')
+	return true
+end
+
+
+
+
+
 function HandleSchematicListCommand(Split, Player)
-	if not PlayerHasWEPermission(Player, "worldeidt.schematic.list") then
-		Player:SendMessage(cChatColor.Rose .. "You do not have permission to use this command.")
-		return true
-	end
-	local FileList = cFile:GetFolderContents("Schematics")
-	for Idx, FileName in ipairs(FileList) do
-		FileList[Idx] = FileName:sub(1, FileName:len() - 10) -- Remove the extension part of the filename.
-	end
+	-- //schematic list
 	
-	Player:SendMessage(cChatColor.LightPurple .. "Available schematics: " .. table.concat(FileList, ", ", 3))
+	-- Retrieve all the objects in the folder:
+	local FolderContents = cFile:GetFolderContents("schematics")
+	
+	-- Filter out non-files and non-".schematic" files:
+	local FileList = {}
+	for idx, fnam in ipairs(FolderContents) do
+		if (
+			cFile:IsFile("schematics/" .. fnam) and
+			fnam:match(".*%.schematic")
+		) then
+			table.insert(FileList, fnam:sub(1, fnam:len() - 10))  -- cut off the ".schematic" part of the name
+		end
+	end
+	table.sort(FileList,
+		function(f1, f2)
+			return (string.lower(f1) < string.lower(f2))
+		end
+	)
+	
+	Player:SendMessage(cChatColor.LightPurple .. "Available schematics: " .. table.concat(FileList, ", "))
 	return true
 end
 
 
-----------------------------------------------
---------------------EXPAND--------------------
-----------------------------------------------
-function HandleExpandCommand(Split, Player)
-	if GetSize(Player) == -1 then
-		Player:SendMessage(cChatColor.Rose .. "You don't have anything selected.")
+
+
+
+function HandlePos1Command(a_Split, a_Player)
+	-- //pos1
+	local State = GetPlayerState(a_Player)
+	local BlockX = math.floor(a_Player:GetPosX())
+	local BlockY = math.floor(a_Player:GetPosY())
+	local BlockZ = math.floor(a_Player:GetPosZ())
+	State.Selection:SetFirstPoint(BlockX, BlockY, BlockZ)
+	a_Player:SendMessage("First position set to {" .. BlockX .. ", " .. BlockY .. ", " .. BlockZ .. "}.")
+	return true
+end
+
+
+
+
+
+function HandlePos2Command(a_Split, a_Player)
+	-- //pos2
+	local State = GetPlayerState(a_Player)
+	local BlockX = math.floor(a_Player:GetPosX())
+	local BlockY = math.floor(a_Player:GetPosY())
+	local BlockZ = math.floor(a_Player:GetPosZ())
+	State.Selection:SetSecondPoint(BlockX, BlockY, BlockZ)
+	a_Player:SendMessage("Second position set to {" .. BlockX .. ", " .. BlockY .. ", " .. BlockZ .. "}.")
+	return true
+end
+
+
+
+
+
+function HandleHPos1Command(a_Split, a_Player)
+	-- //hpos1
+	
+	-- Trace the blocks along the player's look vector until a hit is found:
+	local Target = HPosSelect(a_Player)
+	if not(Target) then
+		a_Player:SendMessage(cChatColor.Rose .. "You were not looking at a block.")
 		return true
 	end
 	
-	if Split[2] ~= nil and tonumber(Split[2]) == nil then
-		Player:SendMessage(cChatColor.Rose .. "Usage: //expand [Blocks] [Direction]")
+	-- Select the block:
+	local State = GetPlayerState(a_Player)
+	State.Selection:SetFirstPoint(Target.x, Target.y, Target.z)
+	a_Player:SendMessage("First position set to {" .. Target.x .. ", " .. Target.y .. ", " .. Target.z .. "}.")
+	return true
+end
+
+
+
+
+
+function HandleHPos2Command(a_Split, a_Player)
+	-- //hpos2
+	
+	-- Trace the blocks along the player's look vector until a hit is found:
+	local Target = HPosSelect(a_Player)
+	if not(Target) then
+		a_Player:SendMessage(cChatColor.Rose .. "You were not looking at a block.")
 		return true
 	end
 	
-	local Blocks = Split[2] or 1 -- Use the given amount or 1 if nil
-	local Direction = string.upper(Split[3] or "forward")
+	-- Select the block:
+	local State = GetPlayerState(a_Player)
+	State.Selection:SetSecondPoint(Target.x, Target.y, Target.z)
+	a_Player:SendMessage("Second position set to {" .. Target.x .. ", " .. Target.y .. ", " .. Target.z .. "}.")
+	return true
+end
+
+
+
+
+
+function HandleExpandCommand(a_Split, a_Player)
+	-- //expand [Amount] [Direction]
 	
-	local PlayerName = Player:GetName()
-		
-	if Direction == "UP" then
-		if OnePlayer[PlayerName].y < TwoPlayer[PlayerName].y then
-			SetPlayerSelectionPoint(Player, TwoPlayer[PlayerName].x, TwoPlayer[PlayerName].y + Blocks, TwoPlayer[PlayerName].z, E_SELECTIONPOINT_RIGHT)
-		else
-			SetPlayerSelectionPoint(Player, OnePlayer[PlayerName].x, OnePlayer[PlayerName].y + Blocks, OnePlayer[PlayerName].z, E_SELECTIONPOINT_LEFT)
-		end
-		return true
-	elseif Direction == "DOWN" then
-		if OnePlayer[PlayerName].y > TwoPlayer[PlayerName].y then
-			SetPlayerSelectionPoint(Player, TwoPlayer[PlayerName].x, TwoPlayer[PlayerName].y - Blocks, TwoPlayer[PlayerName].z, E_SELECTIONPOINT_RIGHT)
-		else
-			SetPlayerSelectionPoint(Player, OnePlayer[PlayerName].x, OnePlayer[PlayerName].y - Blocks, OnePlayer[PlayerName].z, E_SELECTIONPOINT_LEFT)
-		end
+	-- Check the selection:
+	local State = GetPlayerState(a_Player)
+	if not(State.Selection:IsValid()) then
+		a_Player:SendMessage(cChatColor.Rose .. "No region set")
 		return true
 	end
 	
-	local LookDirection = Round((Player:GetYaw() + 180) / 90)
-	local FinalDirection = 0
-	if Direction == "LEFT" then
-		if LookDirection == E_DIRECTION_SOUTH then
-			FinalDirection = E_DIRECTION_EAST
-		elseif LookDirection == E_DIRECTION_EAST then
-			FinalDirection = E_DIRECTION_NORTH1
-		elseif LookDirection == E_DIRECTION_NORTH1 or LookDirection == E_DIRECTION_NORTH2 then
-			FinalDirection = E_DIRECTION_WEST
-		elseif LookDirection == E_DIRECTION_WEST then
-			FinalDirection = E_DIRECTION_SOUTH
+	if (a_Split[2] ~= nil) and (tonumber(a_Split[2]) == nil) then
+		a_Player:SendMessage(cChatColor.Rose .. "Usage: //expand [Blocks] [Direction]")
+		return true
+	end
+	
+	local NumBlocks = a_Split[2] or 1 -- Use the given amount or 1 if nil
+	local Direction = string.lower(a_Split[3] or "forward")
+	local SubMinX, SubMinY, SubMinZ, AddMaxX, AddMaxY, AddMaxZ = 0, 0, 0, 0, 0, 0
+	local LookDirection = Round((a_Player:GetYaw() + 180) / 90)
+	
+	if (Direction == "up") then
+		AddMaxY = NumBlocks
+	elseif (Direction == "down") then
+		SubMinY = NumBlocks
+	elseif (Direction == "left") then
+		if (LookDirection == E_DIRECTION_SOUTH) then
+			AddMaxX = NumBlocks
+		elseif (LookDirection == E_DIRECTION_EAST) then
+			SubMinZ = NumBlocks
+		elseif (LookDirection == E_DIRECTION_NORTH1) or (LookDirection == E_DIRECTION_NORTH2) then
+			SubMinX = NumBlocks
+		elseif (LookDirection == E_DIRECTION_WEST) then
+			AddMaxZ = NumBlocks
 		end
-	elseif Direction == "RIGHT" then
-		if LookDirection == E_DIRECTION_SOUTH then
-			FinalDirection = E_DIRECTION_WEST
-		elseif LookDirection == E_DIRECTION_EAST then
-			FinalDirection = E_DIRECTION_SOUTH
-		elseif LookDirection == E_DIRECTION_NORTH1 or LookDirection == E_DIRECTION_NORTH2 then
-			FinalDirection = E_DIRECTION_EAST
-		elseif LookDirection == E_DIRECTION_WEST then
-			FinalDirection = E_DIRECTION_NORTH1
+	elseif (Direction == "right") then
+		if (LookDirection == E_DIRECTION_SOUTH) then
+			SubMinX = NumBlocks
+		elseif (LookDirection == E_DIRECTION_EAST) then
+			AddMaxZ = NumBlocks
+		elseif (LookDirection == E_DIRECTION_NORTH1) or (LookDirection == E_DIRECTION_NORTH2) then
+			AddMaxX = NumBlocks
+		elseif (LookDirection == E_DIRECTION_WEST) then
+			SubMinZ = NumBlocks
 		end
-	elseif Direction == "SOUTH" then
-		FinalDirection = E_DIRECTION_SOUTH
-	elseif Direction == "EAST" then
-		FinalDirection = E_DIRECTION_EAST
-	elseif Direction == "NORTH" then
-		FinalDirection = E_DIRECTION_NORTH1
-	elseif Direction == "WEST" then
-		FinalDirection = E_DIRECTION_WEST
-	elseif Direction == "FORWARD" then
-		FinalDirection = LookDirection
-	elseif Direction == "BACKWARDS" or Direction == "BACK" then
-		if LookDirection == E_DIRECTION_SOUTH then
-			FinalDirection = E_DIRECTION_NORTH1
-		elseif LookDirection == E_DIRECTION_EAST then
-			FinalDirection = E_DIRECTION_WEST
-		elseif LookDirection == E_DIRECTION_NORTH1 or LookDirection == E_DIRECTION_NORTH2 then
-			FinalDirection = E_DIRECTION_SOUTH
-		elseif LookDirection == E_DIRECTION_WEST then
-			FinalDirection = E_DIRECTION_EAST
+	elseif (Direction == "south") then
+		AddMaxZ = NumBlocks
+	elseif (Direction == "east") then
+		AddMaxX = NumBlocks
+	elseif (Direction == "north") then
+		SubMinZ = NumBlocks
+	elseif (Direction == "west") then
+		SubMinX = NumBlocks
+	elseif ((Direction == "forward") or (Direction == "me")) then
+		if (LookDirection == E_DIRECTION_SOUTH) then
+			AddMaxZ = NumBlocks
+		elseif (LookDirection == E_DIRECTION_EAST) then
+			AddMaxX = NumBlocks
+		elseif ((LookDirection == E_DIRECTION_NORTH1) or (LookDirection == E_DIRECTION_NORTH2)) then
+			SubMinZ = NumBlocks
+		elseif (LookDirection == E_DIRECTION_WEST) then
+			SubMinX = NumBlocks
+		end
+	elseif ((Direction == "backwards") or (Direction == "back")) then
+		if (LookDirection == E_DIRECTION_SOUTH) then
+			SubMinZ = NumBlocks
+		elseif (LookDirection == E_DIRECTION_EAST) then
+			SubMinX = NumBlocks
+		elseif ((LookDirection == E_DIRECTION_NORTH1) or (LookDirection == E_DIRECTION_NORTH2)) then
+			AddMaxZ = NumBlocks
+		elseif (LookDirection == E_DIRECTION_WEST) then
+			AddMaxX = NumBlocks
 		end
 	else
-		Player:SendMessage(cChatColor.Rose .. "Unknown direction \"" .. Direction .. "\".")
+		a_Player:SendMessage(cChatColor.Rose .. "Unknown direction \"" .. Direction .. "\".")
 		return true
 	end
 	
-	if FinalDirection == E_DIRECTION_EAST then
-		if OnePlayer[PlayerName].x < TwoPlayer[PlayerName].x then
-			SetPlayerSelectionPoint(Player, TwoPlayer[PlayerName].x + Blocks, TwoPlayer[PlayerName].y, TwoPlayer[PlayerName].z, E_SELECTIONPOINT_RIGHT)
-		else
-			SetPlayerSelectionPoint(Player, OnePlayer[PlayerName].x + Blocks, OnePlayer[PlayerName].y, OnePlayer[PlayerName].z, E_SELECTIONPOINT_LEFT)
-		end
-	elseif FinalDirection == E_DIRECTION_SOUTH then
-		if OnePlayer[PlayerName].z < TwoPlayer[PlayerName].z then
-			SetPlayerSelectionPoint(Player, TwoPlayer[PlayerName].x, TwoPlayer[PlayerName].y, TwoPlayer[PlayerName].z + Blocks, E_SELECTIONPOINT_RIGHT)
-		else
-			SetPlayerSelectionPoint(Player, OnePlayer[PlayerName].x, OnePlayer[PlayerName].y, OnePlayer[PlayerName].z + Blocks, E_SELECTIONPOINT_LEFT)
-		end
-	elseif FinalDirection == E_DIRECTION_NORTH1  or FinalDirection == E_DIRECTION_NORTH2 then
-		if OnePlayer[PlayerName].z > TwoPlayer[PlayerName].z then
-			SetPlayerSelectionPoint(Player, TwoPlayer[PlayerName].x, TwoPlayer[PlayerName].y, TwoPlayer[PlayerName].z - Blocks, E_SELECTIONPOINT_RIGHT)
-		else
-			SetPlayerSelectionPoint(Player, OnePlayer[PlayerName].x, OnePlayer[PlayerName].y, OnePlayer[PlayerName].z - Blocks, E_SELECTIONPOINT_LEFT)
-		end
-	elseif FinalDirection == E_DIRECTION_WEST then
-		if OnePlayer[PlayerName].x > TwoPlayer[PlayerName].x then
-			SetPlayerSelectionPoint(Player, TwoPlayer[PlayerName].x - Blocks, TwoPlayer[PlayerName].y, TwoPlayer[PlayerName].z, E_SELECTIONPOINT_RIGHT)
-		else
-			SetPlayerSelectionPoint(Player, OnePlayer[PlayerName].x - Blocks, OnePlayer[PlayerName].y, OnePlayer[PlayerName].z, E_SELECTIONPOINT_LEFT)
-		end
-	end
+	State.Selection:Expand(SubMinX, SubMinY, SubMinZ, AddMaxX, AddMaxY, AddMaxZ)
+	a_Player:SendMessage(cChatColor.LightPurple .. "Expaned the selection.")
+	a_Player:SendMessage(cChatColor.LightPurple .. "Selection is now " .. State.Selection:GetSizeDesc())
 	return true
 end
+
+
+
+

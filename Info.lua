@@ -164,62 +164,30 @@ g_PluginInfo =
 				save =
 				{
 					HelpString = "Saves the current clipboard to a file with the given filename.",
-					Permission = "",
+					Permission = "worldedit.schematic.save",
 					Handler = HandleSchematicSaveCommand,
-				},
-				s =
-				{
-					HelpString = "Saves the current clipboard to a file with the given filename.",
-					Permission = "",
-					Handler = HandleSchematicSaveCommand,
+					Alias = "s",
 				},
 				load =
 				{
 					HelpString = "Loads the given schematic file.",
-					Permission = "",
+					Permission = "worldedit.schematic.load",
 					Handler = HandleSchematicLoadCommand,
-				},
-				l =
-				{
-					HelpString = "Loads the given schematic file.",
-					Permission = "",
-					Handler = HandleSchematicLoadCommand,
+					Alias = "l",
 				},
 				formats =
 				{
 					HelpString = "List available schematic formats",
-					Permission = "",
+					Permission = "worldedit.schematic.list",
 					Handler = HandleSchematicFormatsCommand,
-				},
-				listformats =
-				{
-					HelpString = "List available schematic formats",
-					Permission = "",
-					Handler = HandleSchematicFormatsCommand,
-				},
-				f =
-				{
-					HelpString = "List available schematic formats",
-					Permission = "",
-					Handler = HandleSchematicFormatsCommand,
+					Alias = {"listformats", "f" },
 				},
 				list =
 				{
 					HelpString = "List available schematics",
-					Permission = "",
+					Permission = "worldedit.schematic.list",
 					Handler = HandleSchematicListCommand,
-				},
-				all =
-				{
-					HelpString = "List available schematics",
-					Permission = "",
-					Handler = HandleSchematicListCommand,
-				},
-				ls =
-				{
-					HelpString = "List available schematics",
-					Permission = "",
-					Handler = HandleSchematicListCommand,
+					Alias = { "all", "ls", },
 				},
 			},
 		},

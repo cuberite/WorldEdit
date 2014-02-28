@@ -18,24 +18,12 @@ end
 ------------------CREATETABLES-----------------
 -----------------------------------------------
 function CreateTables()
-	OnePlayer = {}
-	TwoPlayer = {}
-	Blocks = {}
-	PersonalBlockArea = {}
-	PersonalUndo = {}
-	PersonalRedo = {}
-	PersonalClipboard = {}
-	LastRedoCoords = {}
-	LastCoords = {}
 	SP = {}
 	Repl = {}
 	ReplItem = {}
-	Count = {}
 	GrowTreeItem = {}
-	WandActivated = {}
 	LeftClickCompassUsed = {}
 	ExclusionAreaPlugins = {}
-	PlayerWECUIActivated = {}
 	PlayerSelectPointHooks = {}
 	cRoot:Get():ForEachWorld(function(World)
 		ExclusionAreaPlugins[World:GetName()] = {}
@@ -43,60 +31,7 @@ function CreateTables()
 end
 
 
---------------------------------------------
-------------LOADCOMMANDFUNCTIONS------------
---------------------------------------------
-function LoadCommandFunctions(PluginDir)
-	dofile(PluginDir .. "/Commands/Tools.lua") -- Add lua file with functions for tools commands
-	dofile(PluginDir .. "/Commands/Selection.lua") -- Add lua file with functions for selection commands
-	dofile(PluginDir .. "/Commands/functions.lua") -- Add lua file with helper functions
-	dofile(PluginDir .. "/Commands/AlterLandscape.lua") -- Add lua file with functions for landscape editting commands
-	dofile(PluginDir .. "/Commands/Entitys.lua") -- Add lua file with functions for entity commands
-	dofile(PluginDir .. "/Commands/Navigation.lua") -- Add lua file with functions for navigation commands
-	dofile(PluginDir .. "/Commands/Other.lua") -- Add lua file with functions for all the other commands
-	
-	dofile(PluginDir .. "/API/Manage.lua")
-	dofile(PluginDir .. "/API/Check.lua")
-end
 
-
----------------------------------------------
---------------LOADONLINEPLAYERS--------------
----------------------------------------------
-function LoadOnlinePlayers()
-	cRoot:Get():ForEachPlayer(
-	function(Player)
-		LoadPlayer(Player)
-	end)
-end
-
-
----------------------------------------------
--------------------GETSIZE-------------------
----------------------------------------------
-function GetSize(Player)
-	local PlayerName = Player:GetName()
-	if OnePlayer[PlayerName] == nil or TwoPlayer[PlayerName] == nil then
-		return -1 -- The player doesn't have anything selected. return -1
-	end
-	
-	if OnePlayer[PlayerName].x > TwoPlayer[PlayerName].x then -- check what number is bigger becouse otherwise you can get a negative number.
-		X = OnePlayer[PlayerName].x - TwoPlayer[PlayerName].x + 1
-	else
-		X = TwoPlayer[PlayerName].x - OnePlayer[PlayerName].x + 1
-	end
-	if OnePlayer[PlayerName].y > TwoPlayer[PlayerName].y then -- check what number is bigger becouse otherwise you can get a negative number.
-		Y = OnePlayer[PlayerName].y - TwoPlayer[PlayerName].y + 1
-	else
-		Y = TwoPlayer[PlayerName].y - OnePlayer[PlayerName].y + 1
-	end
-	if OnePlayer[PlayerName].z > TwoPlayer[PlayerName].z then -- check what number is bigger becouse otherwise you can get a negative number.
-		Z = OnePlayer[PlayerName].z - TwoPlayer[PlayerName].z + 1
-	else
-		Z = TwoPlayer[PlayerName].z - OnePlayer[PlayerName].z + 1
-	end
-	return X * Y * Z -- calculate the area.
-end
 
 
 ---------------------------------------------
@@ -156,63 +91,7 @@ function GetBiomeFromString(Split, Player) -- this simply checks what the player
 end
 
 
----------------------------------------------
------------------GETXZCOORDS-----------------
----------------------------------------------
-function GetXZCoords(Player)
-	local PlayerName = Player:GetName()
-	if OnePlayer[PlayerName] == nil or TwoPlayer[PlayerName] == nil then -- check if there is a region. Needed for plugins that are going to use this plugin.
-		return false
-	end
-	if OnePlayer[PlayerName].x < TwoPlayer[PlayerName].x then -- check what number is bigger becouse otherwise you can get a negative number.
-		OneX = OnePlayer[PlayerName].x
-		TwoX = TwoPlayer[PlayerName].x
-	else
-		OneX = TwoPlayer[PlayerName].x
-		TwoX = OnePlayer[PlayerName].x
-	end
-	if OnePlayer[PlayerName].z < TwoPlayer[PlayerName].z then -- check what number is bigger becouse otherwise you can get a negative number.
-		OneZ = OnePlayer[PlayerName].z
-		TwoZ = TwoPlayer[PlayerName].z
-	else
-		OneZ = TwoPlayer[PlayerName].z
-		TwoZ = OnePlayer[PlayerName].z
-	end
-	return OneX, TwoX, OneZ, TwoZ -- return the right coordinates
-end
 
-
-----------------------------------------------
------------------GETXYZCOORDS-----------------
-----------------------------------------------
-function GetXYZCoords(Player)
-	local PlayerName = Player:GetName()
-	if OnePlayer[PlayerName] == nil or TwoPlayer[PlayerName] == nil then -- check if there is a region. Needed for plugins that are going to use this plugin.
-		return false
-	end
-	if OnePlayer[PlayerName].x < TwoPlayer[PlayerName].x then -- check what number is bigger becouse otherwise you can get a negative number.
-		OneX = OnePlayer[PlayerName].x
-		TwoX = TwoPlayer[PlayerName].x
-	else
-		OneX = TwoPlayer[PlayerName].x
-		TwoX = OnePlayer[PlayerName].x
-	end
-	if OnePlayer[PlayerName].y < TwoPlayer[PlayerName].y then -- check what number is bigger becouse otherwise you can get a negative number.
-		OneY = OnePlayer[PlayerName].y
-		TwoY = TwoPlayer[PlayerName].y
-	else
-		OneY = TwoPlayer[PlayerName].y
-		TwoY = OnePlayer[PlayerName].y
-	end
-	if OnePlayer[PlayerName].z < TwoPlayer[PlayerName].z then -- check what number is bigger becouse otherwise you can get a negative number.
-		OneZ = OnePlayer[PlayerName].z
-		TwoZ = TwoPlayer[PlayerName].z
-	else
-		OneZ = TwoPlayer[PlayerName].z
-		TwoZ = OnePlayer[PlayerName].z
-	end
-	return OneX, TwoX, OneY, TwoY, OneZ, TwoZ -- return the right coordinates
-end
 
 
 ----------------------------------------------
@@ -336,27 +215,6 @@ function table.contains(table, element)
 end
 
 
---------------------------------------------
-----------------LOADPLAYER------------------
---------------------------------------------
-function LoadPlayer(Player)
-	local PlayerName = Player:GetName()
-	if PersonalBlockArea[PlayerName] == nil then
-		PersonalBlockArea[PlayerName] = cBlockArea()
-	end
-	if PersonalUndo[PlayerName] == nil then
-		PersonalUndo[PlayerName] = cBlockArea()
-	end
-	if PersonalRedo[PlayerName] == nil then
-		PersonalRedo[PlayerName] = cBlockArea()
-	end
-	if PersonalClipboard[PlayerName] == nil then
-		PersonalClipboard[PlayerName] = cBlockArea()
-	end
-	if WandActivated[PlayerName] == nil then
-		WandActivated[PlayerName] = true
-	end
-end
 
 
 --------------------------------------------
@@ -390,37 +248,6 @@ function PlayerHasWEPermission(Player, ...)
 end
 
 
------------------------------------------------
-------------SETPLAYERSELECTIONPOINT------------
------------------------------------------------
-function SetPlayerSelectionPoint(a_Player, a_PosX, a_PosY, a_PosZ, a_PointNr)
-	-- Check if other plugins agree with changing the players selection.
-	if CheckIfAllowedToChangeSelection(a_Player, a_PosX, a_PosY, a_PosZ, a_PointNr) then
-		return
-	end
-	
-	local PlayerName = a_Player:GetName()
-	local PointNrName = ""
-	if a_PointNr == E_SELECTIONPOINT_LEFT then
-		PointNrName = "First"
-		OnePlayer[PlayerName] = Vector3i(a_PosX, a_PosY, a_PosZ)
-	else
-		PointNrName = "Second"
-		TwoPlayer[PlayerName] = Vector3i(a_PosX, a_PosY, a_PosZ)
-	end
-	
-	if OnePlayer[PlayerName] ~= nil and TwoPlayer[PlayerName] ~= nil then
-		a_Player:SendMessage(cChatColor.LightPurple .. PointNrName .. ' position set to (' .. a_PosX .. ".0, " .. a_PosY .. ".0, " .. a_PosZ .. ".0) (" .. GetSize(a_Player) .. ").")
-		if PlayerWECUIActivated[PlayerName] then
-			a_Player:GetClientHandle():SendPluginMessage("WECUI", string.format("p|%i|%i|%i|%i|%i", a_PointNr, a_PosX, a_PosY, a_PosZ, a_PosX * a_PosY * a_PosZ))
-		end
-	else
-		a_Player:SendMessage(cChatColor.LightPurple .. PointNrName .. ' position set to (' .. a_PosX .. ".0, " .. a_PosY .. ".0, " .. a_PosZ .. ".0).")
-		if PlayerWECUIActivated[PlayerName] then
-			a_Player:GetClientHandle():SendPluginMessage("WECUI", string.format("p|%i|%i|%i|%i|-1", a_PointNr, a_PosX, a_PosY, a_PosZ))
-		end
-	end
-end
 
 
 -----------------------------------------------

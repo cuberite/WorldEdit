@@ -1,58 +1,11 @@
----------------------------------------------------
------------------SELECTFIRSTPOINT------------------
----------------------------------------------------
-function SelectFirstPointHook(Player, BlockX, BlockY, BlockZ, BlockFace, BlockType, BlockMeta)
-	if not PlayerHasWEPermission(Player, "worldedit.selection.pos") then
-		return false
-	end
-	
-	local PlayerName = Player:GetName()
-	if not WandActivated[PlayerName] then
-		return false
-	end
-	
-	if Player:GetEquippedItem().m_ItemType ~= Wand then
-		return false
-	end
-	
-	if Player:IsCrouched() then
-		BlockX, BlockY, BlockZ = AddFaceDirection(BlockX, BlockY, BlockZ, BlockFace)
-	end
-	
-	SetPlayerSelectionPoint(Player, BlockX, BlockY, BlockZ, E_SELECTIONPOINT_LEFT)
-	return true
-end
+
+-- hooks.lua
+
+-- Implements the handlers for the hooks used by the plugin
+-- This file is temporary, the hook handlers will be moved to the tools they implement!
 
 
-----------------------------------------------------
------------------SELECTSECONDPOINT------------------
-----------------------------------------------------
-function SelectSecondPointHook(Player, BlockX, BlockY, BlockZ, BlockFace, CursorX, CursorY, CursorZ)
-	if BlockFace == BLOCK_FACE_NONE then
-		return false
-	end
-	
-	local PlayerName = Player:GetName()
-	if not PlayerHasWEPermission(Player, "worldedit.selection.pos") then
-		return false
-	end
-	
-	if not WandActivated[PlayerName] then
-		return false
-	end
-	
-	-- Check if the wand is equipped
-	if Player:GetEquippedItem().m_ItemType ~= Wand then
-		return false
-	end
-	
-	if Player:IsCrouched() then
-		BlockX, BlockY, BlockZ = AddFaceDirection(BlockX, BlockY, BlockZ, BlockFace)
-	end
-	
-	SetPlayerSelectionPoint(Player, BlockX, BlockY, BlockZ, E_SELECTIONPOINT_RIGHT)
-	return true
-end
+
 
 
 ---------------------------------------------------
@@ -115,12 +68,6 @@ function RightClickCompassHook(Player, BlockX, BlockY, BlockZ, BlockFace, Cursor
 end
 
 
------------------------------------------------------
--------------------ONPLAYERJOINED--------------------
------------------------------------------------------
-function OnPlayerJoined(Player)
-	LoadPlayer(Player)
-end
 
 
 ---------------------------------------------------
@@ -186,11 +133,3 @@ end
 
 
 
-----------------------------------------------------
-------------------ONPLUGINMESSAGE-------------------
-----------------------------------------------------
-function OnPluginMessage(a_Client, a_Channel, a_Message)
-	if (a_Channel == "REGISTER") and (a_Message:find("WECUI") ~= nil) then
-		PlayerWECUIActivated[a_Client:GetPlayer():GetName()] = true
-	end
-end

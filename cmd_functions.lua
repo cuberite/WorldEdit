@@ -1,145 +1,187 @@
--------------------------------------------------
----------------CREATEWALLSFUNCTION---------------
--------------------------------------------------
-function HandleCreateWalls(Player, World, BlockType, BlockMeta)
-	local OneX, TwoX, OneY, TwoY, OneZ, TwoZ = GetXYZCoords(Player) -- Get the right X, Y and Z coordinates
-	if CheckIfInsideAreas(OneX, TwoX, OneY, TwoY, OneZ, TwoZ, Player, World, "walls") then -- Check if the region intersects with any of the areas.
-		return false
+
+-- cmd_functions.lua
+
+-- Implements the helper functions that do the actual filling / replacing / blocktracing work
+
+
+
+
+
+--- Fills the walls of the selection stored in the specified cPlayerState with the specified block type
+-- Returns the number of blocks changed, or no value if disallowed
+-- The original contents are pushed onto PlayerState's Undo stack
+function FillWalls(a_PlayerState, a_Player, a_World, a_BlockType, a_BlockMeta)
+	-- Check with other plugins if the operation is okay:
+	if not(CheckAreaCallbacks(a_PlayerState.Selection:GetSortedCuboid(), a_Player, a_World, "walls")) then
+		return
 	end
 	
-	local PlayerName = Player:GetName()
+	-- Push an Undo onto the stack:
+	a_PlayerState:PushUndoInSelection(a_World, "walls")
+
+	-- Fill the walls:
+	local Area = cBlockArea()
+	local MinX, MaxX = a_PlayerState.Selection:GetXCoordsSorted()
+	local MinY, MaxY = a_PlayerState.Selection:GetYCoordsSorted()
+	local MinZ, MaxZ = a_PlayerState.Selection:GetZCoordsSorted()
+	local XSize = MaxX - MinX
+	local YSize = MaxY - MinY
+	local ZSize = MaxZ - MinZ
+	Area:Read(a_World, MinX, MaxX, MinY, MaxY, MinZ, MaxZ, cBlockArea.baTypes + cBlockArea.baMetas)
+	Area:FillRelCuboid(0,     XSize, 0,     YSize, 0,     0,     cBlockArea.baTypes + cBlockArea.baMetas, a_BlockType, a_BlockMeta)  -- XY wall at MinZ
+	Area:FillRelCuboid(0,     XSize, 0,     YSize, ZSize, ZSize, cBlockArea.baTypes + cBlockArea.baMetas, a_BlockType, a_BlockMeta)  -- XY wall at MaxZ
+	Area:FillRelCuboid(0,     0,     0,     YSize, 0,     ZSize, cBlockArea.baTypes + cBlockArea.baMetas, a_BlockType, a_BlockMeta)  -- YZ wall at MinX
+	Area:FillRelCuboid(XSize, XSize, 0,     YSize, 0,     ZSize, cBlockArea.baTypes + cBlockArea.baMetas, a_BlockType, a_BlockMeta)  -- YZ wall at MinX
+	Area:Write(a_World, MinX, MinY, MinZ)
+	Area:Clear()
+	a_World:WakeUpSimulatorsInArea(MinX - 1, MaxX + 1, MinY - 1, MaxY + 1, MinZ - 1, MaxZ + 1)
 	
-	LastCoords[PlayerName] = {X = OneX, Y = OneY, Z = OneZ, WorldName = World:GetName()}
-	
-	PersonalUndo[PlayerName]:Read(World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ)
-	PersonalBlockArea[PlayerName]:Read(World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ)
-	local Blocks = (2 * (PersonalBlockArea[PlayerName]:GetSizeX() - 1 + PersonalBlockArea[PlayerName]:GetSizeZ() - 1) * PersonalBlockArea[PlayerName]:GetSizeY()) -- Calculate the amount if blocks that are going to change
-	if Blocks == 0 then -- if the wall is 1x1x1 then the amout of blocks changed are 1
-		Blocks = 1
+	-- Calculate the number of changed blocks:
+	local VolumeIncluding = (XSize + 1) * (YSize + 1) * (ZSize + 1)  -- Volume of the cuboid INcluding the walls
+	local VolumeExcluding = (XSize - 1) * (YSize + 1) * (ZSize - 1)  -- Volume of the cuboid EXcluding the walls
+	if (VolumeExcluding < 0) then
+		VolumeExcluding = 0
 	end
-	
-	local Y = 0
-	local Z = 0
-	local X = 0
-	local XX = PersonalBlockArea[PlayerName]:GetSizeX() - 1
-	local YY = PersonalBlockArea[PlayerName]:GetSizeY() - 1
-	local ZZ = PersonalBlockArea[PlayerName]:GetSizeZ() - 1
-	
-	PersonalBlockArea[PlayerName]:FillRelCuboid(X, XX, Y, YY, Z, Z, 3, BlockType, BlockMeta)
-	PersonalBlockArea[PlayerName]:FillRelCuboid(X, XX, Y, YY, ZZ, ZZ, 3, BlockType, BlockMeta)
-	PersonalBlockArea[PlayerName]:FillRelCuboid(XX, XX, Y, YY, Z, ZZ, 3, BlockType, BlockMeta)
-	PersonalBlockArea[PlayerName]:FillRelCuboid(X, X, Y, YY, Z, ZZ, 3, BlockType, BlockMeta)
-	PersonalBlockArea[PlayerName]:Write(World, OneX, OneY, OneZ) -- Write the region into the world
-	World:WakeUpSimulatorsInArea(OneX - 1, TwoX + 1, OneY - 1, TwoY + 1, OneZ - 1, TwoZ + 1)
-	return Blocks
+	return VolumeIncluding - VolumeExcluding
 end
 
 
--------------------------------------------------
----------------CREATEFACESFUNCTION---------------
--------------------------------------------------
-function HandleCreateFaces(Player, World, BlockType, BlockMeta)
-	local OneX, TwoX, OneY, TwoY, OneZ, TwoZ = GetXYZCoords(Player) -- get the coordinates
-	
-	if CheckIfInsideAreas(OneX, TwoX, OneY, TwoY, OneZ, TwoZ, Player, World, "faces") then -- Check if the region intersects with any of the areas.
-		return false
-	end
-	
-	local PlayerName = Player:GetName()
-	
-	LastCoords[PlayerName] = {X = OneX, Y = OneY, Z = OneZ, WorldName = World:GetName()}
-	
-	PersonalUndo[PlayerName]:Read(World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ)
-	PersonalBlockArea[PlayerName]:Read(World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ) -- read the area
-	local Blocks = (2 * (PersonalBlockArea[PlayerName]:GetSizeX() - 1 + PersonalBlockArea[PlayerName]:GetSizeZ() - 1) * PersonalBlockArea[PlayerName]:GetSizeY()) -- calculate the amount of changed blocks.
-	if Blocks == 0 then
-		Blocks = 1
-	end
-	local Y = 0
-	local Z = 0
-	local X = 0
-	local XX = PersonalBlockArea[PlayerName]:GetSizeX() - 1
-	local YY = PersonalBlockArea[PlayerName]:GetSizeY() - 1
-	local ZZ = PersonalBlockArea[PlayerName]:GetSizeZ() - 1
-	
-	PersonalBlockArea[PlayerName]:FillRelCuboid(X, XX, Y, YY, Z, Z, 3, BlockType, BlockMeta) -- Walls
-	PersonalBlockArea[PlayerName]:FillRelCuboid(X, XX, Y, YY, ZZ, ZZ, 3, BlockType, BlockMeta)
-	PersonalBlockArea[PlayerName]:FillRelCuboid(XX, XX, Y, YY, Z, ZZ, 3, BlockType, BlockMeta)
-	PersonalBlockArea[PlayerName]:FillRelCuboid(X, X, Y, YY, Z, ZZ, 3, BlockType, BlockMeta)
-	
-	PersonalBlockArea[PlayerName]:FillRelCuboid(X, XX, Y, Y, Z, ZZ, 3, BlockType, BlockMeta) -- Floor
-	PersonalBlockArea[PlayerName]:FillRelCuboid(X, XX, YY, YY, Z, ZZ, 3, BlockType, BlockMeta) -- Ceiling
 
-	PersonalBlockArea[PlayerName]:Write(World, OneX, OneY, OneZ) -- write the area in the world.
-	World:WakeUpSimulatorsInArea(OneX - 1, TwoX + 1, OneY - 1, TwoY + 1, OneZ - 1, TwoZ + 1)
-	return Blocks
+
+
+--- Fills the faces of the selection stored in the specified cPlayerState with the specified block type
+-- Returns the number of blocks changed, or no value if disallowed
+-- The original contents are pushed onto PlayerState's Undo stack
+function FillFaces(a_PlayerState, a_Player, a_World, a_BlockType, a_BlockMeta)
+	-- Check with other plugins if the operation is okay:
+	if not(CheckAreaCallbacks(a_PlayerState.Selection:GetSortedCuboid(), a_Player, a_World, "faces")) then
+		return
+	end
+	
+	-- Push an Undo onto the stack:
+	a_PlayerState:PushUndoInSelection(a_World, "faces")
+
+	-- Fill the faces:
+	local Area = cBlockArea()
+	local MinX, MaxX = a_PlayerState.Selection:GetXCoordsSorted()
+	local MinY, MaxY = a_PlayerState.Selection:GetYCoordsSorted()
+	local MinZ, MaxZ = a_PlayerState.Selection:GetZCoordsSorted()
+	local XSize = MaxX - MinX
+	local YSize = MaxY - MinY
+	local ZSize = MaxZ - MinZ
+	Area:Read(a_World, MinX, MaxX, MinY, MaxY, MinZ, MaxZ, cBlockArea.baTypes + cBlockArea.baMetas)
+	Area:FillRelCuboid(0,     XSize, 0,     YSize, 0,     0,     cBlockArea.baTypes + cBlockArea.baMetas, a_BlockType, a_BlockMeta)  -- XY wall at MinZ
+	Area:FillRelCuboid(0,     XSize, 0,     YSize, ZSize, ZSize, cBlockArea.baTypes + cBlockArea.baMetas, a_BlockType, a_BlockMeta)  -- XY wall at MaxZ
+	Area:FillRelCuboid(0,     0,     0,     YSize, 0,     ZSize, cBlockArea.baTypes + cBlockArea.baMetas, a_BlockType, a_BlockMeta)  -- YZ wall at MinX
+	Area:FillRelCuboid(XSize, XSize, 0,     YSize, 0,     ZSize, cBlockArea.baTypes + cBlockArea.baMetas, a_BlockType, a_BlockMeta)  -- YZ wall at MinX
+	Area:FillRelCuboid(0,     XSize, 0,     0,     0,     ZSize, cBlockArea.baTypes + cBlockArea.baMetas, a_BlockType, a_BlockMeta)  -- XZ floor
+	Area:FillRelCuboid(0,     XSize, YSize, YSize, 0,     ZSize, cBlockArea.baTypes + cBlockArea.baMetas, a_BlockType, a_BlockMeta)  -- XZ ceiling
+	Area:Write(a_World, MinX, MinY, MinZ)
+	Area:Clear()
+	a_World:WakeUpSimulatorsInArea(MinX - 1, MaxX + 1, MinY - 1, MaxY + 1, MinZ - 1, MaxZ + 1)
+	
+	-- Calculate the number of changed blocks:
+	local VolumeIncluding = (XSize + 1) * (YSize + 1) * (ZSize + 1)  -- Volume of the cuboid INcluding the faces
+	local VolumeExcluding = (XSize - 1) * (YSize - 1) * (ZSize - 1)  -- Volume of the cuboid EXcluding the faces
+	if (VolumeExcluding < 0) then
+		VolumeExcluding = 0
+	end
+	return VolumeIncluding - VolumeExcluding
 end
 
 
-------------------------------------------------
-------------------FILLFUNCTION------------------
-------------------------------------------------
-function HandleFillSelection(Player, World, BlockType, BlockMeta)
-	local OneX, TwoX, OneY, TwoY, OneZ, TwoZ = GetXYZCoords(Player)
-	
-	if CheckIfInsideAreas(OneX, TwoX, OneY, TwoY, OneZ, TwoZ, Player, World, "fill") then -- Check if the region intersects with any of the areas.
-		return false
+
+
+
+--- Fills the selection stored in the specified cPlayerState with the specified block type
+-- Returns the number of blocks changed, or no value if disallowed
+-- The original contents are pushed onto PlayerState's Undo stack
+function FillSelection(a_PlayerState, a_Player, a_World, a_BlockType, a_BlockMeta)
+	-- Check with other plugins if the operation is okay:
+	if not(CheckAreaCallbacks(a_PlayerState.Selection:GetSortedCuboid(), a_Player, a_World, "fill")) then
+		return
 	end
 	
-	local PlayerName = Player:GetName()
+	-- Push an Undo onto the stack:
+	a_PlayerState:PushUndoInSelection(a_World, "fill")
+
+	-- Fill the selection:
+	local Area = cBlockArea()
+	local MinX, MaxX = a_PlayerState.Selection:GetXCoordsSorted()
+	local MinY, MaxY = a_PlayerState.Selection:GetYCoordsSorted()
+	local MinZ, MaxZ = a_PlayerState.Selection:GetZCoordsSorted()
+	Area:Create(MaxX - MinX + 1, MaxY - MinY + 1, MaxZ - MinZ + 1)
+	Area:Fill(cBlockArea.baTypes + cBlockArea.baMetas, a_BlockType, a_BlockMeta)
+	Area:Write(a_World, MinX, MinY, MinZ)
+	Area:Clear()
+	a_World:WakeUpSimulatorsInArea(MinX - 1, MaxX + 1, MinY - 1, MaxY + 1, MinZ - 1, MaxZ + 1)
 	
-	LastCoords[PlayerName] = {X = OneX, Y = OneY, Z = OneZ, WorldName = World:GetName()}
-	
-	PersonalUndo[PlayerName]:Read(World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ)
-	PersonalBlockArea[PlayerName]:Read(World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ) -- read the area
-	PersonalBlockArea[PlayerName]:Fill(3, BlockType, BlockMeta) -- fill the area with the right blocks
-	PersonalBlockArea[PlayerName]:Write(World, OneX, OneY, OneZ) -- write the area in the world
-	
-	World:WakeUpSimulatorsInArea(OneX - 1, TwoX + 1, OneY - 1, TwoY + 1, OneZ - 1, TwoZ + 1)
-	return GetSize(Player)
+	return (MaxX - MinX + 1) * (MaxY - MinY + 1) * (MaxZ - MinZ + 1)
 end
 
 
--------------------------------------------------
------------------REPLACEFUNCTION-----------------
--------------------------------------------------
-function HandleReplaceSelection(Player, World, ChangeBlockType, ChangeBlockMeta, ToChangeBlockType, ToChangeBlockMeta, TypeOnly)
-	local OneX, TwoX, OneY, TwoY, OneZ, TwoZ = GetXYZCoords(Player)
-	
-	if CheckIfInsideAreas(OneX, TwoX, OneY, TwoY, OneZ, TwoZ, Player, World, "replace") then -- Check if the region intersects with any of the areas.
-		return false
+
+
+
+--- Replaces the specified blocks in the selection stored in the specified cPlayerState
+-- Returns the number of blocks changed, or no value if disallowed
+-- The original contents are pushed onto PlayerState's Undo stack
+-- If a_TypeOnly is set, the block meta is ignored and conserved
+function ReplaceSelection(a_PlayerState, a_Player, a_World, a_SrcBlockType, a_SrcBlockMeta, a_DstBlockType, a_DstBlockMeta, a_TypeOnly)
+	-- Check with other plugins if the operation is okay:
+	if not(CheckAreaCallbacks(a_PlayerState.Selection:GetSortedCuboid(), a_Player, a_World, "replace")) then
+		return
 	end
 	
-	local Blocks = 0
-	local PlayerName = Player:GetName()
+	-- Push an Undo onto the stack:
+	a_PlayerState:PushUndoInSelection(a_World, "replace")
+
+	-- Read the area to be replaced:
+	local Area = cBlockArea()
+	local MinX, MaxX = a_PlayerState.Selection:GetXCoordsSorted()
+	local MinY, MaxY = a_PlayerState.Selection:GetYCoordsSorted()
+	local MinZ, MaxZ = a_PlayerState.Selection:GetZCoordsSorted()
+	Area:Read(a_World, MinX, MaxX, MinY, MaxY, MinZ, MaxZ)
 	
-	LastCoords[PlayerName] = {X = OneX, Y = OneY, Z = OneZ, WorldName = World:GetName()}
-	
-	PersonalUndo[PlayerName]:Read(World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ)
-	PersonalBlockArea[PlayerName]:Read(World, OneX, TwoX, OneY, TwoY, OneZ, TwoZ) -- Read the area
-	
-	local XSize = PersonalBlockArea[PlayerName]:GetSizeX() - 1
-	local YSize = PersonalBlockArea[PlayerName]:GetSizeY() - 1
-	local ZSize = PersonalBlockArea[PlayerName]:GetSizeZ() - 1
-	
-	for X=0, XSize do
-		for Y=0, YSize do
-			for Z=0, ZSize do
-				if PersonalBlockArea[PlayerName]:GetRelBlockType(X, Y, Z) == ChangeBlockType then -- if the blocktype is the same as the block that needs to change then
-					if PersonalBlockArea[PlayerName]:GetRelBlockMeta(X, Y, Z) == ChangeBlockMeta or (TypeOnly) then -- check if the blockmeta is the same as the meta that has to change
-						PersonalBlockArea[PlayerName]:SetRelBlockType(X, Y, Z, ToChangeBlockType) -- change the block
-						PersonalBlockArea[PlayerName]:SetRelBlockMeta(X, Y, Z, ToChangeBlockMeta) -- change the meta
-						Blocks = Blocks + 1 -- add a 1 to the amount of changed blocks.
+	-- Replace the blocks:
+	local XSize = MaxX - MinX
+	local YSize = MaxY - MinY
+	local ZSize = MaxZ - MinZ
+	local NumBlocks = 0
+	if (a_TypeOnly) then
+		for X = 0, XSize do
+			for Y = 0, YSize do
+				for Z = 0, ZSize do
+					if (Area:GetRelBlockType(X, Y, Z) == a_SrcBlockType) then
+						Area:SetRelBlockType(X, Y, Z, a_DstBlockType)
+						NumBlocks = NumBlocks + 1
+					end
+				end
+			end
+		end
+	else
+		for X = 0, XSize do
+			for Y = 0, YSize do
+				for Z = 0, ZSize do
+					local BlockType, BlockMeta = Area:GetRelBlockTypeMeta(X, Y, Z)
+					if ((BlockType == a_SrcBlockType) and (BlockMeta == a_SrcBlockMeta)) then
+						Area:SetRelBlockTypeMeta(X, Y, Z, a_DstBlockType, a_DstBlockMeta)
+						NumBlocks = NumBlocks + 1
 					end
 				end
 			end
 		end
 	end
 	
-	PersonalBlockArea[PlayerName]:Write(World, OneX, OneY, OneZ) -- write the area into the world.
-	World:WakeUpSimulatorsInArea(OneX - 1, TwoX + 1, OneY - 1, TwoY + 1, OneZ - 1, TwoZ + 1)
-	return Blocks
+	-- Write the area back to world:
+	Area:Write(a_World, MinX, MinY, MinZ)
+	a_World:WakeUpSimulatorsInArea(MinX - 1, MaxX + 1, MinY - 1, MaxY + 1, MinZ - 1, MaxZ + 1)
+	
+	return NumBlocks
 end
+
+
+
 
 
 -------------------------------------------
@@ -222,27 +264,42 @@ function LeftClickCompass(Player)
 end
 
 
-------------------------------------------------
-------------------HPOSSELECT--------------------
-------------------------------------------------
-function HPosSelect(Player, World)
-	local hpos = nil
-	local Callbacks = {
-	OnNextBlock = function(X, Y, Z, BlockType, BlockMeta)
-		if BlockType ~= E_BLOCK_AIR and not g_BlockOneHitDig[BlockType] then
-			hpos = Vector3i(X, Y, Z)
-			return true
-		end
-	end
-	};
-	local EyePos = Player:GetEyePosition()
-	local LookVector = Player:GetLookVector()
-	LookVector:Normalize()
-	local Start = EyePos
-	local End = EyePos + LookVector * 150
+
+
+
+--- Traces blocks in a line-of-sight of the player until it hits a non-air non-1-hit-dig block
+-- Returns the coords of the block as a table {x = ..., y = ..., z = ... }
+-- If nothing is hit within the specified distance, returns nil
+function HPosSelect(a_Player, a_MaxDistance)
+	assert(tolua.type(a_Player) == "cPlayer")
+	a_MaxDistance = a_MaxDistance or 150
 	
-	if cLineBlockTracer.Trace(World, Callbacks, Start.x, Start.y, Start.z, End.x, End.y, End.z) then
-		return false
+	-- Prepare the vectors to be used for the tracing:
+	local Start = a_Player:GetEyePosition()
+	local LookVector = a_Player:GetLookVector()
+	LookVector:Normalize()
+	local End = Start + LookVector * a_MaxDistance
+	
+	-- The callback checks the blocktype of the hit, saves coords if true hit and aborts:
+	local hpos = nil
+	local Callbacks =
+	{
+		OnNextBlock = function(a_X, a_Y, a_Z, a_BlockType, a_BlockMeta)
+			if ((a_BlockType ~= E_BLOCK_AIR) and not(g_BlockOneHitDig[a_BlockType])) then
+				hpos = {x = a_X, y = a_Y, z = a_Z }
+				return true
+			end
+		end
+	}
+	
+	-- Trace:
+	if (cLineBlockTracer.Trace(a_Player:GetWorld(), Callbacks, Start.x, Start.y, Start.z, End.x, End.y, End.z)) then
+		-- Nothing reached within the distance, return nil for failure
+		return nil
 	end
-	return true, hpos
+	return hpos
 end
+
+
+
+

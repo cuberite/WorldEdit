@@ -1,10 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <project>
   <file>
+    <filename>Clipboard.lua</filename>
+  </file>
+  <file>
     <filename>Info.lua</filename>
   </file>
   <file>
-    <filename>InfoDump.lua</filename>
+    <filename>..\InfoReg.lua</filename>
+  </file>
+  <file>
+    <filename>PlayerSelection.lua</filename>
+  </file>
+  <file>
+    <filename>PlayerState.lua</filename>
+  </file>
+  <file>
+    <filename>UndoStack.lua</filename>
   </file>
   <file>
     <filename>api_Check.lua</filename>
