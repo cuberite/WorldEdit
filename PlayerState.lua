@@ -200,7 +200,7 @@ end
 
 
 local function OnPlayerLeftClick(Player, BlockX, BlockY, BlockZ, BlockFace, Action)
-	if ((Action == DIG_STATUS_DROP_HELD) or (Action == DIG_STATUS_DROP_STACK)) then
+	if ((Action ~= DIG_STATUS_STARTED) and (Action ~= DIG_STATUS_FINISHED)) then
 		return false
 	end
 	return SetPos(Player, BlockX, BlockY, BlockZ, BlockFace, cPlayerSelection.SetFirstPoint, "First")
