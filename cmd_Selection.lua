@@ -243,14 +243,20 @@ function HandleReplaceCommand(a_Split, a_Player)
 		a_Player:SendMessage(cChatColor.LightPurple .. "Unknown src block type: '" .. a_Split[2] .. "'.")
 		return true
 	end
-	local DstBlockType, DstBlockMeta = GetBlockTypeMeta(a_Split[3])
-	if not(DstBlockType) then
-		a_Player:SendMessage(cChatColor.LightPurple .. "Unknown dst block type: '" .. a_Split[3] .. "'.")
-		return true
+	
+	local RawDstBlockTable = StringSplit(a_Split[3], ";")
+	local DstBlockTable = {}
+	for Idx, Value in ipairs(RawDstBlockTable) do
+		local DstBlockType, DstBlockMeta = GetBlockTypeMeta(Value)
+		if not(DstBlockType) then
+			a_Player:SendMessage(cChatColor.LightPurple .. "Unknown dst block type: '" .. Value .. "'.")
+			return true
+		end
+		DstBlockTable[Idx] = {DstBlockType = DstBlockType, DstBlockMeta = DstBlockMeta}
 	end
 	
 	-- Replace the blocks:
-	local NumBlocks = ReplaceSelection(State, a_Player, a_Player:GetWorld(), SrcBlockType, SrcBlockMeta, DstBlockType, DstBlockMeta, TypeOnly)
+	local NumBlocks = ReplaceSelection(State, a_Player, a_Player:GetWorld(), SrcBlockType, SrcBlockMeta, DstBlockTable, TypeOnly)
 	if (NumBlocks) then
 		a_Player:SendMessage(cChatColor.LightPurple .. NumBlocks .. " block(s) have been changed.")
 	end
