@@ -39,6 +39,8 @@ function cTools:SwichSuperPickaxeActivated()
 	else
 		self.SuperPickaxe = true
 	end
+	
+	-- Return in what state the SuperPickaxe now is.
 	return self.SuperPickaxe
 end
 
@@ -75,8 +77,72 @@ end
 
 
 
-function cTools:SetGrowTreeTool(a_ItemType)
+-- Enables the GrowTreeTool and sets the tool to given itemtype
+function cTools:EnableGrowTreeTool(a_ItemType)
 	assert(type(a_ItemType) == 'number')
 	
 	self.GrowTreeTool = a_ItemType
 end
+
+
+
+
+
+-- Disables the GrowTreeTool
+function cTools:DisableGrowTreeTool()
+	self.GrowTreeTool = -1
+end
+
+
+
+
+
+-- Returns true if the ReplaceTool is activated
+function cTools:IsReplaceToolActivated()
+	return (self.ReplaceTool.ToHoldItem ~= -1)
+end
+
+
+
+
+
+-- Returns true if the given ItemType is the ReplaceTool
+function cTools:IsReplaceTool(a_ItemType)
+	return (self.ReplaceTool.ToHoldItem == a_ItemType)
+end
+
+
+	
+	
+
+-- Activates the ReplaceTool and sets the ToChangeBlock type and meta.
+function cTools:SetReplaceTool(a_Tool, a_BlockType, a_BlockMeta)
+	assert(type(a_Tool) ==  'number')
+	assert(type(a_BlockType) ==  'number')
+	assert(type(a_BlockMeta) ==  'number')
+	
+	self.ReplaceTool.ToHoldItem = a_Tool
+	self.ReplaceTool.ToChangeBlock.m_ItemType = a_BlockType
+	self.ReplaceTool.ToChangeBlock.m_ItemDamage = a_BlockMeta
+end
+
+
+
+
+
+-- Disables the ReplaceTool
+function cTools:DisableReplaceTool()
+	self.ReplaceTool.ToHoldItem = -1
+	self.ReplaceTool.ToChangeBlock:Clear()
+end
+
+
+
+
+
+function cTools:ReplaceToolGetToChangeBlock()
+	assert(self:IsReplaceToolActivated())
+	
+	return self.ReplaceTool.ToChangeBlock.m_ItemType, self.ReplaceTool.ToChangeBlock.m_ItemDamage
+end
+		
