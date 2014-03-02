@@ -208,6 +208,14 @@ g_PluginInfo =
 			Category = "Biome",
 		},
 		
+		["//shift"] =
+		{
+			Permission = "worldedit.selection.size",
+			Handler = HandleShiftCommand,
+			HelpString = " Move the selection area",
+			Category = "Selection",
+		},
+		
 		["//size"] =
 		{
 			Permission = "worldedit.selection.size",

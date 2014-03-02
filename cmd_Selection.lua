@@ -636,3 +636,89 @@ end
 
 
 
+
+function HandleShiftCommand(a_Split, a_Player)
+	-- //shift [Amount] [Direction]
+	
+	-- Check the selection:
+	local State = GetPlayerState(a_Player)
+	if not(State.Selection:IsValid()) then
+		a_Player:SendMessage(cChatColor.Rose .. "No region set")
+		return true
+	end
+	
+	if (a_Split[2] ~= nil) and (tonumber(a_Split[2]) == nil) then
+		a_Player:SendMessage(cChatColor.Rose .. "Usage: //shift [Blocks] [Direction]")
+		return true
+	end
+	
+	local NumBlocks = a_Split[2] or 1 -- Use the given amount or 1 if nil
+	local Direction = string.lower(a_Split[3] or "forward")
+	local X, Y, Z = 0, 0, 0
+	local LookDirection = Round((a_Player:GetYaw() + 180) / 90)
+	
+	if (Direction == "up") then
+		Y = NumBlocks
+	elseif (Direction == "down") then
+		Y = -NumBlocks
+	elseif (Direction == "left") then
+		if (LookDirection == E_DIRECTION_SOUTH) then
+			X = NumBlocks
+		elseif (LookDirection == E_DIRECTION_EAST) then
+			Z = -NumBlocks
+		elseif (LookDirection == E_DIRECTION_NORTH1) or (LookDirection == E_DIRECTION_NORTH2) then
+			X = -NumBlocks
+		elseif (LookDirection == E_DIRECTION_WEST) then
+			Z = NumBlocks
+		end
+	elseif (Direction == "right") then
+		if (LookDirection == E_DIRECTION_SOUTH) then
+			X = -NumBlocks
+		elseif (LookDirection == E_DIRECTION_EAST) then
+			Z = NumBlocks
+		elseif (LookDirection == E_DIRECTION_NORTH1) or (LookDirection == E_DIRECTION_NORTH2) then
+			X = NumBlocks
+		elseif (LookDirection == E_DIRECTION_WEST) then
+			Z = -NumBlocks
+		end
+	elseif (Direction == "south") then
+		Z = NumBlocks
+	elseif (Direction == "east") then
+		X = NumBlocks
+	elseif (Direction == "north") then
+		Z = -NumBlocks
+	elseif (Direction == "west") then
+		X = -NumBlocks
+	elseif ((Direction == "forward") or (Direction == "me")) then
+		if (LookDirection == E_DIRECTION_SOUTH) then
+			Z = NumBlocks
+		elseif (LookDirection == E_DIRECTION_EAST) then
+			X = NumBlocks
+		elseif ((LookDirection == E_DIRECTION_NORTH1) or (LookDirection == E_DIRECTION_NORTH2)) then
+			Z = -NumBlocks
+		elseif (LookDirection == E_DIRECTION_WEST) then
+			X = -NumBlocks
+		end
+	elseif ((Direction == "backwards") or (Direction == "back")) then
+		if (LookDirection == E_DIRECTION_SOUTH) then
+			Z = -NumBlocks
+		elseif (LookDirection == E_DIRECTION_EAST) then
+			X = -NumBlocks
+		elseif ((LookDirection == E_DIRECTION_NORTH1) or (LookDirection == E_DIRECTION_NORTH2)) then
+			Z = NumBlocks
+		elseif (LookDirection == E_DIRECTION_WEST) then
+			X = NumBlocks
+		end
+	else
+		a_Player:SendMessage(cChatColor.Rose .. "Unknown direction \"" .. Direction .. "\".")
+		return true
+	end
+	
+	State.Selection:Move(X, Y, Z)
+	a_Player:SendMessage(cChatColor.LightPurple .. "Region shifted.")
+	return true
+end
+
+
+
+

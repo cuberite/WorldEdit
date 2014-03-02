@@ -280,6 +280,24 @@ end
 
 
 
+--- Moves the entire cuboid to the given Offset
+function cPlayerSelection:Move(a_OffsetX, a_OffsetY, a_OffsetZ)
+	-- Check the parameters
+	assert(a_OffsetX ~= nil)
+	assert(a_OffsetY ~= nil)
+	assert(a_OffsetZ ~= nil)
+	
+	-- Move the cuboid
+	self.Cuboid:Move(a_OffsetX, a_OffsetY, a_OffsetZ)
+
+	-- Notify the client
+	self:NotifySelectionChanged()
+end
+
+
+
+
+
 --- Sets the first point in the selection
 function cPlayerSelection:SetFirstPoint(a_BlockX, a_BlockY, a_BlockZ)
 	-- Check the params:
