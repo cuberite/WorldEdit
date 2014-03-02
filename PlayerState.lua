@@ -182,7 +182,7 @@ local function SetPos(a_Player, a_BlockX, a_BlockY, a_BlockZ, a_BlockFace, a_Set
 	a_SetFn(State.Selection, a_BlockX, a_BlockY, a_BlockZ)
 	
 	-- Send a success message to the player:
-	a_Player:SendMessage(a_PosName .. " position set to {" .. a_BlockX .. ", " .. a_BlockY .. ", " .. a_BlockZ .. "}.")
+	a_Player:SendMessage(cChatColor.LightPurple .. a_PosName .. " position set to {" .. a_BlockX .. ", " .. a_BlockY .. ", " .. a_BlockZ .. "}.")
 	
 	return true
 end
