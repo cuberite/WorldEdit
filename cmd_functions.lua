@@ -127,7 +127,7 @@ end
 -- Returns the number of blocks changed, or no value if disallowed
 -- The original contents are pushed onto PlayerState's Undo stack
 -- If a_TypeOnly is set, the block meta is ignored will be replaced
-function ReplaceSelection(a_PlayerState, a_Player, a_World, a_SrcBlockType, a_SrcBlockMeta, a_DstBlockTable, a_TypeOnly)
+function ReplaceSelection(a_PlayerState, a_Player, a_World, a_SrcBlockTable, a_DstBlockTable)
 	-- Check with other plugins if the operation is okay:
 	if not(CheckAreaCallbacks(a_PlayerState.Selection:GetSortedCuboid(), a_Player, a_World, "replace")) then
 		return
@@ -148,28 +148,15 @@ function ReplaceSelection(a_PlayerState, a_Player, a_World, a_SrcBlockType, a_Sr
 	local YSize = MaxY - MinY
 	local ZSize = MaxZ - MinZ
 	local NumBlocks = 0
-	if (a_TypeOnly) then
-		for X = 0, XSize do
-			for Y = 0, YSize do
-				for Z = 0, ZSize do
-					if (Area:GetRelBlockType(X, Y, Z) == a_SrcBlockType) then
-						local DstBlock = a_DstBlockTable[math.random(1, #a_DstBlockTable)]
-						Area:SetRelBlockTypeMeta(X, Y, Z, DstBlock.DstBlockType, DstBlock.DstBlockMeta)
-						NumBlocks = NumBlocks + 1
-					end
-				end
-			end
-		end
-	else
-		for X = 0, XSize do
-			for Y = 0, YSize do
-				for Z = 0, ZSize do
-					local BlockType, BlockMeta = Area:GetRelBlockTypeMeta(X, Y, Z)
-					if ((BlockType == a_SrcBlockType) and (BlockMeta == a_SrcBlockMeta)) then
-						local DstBlock = a_DstBlockTable[math.random(1, #a_DstBlockTable)]
-						Area:SetRelBlockTypeMeta(X, Y, Z, DstBlock.DstBlockType, DstBlock.DstBlockMeta)
-						NumBlocks = NumBlocks + 1
-					end
+	
+	for X = 0, XSize do
+		for Y = 0, YSize do
+			for Z = 0, ZSize do
+				local BlockType, BlockMeta = Area:GetRelBlockTypeMeta(X, Y, Z)
+				if (a_SrcBlockTable[BlockType] and (a_SrcBlockTable[BlockType].TypeOnly or a_SrcBlockTable[BlockType].SrcBlockMeta == BlockMeta)) then
+					local DstBlock = a_DstBlockTable[math.random(1, #a_DstBlockTable)]
+					Area:SetRelBlockTypeMeta(X, Y, Z, DstBlock.DstBlockType, DstBlock.DstBlockMeta)
+					NumBlocks = NumBlocks + 1
 				end
 			end
 		end
