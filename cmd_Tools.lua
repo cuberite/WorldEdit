@@ -68,11 +68,10 @@ end
 -------------------SUPERPICK-------------------
 -----------------------------------------------
 function HandleSuperPickCommand(Split, Player)
-	if SP[Player:GetName()] == nil or not SP[Player:GetName()] then -- check if super pickaxe is activated
-		SP[Player:GetName()] = true
+	local State = GetPlayerState(Player)
+	if (State.Tools:SwichSuperPickaxeActivated()) then -- check if super pickaxe is activated
 		Player:SendMessage(cChatColor.LightPurple .. "Super pick activated")
 	else -- else deactivate the superpickaxe
-		SP[Player:GetName()] = false
 		Player:SendMessage(cChatColor.LightPurple .. "Super pick deactivated")
 	end
 	return true

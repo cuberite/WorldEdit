@@ -12,13 +12,23 @@
 -------------------SUPERPICKAXE--------------------
 ---------------------------------------------------
 function SuperPickaxeHook(Player, BlockX, BlockY, BlockZ, BlockFace, Status)
-	if (SP[Player:GetName()]) then
-		if CheckIfInsideAreas(BlockX, BlockX, BlockY, BlockY, BlockZ, BlockZ, Player, Player:GetWorld(), "superpickaxe") then
-			return true
-		end
-		local World = Player:GetWorld()
-		World:DigBlock(BlockX, BlockY, BlockZ) 		
+	-- SuperPickaxe
+	if BlockFace == BLOCK_FACE_NONE then
+		return false
 	end
+	
+	local State = GetPlayerState(Player)
+	
+	if (not State.Tools:HasSuperPickaxeActivated()) then
+		return false
+	end
+	
+	if CheckIfInsideAreas(BlockX, BlockX, BlockY, BlockY, BlockZ, BlockZ, Player, Player:GetWorld(), "superpickaxe") then
+		return true
+	end
+	
+	local World = Player:GetWorld()
+	World:DigBlock(BlockX, BlockY, BlockZ) 		
 end
 
 

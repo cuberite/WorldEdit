@@ -47,6 +47,7 @@ function cPlayerState:new(a_Obj, a_PlayerKey, a_Player)
 	a_Obj.Selection = cPlayerSelection:new({}, a_Obj)
 	a_Obj.UndoStack = cUndoStack:new({}, 10, a_Obj)  -- TODO: Settable Undo depth (2nd param)
 	a_Obj.WandActivated = true
+	a_Obj.Tools     = cTools:new({}, a_Obj)
 	
 	return a_Obj
 end
