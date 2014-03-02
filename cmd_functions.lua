@@ -126,7 +126,7 @@ end
 --- Replaces the specified blocks in the selection stored in the specified cPlayerState
 -- Returns the number of blocks changed, or no value if disallowed
 -- The original contents are pushed onto PlayerState's Undo stack
--- If a_TypeOnly is set, the block meta is ignored and conserved
+-- If a_TypeOnly is set, the block meta is ignored will be replaced
 function ReplaceSelection(a_PlayerState, a_Player, a_World, a_SrcBlockType, a_SrcBlockMeta, a_DstBlockTable, a_TypeOnly)
 	-- Check with other plugins if the operation is okay:
 	if not(CheckAreaCallbacks(a_PlayerState.Selection:GetSortedCuboid(), a_Player, a_World, "replace")) then
@@ -153,7 +153,8 @@ function ReplaceSelection(a_PlayerState, a_Player, a_World, a_SrcBlockType, a_Sr
 			for Y = 0, YSize do
 				for Z = 0, ZSize do
 					if (Area:GetRelBlockType(X, Y, Z) == a_SrcBlockType) then
-						Area:SetRelBlockType(X, Y, Z, a_DstBlockTable[math.random(1, #a_DstBlockTable)].DstBlockType)
+						local DstBlock = a_DstBlockTable[math.random(1, #a_DstBlockTable)]
+						Area:SetRelBlockTypeMeta(X, Y, Z, DstBlock.DstBlockType, DstBlock.DstBlockMeta)
 						NumBlocks = NumBlocks + 1
 					end
 				end
