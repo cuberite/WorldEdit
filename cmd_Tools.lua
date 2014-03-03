@@ -31,7 +31,7 @@ function HandleReplCommand(Split, Player)
 	-- ToDo: Check if another tool is using the equipped item.
 	local State = GetPlayerState(Player)
 	
-	State.Tools:SetReplaceTool(EquippedItem.m_ItemType, BlockType, BlockMeta)
+	State.Tools:ActivateReplaceTool(EquippedItem.m_ItemType, BlockType, BlockMeta)
 	Player:SendMessage(cChatColor.LightPurple .. "Block replacer tool bound to " .. ItemToString(Player:GetEquippedItem()))
 	return true
 end

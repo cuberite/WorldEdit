@@ -116,7 +116,7 @@ end
 	
 
 -- Activates the ReplaceTool and sets the ToChangeBlock type and meta.
-function cTools:SetReplaceTool(a_Tool, a_BlockType, a_BlockMeta)
+function cTools:ActivateReplaceTool(a_Tool, a_BlockType, a_BlockMeta)
 	assert(type(a_Tool) ==  'number')
 	assert(type(a_BlockType) ==  'number')
 	assert(type(a_BlockMeta) ==  'number')
@@ -140,6 +140,7 @@ end
 
 
 
+-- Returns the blocktype and blockmeta for the replace tool. If a player uses the replace tool the block will change into these block type/meta
 function cTools:ReplaceToolGetToChangeBlock()
 	assert(self:IsReplaceToolActivated())
 	
