@@ -566,7 +566,7 @@ function HandleExpandCommand(a_Split, a_Player)
 	end
 	
 	local NumBlocks = a_Split[2] or 1 -- Use the given amount or 1 if nil
-	local Direction = string.lower(a_Split[3] or "forward")
+	local Direction = string.lower(a_Split[3] or ((a_Player:GetPitch() > 70) and "down") or ((a_Player:GetPitch() < -70) and "up") or "forward")
 	local SubMinX, SubMinY, SubMinZ, AddMaxX, AddMaxY, AddMaxZ = 0, 0, 0, 0, 0, 0
 	local LookDirection = Round((a_Player:GetYaw() + 180) / 90)
 	
@@ -653,7 +653,7 @@ function HandleShiftCommand(a_Split, a_Player)
 	end
 	
 	local NumBlocks = a_Split[2] or 1 -- Use the given amount or 1 if nil
-	local Direction = string.lower(a_Split[3] or "forward")
+	local Direction = string.lower(a_Split[3] or ((a_Player:GetPitch() > 70) and "down") or ((a_Player:GetPitch() < -70) and "up") or "forward")
 	local X, Y, Z = 0, 0, 0
 	local LookDirection = Round((a_Player:GetYaw() + 180) / 90)
 	
