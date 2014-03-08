@@ -183,17 +183,17 @@ function RightClickCompass(Player)
 	
 	local Callbacks = {
 		OnNextBlock = function(X, Y, Z, BlockType, BlockMeta)
-			if not g_BlockTransparent[BlockType] then
+			if not cBlockInfo:IsTransparent(BlockType) then
 				WentThroughBlock = true
 			else
 				if WentThroughBlock then
-					if BlockType == E_BLOCK_AIR and g_BlockIsSolid[World:GetBlock(X, Y - 1, Z)] then
+					if BlockType == E_BLOCK_AIR and cBlockInfo:IsSolid(World:GetBlock(X, Y - 1, Z)) then
 						Player:TeleportToCoords(X + 0.5, Y, Z + 0.5)
 						Teleported = true
 						return true
 					else
 						for y = Y, 1, -1 do
-							if g_BlockIsSolid[World:GetBlock(X, y, Z)] then
+							if cBlockInfo:IsSolid(World:GetBlock(X, y, Z)) then
 								Player:TeleportToCoords(X + 0.5, y + 1, Z + 0.5)
 								Teleported = true
 								return true
@@ -227,10 +227,10 @@ function LeftClickCompass(Player)
 	
 	local Callbacks = {
 		OnNextBlock = function(X, Y, Z, BlockType, BlockMeta)
-			if BlockType ~= E_BLOCK_AIR and not g_BlockOneHitDig[BlockType] then
+			if BlockType ~= E_BLOCK_AIR and not cBlockInfo:IsOneHitDig(BlockType) then
 				local IsValid, WorldHeight = World:TryGetHeight(X, Z)
 				for y = Y, WorldHeight + 1 do
-					if not g_BlockIsSolid[World:GetBlock(X, y, Z)] then
+					if not cBlockInfo:IsSolid(World:GetBlock(X, y, Z)) then
 						Y = y
 						break
 					end
@@ -274,7 +274,7 @@ function HPosSelect(a_Player, a_MaxDistance)
 	local Callbacks =
 	{
 		OnNextBlock = function(a_X, a_Y, a_Z, a_BlockType, a_BlockMeta)
-			if ((a_BlockType ~= E_BLOCK_AIR) and not(g_BlockOneHitDig[a_BlockType])) then
+			if ((a_BlockType ~= E_BLOCK_AIR) and not(cBlockInfo:IsOneHitDig(a_BlockType))) then
 				hpos = {x = a_X, y = a_Y, z = a_Z }
 				return true
 			end

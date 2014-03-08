@@ -254,7 +254,7 @@ function HandleSnowCommand(Split, Player)
 				elseif World:GetBlock(x, y , z) == E_BLOCK_LAVA then -- check if the block is lava
 					table.insert(PossibleBlockChanges, {X = x, Y = y, Z = z, BlockType = E_BLOCK_OBSIDIAN})
 				else
-					if g_BlockIsSnowable[World:GetBlock(x, y, z)] then
+					if cBlockInfo:IsSnowable(World:GetBlock(x, y, z)) then
 						table.insert(PossibleBlockChanges, {X = x, Y = y + 1, Z = z, BlockType = E_BLOCK_SNOW})
 					end
 				end
