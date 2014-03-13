@@ -25,6 +25,14 @@ g_PluginInfo =
 			Category = "Tool",
 		},
 		
+		["//addleaves"] =
+		{
+			Permission = "worldedit.addleaves",
+			Handler = HandleAddLeavesCommand,
+			HelpString = " Adds leaves next to log blocks",
+			Category = "Tool",
+		},
+		
 		["//copy"] =
 		{
 			Permission = "worldedit.clipboard.copy",
