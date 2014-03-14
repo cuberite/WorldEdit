@@ -828,6 +828,7 @@ function HandleAddLeavesCommand(a_Split, a_Player)
 	
 	-- Write the block area back to world:
 	BA:Write(World, BA:GetOrigin())
+	return true
 end
 
 
