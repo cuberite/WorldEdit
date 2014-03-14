@@ -722,3 +722,115 @@ end
 
 
 
+
+function HandleAddLeavesCommand(a_Split, a_Player)
+	-- //addleaves <LeafType>
+	
+	-- Parse the LeafType:
+	local LeafType = a_Split[2]
+	local LeafBlockType = 0
+	local LeafBlockMeta = 0
+	if (LeafType == "oak") then
+		LeafBlockType = E_BLOCK_LEAVES
+		LeafBlockMeta = 0
+	elseif ((LeafType == "pine") or (LeafType == "spruce") or (LeafType == "conifer")) then
+		LeafBlockType = E_BLOCK_LEAVES
+		LeafBlockMeta = 1
+	elseif (LeafType == "birch") then
+		LeafBlockType = E_BLOCK_LEAVES
+		LeafBlockMeta = 2
+	elseif (LeafType == "jungle") then
+		LeafBlockType = E_BLOCK_LEAVES
+		LeafBlockMeta = 3
+	elseif (LeafType == "acacia") then
+		LeafBlockType = E_BLOCK_NEW_LEAVES
+		LeafBlockMeta = 0
+	elseif ((LeafType == "darkoak") or (LeafType == "dark")) then
+		LeafBlockType = E_BLOCK_NEW_LEAVES
+		LeafBlockMeta = 1
+	else
+		a_Player:SendMessage(cChatColor.Rose .. "Unknown leaf type: " .. (LeafType or "<no argument>").. ".")
+		return true
+	end
+
+	-- Check the selection:
+	local State = GetPlayerState(a_Player)
+	if not(State.Selection:IsValid()) then
+		a_Player:SendMessage(cChatColor.Rose .. "No region set")
+		return true
+	end
+	
+	-- Check with other plugins if the operation is okay:
+	local SrcCuboid = State.Selection:GetSortedCuboid()
+	local World = a_Player:GetWorld()
+	if not(CheckAreaCallbacks(SrcCuboid, a_Player, World, "copy")) then
+		return
+	end
+	
+	-- Push an undo snapshot:
+	State.UndoStack:PushUndoFromCuboid(World, SrcCuboid, "addleaves")
+	
+	-- Read the selected cuboid into a cBlockArea:
+	local BA = cBlockArea()
+	BA:Read(World, SrcCuboid)
+	local MaxX, MaxY, MaxZ = BA:GetSize()
+	MaxX = MaxX - 1
+	MaxY = MaxY - 1
+	MaxZ = MaxZ - 1
+	
+	-- Create an image for the leaves to be added at each log:
+	--[[
+	The image is like this:
+	level 0 and 1:
+	.xxx.
+	xxxxx
+	xxxxx
+	xxxxx
+	.xxx.
+	
+	level 2:
+	.....
+	..x..
+	.xxx.
+	..x..
+	.....
+	--]]
+	local LeavesImg = cBlockArea()
+	LeavesImg:Create(5, 3, 5)
+	LeavesImg:FillRelCuboid(0, 4, 0, 1, 0, 4, cBlockArea.baTypes + cBlockArea.baMetas, LeafBlockType, LeafBlockMeta)
+	LeavesImg:SetRelBlockType(0, 0, 0, 0)
+	LeavesImg:SetRelBlockType(4, 0, 0, 0)
+	LeavesImg:SetRelBlockType(0, 0, 4, 0)
+	LeavesImg:SetRelBlockType(4, 0, 4, 0)
+	LeavesImg:SetRelBlockType(0, 1, 0, 0)
+	LeavesImg:SetRelBlockType(4, 1, 0, 0)
+	LeavesImg:SetRelBlockType(0, 1, 4, 0)
+	LeavesImg:SetRelBlockType(4, 1, 4, 0)
+	LeavesImg:SetRelBlockTypeMeta(1, 2, 2, LeafBlockType, LeafBlockMeta)
+	LeavesImg:SetRelBlockTypeMeta(2, 2, 1, LeafBlockType, LeafBlockMeta)
+	LeavesImg:SetRelBlockTypeMeta(3, 2, 2, LeafBlockType, LeafBlockMeta)
+	LeavesImg:SetRelBlockTypeMeta(2, 2, 3, LeafBlockType, LeafBlockMeta)
+	LeavesImg:SetRelBlockTypeMeta(2, 2, 2, LeafBlockType, LeafBlockMeta)
+	
+	-- Process the block area - add leaves next to all log blocks:
+	local LogBlock = E_BLOCK_LOG
+	local NewLogBlock = E_BLOCK_NEW_LOG
+	for y = 0, MaxY do
+		for z = 0, MaxZ do
+			for x = 0, MaxX do
+				local BlockType = BA:GetRelBlockType(x, y, z)
+				if ((BlockType == LogBlock) or (BlockType == NewLogBlock)) then
+					BA:Merge(LeavesImg, x - 2, y, z - 2, cBlockArea.msFillAir)
+				end
+			end
+		end
+	end
+	
+	-- Write the block area back to world:
+	BA:Write(World, BA:GetOrigin())
+	return true
+end
+
+
+
+
