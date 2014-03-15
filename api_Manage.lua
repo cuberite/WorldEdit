@@ -1,4 +1,11 @@
 
+-- api_Manage.lua
+
+-- Implements functions that can be called by external plugins to manipulate WorldEdit state
+
+
+
+
 
 --- Registers a function from an external plugin that will be called for each operation in the specified world
 -- Returns true to signalize call success to the caller
@@ -54,3 +61,109 @@ function RegisterPlayerSelectingPoint(a_PluginName, a_FunctionName)
 	table.insert(PlayerSelectPointHooks, {PluginName = a_PluginName, FunctionName = a_FunctionName})
 	return true
 end
+
+
+
+
+
+--- Sets the player's selection to the specified cuboid.
+-- Returns true on success, false on failure.
+function SetPlayerCuboidSelection(a_Player, a_Cuboid)
+	-- Check the params:
+	if (
+		(tolua.type(a_Player) ~= "cPlayer") or
+		(tolua.type(a_Cuboid) ~= "cCuboid")
+	) then
+		LOGWARNING("[WorldEdit] Invalid SetPlayerCuboidSelection API function parameters.")
+		LOGWARNING("  SetPlayerCuboidSelection() was called with param types \"" ..
+			tolua.type(a_Player) .. "\" (\"cPlayer\" wanted) and \"" ..
+			tolua.type(a_Cuboid) .. "\" (\"cCuboid\" wanted)."
+		)
+		return false
+	end
+	
+	-- Set the selection, both points:
+	local State = GetPlayerState(a_Player)
+	State.Selection:SetFirstPoint(a_Cuboid.p1.x, a_Cuboid.p1.y, a_Cuboid.p1.z)
+	State.Selection:SetSecondPoint(a_Cuboid.p2.x, a_Cuboid.p2.y, a_Cuboid.p2.z)
+	return true
+end
+
+
+
+
+
+--- Sets the specified corner-point of the player's cuboid selection to the specified Vector3i coord.
+-- Returns true if successful, false if selection not cuboid / other error
+function SetPlayerCuboidSelectionPoint(a_Player, a_PointNumber, a_CoordVector)
+	-- Check the params:
+	if (
+		(tolua.type(a_Player)      ~= "cPlayer") or
+		(tonumber(a_PointNumber)   == nil)  or
+		(tolua.type(a_CoordVector) ~= "Vector3i")
+	) then
+		LOGWARNING("[WorldEdit] Invalid SetPlayerCuboidSelectionPoint API function parameters.")
+		LOGWARNING("  SetPlayerCuboidSelection() was called with param types \"" ..
+			tolua.type(a_Player) .. "\" (\"cPlayer\" wanted), \"" ..
+			type(a_PointNumber) .. "\" (\"number\" wanted) and \"" ..
+			tolua.type(a_CoordVector) .. "\" (\"cVector3i\" wanted)."
+		)
+		return false
+	end
+	
+	-- Set the specified selection point:
+	local State = GetPlayerState(a_Player)
+	if (tonumber(a_PointNumber) == 1) then
+		State.Selection:SetFirstPoint(a_CoordVector)
+	elseif (tonumber(a_PointNumber) == 2) then
+		State.Selection:SetSecondPoint(a_CoordVector)
+	else
+		LOGWARNING("[WorldEdit] Invalid SetPlayerCuboidSelectionPoint API function parameters.")
+		LOGWARNING("  SetPlayerCuboidSelection() was called with invalid point number " .. a_PointNumber)
+		return false
+	end
+	return true
+end
+
+
+
+
+
+--- If the player's selection is a cuboid (as oposed to sphere / cylinder / ...), returns true;
+-- Returns false if player's selection is not a cuboid
+function IsPlayerSelectionCuboid(a_Player)
+	-- Current WE version has only cuboid selections
+	return true
+end
+
+
+
+
+
+--- If the player's selection is a cuboid, sets a_CuboidToSet to the selection cuboid and returns true
+-- Returns false if player's selection is not a cuboid.
+-- Note that we can't return a cCuboid instance - it would be owned by this plugin's Lua state and it could
+-- delete it at any time, making the variable in the other state point to bad memory, crashing the server.
+function GetPlayerCuboidSelection(a_Player, a_CuboidToSet)
+	-- Check the params:
+	if (
+		(tolua.type(a_Player)      ~= "cPlayer") or
+		(tolua.type(a_CuboidToSet) ~= "cCuboid")
+	) then
+		LOGWARNING("[WorldEdit] Invalid SetPlayerCuboidSelection API function parameters.")
+		LOGWARNING("  SetPlayerCuboidSelection() was called with param types \"" ..
+			tolua.type(a_Player) .. "\" (\"cPlayer\" wanted) and \"" ..
+			tolua.type(a_CuboidToSet) .. "\" (\"cCuboid\" wanted)."
+		)
+		return false
+	end
+	
+	-- Set the output cuboid to the selection:
+	local State = GetPlayerState(a_Player)
+	a_CuboidToSet:Assign(State.Selection.Cuboid)
+	return true
+end
+
+
+
+
