@@ -25,31 +25,10 @@ end
 ----------------------------------------------------
 ---------------------TOOLSHOOK----------------------
 ----------------------------------------------------
-function ToolsHook(Player, BlockX, BlockY, BlockZ, BlockFace, CursorX, CursorY, CursorZ)
-	if BlockFace == BLOCK_FACE_NONE then
-		return false
-	end
+function ToolsHook(a_Player, a_BlockX, a_BlockY, a_BlockZ, a_BlockFace, a_CursorX, a_CursorY, a_CursorZ)
+	local State = GetPlayerState(a_Player)
 	
-	local PlayerName = Player:GetName()
-	local World = Player:GetWorld()
-	if Player:GetEquippedItem().m_ItemType == ReplItem[PlayerName] then
-		if CheckIfInsideAreas(BlockX, BlockX, BlockY, BlockY, BlockZ, BlockZ, Player, Player:GetWorld(), "replacetool") then
-			return true
-		end
-		local Block = StringSplit(Repl[PlayerName], ":")
-		if Block[2] == nil then
-			Block[2] = 0
-		end
-		World:SetBlock(BlockX, BlockY, BlockZ, Block[1], Block[2])
-		return false
-	end
-	if Player:GetEquippedItem().m_ItemType == GrowTreeItem[PlayerName] then
-		if World:GetBlock(BlockX, BlockY, BlockZ) == 2 or World:GetBlock(BlockX, BlockY, BlockZ) == 3 then
-			World:GrowTree(BlockX, BlockY + 1, BlockZ)
-		else
-			Player:SendMessage(cChatColor.Rose .. "A tree can't go there.")
-		end
-	end
+	return State.ToolRegistrator:UseTool(a_Player, a_BlockX, a_BlockY, a_BlockZ, a_BlockFace, a_Player:GetEquippedItem().m_ItemType)
 end
 
 
