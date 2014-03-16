@@ -18,10 +18,6 @@ end
 ------------------CREATETABLES-----------------
 -----------------------------------------------
 function CreateTables()
-	SP = {}
-	Repl = {}
-	ReplItem = {}
-	GrowTreeItem = {}
 	LeftClickCompassUsed = {}
 	ExclusionAreaPlugins = {}
 	PlayerSelectPointHooks = {}

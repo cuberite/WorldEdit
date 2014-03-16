@@ -12,13 +12,23 @@
 -------------------SUPERPICKAXE--------------------
 ---------------------------------------------------
 function SuperPickaxeHook(Player, BlockX, BlockY, BlockZ, BlockFace, Status)
-	if (SP[Player:GetName()]) then
-		if CheckIfInsideAreas(BlockX, BlockX, BlockY, BlockY, BlockZ, BlockZ, Player, Player:GetWorld(), "superpickaxe") then
-			return true
-		end
-		local World = Player:GetWorld()
-		World:DigBlock(BlockX, BlockY, BlockZ) 		
+	-- SuperPickaxe
+	if BlockFace == BLOCK_FACE_NONE then
+		return false
 	end
+	
+	local State = GetPlayerState(Player)
+	
+	if (not State.Tools:HasSuperPickaxeActivated()) then
+		return false
+	end
+	
+	if CheckIfInsideAreas(BlockX, BlockX, BlockY, BlockY, BlockZ, BlockZ, Player, Player:GetWorld(), "superpickaxe") then
+		return true
+	end
+	
+	local World = Player:GetWorld()
+	World:DigBlock(BlockX, BlockY, BlockZ) 		
 end
 
 
@@ -30,20 +40,22 @@ function ToolsHook(Player, BlockX, BlockY, BlockZ, BlockFace, CursorX, CursorY, 
 		return false
 	end
 	
-	local PlayerName = Player:GetName()
+	local EquippedItem = Player:GetEquippedItem()
 	local World = Player:GetWorld()
-	if Player:GetEquippedItem().m_ItemType == ReplItem[PlayerName] then
+	local State = GetPlayerState(Player)
+	
+	if (State.Tools:IsReplaceTool(EquippedItem.m_ItemType)) then
 		if CheckIfInsideAreas(BlockX, BlockX, BlockY, BlockY, BlockZ, BlockZ, Player, Player:GetWorld(), "replacetool") then
 			return true
 		end
-		local Block = StringSplit(Repl[PlayerName], ":")
-		if Block[2] == nil then
-			Block[2] = 0
-		end
-		World:SetBlock(BlockX, BlockY, BlockZ, Block[1], Block[2])
+
+		local BlockType, BlockMeta = State.Tools:ReplaceToolGetToChangeBlock()
+
+		World:SetBlock(BlockX, BlockY, BlockZ, BlockType, BlockMeta)
 		return false
 	end
-	if Player:GetEquippedItem().m_ItemType == GrowTreeItem[PlayerName] then
+	
+	if (State.Tools:IsGrowTreeTool(EquippedItem.m_ItemType)) then
 		if World:GetBlock(BlockX, BlockY, BlockZ) == 2 or World:GetBlock(BlockX, BlockY, BlockZ) == 3 then
 			World:GrowTree(BlockX, BlockY + 1, BlockZ)
 		else
