@@ -138,6 +138,14 @@ g_PluginInfo =
 			Category = "Selection",
 		},
 		
+		["//pyramid"] =
+		{
+			Permission = "worldedit.generation.pyramid",
+			Handler = HandlePyramidCommand,
+			HelpString = "Generate a filled pyramid",
+			Category = "Generation",
+		},
+		
 		["//redo"] =
 		{
 			Permission = "worldedit.history.redo",

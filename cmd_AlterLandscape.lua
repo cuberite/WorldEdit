@@ -622,3 +622,52 @@ end
 
 
 
+
+function HandlePyramidCommand(a_Split, a_Player)
+	if ((a_Split[2] == nil) or (a_Split[3] == nil)) then
+		a_Player:SendMessage(cChatColor.Rose .. "Too few arguments.")
+		a_Player:SendMessage(cChatColor.Rose .. "//pyramid <block> <size>")
+		return true
+	end
+	
+	local BlockType, BlockMeta = GetBlockTypeMeta(a_Split[2])
+	if (not BlockType) then
+		a_Player:SendMessage(cChatColor.Rose .. "Block name '" .. a_Split[2] .. "' was not recognized.")
+		return true
+	end
+	
+	local Radius = tonumber(a_Split[3])
+	if (not Radius) then
+		a_Player:SendMessage(cChatColor.Rose .. "Number expected; string \"" .. a_Split[3] .. "\" given.")
+		return true
+	end
+	
+	local Pos = a_Player:GetPosition()
+	local MinX, MaxX = Pos.x - Radius, Pos.x + Radius
+	local MinY, MaxY = Pos.y, Pos.y + Radius
+	local MinZ, MaxZ = Pos.z - Radius, Pos.z + Radius
+	
+	local World = a_Player:GetWorld()
+	
+	local BlockArea = cBlockArea()
+	BlockArea:Read(World, MinX, MaxX, MinY, MaxY, MinZ, MaxZ, cBlockArea.baTypes + cBlockArea.baMetas)
+	
+	local Size = Radius * 2
+	local AffectedBlocks = 0
+	local Layer = 0
+	for Y = 0, BlockArea:GetSizeY() do
+		local AffectedSize = Size - Layer * 2
+		AffectedBlocks = AffectedBlocks + AffectedSize * AffectedSize
+		BlockArea:FillRelCuboid(0 + Layer, Size - Layer, Y, Y, 0 + Layer, Size - Layer, cBlockArea.baTypes + cBlockArea.baMetas, BlockType, BlockMeta)
+		Layer = Layer + 1
+	end
+	
+	BlockArea:Write(World, MinX, MinY, MinZ)
+	a_Player:SendMessage(cChatColor.LightPurple .. AffectedBlocks .. " block(s) have been created.")
+	
+	return true
+end
+
+
+
+
