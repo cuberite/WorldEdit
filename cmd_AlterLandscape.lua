@@ -1,95 +1,149 @@
--------------------------------------------------
--------------------REMOVEBELOW-------------------
--------------------------------------------------
-function HandleRemoveBelowCommand(Split, Player)
-	local X = math.floor(Player:GetPosX()) -- round the number (for example from 12.23423987 to 12)
-	local Y = math.floor(Player:GetPosY()) -- round the number (for example from 12.23423987 to 12)
-	local Z = math.floor(Player:GetPosZ()) -- round the number (for example from 12.23423987 to 12)
-	local World = Player:GetWorld() -- Get the world
-	local PlayerName = Player:GetName()
+
+-- cmd_AlterLandscape.lua
+
+-- Implements the commands and functions for altering the landscape
+
+
+
+
+
+--- Common code for RemoveAbove and RemoveBelow
+-- Checks with plugins if the operation is allowed
+-- Pushes the column in Undo stack
+-- Removes the blocks
+-- a_Cuboid is expected to be sorted
+-- Returns true if successful, false if not
+function RemoveColumnPart(a_Player, a_Cuboid, a_OperationName, a_UndoName)
+	assert(tolua.type(a_Player) == "cPlayer")
+	assert(tolua.type(a_Cuboid) == "cCuboid")
+	assert(type(a_OperationName) == "string")
+	assert(type(a_UndoName) == "string")
 	
-	if CheckIfInsideAreas(X, X, 1, Y, Z, Z, Player, Player:GetWorld(), "removebelow") then
-		return true
+	-- DEBUG:
+	LOG(string.format("%s cuboid: {%d, %d, %d} - {%d, %d, %d}",
+		a_UndoName,
+		a_Cuboid.p1.x, a_Cuboid.p1.y, a_Cuboid.p1.z,
+		a_Cuboid.p2.x, a_Cuboid.p2.y, a_Cuboid.p2.z
+	))
+	
+	-- Check if other plugins allow the operation:
+	local World = a_Player:GetWorld()
+	if not(CheckAreaCallbacks(a_Cuboid, a_Player, World, a_OperationName)) then
+		return false
 	end
 	
-	LastCoords[PlayerName] = {X = X, Y = 1, Z = Z, WorldName = World:GetName()}
+	-- Push in Undo stack:
+	local State = GetPlayerState(a_Player)
+	State.UndoStack:PushUndoFromCuboid(World, a_Cuboid, a_UndoName)
 	
-	PersonalUndo[PlayerName]:Read(World, X, X, 1, Y, Z, Z)
-	for y = 1, Y do
-		World:SetBlock(X, y, Z, E_BLOCK_AIR, 0)
-	end
-	Player:SendMessageSuccess(Y + 1 .. " block(s) have been removed.")
+	-- Clear the blocks by writing an empty cBlockArea over them:
+	local Area = cBlockArea()
+	Area:Create(a_Cuboid:DifX() + 1, a_Cuboid:DifY() + 1, a_Cuboid:DifZ() + 1, cBlockArea.baTypes + cBlockArea.baMetas)
+	Area:Write(World, a_Cuboid.p1)
+	Area:Clear()
+
 	return true
 end
 
 
--------------------------------------------------
--------------------REMOVEABOVE-------------------
--------------------------------------------------
-function HandleRemoveAboveCommand(Split, Player)
-	local X = math.floor(Player:GetPosX()) -- round the number (for example from 12.23423987 to 12)
-	local y = math.floor(Player:GetPosY()) -- round the number (for example from 12.23423987 to 12)
-	local Z = math.floor(Player:GetPosZ()) -- round the number (for example from 12.23423987 to 12)
-	local World = Player:GetWorld()
-	local PlayerName = Player:GetName()
-	local IsValid, WorldHeight = World:TryGetHeight(X, Z)
+
+
+
+function HandleRemoveBelowCommand(a_Split, a_Player)
+	-- //removebelow
+
+	local X = math.floor(a_Player:GetPosX())
+	local Y = math.floor(a_Player:GetPosY())
+	local Z = math.floor(a_Player:GetPosZ())
+	local Cuboid = cCuboid(X, 1, Z, X, Y, Z)
 	
-	if not IsValid then
-		Player:SendMessageFailure("No blocks have been removed, chunk not loaded?")
-		return true
+	if (RemoveColumnPart(a_Player, Cuboid, "removebelow", "//removebelow")) then
+		a_Player:SendMessageSuccess(Y + 1 .. " block(s) have been removed.")
 	end
-	
-	if CheckIfInsideAreas(X, X, y, WorldHeight, Z, Z, Player, World, "removeabove") then
-		return true
-	end
-	
-	LastCoords[PlayerName] = {X = X, Y = y, Z = Z, WorldName = World:GetName()}
-	PersonalUndo[PlayerName]:Read(World, X, X, y, WorldHeight, Z, Z)
-	
-	for Y = y, WorldHeight do
-		World:SetBlock(X, Y, Z, E_BLOCK_AIR, 0)
-	end
-	Player:SendMessageSuccess(WorldHeight - y .. " block(s) have been removed.")
 	return true
 end
+
+
+
+
+
+function HandleRemoveAboveCommand(a_Split, a_Player)
+	-- //removeabove
+	local X = math.floor(a_Player:GetPosX())
+	local Y = math.floor(a_Player:GetPosY())
+	local Z = math.floor(a_Player:GetPosZ())
+	
+	-- Try to determine the world height at this column:
+	local IsValid, WorldHeight = a_Player:GetWorld():TryGetHeight(X, Z)
+	if not(IsValid) then
+		a_Player:SendMessage(cChatColor.LightPurple .. "0 block(s) have been removed.")
+		return true
+	end
+
+	-- Remove the blocks:
+	local Cuboid = cCuboid(X, Y, Z, X, WorldHeight, Z)
+	if (RemoveColumnPart(a_Player, Cuboid, "removeabove", "//removeabove")) then
+		a_Player:SendMessageSuccess(WorldHeight - Y + 1 .. " block(s) have been removed.")
+	end
+
+	return true
+end
+
+
+
 
 
 -----------------------------------------------
 ---------------------DRAIN---------------------
 -----------------------------------------------
-function HandleDrainCommand(Split, Player)
-	if tonumber(Split[2]) == nil or Split[2] == nil then -- check if the player gave a radius
-		Player:SendMessageInfo("Usage: //drain <radius>")
-		return true
-	else
-		Radius = tonumber(Split[2]) -- set the radius to the given radius
-	end
-	
-	local MinX = math.floor(Player:GetPosX()) - Radius
-	local MinY = math.floor(Player:GetPosY()) - Radius
-	local MinZ = math.floor(Player:GetPosZ()) - Radius
-	local MaxX = math.floor(Player:GetPosX()) + Radius
-	local MaxY = math.floor(Player:GetPosY()) + Radius
-	local MaxZ = math.floor(Player:GetPosZ()) + Radius
-	
-	if CheckIfInsideAreas(MinX, MaxX, MinY, MaxY, MinZ, MaxZ, Player, Player:GetWorld(), "drain") then
+function HandleDrainCommand(a_Split, a_Player)
+	-- Check the radius parameter:
+	local Radius = tonumber(a_Split[2])
+	if (Radius == nil) then
+		a_Player:SendMessageInfo("Usage: //drain <radius>")
 		return true
 	end
 	
+	-- Check if other plugins allow the operation:
+	local X = math.floor(a_Player:GetPosX())
+	local Y = math.floor(a_Player:GetPosY())
+	local Z = math.floor(a_Player:GetPosZ())
+	local Cuboid = cCuboid(X - Radius, Y - Radius, Z - Radius, X + Radius, Y + Radius, Z + Radius)
+	Cuboid:ClampY(0, 255)
+	if not(CheckAreaCallbacks(Cuboid, a_Player, a_Player:GetWorld(), "drain")) then
+		return true
+	end
+	
+	-- TODO: Do a proper areafill algorithm (BFS / DFS) to replace only the connected bodies of fluid,
+	-- instead of replacing everything in the area
+	
+	-- Push the area to Undo stack:
+	local State = GetPlayerState(a_Player)
+	local World = a_Player:GetWorld()
+	State.UndoStack:PushUndoFromCuboid(World, Cuboid, "drain")
+	
+	-- Process the area around the player using a cBlockArea:
 	local BlockArea = cBlockArea()
-	BlockArea:Read(Player:GetWorld(), MinX, MaxX, MinY, MaxY, MinZ, MaxZ) -- read the area
-	for x=0, BlockArea:GetSizeX() - 1 do
-		for y=0, BlockArea:GetSizeY() - 1 do
-			for z=0, BlockArea:GetSizeZ() - 1 do
-				if BlockArea:GetRelBlockType(x, y, z) == E_BLOCK_WATER or BlockArea:GetRelBlockType(x, y, z) == E_BLOCK_STATIONARY_WATER then -- check if the block is water
+	BlockArea:Read(World, Cuboid)
+	local NumBlocks = 0
+	for y = 0, BlockArea:GetSizeY() - 1 do
+		for z = 0, BlockArea:GetSizeZ() - 1 do
+			for x = 0, BlockArea:GetSizeX() - 1 do
+				local BlockType = BlockArea:GetRelBlockType(x, y, z)
+				if ((BlockType == E_BLOCK_WATER) or (BlockType == E_BLOCK_STATIONARY_WATER)) then
 					BlockArea:SetRelBlockType(x, y, z, 0) -- set the block to air
+					NumBlocks = NumBlocks + 1
 				end
 			end
 		end
 	end
-	BlockArea:Write(Player:GetWorld(), MinX, MinY, MinZ) -- write the are into the world.
+	BlockArea:Write(World, Cuboid.p1)
+	a_Player:SendMessageSuccess(NumBlocks .. " block(s) changed.")
 	return true
 end
+
+
+
 
 
 ------------------------------------------------
@@ -97,7 +151,7 @@ end
 ------------------------------------------------
 function HandleExtinguishCommand(Split, Player)
 	if Split[2] == nil or tonumber(Split[2]) == nil then
-		Player:SendMessageInfo("Usage: /ex <radius as number>")
+		Player:SendMessageInfo("Usage: /ex [radius]")
 		return true
 	else
 		Radius = tonumber(Split[2])
@@ -200,7 +254,7 @@ function HandleSnowCommand(Split, Player)
 				elseif World:GetBlock(x, y , z) == E_BLOCK_LAVA then -- check if the block is lava
 					table.insert(PossibleBlockChanges, {X = x, Y = y, Z = z, BlockType = E_BLOCK_OBSIDIAN})
 				else
-					if g_BlockIsSnowable[World:GetBlock(x, y, z)] then
+					if cBlockInfo:IsSnowable(World:GetBlock(x, y, z)) then
 						table.insert(PossibleBlockChanges, {X = x, Y = y + 1, Z = z, BlockType = E_BLOCK_SNOW})
 					end
 				end
@@ -308,28 +362,64 @@ end
 --------------------SETBIOME--------------------
 ------------------------------------------------
 function HandleSetBiomeCommand(Split, Player)
-	Player:SendMessageFailure("This command is currently non-functional.")
-	return true
-	--[[if Split[2] == nil then
-		Player:SendMessage(cChatColor.Rose .. "Please say a biome")
+	local function SendWrongArguments(Reason)
+		Player:SendMessageInfo(Reason .. " arguments.")
+		Player:SendMessageInfo("//setbiome [-p] <biome>")
+		Player:SendMessageInfo("") -- Extra space
+		Player:SendMessageInfo("Sets the biome of the region.")
+		Player:SendMessageInfo("By default sets the biome in your selected area.")
+		Player:SendMessageInfo("-p sets biome in the column you are currently standing in.")
+	end
+	
+	if #Split == 1 then
+		SendWrongArguments("Too few")
 		return true
 	end
-	if OnePlayer[Player:GetName()] == nil or TwoPlayer[Player:GetName()] == nil then
-		Player:SendMessage(cChatColor.Rose .. "No Region set")
+	
+	if #Split > 3 then
+		SendWrongArguments("Too many")
 		return true
 	end
-	Biome = GetBiomeFromString(Split, Player)
-	if Biome == false then
-		Player:SendMessage("Please specify a valid biome")
-		return true
-	end
-	--local World = Player:GetWorld()
-	OneX, TwoX, OneZ, TwoZ = GetXZCoords(Player)
-	for X=OneX, TwoX do
-		for Z=OneZ, TwoZ do
-			cChunkDesc:SetBiome(X, Z, Biome)
+	
+	local World = Player:GetWorld()
+	local PosX = math.floor(Player:GetPosX())
+	local PosZ = math.floor(Player:GetPosZ())
+	
+	if #Split == 3 then
+		if Split[2] ~= "-p" then
+			SendWrongArguments("Too many")
+			return true
 		end
-	end]]
+		
+		local NewBiome = StringToBiome(Split[3])
+		if NewBiome == biInvalidBiome then
+			Player:SendMessageFailure("Unknown biome type: '" .. Split[3] .. "'.")
+			return true
+		end
+		
+		World:SetAreaBiome(PosX, PosX, PosZ, PosZ, NewBiome)
+		Player:SendMessageSuccess("Biome changed to " .. Split[3] .. " at your current location.")
+		return true
+	elseif #Split == 2 then
+		local NewBiome = StringToBiome(Split[2])
+		if NewBiome == biInvalidBiome then
+			Player:SendMessageFailure("Unknown " .. Split[2] .. " biome type.")
+			return true
+		end
+		
+		local State = GetPlayerState(Player)
+		if not(State.Selection:IsValid()) then
+			Player:SendMessageFailure("You need to select a region first.")
+			return true
+		end
+		local MinX, MaxX = State.Selection:GetXCoordsSorted()
+		local MinZ, MaxZ = State.Selection:GetZCoordsSorted()
+			
+		World:SetAreaBiome(MinX, MaxX, MinZ, MaxZ, NewBiome)
+		Player:SendMessageSuccess("Biome changed to " .. Split[2] .. ". " .. (1 + MaxX - MinX) * (1 + MaxZ - MinZ) .. " columns affected.")
+		return true
+	end
+	return true
 end
 
 
@@ -357,8 +447,9 @@ function HandlePumpkinsCommand(Split, Player)
 	for I=1, Radius * 2 do
 		local X = PosX + math.random(-Radius, Radius)
 		local Z = PosZ + math.random(-Radius, Radius)
-		local IsValid, Y = World:TryGetHeight(X, Z) + 1
+		local IsValid, Y = World:TryGetHeight(X, Z)
 		if IsValid then
+			Y = Y + 1
 			if World:GetBlock(X, Y - 1, Z) == E_BLOCK_GRASS or World:GetBlock(X, Y, Z) - 1 == E_BLOCK_DIRT then
 				YCheck:SetY(Y)
 				table.insert(PossibleBlockChanges, {X = X, Y = Y, Z = Z, BlockType = E_BLOCK_LOG, BlockMeta = 0})
@@ -386,7 +477,148 @@ function HandlePumpkinsCommand(Split, Player)
 		for idx, value in ipairs(PossibleBlockChanges) do
 			World:SetBlock(value.X, value.Y, value.Z, value.BlockType, value.BlockMeta)
 		end
-		Player:SendMessageSuccess(#PossibleBlockChanges .. "  surfaces pumpkinfied")
+		Player:SendMessageSuccess(#PossibleBlockChanges .. " pumpkin patches created")
 	end
 	return true
-end		
+end
+
+
+
+
+
+function HandleSphereCommand(a_Split, a_Player)
+	-- //sphere <BlockType> <Radius>
+	
+	-- Check the params:
+	if ((a_Split[2] == nil) or (a_Split[3] == nil)) then
+		a_Player:SendMessage(cChatColor.Rose .. "Usage: //sphere <BlockType> <Radius>")
+		return true
+	end
+	
+	-- Convert the blocktype param:
+	local BlockType, BlockMeta = GetBlockTypeMeta(a_Split[2])
+	if not(BlockType) then
+		a_Player:SendMessage(cChatColor.Rose .. "Unknown block type: \"" .. a_Split[2] .. "\"")
+		return true
+	end
+	
+	-- Convert the Radius param:
+	local Radius = tonumber(a_Split[3])
+	if not(Radius) then
+		a_Player:SendMessage(cChatColor.Rose .. "Cannot convert radius \"" .. a_Split[3] .. "\" to a number.")
+		return true
+	end
+	
+	-- Check if other plugins agree with the operation:
+	local World = a_Player:GetWorld()
+	local PosX = math.floor(a_Player:GetPosX())
+	local PosY = math.floor(a_Player:GetPosY())
+	local PosZ = math.floor(a_Player:GetPosZ())
+	local MinX, MaxX, MinY, MaxY, MinZ, MaxZ = PosX - Radius, PosX + Radius, PosY - Radius, PosY + Radius, PosZ - Radius, PosZ + Radius
+	local Cuboid = cCuboid(MinX, MinY, MinZ, MaxX, MaxY, MaxZ)
+	Cuboid:ClampY(0, 255)
+	if not(CheckAreaCallbacks(Cuboid, a_Player, World, "sphere")) then
+		return true
+	end
+	
+	-- Push the area into an undo stack:
+	local State = GetPlayerState(a_Player)
+	State.UndoStack:PushUndoFromCuboid(World, Cuboid)
+	
+	-- Read the current contents of the world:
+	local BlockArea = cBlockArea()
+	BlockArea:Read(World, Cuboid, cBlockArea.baTypes + cBlockArea.baMetas)
+
+	-- Change blocks inside the sphere:
+	local MidPoint = Vector3d(Radius, PosY - MinY, Radius)  -- Midpoint of the sphere, relative to the area
+	local NumBlocks = 0
+	local SqrRadius = Radius * Radius
+	for Y = 0, Cuboid.p2.y - Cuboid.p1.y do  -- The Cuboid has been Y-clamped correctly, take advantage of that
+		for Z = 0, 2 * Radius do
+			for X = 0, 2 * Radius do
+				local Distance = math.floor((MidPoint - Vector3d(X, Y, Z)):SqrLength())
+				if (Distance <= SqrRadius) then
+					BlockArea:SetRelBlockTypeMeta(X, Y, Z, BlockType, BlockMeta)
+					NumBlocks = NumBlocks + 1
+				end
+			end
+		end
+	end
+
+	-- Write the area back to world:
+	BlockArea:Write(World, MinX, MinY, MinZ)
+	a_Player:SendMessage(cChatColor.LightPurple .. NumBlocks .. " block(s) were affected.")
+	return true
+end
+
+
+
+
+
+function HandleHSphereCommand(a_Split, a_Player)
+	-- //hsphere <BlockType> <Radius>
+	
+	-- Check the number of params:
+	if ((a_Split[2] == nil) or (a_Split[3] == nil)) then
+		a_Player:SendMessage(cChatColor.Rose .. "Usage: //hsphere <BlockType> <Radius>")
+		return true
+	end
+	
+	-- Convert the blocktype param:
+	local BlockType, BlockMeta = GetBlockTypeMeta(a_Split[2])
+	if not(BlockType) then
+		a_Player:SendMessage(cChatColor.Rose .. "Unknown block type: \"" .. a_Split[2] .. "\"")
+		return true
+	end
+	
+	-- Convert the Radius param:
+	local Radius = tonumber(a_Split[3])
+	if not(Radius) then
+		a_Player:SendMessage(cChatColor.Rose .. "Cannot convert radius \"" .. a_Split[3] .. "\" to a number.")
+		return true
+	end
+	
+	-- Check if other plugins agree with the operation:
+	local World = a_Player:GetWorld()
+	local PosX = math.floor(a_Player:GetPosX())
+	local PosY = math.floor(a_Player:GetPosY())
+	local PosZ = math.floor(a_Player:GetPosZ())
+	local MinX, MaxX, MinY, MaxY, MinZ, MaxZ = PosX - Radius, PosX + Radius, PosY - Radius, PosY + Radius, PosZ - Radius, PosZ + Radius
+	local Cuboid = cCuboid(MinX, MinY, MinZ, MaxX, MaxY, MaxZ)
+	Cuboid:ClampY(0, 255)
+	if not(CheckAreaCallbacks(Cuboid, a_Player, World, "sphere")) then
+		return true
+	end
+	
+	-- Push the area into an undo stack:
+	local State = GetPlayerState(a_Player)
+	State.UndoStack:PushUndoFromCuboid(World, Cuboid)
+	
+	-- Read the current contents of the world:
+	local BlockArea = cBlockArea()
+	BlockArea:Read(World, Cuboid, cBlockArea.baTypes + cBlockArea.baMetas)
+
+	-- Change blocks inside the sphere:
+	local MidPoint = Vector3d(Radius, PosY - MinY, Radius)  -- Midpoint of the sphere, relative to the area
+	local NumBlocks = 0
+	for Y = 0, Cuboid.p2.y - Cuboid.p1.y do  -- The Cuboid has been Y-clamped correctly, take advantage of that
+		for Z = 0, 2 * Radius do
+			for X = 0, 2 * Radius do
+				local Distance = math.floor((MidPoint - Vector3d(X, Y, Z)):Length())
+				if (Distance == Radius) then
+					BlockArea:SetRelBlockTypeMeta(X, Y, Z, BlockType, BlockMeta)
+					NumBlocks = NumBlocks + 1
+				end
+			end
+		end
+	end
+
+	-- Write the area back to world:
+	BlockArea:Write(World, MinX, MinY, MinZ)
+	a_Player:SendMessage(cChatColor.LightPurple .. NumBlocks .. " block(s) were affected.")
+	return true
+end
+
+
+
+

@@ -8,6 +8,7 @@ g_PluginInfo =
 	Name = "WorldEdit",
 	Version = "0.1",
 	Date = "2014-01-25",
+	SourceLocation = "https://github.com/mc-server/WorldEdit",
 	Description = [[This plugin allows you to easily manage the world, edit the world, navigate around or get information. It bears similarity to the Bukkit's WorldEdit plugin and aims to have the same set of commands,however, it has no affiliation to that plugin.
 	]],
 	Commands =
@@ -21,6 +22,14 @@ g_PluginInfo =
 			Permission = "worldedit.superpickaxe",
 			Handler = HandleSuperPickCommand,
 			HelpString = " Toggle the super pickaxe pickaxe function",
+			Category = "Tool",
+		},
+		
+		["//addleaves"] =
+		{
+			Permission = "worldedit.addleaves",
+			Handler = HandleAddLeavesCommand,
+			HelpString = " Adds leaves next to log blocks",
 			Category = "Tool",
 		},
 		
@@ -81,6 +90,30 @@ g_PluginInfo =
 			Category = "Terraforming",
 		},
 		
+		["//hpos1"] =
+		{
+			Permission = "worldedit.selection.pos",
+			Handler = HandleHPos1Command,
+			HelpString = " Set position 1 to the position you are looking at.",
+			Category = "Selection",
+		},
+		
+		["//hpos2"] =
+		{
+			Permission = "worldedit.selection.pos",
+			Handler = HandleHPos2Command,
+			HelpString = " Set position 2 to the position you are looking at.",
+			Category = "Selection",
+		},
+		
+		["//hsphere"] =
+		{
+			Permission = "worldedit.generation.hsphere",
+			Handler = HandleHSphereCommand,
+			HelpString = " Generates a hollow sphere.",
+			Category = "Generation",
+		},
+		
 		["//paste"] =
 		{
 			Permission = "worldedit.clipboard.paste",
@@ -102,22 +135,6 @@ g_PluginInfo =
 			Permission = "worldedit.selection.pos",
 			Handler = HandlePos2Command,
 			HelpString = " Set position 2",
-			Category = "Selection",
-		},
-		
-		["//hpos1"] =
-		{
-			Permission = "worldedit.selection.pos",
-			Handler = HandleHPos1Command,
-			HelpString = " Set position 1 to the position you are looking at.",
-			Category = "Selection",
-		},
-		
-		["//hpos2"] =
-		{
-			Permission = "worldedit.selection.pos",
-			Handler = HandleHPos2Command,
-			HelpString = " Set position 2 to the position you are looking at.",
 			Category = "Selection",
 		},
 		
@@ -156,62 +173,30 @@ g_PluginInfo =
 				save =
 				{
 					HelpString = "Saves the current clipboard to a file with the given filename.",
-					Permission = "",
+					Permission = "worldedit.schematic.save",
 					Handler = HandleSchematicSaveCommand,
-				},
-				s =
-				{
-					HelpString = "Saves the current clipboard to a file with the given filename.",
-					Permission = "",
-					Handler = HandleSchematicSaveCommand,
+					Alias = "s",
 				},
 				load =
 				{
 					HelpString = "Loads the given schematic file.",
-					Permission = "",
+					Permission = "worldedit.schematic.load",
 					Handler = HandleSchematicLoadCommand,
-				},
-				l =
-				{
-					HelpString = "Loads the given schematic file.",
-					Permission = "",
-					Handler = HandleSchematicLoadCommand,
+					Alias = "l",
 				},
 				formats =
 				{
 					HelpString = "List available schematic formats",
-					Permission = "",
+					Permission = "worldedit.schematic.list",
 					Handler = HandleSchematicFormatsCommand,
-				},
-				listformats =
-				{
-					HelpString = "List available schematic formats",
-					Permission = "",
-					Handler = HandleSchematicFormatsCommand,
-				},
-				f =
-				{
-					HelpString = "List available schematic formats",
-					Permission = "",
-					Handler = HandleSchematicFormatsCommand,
+					Alias = {"listformats", "f" },
 				},
 				list =
 				{
 					HelpString = "List available schematics",
-					Permission = "",
+					Permission = "worldedit.schematic.list",
 					Handler = HandleSchematicListCommand,
-				},
-				all =
-				{
-					HelpString = "List available schematics",
-					Permission = "",
-					Handler = HandleSchematicListCommand,
-				},
-				ls =
-				{
-					HelpString = "List available schematics",
-					Permission = "",
-					Handler = HandleSchematicListCommand,
+					Alias = { "all", "ls", },
 				},
 			},
 		},
@@ -232,12 +217,28 @@ g_PluginInfo =
 			Category = "Biome",
 		},
 		
+		["//shift"] =
+		{
+			Permission = "worldedit.selection.size",
+			Handler = HandleShiftCommand,
+			HelpString = " Move the selection area",
+			Category = "Selection",
+		},
+		
 		["//size"] =
 		{
 			Permission = "worldedit.selection.size",
 			Handler = HandleSizeCommand,
 			HelpString = " Get the size of the selection",
 			Category = "Selection",
+		},
+		
+		["//sphere"] =
+		{
+			Permission = "worldedit.generation.sphere",
+			Handler = HandleSphereCommand,
+			HelpString = " Generates a filled sphere.",
+			Category = "Generation",
 		},
 		
 		["//undo"] =
@@ -468,6 +469,10 @@ g_PluginInfo =
 		Selection =
 		{
 			Description = "Commands that give info/help setting the region you have selected.",
+		},
+		Generation =
+		{
+			Description = "Commands that generates structures.",
 		},
 		History =
 		{

@@ -1,50 +1,11 @@
----------------------------------------------------
------------------SELECTFIRSTPOINT------------------
----------------------------------------------------
-function SelectFirstPointHook(Player, BlockX, BlockY, BlockZ, BlockFace, BlockType, BlockMeta)
-	if not PlayerHasWEPermission(Player, "worldedit.selection.pos") then
-		return false
-	end
-	
-	local PlayerName = Player:GetName()
-	if not WandActivated[PlayerName] then
-		return false
-	end
-	
-	if Player:GetEquippedItem().m_ItemType ~= Wand then
-		return false
-	end
-	
-	SetPlayerSelectionPoint(Player, BlockX, BlockY, BlockZ, E_SELECTIONPOINT_LEFT)
-	return true
-end
+
+-- hooks.lua
+
+-- Implements the handlers for the hooks used by the plugin
+-- This file is temporary, the hook handlers will be moved to the tools they implement!
 
 
-----------------------------------------------------
------------------SELECTSECONDPOINT------------------
-----------------------------------------------------
-function SelectSecondPointHook(Player, BlockX, BlockY, BlockZ, BlockFace, CursorX, CursorY, CursorZ)
-	if BlockFace == BLOCK_FACE_NONE then
-		return false
-	end
-	
-	local PlayerName = Player:GetName()
-	if not PlayerHasWEPermission(Player, "worldedit.selection.pos") then
-		return false
-	end
-	
-	if not WandActivated[PlayerName] then
-		return false
-	end
-	
-	-- Check if the wand is equipped
-	if Player:GetEquippedItem().m_ItemType ~= Wand then
-		return false
-	end
-	
-	SetPlayerSelectionPoint(Player, BlockX, BlockY, BlockZ, E_SELECTIONPOINT_RIGHT)
-	return true
-end
+
 
 
 ---------------------------------------------------
@@ -64,31 +25,10 @@ end
 ----------------------------------------------------
 ---------------------TOOLSHOOK----------------------
 ----------------------------------------------------
-function ToolsHook(Player, BlockX, BlockY, BlockZ, BlockFace, CursorX, CursorY, CursorZ)
-	if BlockFace == BLOCK_FACE_NONE then
-		return false
-	end
+function ToolsHook(a_Player, a_BlockX, a_BlockY, a_BlockZ, a_BlockFace, a_CursorX, a_CursorY, a_CursorZ)
+	local State = GetPlayerState(a_Player)
 	
-	local PlayerName = Player:GetName()
-	local World = Player:GetWorld()
-	if Player:GetEquippedItem().m_ItemType == ReplItem[PlayerName] then
-		if CheckIfInsideAreas(BlockX, BlockX, BlockY, BlockY, BlockZ, BlockZ, Player, Player:GetWorld(), "replacetool") then
-			return true
-		end
-		local Block = StringSplit(Repl[PlayerName], ":")
-		if Block[2] == nil then
-			Block[2] = 0
-		end
-		World:SetBlock(BlockX, BlockY, BlockZ, Block[1], Block[2])
-		return false
-	end
-	if Player:GetEquippedItem().m_ItemType == GrowTreeItem[PlayerName] then
-		if World:GetBlock(BlockX, BlockY, BlockZ) == 2 or World:GetBlock(BlockX, BlockY, BlockZ) == 3 then
-			World:GrowTree(BlockX, BlockY + 1, BlockZ)
-		else
-			Player:SendMessage(cChatColor.Rose .. "A tree can't go there.")
-		end
-	end
+	return State.ToolRegistrator:UseTool(a_Player, a_BlockX, a_BlockY, a_BlockZ, a_BlockFace, a_Player:GetEquippedItem().m_ItemType)
 end
 
 
@@ -107,12 +47,6 @@ function RightClickCompassHook(Player, BlockX, BlockY, BlockZ, BlockFace, Cursor
 end
 
 
------------------------------------------------------
--------------------ONPLAYERJOINED--------------------
------------------------------------------------------
-function OnPlayerJoined(Player)
-	LoadPlayer(Player)
-end
 
 
 ---------------------------------------------------
@@ -178,11 +112,3 @@ end
 
 
 
-----------------------------------------------------
-------------------ONPLUGINMESSAGE-------------------
-----------------------------------------------------
-function OnPluginMessage(a_Client, a_Channel, a_Message)
-	if (a_Channel == "REGISTER") and (a_Message:find("WECUI") ~= nil) then
-		PlayerWECUIActivated[a_Client:GetPlayer():GetName()] = true
-	end
-end

@@ -37,30 +37,34 @@ function HandleWorldEditHelpCommand(Split, Player)
 end
 
 
-------------------------------------------------
-----------------------WAND----------------------
-------------------------------------------------
+
+
+
 function HandleWandCommand(Split, Player)
+	-- //wand
 	Item = cItem(Wand, 1) -- create the cItem object
 	if (Player:GetInventory():AddItem(Item)) then -- check if the player got the item
-		Player:SendMessageSuccess("Wooden axe acquired!")
+		Player:SendMessageSuccess("You have received the wand.")
 	else
-		Player:SendMessageFailure("Not enough inventory space!")
+		Player:SendMessageFailure("Not enough inventory space.")
 	end
 	return true
 end
 
 
-------------------------------------------------
------------------TOGGLEEDITWAND-----------------
-------------------------------------------------
-function HandleToggleEditWandCommand(Split, Player)
-	if not WandActivated[Player:GetName()] or WandActivated[Player:GetName()] == nil then
-		WandActivated[Player:GetName()] = true
-		Player:SendMessageSuccess("Edit wand enabled.")
+
+
+
+function HandleToggleEditWandCommand(a_Split, a_Player)
+	-- //togglewand
+	
+	local State = GetPlayerState(a_Player)
+	if not(State.WandActivated) then
+		State.WandActivated = true
+		a_Player:SendMessageSuccess("Edit wand enabled.")
 	else
-		WandActivated[Player:GetName()] = false
-		Player:SendMessageSuccess("Edit wand disabled.")
+		State.WandActivated = false
+		a_Player:SendMessageSuccess("Edit wand disabled.")
 	end
 	return true
 end

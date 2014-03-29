@@ -84,7 +84,7 @@ function HandleDescendCommand(Split, Player)
 		else
 			if WentThroughBlock then
 				for y = Y, 1, -1 do
-					if g_BlockIsSolid[World:GetBlock(XPos, y, ZPos)] then
+					if cBlockInfo:IsSolid(World:GetBlock(XPos, y, ZPos)) then
 						YPos = y
 						FoundYCoordinate = true
 						break
