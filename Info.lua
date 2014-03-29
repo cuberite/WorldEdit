@@ -106,6 +106,14 @@ g_PluginInfo =
 			Category = "Selection",
 		},
 		
+		["//hpyramid"] =
+		{
+			Permission = "worldedit.generation.pyramid",
+			Handler = HandleHPyramidCommand,
+			HelpString = "Generate a hollow pyramid",
+			Category = "Generation",
+		},
+		
 		["//hsphere"] =
 		{
 			Permission = "worldedit.generation.hsphere",

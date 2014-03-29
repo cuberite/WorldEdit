@@ -649,6 +649,16 @@ function HandlePyramidCommand(a_Split, a_Player)
 	
 	local World = a_Player:GetWorld()
 	
+	local Cuboid = cCuboid(MinX, MinY, MinZ, MaxX, MaxY, MaxZ)
+	Cuboid:ClampY(0, 255)
+	if not(CheckAreaCallbacks(Cuboid, a_Player, World, "pyramid")) then
+		return true
+	end
+	
+	-- Push the area into an undo stack:
+	local State = GetPlayerState(a_Player)
+	State.UndoStack:PushUndoFromCuboid(World, Cuboid)
+	
 	local BlockArea = cBlockArea()
 	BlockArea:Read(World, MinX, MaxX, MinY, MaxY, MinZ, MaxZ, cBlockArea.baTypes + cBlockArea.baMetas)
 	
@@ -659,6 +669,68 @@ function HandlePyramidCommand(a_Split, a_Player)
 		local AffectedSize = Size - Layer * 2
 		AffectedBlocks = AffectedBlocks + AffectedSize * AffectedSize
 		BlockArea:FillRelCuboid(0 + Layer, Size - Layer, Y, Y, 0 + Layer, Size - Layer, cBlockArea.baTypes + cBlockArea.baMetas, BlockType, BlockMeta)
+		Layer = Layer + 1
+	end
+	
+	BlockArea:Write(World, MinX, MinY, MinZ)
+	a_Player:SendMessage(cChatColor.LightPurple .. AffectedBlocks .. " block(s) have been created.")
+	
+	return true
+end
+
+
+
+
+
+function HandleHPyramidCommand(a_Split, a_Player)
+	if ((a_Split[2] == nil) or (a_Split[3] == nil)) then
+		a_Player:SendMessage(cChatColor.Rose .. "Too few arguments.")
+		a_Player:SendMessage(cChatColor.Rose .. "//pyramid <block> <size>")
+		return true
+	end
+	
+	local BlockType, BlockMeta = GetBlockTypeMeta(a_Split[2])
+	if (not BlockType) then
+		a_Player:SendMessage(cChatColor.Rose .. "Block name '" .. a_Split[2] .. "' was not recognized.")
+		return true
+	end
+	
+	local Radius = tonumber(a_Split[3])
+	if (not Radius) then
+		a_Player:SendMessage(cChatColor.Rose .. "Number expected; string \"" .. a_Split[3] .. "\" given.")
+		return true
+	end
+	
+	local Pos = a_Player:GetPosition()
+	local MinX, MaxX = Pos.x - Radius, Pos.x + Radius
+	local MinY, MaxY = Pos.y, Pos.y + Radius
+	local MinZ, MaxZ = Pos.z - Radius, Pos.z + Radius
+	
+	local World = a_Player:GetWorld()
+	
+	local Cuboid = cCuboid(MinX, MinY, MinZ, MaxX, MaxY, MaxZ)
+	Cuboid:ClampY(0, 255)
+	if not(CheckAreaCallbacks(Cuboid, a_Player, World, "pyramid")) then
+		return true
+	end
+	
+	-- Push the area into an undo stack:
+	local State = GetPlayerState(a_Player)
+	State.UndoStack:PushUndoFromCuboid(World, Cuboid)
+	
+	local BlockArea = cBlockArea()
+	BlockArea:Read(World, MinX, MaxX, MinY, MaxY, MinZ, MaxZ, cBlockArea.baTypes + cBlockArea.baMetas)
+	
+	local Size = Radius * 2
+	local AffectedBlocks = 0
+	local Layer = 0
+	for Y = 0, BlockArea:GetSizeY() do
+		local AffectedSize = Size - Layer * 2
+		AffectedBlocks = AffectedBlocks + AffectedSize * 4
+		BlockArea:FillRelCuboid(0 + Layer, Size - Layer, Y, Y, 0 + Layer, 0 + Layer, cBlockArea.baTypes + cBlockArea.baMetas, BlockType, BlockMeta)
+		BlockArea:FillRelCuboid(0 + Layer, Size - Layer, Y, Y, Size - Layer, Size - Layer, cBlockArea.baTypes + cBlockArea.baMetas, BlockType, BlockMeta)
+		BlockArea:FillRelCuboid(0 + Layer, 0 + Layer, Y, Y, 0 + Layer, Size - Layer, cBlockArea.baTypes + cBlockArea.baMetas, BlockType, BlockMeta)
+		BlockArea:FillRelCuboid(Size - Layer, Size - Layer, Y, Y, 0 + Layer, Size - Layer, cBlockArea.baTypes + cBlockArea.baMetas, BlockType, BlockMeta)
 		Layer = Layer + 1
 	end
 	
