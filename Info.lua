@@ -49,6 +49,14 @@ g_PluginInfo =
 			Category = "Clipboard",
 		},
 		
+		["//cyl"] =
+		{
+			Permission = "worldedit.generation.cylinder",
+			Handler = HandleCylCommand,
+			HelpString = "Generates a cylinder.",
+			Category = "Generation",
+		},
+		
 		["//drain"] =
 		{
 			Permission = "worldedit.drain",
