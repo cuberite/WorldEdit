@@ -117,6 +117,7 @@ end
 -- a_World is the world where the area belongs
 -- a_Area is expected to have its origin set to where the Undo is located in the world
 -- a_Name is the optional display name for the Undo
+-- No return value
 function cUndoStack:PushUndo(a_World, a_Area, a_Name)
 	assert(a_World ~= nil)
 	assert(a_Area ~= nil)
@@ -142,22 +143,26 @@ end
 --- Pushes one level of Undo onto the Undo stack and clears the Redo stack
 -- Reads the area for the undo from the specified world in the specified cuboid
 -- a_Name is the optional display name for the Undo
+-- Returns true on success, false and message on failure
 function cUndoStack:PushUndoFromCuboid(a_World, a_Cuboid, a_Name)
 	assert(tolua.type(a_World) == "cWorld")
 	assert(tolua.type(a_Cuboid) == "cCuboid")
 	
 	-- Read the area:
 	local Area = cBlockArea()
-	Area:Read(
+	if not(Area:Read(
 		a_World,
 		a_Cuboid.p1.x, a_Cuboid.p2.x,
 		a_Cuboid.p1.y, a_Cuboid.p2.y,
 		a_Cuboid.p1.z, a_Cuboid.p2.z,
 		cBlockArea.baTypes + cBlockArea.baMetas
-	)
+	)) then
+		return false, "cannot read block area"
+	end
 	
 	-- Push the Undo:
-	return self:PushUndo(a_World, Area, a_Name)
+	self:PushUndo(a_World, Area, a_Name)
+	return true
 end
 
 

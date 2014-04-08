@@ -167,3 +167,90 @@ end
 
 
 
+
+--- Pushes an undo from the current contents of the area
+-- a_World is the world where to read the area
+-- a_Cuboid is the area's coords (both points are inclusive)
+-- a_Description holds the user-visible description of the undo savepoint
+-- Assumes that all the chunks for the cuboid are in memory
+-- Returns true on success, false and optional message on failure
+function WEPushUndo(a_Player, a_World, a_Cuboid, a_Description)
+	-- Check the params:
+	if (
+		(tolua.type(a_Player) ~= "cPlayer") or
+		(tolua.type(a_World)  ~= "cWorld")  or
+		(tolua.type(a_Cuboid) ~= "cCuboid") or
+		(type(a_Description)  ~= "string")
+	) then
+		LOGWARNING("[WorldEdit] Invalid WEPushUndo API function parameters.")
+		LOGWARNING("  WePushUndo() was called with these param types:")
+		LOGWARNING("    " .. tolua.type(a_Player) .. " (cPlayer wanted),")
+		LOGWARNING("    " .. tolua.type(a_World)  .. " (cWorld  wanted),")
+		LOGWARNING("    " .. tolua.type(a_Cuboid) .. " (cCuboid wanted),")
+		LOGWARNING("    " .. type(a_Description)  .. " (string  wanted),")
+		return false, "bad params"
+	end
+	
+	-- Push the undo:
+	local State = GetPlayerState(a_Player)
+	return State.UndoStack:PushUndoFromCuboid(a_World, a_Cuboid, a_Description)
+end
+
+
+
+
+
+--- Pushes an undo from the current contents of the area
+-- a_World is the world where to read the area
+-- a_Cuboid is the area's coords (both points are inclusive)
+-- a_Description holds the user-visible description of the undo savepoint
+-- Will load all chunks required for the operation asynchronously
+-- When the undo gets pushed (or an error is detected preventing the push),
+-- the a_CallbackFunctionName is called in a_CallbackPluginName
+-- The callback receives two params, IsSuccess (bool) and FailureMessage (string or nil)
+-- Returns true on success, false and optional message on early failure
+function WEPushUndoAsync(a_Player, a_World, a_Cuboid, a_Description, a_CallbackPluginName, a_CallbackFunctionName)
+	-- Check the params:
+	if (
+		(tolua.type(a_Player)         ~= "cPlayer") or
+		(tolua.type(a_World)          ~= "cWorld")  or
+		(tolua.type(a_Cuboid)         ~= "cCuboid") or
+		(type(a_Description)          ~= "string") or
+		(type(a_CallbackPluginName)   ~= "string") or
+		(type(a_CallbackFunctionName) ~= "string")
+	) then
+		LOGWARNING("[WorldEdit] Invalid WEPushUndoAsync() API function parameters.")
+		LOGWARNING("  WePushUndo() was called with these param types:")
+		LOGWARNING("    " .. tolua.type(a_Player)         .. " (cPlayer wanted),")
+		LOGWARNING("    " .. tolua.type(a_World)          .. " (cWorld  wanted),")
+		LOGWARNING("    " .. tolua.type(a_Cuboid)         .. " (cCuboid wanted),")
+		LOGWARNING("    " .. type(a_Description)          .. " (string  wanted),")
+		LOGWARNING("    " .. type(a_CallbackPluginName)   .. " (string  wanted),")
+		LOGWARNING("    " .. type(a_CallbackFunctionName) .. " (string  wanted),")
+		return false, "bad params"
+	end
+	
+	-- if the input cuboid isn't sorted, create a sorted copy:
+	if not(a_Cuboid:IsSorted()) then
+		a_Cuboid = cCuboid(a_Cuboid)
+		a_Cuboid:Sort()
+	end
+	
+	-- Create a callback for the ChunkStay:
+	local State = GetPlayerState(a_Player)  -- a_Player may be deleted in the meantime, but the State table won't
+	local OnAllChunksAvailable = function()
+		local IsSuccess, Msg = State.UndoStack:PushUndoFromCuboid(a_World, a_Cuboid, a_Description)
+		cPluginManager:CallPlugin(a_CallbackPluginName, a_CallbackFunctionName, IsSuccess, Msg)
+	end
+	
+	-- Get a list of chunks that need to be present:
+	local Chunks = ListChunksForCuboid(a_Cuboid)
+	
+	-- Initiate a ChunkStay operation, pushing the undo when all the chunks are available
+	a_World:ChunkStay(Chunks, nil, OnAllChunksAvailable)
+	return true
+end
+
+
+
+

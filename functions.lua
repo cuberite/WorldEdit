@@ -262,3 +262,36 @@ function Round(GivenNumber)
 		return Number
 	end
 end
+
+
+
+
+
+--- Returns a table of chunk coords for all chunks that insersect the given cuboid
+-- The table is formatted for cWorld:ChunkStay():
+-- { {Chunk1X, Chunk1z}, {Chunk2x, Chunk2z}, ... }
+-- Assumes that the cuboid is sorted
+function ListChunksForCuboid(a_Cuboid)
+	-- Check the params:
+	assert(tolua.type(a_Cuboid) == "a_Cuboid")
+	
+	-- Get the min / max chunk coords:
+	local MinChunkX = math.floor(a_Cuboid.p1.x / 16)
+	local MinChunkZ = math.floor(a_Cuboid.p1.z / 16)
+	local MaxChunkX = math.floor((a_Cuboid.p2.x + 15.5) / 16)
+	local MaxChunkZ = math.floor((a_Cuboid.p2.z + 15.5) / 16)
+	
+	-- Create the coords table:
+	local res = {}
+	local idx = 1
+	for x = MinChunkX, MaxChunkX do for z = MinChunkZ, MaxChunkZ do
+		res[idx] = {x, z}
+		idx = idx + 1
+	end end
+	
+	return res
+end
+
+
+
+
