@@ -225,6 +225,12 @@ function LeftClickCompass(Player)
 	local World = Player:GetWorld()
 	local HasHit = false
 	
+	-- Remember the coords of the last checked block:
+	local LastX = Player:GetPosX()
+	local LastY = Player:GetPosY()
+	local LastZ = Player:GetPosZ()
+	
+	-- Callback that checks whether the block on the traced line is non-solid:
 	local Callbacks = {
 		OnNextBlock = function(X, Y, Z, BlockType, BlockMeta)
 			if BlockType ~= E_BLOCK_AIR and not cBlockInfo:IsOneHitDig(BlockType) then
@@ -239,17 +245,26 @@ function LeftClickCompass(Player)
 				HasHit = true
 				return true
 			end
+			LastX = X
+			LastY = Y
+			LastZ = Z
 		end
 	};
 	
+	-- Trace the line from the player's eyes in their look direction:
 	local EyePos = Player:GetEyePosition()
 	local LookVector = Player:GetLookVector()
 	LookVector:Normalize()
-	
 	local Start = EyePos
 	local End = EyePos + LookVector * 75
 	cLineBlockTracer.Trace(World, Callbacks, Start.x, Start.y, Start.z, End.x, End.y, End.z)
-	return HasHit
+	
+	-- If no block has been hit, teleport the player to the last checked block location (known non-solid):
+	if not(HasHit) then
+		Player:TeleportToCoords(LastX + 0.5, LastY, LastZ + 0.5)
+	end
+	
+	return true
 end
 
 
