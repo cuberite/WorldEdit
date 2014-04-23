@@ -3,20 +3,19 @@
 ------------------------------------------------
 function HandleReplCommand(a_Split, a_Player)
 	if a_Split[2] == nil then -- check if the player gave a block id
-		a_Player:SendMessage(cChatColor.Rose .. "Too few arguments.")
-		a_Player:SendMessage(cChatColor.Rose .. "/repl <block ID>")
+		a_Player:SendMessageInfo("/repl <blocktype>")
 		return true
 	end
 	
 	local BlockType, BlockMeta = GetBlockTypeMeta(a_Split[2])
 	
 	if (not BlockType) then
-		a_Player:SendMessage(cChatColor.Rose .. "Unknown character \"" .. a_Split[2] .. "\"")
+		a_Player:SendMessageFailure("Unknown character \"" .. a_Split[2] .. "\"")
 		return true
 	end
 	
 	if not IsValidBlock(BlockType) then -- check if the player gave a valid block id
-		a_Player:SendMessage(cChatColor.Rose .. a_Split[2] .. " isn't a valid block")
+		a_Player:SendMessageFailure(a_Split[2] .. " isn't a valid block")
 		return true
 	end
 	
@@ -38,11 +37,11 @@ function HandleReplCommand(a_Split, a_Player)
 	local Succes, error = State.ToolRegistrator:BindTool(a_Player:GetEquippedItem().m_ItemType, ReplaceHandler)
 	
 	if (not Succes) then
-		a_Player:SendMessage(cChatColor.Rose .. error)
+		a_Player:SendMessageFailure(error)
 		return true
 	end
 	
-	a_Player:SendMessage(cChatColor.LightPurple .. "Block replacer tool bound to " .. ItemToString(a_Player:GetEquippedItem()))
+	a_Player:SendMessageSuccess("Block replacer tool bound to " .. ItemToString(a_Player:GetEquippedItem()))
 	return true
 end
 
@@ -55,11 +54,12 @@ function HandleNoneCommand(a_Split, a_Player)
 	local Succes, error = State.ToolRegistrator:UnbindTool(a_Player:GetEquippedItem().m_ItemType)
 	
 	if (not Succes) then
-		a_Player:SendMessage(cChatColor.Rose .. error)
+		a_Player:SendMessageFailure(error)
 		return true
 	end
 	
-	a_Player:SendMessage(cChatColor.LightPurple .. "Tool unbound from your current item.")
+	a_Player:SendMessageSuccess("Tool unbound from your current item.")
+
 	return true
 end
 		
@@ -78,7 +78,7 @@ function HandleTreeCommand(a_Split, a_Player)
 		if World:GetBlock(a_BlockX, a_BlockY, a_BlockZ) == 2 or World:GetBlock(a_BlockX, a_BlockY, a_BlockZ) == 3 then
 			World:GrowTree(a_BlockX, a_BlockY + 1, a_BlockZ)
 		else
-			a_Player:SendMessage(cChatColor.Rose .. "A tree can't go there.")
+			a_Player:SendMessageFailure("A tree can't go there.")
 		end
 	end
 	
@@ -86,11 +86,11 @@ function HandleTreeCommand(a_Split, a_Player)
 	local Succes, error = State.ToolRegistrator:BindTool(a_Player:GetEquippedItem().m_ItemType, HandleTree)
 	
 	if (not Succes) then
-		a_Player:SendMessage(cChatColor.Rose .. error)
+		a_Player:SendMessageFailure(error)
 		return true
 	end
 	
-	a_Player:SendMessage(cChatColor.LightPurple .. "Tree tool bound to " .. ItemToString(a_Player:GetEquippedItem()))
+	a_Player:SendMessageSuccess("Tree tool bound to " .. ItemToString(a_Player:GetEquippedItem()))
 	return true
 end
 
@@ -101,14 +101,10 @@ end
 function HandleSuperPickCommand(Split, Player)
 	if SP[Player:GetName()] == nil or not SP[Player:GetName()] then -- check if super pickaxe is activated
 		SP[Player:GetName()] = true
-		Player:SendMessage(cChatColor.LightPurple .. "Super pick activated")
+		Player:SendMessageSuccess("Super pick activated")
 	else -- else deactivate the superpickaxe
 		SP[Player:GetName()] = false
-		Player:SendMessage(cChatColor.LightPurple .. "Super pick deactivated")
+		Player:SendMessageSuccess("Super pick deactivated")
 	end
 	return true
 end
-
-
-
-

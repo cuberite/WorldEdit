@@ -12,14 +12,14 @@ function HandleBiomeInfoCommand(Split, Player)
 	-- If a "-p" param is present, report the biome at player's position:
 	if (Split[2] == "-p") then
 		local Biome = GetStringFromBiome(Player:GetWorld():GetBiomeAt(math.floor(Player:GetPosX()), math.floor(Player:GetPosZ())))
-		Player:SendMessage(cChatColor.LightPurple .. "Biome: " .. Biome)
+		Player:SendMessageInfo("Biome: " .. Biome)
 		return true
 	end
-	
+
 	-- Get the player state:
 	local State = GetPlayerState(Player)
 	if not(State.Selection:IsValid()) then
-		Player:SendMessage(cChatColor.Rose .. "Make a region selection first.")
+		Player:SendMessageFailure("Make a region selection first.")
 		return true
 	end
 	
@@ -33,7 +33,7 @@ function HandleBiomeInfoCommand(Split, Player)
 			BiomesSet[World:GetBiomeAt(X, Z)] = true
 		end
 	end
-	
+
 	-- Convert set to array of names:
 	local BiomesArr = {}
 	for b, val in pairs(BiomesSet) do
@@ -43,7 +43,7 @@ function HandleBiomeInfoCommand(Split, Player)
 	end
 	
 	-- Send the list to the player:
-	Player:SendMessage(cChatColor.LightPurple .. "Biomes: " .. table.concat(BiomesArr, ", "))
+	Player:SendMessageInfo("Biomes: " .. table.concat(BiomesArr, ", "))
 	return true
 end
 
@@ -56,14 +56,12 @@ function HandleRedoCommand(a_Split, a_Player)
 	local State = GetPlayerState(a_Player)
 	local IsSuccess, Msg = State.UndoStack:Redo(a_Player:GetWorld())
 	if (IsSuccess) then
-		a_Player:SendMessage(cChatColor.LightPurple .. "Redo Successful.")
+		a_Player:SendMessageSuccess("Redo successful.")
 	else
-		a_Player:SendMessage(cChatColor.Rose .. "Cannot redo: " .. (Msg or "<unknown error>"))
+		a_Player:SendMessageFailure("Cannot redo: " .. (Msg or "unknown error"))
 	end
 	return true
 end
-
-
 
 
 
@@ -72,9 +70,9 @@ function HandleUndoCommand(a_Split, a_Player)
 	local State = GetPlayerState(a_Player)
 	local IsSuccess, Msg = State.UndoStack:Undo(a_Player:GetWorld())
 	if (IsSuccess) then
-		a_Player:SendMessage(cChatColor.LightPurple .. "Undo Successful.")
+		a_Player:SendMessageSuccess("Undo Successful.")
 	else
-		a_Player:SendMessage(cChatColor.Rose .. "Cannot undo: " .. (Msg or "<unknown error>"))
+		a_Player:SendMessageFailure("Cannot undo: " .. (Msg or "unknown error"))
 	end
 	return true
 end
@@ -87,9 +85,9 @@ function HandleSizeCommand(a_Split, a_Player)
 	-- //size
 	local State = GetPlayerState(a_Player)
 	if (State.Selection:IsValid()) then
-		a_Player:SendMessage(cChatColor.LightPurple .. "The selection size is " .. State.Selection:GetSizeDesc() .. ".")
+		a_Player:SendMessageInfo("The selection size is " .. State.Selection:GetSizeDesc() .. ".")
 	else
-		a_Player:SendMessage(cChatColor.LightPurple .. "Please select a region first")
+		a_Player:SendMessageFailure("Please select a region first")
 	end
 	return true
 end
@@ -104,7 +102,7 @@ function HandlePasteCommand(a_Split, a_Player)
 	-- Check if there's anything in the clipboard:
 	local State = GetPlayerState(a_Player)
 	if not(State.Clipboard:IsValid()) then
-		a_Player:SendMessage(cChatColor.Rose .. "Your clipboard is empty. Use //copy or //cut first.")
+		a_Player:SendMessageFailure("Your clipboard is empty. Use //copy or //cut first.")
 		return true
 	end
 	
@@ -117,7 +115,7 @@ function HandlePasteCommand(a_Split, a_Player)
 	-- Paste:
 	State.UndoStack:PushUndoFromCuboid(a_Player:GetWorld(), DstCuboid, "paste")
 	local NumBlocks = State.Clipboard:Paste(a_Player, DstCuboid.p1)
-	a_Player:SendMessage(cChatColor.LightPurple .. NumBlocks .. " block(s) pasted relative to you.")
+	a_Player:SendMessageSuccess(NumBlocks .. " block(s) pasted relative to you.")
 	return true
 end
 
@@ -144,8 +142,8 @@ function HandleCopyCommand(a_Split, a_Player)
 	
 	-- Cut into the clipboard:
 	local NumBlocks = State.Clipboard:Copy(World, SrcCuboid)
-	a_Player:SendMessage(cChatColor.LightPurple .. NumBlocks .. " block(s) copied.")
-	a_Player:SendMessage(cChatColor.LightPurple .. "Clipboard size: " .. State.Clipboard:GetSizeDesc())
+	a_Player:SendMessageSuccess(NumBlocks .. " block(s) copied.")
+	a_Player:SendMessageInfo("Clipboard size: " .. State.Clipboard:GetSizeDesc())
 	return true
 end
 
@@ -159,7 +157,7 @@ function HandleCutCommand(a_Split, a_Player)
 	-- Get the player state:
 	local State = GetPlayerState(a_Player)
 	if not(State.Selection:IsValid()) then
-		a_Player:SendMessage(cChatColor.Rose .. "Make a region selection first.")
+		a_Player:SendMessageFailure("Make a region selection first.")
 		return true
 	end
 	
@@ -175,8 +173,9 @@ function HandleCutCommand(a_Split, a_Player)
 	
 	-- Cut into the clipboard:
 	local NumBlocks = State.Clipboard:Cut(World, SrcCuboid)
-	a_Player:SendMessage(cChatColor.LightPurple .. NumBlocks .. " block(s) cut.")
-	a_Player:SendMessage(cChatColor.LightPurple .. "Clipboard size: " .. State.Clipboard:GetSizeDesc())
+	a_Player:SendMessageSuccess(NumBlocks .. " block(s) cut.")
+	a_Player:SendMessageInfo("Clipboard size: " .. State.Clipboard:GetSizeDesc())
+
 	return true
 end
 
@@ -191,27 +190,27 @@ function HandleSetCommand(a_Split, a_Player)
 
 	-- Check the selection:
 	if not(State.Selection:IsValid()) then
-		a_Player:SendMessage(cChatColor.Rose .. "No region set")
+		a_Player:SendMessageFailure("No region set")
 		return true
 	end
 	
 	-- Check the params:
 	if (a_Split[2] == nil) then
-		a_Player:SendMessage(cChatColor.Rose .. "Usage: //set <BlockType>")
+		a_Player:SendMessageInfo("Usage: //set <blocktype>")
 		return true
 	end
 	
 	-- Retrieve the blocktype from the params:
 	local BlockType, BlockMeta = GetBlockTypeMeta(a_Split[2])
 	if not(BlockType) then
-		a_Player:SendMessage(cChatColor.LightPurple .. "Unknown block type: '" .. a_Split[2] .. "'.")
+		a_Player:SendMessageFailure("Unknown block type: '" .. a_Split[2] .. "'.")
 		return true
 	end
 	
 	-- Fill the selection:
 	local NumBlocks = FillSelection(State, a_Player, a_Player:GetWorld(), BlockType, BlockMeta)
 	if (NumBlocks) then
-		a_Player:SendMessage(cChatColor.LightPurple .. NumBlocks .. " block(s) have been changed.")
+		a_Player:SendMessageSuccess(NumBlocks .. " block(s) have been changed.")
 	end
 	return true
 end
@@ -227,13 +226,13 @@ function HandleReplaceCommand(a_Split, a_Player)
 	
 	-- Check the selection:
 	if not(State.Selection:IsValid()) then
-		a_Player:SendMessage(cChatColor.Rose .. "No region set")
+		a_Player:SendMessageFailure("No region set")
 		return true
 	end
 	
 	-- Check the params:
 	if ((a_Split[2] == nil) or (a_Split[3] == nil)) then
-		a_Player:SendMessage(cChatColor.Rose .. "Usage: //replace <SrcBlockType> <DstBlockType>")
+		a_Player:SendMessageInfo("Usage: //replace <srcblocktype> <dstblocktype>")
 		return true
 	end
 	
@@ -243,7 +242,7 @@ function HandleReplaceCommand(a_Split, a_Player)
 	for Idx, Value in ipairs(RawSrcBlockTable) do
 		local SrcBlockType, SrcBlockMeta, TypeOnly = GetBlockTypeMeta(Value)
 		if not(SrcBlockType) then
-			a_Player:SendMessage(cChatColor.LightPurple .. "Unknown src block type: '" .. Value .. "'.")
+			a_Player:SendMessageFailure("Unknown src block type: '" .. Value .. "'.")
 			return true
 		end
 		SrcBlockTable[SrcBlockType] = {SrcBlockMeta = SrcBlockMeta, TypeOnly = TypeOnly or false}
@@ -254,7 +253,7 @@ function HandleReplaceCommand(a_Split, a_Player)
 	for Idx, Value in ipairs(RawDstBlockTable) do
 		local DstBlockType, DstBlockMeta = GetBlockTypeMeta(Value)
 		if not(DstBlockType) then
-			a_Player:SendMessage(cChatColor.LightPurple .. "Unknown dst block type: '" .. Value .. "'.")
+			a_Player:SendMessageFailure("Unknown dst block type: '" .. Value .. "'.")
 			return true
 		end
 		DstBlockTable[Idx] = {DstBlockType = DstBlockType, DstBlockMeta = DstBlockMeta}
@@ -263,7 +262,7 @@ function HandleReplaceCommand(a_Split, a_Player)
 	-- Replace the blocks:
 	local NumBlocks = ReplaceSelection(State, a_Player, a_Player:GetWorld(), SrcBlockTable, DstBlockTable)
 	if (NumBlocks) then
-		a_Player:SendMessage(cChatColor.LightPurple .. NumBlocks .. " block(s) have been changed.")
+		a_Player:SendMessageSuccess(NumBlocks .. " block(s) have been changed.")
 	end
 	return true
 end
@@ -279,27 +278,27 @@ function HandleFacesCommand(a_Split, a_Player)
 
 	-- Check the selection:
 	if not(State.Selection:IsValid()) then
-		a_Player:SendMessage(cChatColor.Rose .. "No region set")
+		a_Player:SendMessageFailure("No region set")
 		return true
 	end
 	
 	-- Check the params:
 	if (a_Split[2] == nil) then
-		a_Player:SendMessage(cChatColor.Rose .. "Usage: //faces <BlockType>")
+		a_Player:SendMessageInfo(Usage: //faces <blocktype>")
 		return true
 	end
 	
 	-- Retrieve the blocktype from the params:
 	local BlockType, BlockMeta = GetBlockTypeMeta(a_Split[2])
 	if not(BlockType) then
-		a_Player:SendMessage(cChatColor.LightPurple .. "Unknown block type: '" .. a_Split[2] .. "'.")
+		a_Player:SendMessageFailure("Unknown block type: '" .. a_Split[2] .. "'.")
 		return true
 	end
 	
 	-- Fill the selection:
 	local NumBlocks = FillFaces(State, a_Player, a_Player:GetWorld(), BlockType, BlockMeta)
 	if (NumBlocks) then
-		a_Player:SendMessage(cChatColor.LightPurple .. NumBlocks .. " block(s) have been changed.")
+		a_Player:SendMessageSuccess(NumBlocks .. " block(s) have been changed.")
 	end
 	return true
 end
@@ -310,32 +309,32 @@ end
 
 function HandleWallsCommand(a_Split, a_Player)
 	-- //walls <blocktype>
-	
+
 	local State = GetPlayerState(a_Player)
 
 	-- Check the selection:
 	if not(State.Selection:IsValid()) then
-		a_Player:SendMessage(cChatColor.Rose .. "No region set")
+		a_Player:SendMessageFailure("No region set")
 		return true
 	end
 	
 	-- Check the params:
 	if (a_Split[2] == nil) then
-		a_Player:SendMessage(cChatColor.Rose .. "Usage: //walls <BlockType>")
+		a_Player:SendMessageInfo("Usage: //walls <blocktype>")
 		return true
 	end
 	
 	-- Retrieve the blocktype from the params:
 	local BlockType, BlockMeta = GetBlockTypeMeta(a_Split[2])
 	if not(BlockType) then
-		a_Player:SendMessage(cChatColor.LightPurple .. "Unknown block type: '" .. a_Split[2] .. "'.")
+		a_Player:SendMessageFailure("Unknown block type: '" .. a_Split[2] .. "'.")
 		return true
 	end
 	
 	-- Fill the selection:
 	local NumBlocks = FillWalls(State, a_Player, a_Player:GetWorld(), BlockType, BlockMeta)
 	if (NumBlocks) then
-		a_Player:SendMessage(cChatColor.LightPurple .. NumBlocks .. " block(s) have been changed.")
+		a_Player:SendMessageSuccess(NumBlocks .. " block(s) have been changed.")
 	end
 	return true
 end
@@ -350,22 +349,22 @@ function HandleRotateCommand(a_Split, a_Player)
 	-- Check if the clipboard is valid:
 	local State = GetPlayerState(a_Player)
 	if not(State.Clipboard:IsValid()) then
-		a_Player:SendMessage(cChatColor.Rose .. "Nothing in the clipboard. Use //copy or //cut first.")
+		a_Player:SendMessageFailure("Nothing in the clipboard. Use //copy or //cut first.")
 		return true
 	end
 	
 	-- Check if the player gave an angle:
 	local Angle = tonumber(a_Split[2])
 	if (Angle == nil) then
-		a_Player:SendMessage(cChatColor.Rose .. "Usage: //rotate [90, 180, 270, -90, -180, -270]")
+		a_Player:SendMessageInfo("Usage: //rotate [90, 180, 270, -90, -180, -270]")
 		return true
 	end
 	
 	-- Rotate the clipboard:
 	local NumRots = math.floor(Angle / 90 + 0.5)  -- round to nearest 90-degree step
 	State.Clipboard:Rotate(NumRots)
-	a_Player:SendMessage(cChatColor.LightPurple .. "Rotated the clipboard by " .. (NumRots * 90) .. " degrees CCW")
-	a_Player:SendMessage(cChatColor.LightPurple .. "Clipboard size: " .. State.Clipboard:GetSizeDesc())
+	a_Player:SendMessageSuccess("Rotated the clipboard by " .. (NumRots * 90) .. " degrees CCW")
+	a_Player:SendMessageInfo("Clipboard size: " .. State.Clipboard:GetSizeDesc())
 	return true
 end
 
@@ -383,20 +382,20 @@ function HandleSchematicSaveCommand(a_Split, a_Player)
 	elseif (#a_Split == 3) then
 		FileName = a_Split[3]
 	else
-		a_Player:SendMessage(cChatColor.Rose .. "Usage: //schematic save [<format>] <FileName>")
+		a_Player:SendMessageInfo("Usage: //schematic save [<format>] <FileName>")
 		return true
 	end
-	
+
 	-- Check that there's data in the clipboard:
 	local State = GetPlayerState(a_Player)
 	if not(State.Clipboard:IsValid()) then
-		a_Player:SendMessage(cChatColor.Rose .. "There's no data in the clipboard. Use //copy or //cut first.")
+		a_Player:SendMessageFailure("There's no data in the clipboard. Use //copy or //cut first.")
 		return true
 	end
 
 	-- Save the clipboard:
 	State.Clipboard:SaveToSchematicFile("schematics/" .. FileName .. ".schematic")
-	a_Player:SendMessage(cChatColor.LightPurple .. "Clipboard saved to " .. FileName .. ".")
+	a_Player:SendMessageSuccess("Clipboard saved to " .. FileName .. ".")
 	return true
 end
 
@@ -409,7 +408,7 @@ function HandleSchematicLoadCommand(a_Split, a_Player)
 	
 	-- Check the FileName parameter:
 	if (#a_Split ~= 3) then
-		a_Player:SendMessage(cChatColor.Rose .. "Usage: /schematic load <FileName>")
+		a_Player:SendMessageInfo("Usage: /schematic load <FileName>")
 		return true
 	end
 	local FileName = a_Split[3]
@@ -417,18 +416,19 @@ function HandleSchematicLoadCommand(a_Split, a_Player)
 	-- Check if the file exists:
 	local Path = "schematics/" .. FileName .. ".schematic"
 	if not(cFile:Exists(Path)) then
-		a_Player:SendMessage(cChatColor.Rose .. FileName .. " schematic does not exist.")
+		a_Player:SendMessageFailure(FileName .. " schematic does not exist.")
 		return true
 	end
 	
 	-- Load the file into clipboard:
 	local State = GetPlayerState(a_Player)
 	if not(State.Clipboard:LoadFromSchematicFile(Path)) then
-		a_Player:SendMessage(cChatColor.Rose .. FileName .. " schematic does not exist.")
+		a_Player:SendMessageFailure(FileName .. " schematic does not exist.")
 		return true
 	end
-	a_Player:SendMessage(cChatColor.LightPurple .. FileName .. " schematic was loaded into your clipboard.")
-	a_Player:SendMessage(cChatColor.LightPurple .. "Clipboard size: " .. State.Clipboard:GetSizeDesc())
+	a_Player:SendMessageSuccess(FileName .. " schematic was loaded into your clipboard.")
+	a_Player:SendMessageInfo("Clipboard size: " .. State.Clipboard:GetSizeDesc())
+
 	return true
 end
 
@@ -440,7 +440,8 @@ function HandleSchematicFormatsCommand(a_Split, a_Player)
 	-- //schematic listformats
 	
 	-- We support only one format, MCEdit:
-	a_Player:SendMessage(cChatColor.LightPurple .. 'Available formats: "MCEdit"')
+	a_Player:SendMessageInfo('Available formats: "MCEdit"')
+
 	return true
 end
 
@@ -470,7 +471,7 @@ function HandleSchematicListCommand(Split, Player)
 		end
 	)
 	
-	Player:SendMessage(cChatColor.LightPurple .. "Available schematics: " .. table.concat(FileList, ", "))
+	Player:SendMessageInfo("Available schematics: " .. table.concat(FileList, ", "))
 	return true
 end
 
@@ -514,7 +515,7 @@ function HandleHPos1Command(a_Split, a_Player)
 	-- Trace the blocks along the player's look vector until a hit is found:
 	local Target = HPosSelect(a_Player)
 	if not(Target) then
-		a_Player:SendMessage(cChatColor.Rose .. "You were not looking at a block.")
+		a_Player:SendMessageFailure("You were not looking at a block.")
 		return true
 	end
 	
@@ -538,11 +539,12 @@ function HandleHPos2Command(a_Split, a_Player)
 		a_Player:SendMessage(cChatColor.Rose .. "You were not looking at a block.")
 		return true
 	end
-	
+
 	-- Select the block:
 	local State = GetPlayerState(a_Player)
 	State.Selection:SetSecondPoint(Target.x, Target.y, Target.z)
-	a_Player:SendMessage("Second position set to {" .. Target.x .. ", " .. Target.y .. ", " .. Target.z .. "}.")
+	a_Player:SendMessageSuccess("Second position set to {" .. Target.x .. ", " .. Target.y .. ", " .. Target.z .. "}.")
+
 	return true
 end
 
@@ -556,12 +558,12 @@ function HandleExpandCommand(a_Split, a_Player)
 	-- Check the selection:
 	local State = GetPlayerState(a_Player)
 	if not(State.Selection:IsValid()) then
-		a_Player:SendMessage(cChatColor.Rose .. "No region set")
+		a_Player:SendMessageFailure("No region set")
 		return true
 	end
 	
 	if (a_Split[2] ~= nil) and (tonumber(a_Split[2]) == nil) then
-		a_Player:SendMessage(cChatColor.Rose .. "Usage: //expand [Blocks] [Direction]")
+		a_Player:SendMessageInfo("Usage: //expand [blocks] [direction]")
 		return true
 	end
 	
@@ -570,6 +572,7 @@ function HandleExpandCommand(a_Split, a_Player)
 	local SubMinX, SubMinY, SubMinZ, AddMaxX, AddMaxY, AddMaxZ = 0, 0, 0, 0, 0, 0
 	local LookDirection = Round((a_Player:GetYaw() + 180) / 90)
 	
+
 	if (Direction == "up") then
 		AddMaxY = NumBlocks
 	elseif (Direction == "down") then
@@ -623,13 +626,13 @@ function HandleExpandCommand(a_Split, a_Player)
 			AddMaxX = NumBlocks
 		end
 	else
-		a_Player:SendMessage(cChatColor.Rose .. "Unknown direction \"" .. Direction .. "\".")
+		a_Player:SendMessageFailure("Unknown direction \"" .. Direction .. "\".")
 		return true
 	end
 	
 	State.Selection:Expand(SubMinX, SubMinY, SubMinZ, AddMaxX, AddMaxY, AddMaxZ)
-	a_Player:SendMessage(cChatColor.LightPurple .. "Expaned the selection.")
-	a_Player:SendMessage(cChatColor.LightPurple .. "Selection is now " .. State.Selection:GetSizeDesc())
+	a_Player:SendMessageSuccess("Expaned the selection.")
+	a_Player:SendMessageInfo("Selection is now " .. State.Selection:GetSizeDesc())
 	return true
 end
 

@@ -3,7 +3,7 @@
 -------------------------------------------------
 -- Sends the version of the plugin.
 function HandleWorldEditVersionCommand(Split, Player)
-	Player:SendMessage(cChatColor.LightPurple .. "This is version " .. PLUGIN:GetVersion())
+	Player:SendMessageInfo("This is WorldEdit version " .. PLUGIN:GetVersion())
 	return true
 end
 
@@ -11,10 +11,10 @@ end
 -- Reloads the WorldEdit plugun.
 function HandleWorldEditReloadCommand(Split, Player)
 	if not PlayerHasWEPermission(Player, "worldedit.reload") then
-		Player:SendMessage(cChatColor.Rose .. "You do not have permission to reload WorldEdit.")
+		Player:SendMessageFailure("You do not have permission to reload WorldEdit.")
 		return true
 	end
-	Player:SendMessage(cChatColor.LightPurple .. "Worldedit is reloading")
+	Player:SendMessageWarning("Worldedit is reloading...")
 	cRoot:Get():GetPluginManager():DisablePlugin(PLUGIN:GetName()) -- disable the plugin
 	DisablePlugin = true -- make sure the plugin loads again ;)
 	return true
@@ -23,15 +23,15 @@ end
 
 -- Sends all the available commands to the player.
 function HandleWorldEditHelpCommand(Split, Player)
-	if not PlayerHasWEPermission(Player, "worldedit.help") then
-		Player:SendMessage(cChatColor.Rose .. "You do not have permission for this command.")
+	if not PlayerHasWEPermission(Player, "core.help") then
+		Player:SendMessageFailure("You do not have permission to view help.")
 		return true
 	end
 	local Commands = ""
 	for Command, Information in pairs(g_PluginInfo.Commands) do
 		Commands = Commands .. cChatColor.LightPurple .. Command .. ", "
 	end
-	Player:SendMessage(cChatColor.LightPurple .. "Available commands:")
+	Player:SendMessageInfo("Available commands:")
 	Player:SendMessage(string.sub(Commands, 1, string.len(Commands) - 2)) -- Remove the last ", "
 	return true
 end
@@ -44,9 +44,9 @@ function HandleWandCommand(Split, Player)
 	-- //wand
 	Item = cItem(Wand, 1) -- create the cItem object
 	if (Player:GetInventory():AddItem(Item)) then -- check if the player got the item
-		Player:SendMessage(cChatColor.Green .. "You have received the wand.")
+		Player:SendMessageSuccess("You have received the wand.")
 	else
-		Player:SendMessage(cChatColor.Green .. "Not enough inventory space.")
+		Player:SendMessageFailure("Not enough inventory space.")
 	end
 	return true
 end
@@ -61,10 +61,10 @@ function HandleToggleEditWandCommand(a_Split, a_Player)
 	local State = GetPlayerState(a_Player)
 	if not(State.WandActivated) then
 		State.WandActivated = true
-		a_Player:SendMessage(cChatColor.LightPurple .. "Edit wand enabled.")
+		a_Player:SendMessageSuccess("Edit wand enabled.")
 	else
 		State.WandActivated = false
-		a_Player:SendMessage(cChatColor.LightPurple .. "Edit wand disabled.")
+		a_Player:SendMessageSuccess("Edit wand disabled.")
 	end
 	return true
 end

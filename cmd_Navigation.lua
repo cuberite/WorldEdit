@@ -2,21 +2,14 @@
 ----------------------UP----------------------
 ----------------------------------------------
 function HandleUpCommand(Split, Player)
-	if #Split < 2 then
-		Player:SendMessage(cChatColor.Rose .. "Too few arguments.")
-		Player:SendMessage(cChatColor.Rose .. "/up <block>")
-		return true
-	elseif #Split > 2 then
-		Player:SendMessage(cChatColor.Rose .. "Too many arguments.")
-		Player:SendMessage(cChatColor.Rose .. "/up <block>")
+	
+	local Height = tonumber(Split[2])
+	
+	if #Split ~= 2 or Height == nil then
+		Player:SendMessageInfo("Usage: /up <number of blocks>")
 		return true
 	end
 	
-	local Height = tonumber(Split[2])
-	if Height == nil then -- The given string isn't a number. bail out.
-		Player:SendMessage(cChatColor.Rose .. 'Number expected; string"' .. Split[2] .. '" given.')
-		return true
-	end
 	local Y = math.floor(Player:GetPosY())
 	local y = math.floor(Player:GetPosY()) + Height
 	local X = math.floor(Player:GetPosX())
@@ -24,7 +17,7 @@ function HandleUpCommand(Split, Player)
 	local World = Player:GetWorld()
 	for Y = Y, y + 1 do
 		if World:GetBlock(X, Y, Z) ~= E_BLOCK_AIR then
-			Player:SendMessage(cChatColor.Rose .. "You would hit something above you.")
+			Player:SendMessageFailure("You would hit something above you.")
 			return true
 		end
 	end
@@ -34,7 +27,7 @@ function HandleUpCommand(Split, Player)
 	end
 	
 	Player:TeleportToCoords(X + 0.5, y, Z + 0.5)
-	Player:SendMessage(cChatColor.LightPurple .. "Whoosh!")
+	Player:SendMessageSuccess("Whoosh!")
 	return true
 end
 
@@ -44,13 +37,12 @@ end
 ----------------------------------------------
 function HandleJumpToCommand(Split, Player)
 	if #Split ~= 1 then
-		Player:SendMessage(cChatColor.Rose .. "Too many arguments.")
-		Player:SendMessage(cChatColor.Rose .. "/jumpto")
+		Player:SendMessageInfo("Usage: /jumpto")
 		return true
 	end
 	
 	LeftClickCompass(Player, Player:GetWorld())
-	Player:SendMessage(cChatColor.LightPurple .. "Poof!!")
+	Player:SendMessageSuccess("Poof!")
 	return true
 end
 
@@ -60,13 +52,12 @@ end
 ----------------------------------------------
 function HandleThruCommand(Split, Player)
 	if #Split ~= 1 then
-		Player:SendMessage(cChatColor.Rose .. "Too many arguments.")
-		Player:SendMessage(cChatColor.Rose .. "/thru")
+		Player:SendMessageInfo("Usage: /thru")
 		return true
 	end
 	
 	RightClickCompass(Player, Player:GetWorld())
-	Player:SendMessage(cChatColor.LightPurple .. "Whoosh!")
+	Player:SendMessageSuccess("Whoosh!")
 	return true
 end
 
@@ -77,7 +68,7 @@ end
 function HandleDescendCommand(Split, Player)
 	local World = Player:GetWorld()
 	if Player:GetPosY() < 1 then
-		Player:SendMessage(cChatColor.LightPurple .. "Descended a level.")
+		Player:SendMessageFailure("Y position too low, go higher...")
 		return true
 	end
 	
@@ -111,7 +102,7 @@ function HandleDescendCommand(Split, Player)
 		Player:TeleportToCoords(Player:GetPosX(), YPos + 1, Player:GetPosZ())
 	end
 	
-	Player:SendMessage(cChatColor.LightPurple .. "Descended a level.")
+	Player:SendMessageSuccess("Descended a level.")
 	return true
 end
 
@@ -128,12 +119,12 @@ function HandleAscendCommand(Split, Player)
 	local IsValid, WorldHeight = World:TryGetHeight(XPos, ZPos)
 	
 	if not IsValid then
-		Player:SendMessage(cChatColor.LightPurple .. "Ascended a level.")
+		Player:SendMessageFailure("Couldn't ascend, chunk not loaded?")
 		return true
 	end
 	
 	if Player:GetPosY() == WorldHeight then
-		Player:SendMessage(cChatColor.LightPurple .. "Ascended a level.")
+		Player:SendMessageFailure("Y coordinate too high, come lower...")
 		return true
 	end
 	
@@ -155,7 +146,7 @@ function HandleAscendCommand(Split, Player)
 		Player:TeleportToCoords(Player:GetPosX(), YPos, Player:GetPosZ())
 	end
 	
-	Player:SendMessage(cChatColor.LightPurple .. "Ascended a level.")
+	Player:SendMessageSuccess("Ascended a level.")
 	return true
 end
 
@@ -165,8 +156,7 @@ end
 ------------------------------------------------
 function HandleCeilCommand(Split, Player)
 	if #Split > 2 then
-		Player:SendMessage(cChatColor.Rose .. "Too many arguments.")
-		Player:SendMessage(cChatColor.Rose .. "/ceil [cleurance]")
+		Player:SendMessageInfo("Usage: /ceil [clearance as number]")
 		return true
 	end
 	
@@ -178,7 +168,7 @@ function HandleCeilCommand(Split, Player)
 	end
 	
 	if BlockFromCeil == nil then
-		Player:SendMessage(cChatColor.Rose .. 'Number expected; string "' .. Split[2] .. '" given.')
+		Player:SendMessageInfo("Usage: /ceil [clearance as number]")
 		return true
 	end
 	local World = Player:GetWorld()
@@ -188,12 +178,12 @@ function HandleCeilCommand(Split, Player)
 	local IsValid, WorldHeight = World:TryGetHeight(X, Z)
 	
 	if not IsValid then
-		Player:SendMessage(cChatColor.LightPurple .. "Whoosh!")
+		Player:SendMessageFailure("Couldn't query heightmap, chunk not loaded?")
 		return true
 	end
 	
 	if Y >= WorldHeight + 1 then
-		Player:SendMessage(cChatColor.Rose .. "No free spot above you found.")
+		Player:SendMessageFailure("Y coordinate too high, come lower...")
 		return true
 	end
 	
@@ -204,7 +194,7 @@ function HandleCeilCommand(Split, Player)
 			end
 			local I = y - BlockFromCeil - 2
 			if I == Y then
-				Player:SendMessage(cChatColor.Rose .. "No free spot above you found.")
+				Player:SendMessageFailure("No free spot above you was found.")
 				return true
 			end
 			Player:TeleportToCoords(X + 0.5, I, Z + 0.5)
@@ -212,6 +202,6 @@ function HandleCeilCommand(Split, Player)
 		end
 	end
 	
-	Player:SendMessage(cChatColor.LightPurple .. "Whoosh!")
+	Player:SendMessageSuccess("Whoosh!")
 	return true
 end

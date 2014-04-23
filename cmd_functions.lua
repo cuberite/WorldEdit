@@ -213,7 +213,7 @@ function RightClickCompass(Player)
 	
 	cLineBlockTracer.Trace(World, Callbacks, Start.x, Start.y, Start.z, End.x, End.y, End.z)
 	if not Teleported then
-		Player:SendMessage(cChatColor.Rose .. "Nothing to pass through!")
+		Player:SendMessageFailure("Nothing to pass through!")
 	end
 end
 
