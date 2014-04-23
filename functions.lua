@@ -198,6 +198,40 @@ function GetStringFromBiome(Biome)
 		return "jungle"
 	elseif Biome == 22 then
 		return "jungle hills"
+	elseif Biome == 23 then
+		return "jungle edge"
+	elseif Biome == 24 then
+		return "deep ocean"
+	elseif Biome == 25 then
+		return "stone beach"
+	elseif Biome == 26 then
+		return "cold beach"
+	elseif Biome == 27 then
+		return "birch forest"
+	elseif Biome == 28 then
+		return "birch forest hills"
+	elseif Biome == 29 then
+		return "roofed forest"
+	elseif Biome == 30 then
+		return "cold taiga"
+	elseif Biome == 31 then
+		return "cold taiga hills"
+	elseif Biome == 32 then
+		return "mega taiga"
+	elseif Biome == 33 then
+		return "mega taiga hills"
+	elseif Biome == 34 then
+		return "extreme hills+"
+	elseif Biome == 35 then
+		return "savanna"
+	elseif Biome == 36 then
+		return "savanna plateau"
+	elseif Biome == 37 then
+		return "mesa"
+	elseif Biome == 38 then
+		return "mesa plateau f"
+	elseif Biome == 39 then
+		return "mesa plateau"
 	end
 end
 
