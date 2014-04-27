@@ -622,6 +622,18 @@ function HandleExpandCommand(a_Split, a_Player)
 		elseif (LookDirection == E_DIRECTION_WEST) then
 			AddMaxX = NumBlocks
 		end
+	elseif (Direction == "walls") then
+		AddMaxX = NumBlocks
+		AddMaxZ = NumBlocks
+		SubMinX = NumBlocks
+		SubMinZ = NumBlocks
+	elseif (Direction == "all") then
+		AddMaxX = NumBlocks
+		AddMaxY = NumBlocks
+		AddMaxZ = NumBlocks
+		SubMinX = NumBlocks
+		SubMinY = NumBlocks
+		SubMinZ = NumBlocks
 	else
 		a_Player:SendMessage(cChatColor.Rose .. "Unknown direction \"" .. Direction .. "\".")
 		return true
