@@ -163,65 +163,6 @@ end
 
 
 
-function HandleCopyCommand(a_Split, a_Player)
-	-- //copy
-	
-	-- Get the player state:
-	local State = GetPlayerState(a_Player)
-	if not(State.Selection:IsValid()) then
-		a_Player:SendMessage(cChatColor.Rose .. "Make a region selection first.")
-		return true
-	end
-	
-	-- Check with other plugins if the operation is okay:
-	local SrcCuboid = State.Selection:GetSortedCuboid()
-	local World = a_Player:GetWorld()
-	if not(CheckAreaCallbacks(SrcCuboid, a_Player, World, "copy")) then
-		return
-	end
-	
-	-- Cut into the clipboard:
-	local NumBlocks = State.Clipboard:Copy(World, SrcCuboid)
-	a_Player:SendMessage(cChatColor.LightPurple .. NumBlocks .. " block(s) copied.")
-	a_Player:SendMessage(cChatColor.LightPurple .. "Clipboard size: " .. State.Clipboard:GetSizeDesc())
-	return true
-end
-
-
-
-
-
-function HandleCutCommand(a_Split, a_Player)
-	-- //cut
-	
-	-- Get the player state:
-	local State = GetPlayerState(a_Player)
-	if not(State.Selection:IsValid()) then
-		a_Player:SendMessage(cChatColor.Rose .. "Make a region selection first.")
-		return true
-	end
-	
-	-- Check with other plugins if the operation is okay:
-	local SrcCuboid = State.Selection:GetSortedCuboid()
-	local World = a_Player:GetWorld()
-	if not(CheckAreaCallbacks(SrcCuboid, a_Player, World, "copy")) then
-		return
-	end
-	
-	-- Push an undo snapshot:
-	State.UndoStack:PushUndoFromCuboid(World, SrcCuboid, "cut")
-	
-	-- Cut into the clipboard:
-	local NumBlocks = State.Clipboard:Cut(World, SrcCuboid)
-	a_Player:SendMessage(cChatColor.LightPurple .. NumBlocks .. " block(s) cut.")
-	a_Player:SendMessage(cChatColor.LightPurple .. "Clipboard size: " .. State.Clipboard:GetSizeDesc())
-	return true
-end
-
-
-
-
-
 function HandleExpandCommand(a_Split, a_Player)
 	-- //expand [Amount] [Direction]
 	
@@ -392,33 +333,6 @@ function HandleHPos2Command(a_Split, a_Player)
 	local State = GetPlayerState(a_Player)
 	State.Selection:SetSecondPoint(Target.x, Target.y, Target.z)
 	a_Player:SendMessage("Second position set to {" .. Target.x .. ", " .. Target.y .. ", " .. Target.z .. "}.")
-	return true
-end
-
-
-
-
-
-function HandlePasteCommand(a_Split, a_Player)
-	-- //paste
-
-	-- Check if there's anything in the clipboard:
-	local State = GetPlayerState(a_Player)
-	if not(State.Clipboard:IsValid()) then
-		a_Player:SendMessage(cChatColor.Rose .. "Your clipboard is empty. Use //copy or //cut first.")
-		return true
-	end
-	
-	-- Check with other plugins if the operation is okay:
-	local DstCuboid = State.Clipboard:GetPasteDestCuboid(a_Player)
-	if not(CheckAreaCallbacks(DstCuboid, a_Player, a_Player:GetWorld(), "paste")) then
-		return
-	end
-	
-	-- Paste:
-	State.UndoStack:PushUndoFromCuboid(a_Player:GetWorld(), DstCuboid, "paste")
-	local NumBlocks = State.Clipboard:Paste(a_Player, DstCuboid.p1)
-	a_Player:SendMessage(cChatColor.LightPurple .. NumBlocks .. " block(s) pasted relative to you.")
 	return true
 end
 
