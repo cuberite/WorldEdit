@@ -46,7 +46,7 @@ function HandleAddLeavesCommand(a_Split, a_Player)
 	-- Check with other plugins if the operation is okay:
 	local SrcCuboid = State.Selection:GetSortedCuboid()
 	local World = a_Player:GetWorld()
-	if not(CheckAreaCallbacks(SrcCuboid, a_Player, World, "copy")) then
+	if not(CheckAreaCallbacks(SrcCuboid, a_Player, World, "addleaves")) then
 		return
 	end
 	
@@ -613,6 +613,44 @@ function HandleUndoCommand(a_Split, a_Player)
 	else
 		a_Player:SendMessage(cChatColor.Rose .. "Cannot undo: " .. (Msg or "<unknown error>"))
 	end
+	return true
+end
+
+
+
+
+
+function HandleVMirrorCommand(a_Split, a_Player)
+	-- //vmirror
+	
+	local State = GetPlayerState(a_Player)
+	
+	-- Check the selection:
+	if not(State.Selection:IsValid()) then
+		a_Player:SendMessage(cChatColor.Rose .. "No region selected")
+		return true
+	end
+	
+	-- Check with other plugins if the operation is okay:
+	local SrcCuboid = State.Selection:GetSortedCuboid()
+	local World = a_Player:GetWorld()
+	if not(CheckAreaCallbacks(SrcCuboid, a_Player, World, "vmirror")) then
+		return
+	end
+	
+	-- Push the selection to the undo stack:
+	State:PushUndoInSelection(World, "vmirror")
+	
+	-- Vert-mirror the selection:
+	local Area = cBlockArea()
+	local Selection = cCuboid(State.Selection.Cuboid)  -- Make a copy of the selection cuboid
+	Selection:Sort()
+	Area:Read(World, Selection, cBlockArea.baTypes + cBlockArea.baMetas)
+	Area:MirrorXZ()
+	Area:Write(World, Selection.p1, cBlockArea.baTypes + cBlockArea.baMetas)
+	
+	-- Notify of success:
+	a_Player:SendMessage(cChatColor.Rose .. "Selection mirrored")
 	return true
 end
 

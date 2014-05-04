@@ -273,6 +273,14 @@ g_PluginInfo =
 			Category = "History",
 		},
 		
+		["//vmirror"] =
+		{
+			Permission = "worldedit.region.vmirror",
+			Handler = HandleVMirrorCommand,
+			HelpString = "Mirrors the selection vertically",
+			Category = "Region",
+		},
+		
 		["//walls"] =
 		{
 			Permission = "worldedit.region.walls",
