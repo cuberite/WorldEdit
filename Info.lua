@@ -130,6 +130,21 @@ g_PluginInfo =
 			Category = "Generation",
 		},
 		
+		["//mirror"] =
+		{
+			Permission = "worldedit.region.mirror",
+			Handler = HandleMirrorCommand,
+			HelpString = "Mirrors the selection by the specified plane",
+			Category = "Region",
+			ParameterCombinations =
+			{
+				{
+					Params = "plane",
+					Help = "Mirrors the selection by the specified plane",
+				},
+			},
+		},
+		
 		["//paste"] =
 		{
 			Permission = "worldedit.clipboard.paste",
