@@ -320,13 +320,7 @@ g_PluginInfo =
 			Permission = "worldedit.scripting.execute",
 			Handler = HandleLastCraftScriptCommand,
 			HelpString = "Execute last CraftScript",
-		},
-		
-		["/cs"] =
-		{
-			Permission = "worldedit.craftscript",
-			Handler = HandleCraftScriptCommand,
-			HelpString = " Execute a CraftScript",
+			Category = "Scripting",
 		},
 		
 		["/ascend"] =
@@ -360,6 +354,14 @@ g_PluginInfo =
 			Handler = HandleButcherCommand,
 			HelpString = " Kills nearby mobs based on the given radius, if no radius is given it uses the default in configuration.",
 			Category = "Entities",
+		},
+			
+		["/cs"] =
+		{
+			Permission = "worldedit.scripting.execute",
+			Handler = HandleCraftScriptCommand,
+			HelpString = " Execute a CraftScript",
+			Category = "Scripting",
 		},
 		
 		["/descend"] = 
