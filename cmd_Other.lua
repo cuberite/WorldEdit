@@ -72,3 +72,48 @@ end
 
 
 
+
+function HandleCraftScriptCommand(a_Split, a_Player)
+	-- /cs <scriptname>
+	
+	local PlayerState = GetPlayerState(a_Player)
+	
+	if (not a_Split[2]) then
+		a_Player:SendMessage(cChatColor.Rose .. "Usage: /cs <scriptname>")
+		return true
+	end
+	
+	local Succes, Err = PlayerState.CraftScript:SelectScript(table.concat(a_Split, " ", 2))
+	if (not Succes) then
+		a_Player:SendMessage(cChatColor.Rose .. Err)
+		return true
+	end
+	
+	Succes, Err = PlayerState.CraftScript:Execute(a_Player, a_Split)
+	if (not Succes) then
+		a_Player:SendMessage(cChatColor.Rose .. Err)
+		return true
+	end
+	
+	a_Player:SendMessage(cChatColor.LightPurple .. "Script executed.")
+	return true
+end
+
+
+
+
+
+function HandleLastCraftScriptCommand(a_Split, a_Player)
+	-- /.s
+	
+	local PlayerState = GetPlayerState(a_Player)
+	
+	Succes, Err = PlayerState.CraftScript:Execute(a_Player, a_Split)
+	if (not Succes) then
+		a_Player:SendMessage(cChatColor.Rose .. Err)
+		return true
+	end
+	
+	a_Player:SendMessage(cChatColor.Rose .. "Script Executed")
+	return true
+end

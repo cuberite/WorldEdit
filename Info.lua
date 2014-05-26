@@ -314,7 +314,21 @@ g_PluginInfo =
 		
 ---------------------------------------------------------------------------------------------------
 -- Single-slash commands:
-
+		
+		["/.s"] =
+		{
+			Permission = "worldedit.scripting.execute",
+			Handler = HandleLastCraftScriptCommand,
+			HelpString = "Execute last CraftScript",
+		},
+		
+		["/cs"] =
+		{
+			Permission = "worldedit.craftscript",
+			Handler = HandleCraftScriptCommand,
+			HelpString = " Execute a CraftScript",
+		},
+		
 		["/ascend"] =
 		{
 			Alias = "/asc",
