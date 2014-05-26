@@ -83,13 +83,16 @@ function HandleCraftScriptCommand(a_Split, a_Player)
 		return true
 	end
 	
-	local Succes, Err = PlayerState.CraftScript:SelectScript(table.concat(a_Split, " ", 2))
+	local Succes, Err = PlayerState.CraftScript:SelectScript(a_Split[2])
 	if (not Succes) then
 		a_Player:SendMessage(cChatColor.Rose .. Err)
 		return true
 	end
 	
-	Succes, Err = PlayerState.CraftScript:Execute(a_Player, a_Split)
+	local Arguments = a_Split
+	table.remove(Arguments, 1); table.remove(Arguments, 1)
+	
+	Succes, Err = PlayerState.CraftScript:Execute(a_Player, Arguments)
 	if (not Succes) then
 		a_Player:SendMessage(cChatColor.Rose .. Err)
 		return true
@@ -108,7 +111,10 @@ function HandleLastCraftScriptCommand(a_Split, a_Player)
 	
 	local PlayerState = GetPlayerState(a_Player)
 	
-	Succes, Err = PlayerState.CraftScript:Execute(a_Player, a_Split)
+	local Arguments = a_Split
+	table.remove(Arguments, 1)
+	
+	Succes, Err = PlayerState.CraftScript:Execute(a_Player, Arguments)
 	if (not Succes) then
 		a_Player:SendMessage(cChatColor.Rose .. Err)
 		return true
