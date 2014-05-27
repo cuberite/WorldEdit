@@ -314,7 +314,15 @@ g_PluginInfo =
 		
 ---------------------------------------------------------------------------------------------------
 -- Single-slash commands:
-
+		
+		["/.s"] =
+		{
+			Permission = "worldedit.scripting.execute",
+			Handler = HandleLastCraftScriptCommand,
+			HelpString = "Execute last CraftScript",
+			Category = "Scripting",
+		},
+		
 		["/ascend"] =
 		{
 			Alias = "/asc",
@@ -346,6 +354,14 @@ g_PluginInfo =
 			Handler = HandleButcherCommand,
 			HelpString = " Kills nearby mobs based on the given radius, if no radius is given it uses the default in configuration.",
 			Category = "Entities",
+		},
+			
+		["/cs"] =
+		{
+			Permission = "worldedit.scripting.execute",
+			Handler = HandleCraftScriptCommand,
+			HelpString = " Execute a CraftScript",
+			Category = "Scripting",
 		},
 		
 		["/descend"] = 
