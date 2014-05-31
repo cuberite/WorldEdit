@@ -24,7 +24,7 @@ function HandleCopyCommand(a_Split, a_Player)
 	end
 	
 	-- Cut into the clipboard:
-	local NumBlocks = State.Clipboard:Copy(World, SrcCuboid)
+	local NumBlocks = State.Clipboard:Copy(World, SrcCuboid, Vector3i(a_Player:GetPosition()) - SrcCuboid.p1)
 	a_Player:SendMessage(cChatColor.LightPurple .. NumBlocks .. " block(s) copied.")
 	a_Player:SendMessage(cChatColor.LightPurple .. "Clipboard size: " .. State.Clipboard:GetSizeDesc())
 	return true
@@ -55,7 +55,7 @@ function HandleCutCommand(a_Split, a_Player)
 	State.UndoStack:PushUndoFromCuboid(World, SrcCuboid, "cut")
 	
 	-- Cut into the clipboard:
-	local NumBlocks = State.Clipboard:Cut(World, SrcCuboid)
+	local NumBlocks = State.Clipboard:Cut(World, SrcCuboid, Vector3i(a_Player:GetPosition()) - SrcCuboid.p1)
 	a_Player:SendMessage(cChatColor.LightPurple .. NumBlocks .. " block(s) cut.")
 	a_Player:SendMessage(cChatColor.LightPurple .. "Clipboard size: " .. State.Clipboard:GetSizeDesc())
 	return true
@@ -81,9 +81,18 @@ function HandlePasteCommand(a_Split, a_Player)
 		return
 	end
 	
+	-- Check for parameters
+	local UseOffset = true
+	
+	for Idx, Parameter in ipairs(a_Split) do
+		if (Parameter == "-no") then -- No offset
+			UseOffset = false
+		end
+	end
+	
 	-- Paste:
 	State.UndoStack:PushUndoFromCuboid(a_Player:GetWorld(), DstCuboid, "paste")
-	local NumBlocks = State.Clipboard:Paste(a_Player, DstCuboid.p1)
+	local NumBlocks = State.Clipboard:Paste(a_Player, DstCuboid.p1, UseOffset)
 	a_Player:SendMessage(cChatColor.LightPurple .. NumBlocks .. " block(s) pasted relative to you.")
 	return true
 end
