@@ -30,17 +30,18 @@ end
 
 
 --- Copies the blocks in the specified sorted cuboid into clipboard
-function cClipboard:Copy(a_World, a_Cuboid)
+function cClipboard:Copy(a_World, a_Cuboid, a_Offset)
 	assert(tolua.type(a_World) == "cWorld")
 	assert(tolua.type(a_Cuboid) == "cCuboid")
 	
+	local Offset = a_Offset or Vector3i()
 	self.Area:Read(a_World,
 		a_Cuboid.p1.x, a_Cuboid.p2.x,
 		a_Cuboid.p1.y, a_Cuboid.p2.y,
 		a_Cuboid.p1.z, a_Cuboid.p2.z,
 		cBlockArea.baTypes + cBlockArea.baMetas
 	)
-	-- TODO: Player-relative copy-pasting (remember player dist from a_Cuboid)
+	self.Area:SetWEOffset(Offset)
 	
 	return self.Area:GetVolume()
 end
@@ -51,8 +52,8 @@ end
 
 --- Cuts the blocks from the specified sorted cuboid into clipboard
 -- Replaces the cuboid with air blocks
-function cClipboard:Cut(a_World, a_Cuboid)
-	self:Copy(a_World, a_Cuboid)
+function cClipboard:Cut(a_World, a_Cuboid, a_Offset)
+	self:Copy(a_World, a_Cuboid, a_Offset)
 	
 	-- Replace everything with air:
 	local Area = cBlockArea()
@@ -79,10 +80,11 @@ function cClipboard:GetPasteDestCuboid(a_Player)
 	assert(self:IsValid())
 	
 	-- Base the cuboid on the player position:
-	-- TODO: Player-relative copy-pasting (remember player dist from clipboard)
-	local MinX = math.floor(a_Player:GetPosX())
-	local MinY = math.floor(a_Player:GetPosY())
-	local MinZ = math.floor(a_Player:GetPosZ())
+	local Offset = self.Area:GetWEOffset()
+	
+	local MinX = math.floor(a_Player:GetPosX()) + Offset.x
+	local MinY = math.floor(a_Player:GetPosY()) + Offset.y
+	local MinZ = math.floor(a_Player:GetPosZ()) + Offset.z
 	local XSize, YSize, ZSize = self.Area:GetSize()
 	return cCuboid(MinX, MinY, MinZ, MinX + XSize, MinY + YSize, MinZ + ZSize)
 end
@@ -135,9 +137,13 @@ end
 --- Pastes the clipboard contents into the world relative to the player
 -- a_DstPoint is the optional min-coord Vector3i where to paste; if not specified, the default is used
 -- Returns the number of blocks pasted
-function cClipboard:Paste(a_Player, a_DstPoint)
+function cClipboard:Paste(a_Player, a_DstPoint, a_UseOffset)
 	local World = a_Player:GetWorld()
-	a_DstPoint = a_DstPoint or Vector3i(a_Player:GetPosition())
+	if (a_UseOffset) then
+		a_DstPoint = (a_DstPoint or Vector3i(a_Player:GetPosition())) - (self.Area:GetWEOffset() * 2) + Vector3i(1, 0, 1)
+	else
+		a_DstPoint = (a_DstPoint or Vector3i(a_Player:GetPosition())) - self.Area:GetWEOffset()
+	end
 	
 	-- Write the area:
 	self.Area:Write(World, a_DstPoint.x, a_DstPoint.y, a_DstPoint.z)
