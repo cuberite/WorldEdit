@@ -93,7 +93,11 @@ function HandlePasteCommand(a_Split, a_Player)
 	-- Paste:
 	State.UndoStack:PushUndoFromCuboid(a_Player:GetWorld(), DstCuboid, "paste")
 	local NumBlocks = State.Clipboard:Paste(a_Player, DstCuboid.p1, UseOffset)
-	a_Player:SendMessage(cChatColor.LightPurple .. NumBlocks .. " block(s) pasted relative to you.")
+	if (UseOffset) then
+		a_Player:SendMessage(cChatColor.LightPurple .. NumBlocks .. " block(s) pasted relative to you.")
+	else
+		a_Player:SendMessage(cChatColor.LightPurple .. NumBlocks .. " block(s) pasted next to you.")
+	end
 	return true
 end
 
