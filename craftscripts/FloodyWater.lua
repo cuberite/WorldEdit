@@ -1,7 +1,7 @@
 --[[
 	Floody simulator craftscript for WorldEdit (MCServer)
 	
-	Permission needed for this script is "worldedit.craftscript.execute" (By default) and "worldedit.craftscript.FloodyWater".
+	Permission needed for this script is "worldedit.scripting.execute" (By default) and "worldedit.craftscript.FloodyWater".
 	Usage: Select the region you want water to be simulated with the wand and then execute this script.
 ]]--
 
