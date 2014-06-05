@@ -54,37 +54,27 @@ end
 
 
 -- IsWashAble returns true if the given blocktype is a block that water can wash away.
-local function IsWashAble(a_BlockType)
-	local Blocks = 
-	{
-		E_BLOCK_AIR,
-		E_BLOCK_BROWN_MUSHROOM,
-		E_BLOCK_CACTUS,
-		E_BLOCK_COBWEB,
-		E_BLOCK_CROPS,
-		E_BLOCK_DEAD_BUSH,
-		E_BLOCK_LILY_PAD,
-		E_BLOCK_RAIL,
-		E_BLOCK_REDSTONE_TORCH_OFF,
-		E_BLOCK_REDSTONE_TORCH_ON,
-		E_BLOCK_REDSTONE_WIRE,
-		E_BLOCK_RED_MUSHROOM,
-		E_BLOCK_RED_ROSE,
-		E_BLOCK_SNOW,
-		E_BLOCK_SUGARCANE,
-		E_BLOCK_TALL_GRASS,
-		E_BLOCK_TORCH,
-		E_BLOCK_YELLOW_FLOWER,
-	}
-	
-	for Idx, BlockType in ipairs(Blocks) do
-		if (a_BlockType == BlockType) then
-			return true
-		end
-	end
-	
-	return false
-end
+local g_IsWashAble = 
+{
+	[E_BLOCK_AIR] = true,
+	[E_BLOCK_BROWN_MUSHROOM] = true,
+	[E_BLOCK_CACTUS] = true,
+	[E_BLOCK_COBWEB] = true,
+	[E_BLOCK_CROPS] = true,
+	[E_BLOCK_DEAD_BUSH] = true,
+	[E_BLOCK_LILY_PAD] = true,
+	[E_BLOCK_RAIL] = true,
+	[E_BLOCK_REDSTONE_TORCH_OFF] = true,
+	[E_BLOCK_REDSTONE_TORCH_ON] = true,
+	[E_BLOCK_REDSTONE_WIRE] = true,
+	[E_BLOCK_RED_MUSHROOM] = true,
+	[E_BLOCK_RED_ROSE] = true,
+	[E_BLOCK_SNOW] = true,
+	[E_BLOCK_SUGARCANE] = true,
+	[E_BLOCK_TALL_GRASS] = true,
+	[E_BLOCK_TORCH] = true,
+	[E_BLOCK_YELLOW_FLOWER] = true,
+}
 
 -- End of helper functions.
 ---------------------------------------------------------------
@@ -97,13 +87,15 @@ end
 local BlockArea = cBlockArea()
 BlockArea:Read(World, SrcCuboid, cBlockArea.baTypes + cBlockArea.baMetas)
 
+PlayerState.UndoStack:PushUndoFromCuboid(World, SrcCuboid, "craftscript.FloodyWater")
+
 local SizeX, SizeY, SizeZ = BlockArea:GetSize()
 SizeX, SizeY, SizeZ = SizeX - 1, SizeY - 1, SizeZ - 1
 
 local WaterBlocks = {}
-for X=0, SizeX do
-	for Y=0, SizeY do
-		for Z=0, SizeZ do
+for X = 0, SizeX do
+	for Y = 0, SizeY do
+		for Z = 0, SizeZ do
 			if (IsWater(BlockArea:GetRelBlockType(X, Y, Z))) then
 				table.insert(WaterBlocks, {x = X, y = Y, z = Z})
 			end
@@ -113,12 +105,12 @@ end
 
 local Cuboid = cCuboid(0, 0, 0, SizeX, SizeY, SizeZ)	
 
-while (#WaterBlocks ~= 0) do
+while (WaterBlocks[1]) do
 	local OldWaterBlocks = WaterBlocks
 	WaterBlocks = {}
 	
 	for Idx, Coord in ipairs(OldWaterBlocks) do
-		if (Cuboid:IsInside(Coord.x, Coord.y - 1, Coord.z) and IsWashAble(BlockArea:GetRelBlockType(Coord.x, Coord.y - 1, Coord.z)) or IsWater(BlockArea:GetRelBlockType(Coord.x, Coord.y - 1, Coord.z))) then
+		if (Cuboid:IsInside(Coord.x, Coord.y - 1, Coord.z) and g_IsWashAble[BlockArea:GetRelBlockType(Coord.x, Coord.y - 1, Coord.z)] or IsWater(BlockArea:GetRelBlockType(Coord.x, Coord.y - 1, Coord.z))) then
 			BlockArea:SetRelBlockTypeMeta(Coord.x, Coord.y - 1, Coord.z, E_BLOCK_WATER, 8)
 			table.insert(WaterBlocks, {x = Coord.x, y = Coord.y - 1, z = Coord.z})
 		else
@@ -133,7 +125,7 @@ while (#WaterBlocks ~= 0) do
 				}
 				
 				for Idx, FlowCoord in ipairs(PossibleFlowCoordinates) do
-					if (Cuboid:IsInside(FlowCoord.x, FlowCoord.y, FlowCoord.z) and IsWashAble(BlockArea:GetRelBlockType(FlowCoord.x, FlowCoord.y, FlowCoord.z))) then
+					if (Cuboid:IsInside(FlowCoord.x, FlowCoord.y, FlowCoord.z) and g_IsWashAble[BlockArea:GetRelBlockType(FlowCoord.x, FlowCoord.y, FlowCoord.z)]) then
 						BlockArea:SetRelBlockTypeMeta(FlowCoord.x, FlowCoord.y, FlowCoord.z, E_BLOCK_WATER, (Meta == 8 and 1) or Meta + 1)
 						table.insert(WaterBlocks, {x = FlowCoord.x, y = FlowCoord.y, z = FlowCoord.z})
 					end
