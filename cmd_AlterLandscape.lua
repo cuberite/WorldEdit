@@ -765,7 +765,7 @@ function HandleCylCommand(a_Split, a_Player)
 	
 	Radius = Round(Radius)
 	
-	local Height = tonumber(a_Split[4] or 0)
+	local Height = tonumber(a_Split[4] or 1) - 1
 	
 	local Pos = a_Player:GetPosition()
 	local MinX, MaxX = Pos.x - Radius, Pos.x + Radius
