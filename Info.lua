@@ -99,6 +99,14 @@ g_PluginInfo =
 			Category = "Terraforming",
 		},
 		
+		["//hcyl"] =
+		{
+			Permission = "worldedit.selection.cylinder",
+			Handler = HandleHCylCommand,
+			HelpString = "Generates a hollow cylinder",
+			Category = "Generation",
+		},
+		
 		["//hpos1"] =
 		{
 			Permission = "worldedit.selection.pos",
