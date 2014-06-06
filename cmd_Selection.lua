@@ -279,15 +279,20 @@ function HandleFacesCommand(a_Split, a_Player)
 		return true
 	end
 	
-	-- Retrieve the blocktype from the params:
-	local BlockType, BlockMeta = GetBlockTypeMeta(a_Split[2])
-	if not(BlockType) then
-		a_Player:SendMessage(cChatColor.LightPurple .. "Unknown block type: '" .. a_Split[2] .. "'.")
-		return true
+	-- Retrieve the blocktypes from the params:
+	local RawDstBlockTable = StringSplit(a_Split[2], ",")
+	local DstBlockTable = {}
+	for Idx, Value in ipairs(RawDstBlockTable) do
+		local DstBlockType, DstBlockMeta = GetBlockTypeMeta(Value)
+		if not(DstBlockType) then
+			a_Player:SendMessage(cChatColor.LightPurple .. "Unknown dst block type: '" .. Value .. "'.")
+			return true
+		end
+		table.insert(DstBlockTable, {BlockType = DstBlockType, BlockMeta = DstBlockMeta})
 	end
 	
 	-- Fill the selection:
-	local NumBlocks = FillFaces(State, a_Player, a_Player:GetWorld(), BlockType, BlockMeta)
+	local NumBlocks = FillFaces(State, a_Player, a_Player:GetWorld(), DstBlockTable)
 	if (NumBlocks) then
 		a_Player:SendMessage(cChatColor.LightPurple .. NumBlocks .. " block(s) have been changed.")
 	end
