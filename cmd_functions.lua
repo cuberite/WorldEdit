@@ -10,7 +10,7 @@
 --- Fills the walls of the selection stored in the specified cPlayerState with the specified block type
 -- Returns the number of blocks changed, or no value if disallowed
 -- The original contents are pushed onto PlayerState's Undo stack
-function FillWalls(a_PlayerState, a_Player, a_World, a_BlockType, a_BlockMeta)
+function FillWalls(a_PlayerState, a_Player, a_World, a_DstBlockTable)
 	-- Check with other plugins if the operation is okay:
 	if not(CheckAreaCallbacks(a_PlayerState.Selection:GetSortedCuboid(), a_Player, a_World, "walls")) then
 		return
@@ -19,7 +19,6 @@ function FillWalls(a_PlayerState, a_Player, a_World, a_BlockType, a_BlockMeta)
 	-- Push an Undo onto the stack:
 	a_PlayerState:PushUndoInSelection(a_World, "walls")
 
-	-- Fill the walls:
 	local Area = cBlockArea()
 	local MinX, MaxX = a_PlayerState.Selection:GetXCoordsSorted()
 	local MinY, MaxY = a_PlayerState.Selection:GetYCoordsSorted()
@@ -27,11 +26,32 @@ function FillWalls(a_PlayerState, a_Player, a_World, a_BlockType, a_BlockMeta)
 	local XSize = MaxX - MinX
 	local YSize = MaxY - MinY
 	local ZSize = MaxZ - MinZ
+	
+	-- Read the area into a cBlockArea
 	Area:Read(a_World, MinX, MaxX, MinY, MaxY, MinZ, MaxZ, cBlockArea.baTypes + cBlockArea.baMetas)
-	Area:FillRelCuboid(0,     XSize, 0,     YSize, 0,     0,     cBlockArea.baTypes + cBlockArea.baMetas, a_BlockType, a_BlockMeta)  -- XY wall at MinZ
-	Area:FillRelCuboid(0,     XSize, 0,     YSize, ZSize, ZSize, cBlockArea.baTypes + cBlockArea.baMetas, a_BlockType, a_BlockMeta)  -- XY wall at MaxZ
-	Area:FillRelCuboid(0,     0,     0,     YSize, 0,     ZSize, cBlockArea.baTypes + cBlockArea.baMetas, a_BlockType, a_BlockMeta)  -- YZ wall at MinX
-	Area:FillRelCuboid(XSize, XSize, 0,     YSize, 0,     ZSize, cBlockArea.baTypes + cBlockArea.baMetas, a_BlockType, a_BlockMeta)  -- YZ wall at MinX
+	
+	local NumDstBlocks = #a_DstBlockTable
+	
+	-- Place the walls
+	for Y = 0, YSize do
+		for X = 0, XSize do
+			local Block = a_DstBlockTable[math.random(1, NumDstBlocks)]
+			Area:SetRelBlockTypeMeta(X, Y, 0, Block.BlockType, Block.BlockMeta)
+			
+			Block = a_DstBlockTable[math.random(1, NumDstBlocks)]
+			Area:SetRelBlockTypeMeta(X, Y, ZSize, Block.BlockType, Block.BlockMeta)
+		end
+		
+		-- The X for loop already did the 0 coordinate and ZSize so we don't have to do that here
+		for Z = 1, ZSize - 1 do
+			local Block = a_DstBlockTable[math.random(1, NumDstBlocks)]
+			Area:SetRelBlockTypeMeta(0, Y, Z, Block.BlockType, Block.BlockMeta)
+			
+			Block = a_DstBlockTable[math.random(1, NumDstBlocks)]
+			Area:SetRelBlockTypeMeta(XSize, Y, Z, Block.BlockType, Block.BlockMeta)
+		end
+	end
+
 	Area:Write(a_World, MinX, MinY, MinZ)
 	Area:Clear()
 	a_World:WakeUpSimulatorsInArea(MinX - 1, MaxX + 1, MinY - 1, MaxY + 1, MinZ - 1, MaxZ + 1)
