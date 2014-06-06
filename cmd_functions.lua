@@ -96,7 +96,7 @@ end
 --- Fills the selection stored in the specified cPlayerState with the specified block type
 -- Returns the number of blocks changed, or no value if disallowed
 -- The original contents are pushed onto PlayerState's Undo stack
-function FillSelection(a_PlayerState, a_Player, a_World, a_BlockType, a_BlockMeta)
+function FillSelection(a_PlayerState, a_Player, a_World, a_DstBlockTable)
 	-- Check with other plugins if the operation is okay:
 	if not(CheckAreaCallbacks(a_PlayerState.Selection:GetSortedCuboid(), a_Player, a_World, "fill")) then
 		return
@@ -110,8 +110,22 @@ function FillSelection(a_PlayerState, a_Player, a_World, a_BlockType, a_BlockMet
 	local MinX, MaxX = a_PlayerState.Selection:GetXCoordsSorted()
 	local MinY, MaxY = a_PlayerState.Selection:GetYCoordsSorted()
 	local MinZ, MaxZ = a_PlayerState.Selection:GetZCoordsSorted()
+	
 	Area:Create(MaxX - MinX + 1, MaxY - MinY + 1, MaxZ - MinZ + 1)
-	Area:Fill(cBlockArea.baTypes + cBlockArea.baMetas, a_BlockType, a_BlockMeta)
+	
+	local SizeX, SizeY, SizeZ = Area:GetSize()
+	SizeX, SizeY, SizeZ = SizeX - 1, SizeY - 1, SizeZ - 1
+
+	local NumDstBlocks = #a_DstBlockTable
+	for X = 0, SizeX do
+		for Y = 0, SizeY do
+			for Z = 0, SizeZ do
+				local Block = a_DstBlockTable[math.random(1, NumDstBlocks)]
+				Area:SetRelBlockTypeMeta(X, Y, Z, Block.BlockType, Block.BlockMeta)
+			end
+		end
+	end
+	
 	Area:Write(a_World, MinX, MinY, MinZ)
 	Area:Clear()
 	a_World:WakeUpSimulatorsInArea(MinX - 1, MaxX + 1, MinY - 1, MaxY + 1, MinZ - 1, MaxZ + 1)
