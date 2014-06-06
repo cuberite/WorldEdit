@@ -84,6 +84,7 @@ g_PluginInfo =
 		
 		["//faces"] =
 		{
+			Alias = {"//outline"},
 			Permission = "worldedit.region.faces",
 			Handler = HandleFacesCommand,
 			HelpString = " Build the walls, ceiling, and floor of a selection",
