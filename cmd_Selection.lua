@@ -849,9 +849,16 @@ function HandleStackCommand(a_Split, a_Player)
 		return true
 	end
 	
-	-- Push the selection that is going to change into the UndoStack
+	-- Create a cuboid that contains the complete area that is going to change
 	local UndoStackCuboid = cCuboid(SelectionCuboid)
 	UndoStackCuboid.p2 = UndoStackCuboid.p2 + (VectorDirection * NumStacks)
+	
+	-- Check other plugins if they agree
+	if not(CheckAreaCallbacks(UndoStackCuboid, a_Player, World, "stack")) then
+		return true
+	end
+	
+	-- Push the selection that is going to change into the UndoStack
 	State.UndoStack:PushUndoFromCuboid(World, UndoStackCuboid)
 	
 	-- Stack the selection in the given Direction.
