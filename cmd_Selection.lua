@@ -762,3 +762,110 @@ end
 
 
 
+function HandleStackCommand(a_Split, a_Player)
+	-- //stack [Amount] [Direction]
+	
+	-- Check the selection:
+	local State = GetPlayerState(a_Player)
+	if not(State.Selection:IsValid()) then
+		a_Player:SendMessage(cChatColor.Rose .. "No region set")
+		return true
+	end
+	
+	if (a_Split[2] ~= nil) and (tonumber(a_Split[2]) == nil) then
+		a_Player:SendMessage(cChatColor.Rose .. "Usage: //stack [Blocks] [Direction]")
+		return true
+	end
+	
+	-- The amount of time the selection should be stacked
+	local NumStacks = a_Split[2] or 1 -- Use the given amount or 1 if nil
+	local Direction = string.lower(a_Split[3] or ((a_Player:GetPitch() > 70) and "down") or ((a_Player:GetPitch() < -70) and "up") or "forward")
+	
+	local SelectionCuboid = State.Selection:GetSortedCuboid()
+	local World = a_Player:GetWorld()
+	
+	-- Read the selection
+	local BA = cBlockArea()
+	BA:Read(World, SelectionCuboid, cBlockArea.baTypes + cBlockArea.baMetas)
+	
+	local VectorDirection = Vector3i()
+	local LookDirection = Round((a_Player:GetYaw() + 180) / 90)
+	
+	-- Find the proper direction and set the VectorDirection using it.
+	if (Direction == "up") then
+		VectorDirection.y = BA:GetSizeY()
+	elseif (Direction == "down") then
+		VectorDirection.y = -BA:GetSizeY()
+	elseif (Direction == "left") then
+		if (LookDirection == E_DIRECTION_SOUTH) then
+			VectorDirection.x = BA:GetSizeY()
+		elseif (LookDirection == E_DIRECTION_EAST) then
+			VectorDirection.z = -BA:GetSizeZ()
+		elseif (LookDirection == E_DIRECTION_NORTH1) or (LookDirection == E_DIRECTION_NORTH2) then
+			VectorDirection.x = -BA:GetSizeX()
+		elseif (LookDirection == E_DIRECTION_WEST) then
+			VectorDirection.z = BA:GetSizeZ()
+		end
+	elseif (Direction == "right") then
+		if (LookDirection == E_DIRECTION_SOUTH) then
+			VectorDirection.x = -BA:GetSizeX()
+		elseif (LookDirection == E_DIRECTION_EAST) then
+			VectorDirection.z = BA:GetSizeZ()
+		elseif (LookDirection == E_DIRECTION_NORTH1) or (LookDirection == E_DIRECTION_NORTH2) then
+			VectorDirection.x = BA:GetSizeX()
+		elseif (LookDirection == E_DIRECTION_WEST) then
+			VectorDirection.z = BA:GetSizeZ()
+		end
+	elseif (Direction == "south") then
+		VectorDirection.z = BA:GetSizeZ()
+	elseif (Direction == "east") then
+		VectorDirection.x = BA:GetSizeX()
+	elseif (Direction == "north") then
+		VectorDirection.z = -BA:GetSizeZ()
+	elseif (Direction == "west") then
+		VectorDirection.x = -BA:GetSizeY()
+	elseif ((Direction == "forward") or (Direction == "me")) then
+		if (LookDirection == E_DIRECTION_SOUTH) then
+			VectorDirection.z = BA:GetSizeZ()
+		elseif (LookDirection == E_DIRECTION_EAST) then
+			VectorDirection.x = BA:GetSizeX()
+		elseif ((LookDirection == E_DIRECTION_NORTH1) or (LookDirection == E_DIRECTION_NORTH2)) then
+			VectorDirection.z = -BA:GetSizeZ()
+		elseif (LookDirection == E_DIRECTION_WEST) then
+			VectorDirection.x = -BA:GetSizeX()
+		end
+	elseif ((Direction == "backwards") or (Direction == "back")) then
+		if (LookDirection == E_DIRECTION_SOUTH) then
+			VectorDirection.z = -BA:GetSizeZ()
+		elseif (LookDirection == E_DIRECTION_EAST) then
+			VectorDirection.x = -BA:GetSizeX()
+		elseif ((LookDirection == E_DIRECTION_NORTH1) or (LookDirection == E_DIRECTION_NORTH2)) then
+			VectorDirection.z = BA:GetSizeZ()
+		elseif (LookDirection == E_DIRECTION_WEST) then
+			VectorDirection.x = BA:GetSizeX()
+		end
+	else
+		a_Player:SendMessage(cChatColor.Rose .. "Unknown direction \"" .. Direction .. "\".")
+		return true
+	end
+	
+	-- Push the selection that is going to change into the UndoStack
+	local UndoStackCuboid = cCuboid(SelectionCuboid)
+	UndoStackCuboid.p2 = UndoStackCuboid.p2 + (VectorDirection * NumStacks)
+	State.UndoStack:PushUndoFromCuboid(World, UndoStackCuboid)
+	
+	-- Stack the selection in the given Direction.
+	local Pos = SelectionCuboid.p1 + VectorDirection
+	for I=1, NumStacks do
+		BA:Write(World, Pos, cBlockArea.baTypes + cBlockArea.baMetas)
+		Pos = Pos + VectorDirection
+	end
+	
+	a_Player:SendMessage(cChatColor.LightPurple .. BA:GetVolume() * VectorDirection:Length() .. " blocks changed. Undo with //undo")
+	return true
+end
+
+
+
+
+

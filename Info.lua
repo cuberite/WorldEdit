@@ -289,6 +289,14 @@ g_PluginInfo =
 			Category = "Generation",
 		},
 		
+		["//stack"] =
+		{
+			Permission = "worldedit.region.stack",
+			Handler = HandleStackCommand,
+			HelpString = "Repeat the contents of the selection.",
+			Category = "Selection",
+		},
+		
 		["//undo"] =
 		{
 			Permission = "worldedit.history.undo",
