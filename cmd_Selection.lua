@@ -834,7 +834,7 @@ function HandleLeafDecayCommand(a_Split, a_Player)
 		end
 	end
 	
-	BA2:Write(World, SrcCuboid.p2, cBlockArea.baTypes + cBlockArea.baMetas)
+	BA2:Write(World, SrcCuboid.p1, cBlockArea.baTypes + cBlockArea.baMetas)
 	a_Player:SendMessage(cChatColor.LightPurple .. "Removed " .. NumChangedBlocks .. " leaf block(s)")
 	return true
 end
