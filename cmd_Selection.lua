@@ -747,3 +747,98 @@ end
 
 
 
+function HandleLeafDecayCommand(a_Split, a_Player)
+	-- //leafdecay
+	
+	local LEAVES_CHECK_DISTANCE = 6
+	local PlayerState = GetPlayerState(a_Player)
+
+	-- Check if the selected region is valid.
+	if (not PlayerState.Selection:IsValid()) then
+		a_Player:SendMessage(cChatColor.Rose .. "No region set")
+		return true
+	end
+
+	local SrcCuboid = PlayerState.Selection:GetSortedCuboid()
+	local World = a_Player:GetWorld()
+
+	-- Check if other plugins might want to block this action.
+	if not(CheckAreaCallbacks(SrcCuboid, a_Player, World, "leafdecay")) then
+		return true
+	end
+
+	SrcCuboid:Expand(
+		LEAVES_CHECK_DISTANCE, LEAVES_CHECK_DISTANCE,
+		LEAVES_CHECK_DISTANCE, LEAVES_CHECK_DISTANCE,
+		LEAVES_CHECK_DISTANCE, LEAVES_CHECK_DISTANCE
+	)
+
+	local BA = cBlockArea()
+	BA:Read(World, SrcCuboid, cBlockArea.baTypes + cBlockArea.baMetas)
+
+	local BA2 = cBlockArea()
+	BA2:CopyFrom(BA)
+
+	local SizeX, SizeY, SizeZ = BA:GetSize()
+	SizeX, SizeY, SizeZ = SizeX - 1, SizeY - 1, SizeZ - 1
+
+	local function ProcessLeaf(a_X, a_Y, a_Z, a_I)
+		local BlockType = BA:GetRelBlockType(a_X, a_Y, a_Z)
+		if ((BlockType == E_BLOCK_LEAVES) or (BlockType == E_BLOCK_NEW_LEAVES)) then
+			BA:SetRelBlockType(a_X, a_Y, a_Z, E_BLOCK_SPONGE)
+		else
+			return
+		end
+		
+		local I = a_I - 1
+		if (I == 0) then
+			return
+		end
+		
+		ProcessLeaf(a_X - 1, a_Y, a_Z, I)
+		ProcessLeaf(a_X + 1, a_Y, a_Z, I)
+		ProcessLeaf(a_X, a_Y - 1, a_Z, I)
+		ProcessLeaf(a_X, a_Y + 1, a_Z, I)
+		ProcessLeaf(a_X, a_Y, a_Z - 1, I)
+		ProcessLeaf(a_X, a_Y, a_Z + 1, I)
+	end
+		
+
+	for X = 0, SizeX do
+		for Y = 0, SizeY do
+			for Z = 0, SizeZ do
+				local BlockType = BA:GetRelBlockType(X, Y, Z)
+				if ((BlockType == E_BLOCK_LOG) or (BlockType == E_BLOCK_NEW_LOG)) then
+					ProcessLeaf(X - 1, Y, Z, LEAVES_CHECK_DISTANCE)
+					ProcessLeaf(X + 1, Y, Z, LEAVES_CHECK_DISTANCE)
+					ProcessLeaf(X, Y - 1, Z, LEAVES_CHECK_DISTANCE)
+					ProcessLeaf(X, Y + 1, Z, LEAVES_CHECK_DISTANCE)
+					ProcessLeaf(X, Y, Z - 1, LEAVES_CHECK_DISTANCE)
+					ProcessLeaf(X, Y, Z + 1, LEAVES_CHECK_DISTANCE)
+				end
+			end
+		end
+	end
+
+	SizeX, SizeY, SizeZ = SizeX - LEAVES_CHECK_DISTANCE, SizeY - LEAVES_CHECK_DISTANCE, SizeZ - LEAVES_CHECK_DISTANCE
+	local NumChangedBlocks = 0
+	for X = LEAVES_CHECK_DISTANCE, SizeX do
+		for Y = LEAVES_CHECK_DISTANCE, SizeY do
+			for Z = LEAVES_CHECK_DISTANCE, SizeZ do
+				local BlockType = BA:GetRelBlockType(X, Y, Z)
+				if ((BlockType == E_BLOCK_LEAVES) or (BlockType == E_BLOCK_NEW_LEAVES)) then
+					BA2:SetRelBlockTypeMeta(X, Y, Z, E_BLOCK_AIR, 0)
+					NumChangedBlocks = NumChangedBlocks + 1
+				end
+			end
+		end
+	end
+	
+	BA2:Write(World, SrcCuboid.p1, cBlockArea.baTypes + cBlockArea.baMetas)
+	a_Player:SendMessage(cChatColor.LightPurple .. "Removed " .. NumChangedBlocks .. " leaf block(s)")
+	return true
+end
+
+
+
+

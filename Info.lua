@@ -130,6 +130,14 @@ g_PluginInfo =
 			Category = "Generation",
 		},
 		
+		["//leafdecay"] =
+		{
+			Permission = "worldedit.region.leafdecay",
+			Handler = HandleLeafDecayCommand,
+			HelpString = "Removes all the leaves in the selection that would decay",
+			Category = "Selection",
+		},
+		
 		["//mirror"] =
 		{
 			Permission = "worldedit.region.mirror",
