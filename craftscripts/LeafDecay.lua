@@ -24,11 +24,11 @@ if not(CheckAreaCallbacks(SrcCuboid, a_Player, World, "craftscript.LeafDecay")) 
 	return true
 end
 
--- SrcCuboid:Expand(
-	-- LEAVES_CHECK_DISTANCE, LEAVES_CHECK_DISTANCE,
-	-- LEAVES_CHECK_DISTANCE, LEAVES_CHECK_DISTANCE,
-	-- LEAVES_CHECK_DISTANCE, LEAVES_CHECK_DISTANCE
--- )
+SrcCuboid:Expand(
+	LEAVES_CHECK_DISTANCE, LEAVES_CHECK_DISTANCE,
+	LEAVES_CHECK_DISTANCE, LEAVES_CHECK_DISTANCE,
+	LEAVES_CHECK_DISTANCE, LEAVES_CHECK_DISTANCE
+)
 
 local BA = cBlockArea()
 BA:Read(World, SrcCuboid, cBlockArea.baTypes + cBlockArea.baMetas)
@@ -75,9 +75,11 @@ for X = 0, SizeX do
 	end
 end
 
-for X = 0, SizeX do
-	for Y = 0, SizeY do
-		for Z = 0, SizeZ do
+SizeX, SizeY, SizeZ = SizeX - LEAVES_CHECK_DISTANCE, SizeY - LEAVES_CHECK_DISTANCE, SizeZ - LEAVES_CHECK_DISTANCE
+
+for X = LEAVES_CHECK_DISTANCE, SizeX do
+	for Y = LEAVES_CHECK_DISTANCE, SizeY do
+		for Z = LEAVES_CHECK_DISTANCE, SizeZ do
 			local BlockType = BA:GetRelBlockType(X, Y, Z)
 			if ((BlockType == E_BLOCK_LEAVES) or (BlockType == E_BLOCK_NEW_LEAVES)) then
 				BA2:SetRelBlockTypeMeta(X, Y, Z, E_BLOCK_AIR, 0)
