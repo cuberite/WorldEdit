@@ -221,7 +221,7 @@ function ReplaceSelection(a_PlayerState, a_Player, a_World, a_SrcBlockTable, a_D
 	local MinZ, MaxZ = a_PlayerState.Selection:GetZCoordsSorted()
 	Area:Read(a_World, MinX, MaxX, MinY, MaxY, MinZ, MaxZ)
 	
-	-- Read procents from the DstBlock table
+	-- Read percents from the DstBlock table
 	local MaxChance = 0
 	for Idx, Value in ipairs(a_DstBlockTable) do
 		MaxChance = MaxChance + Value.Chance
