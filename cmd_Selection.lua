@@ -163,6 +163,45 @@ end
 
 
 
+function HandleCountCommand(a_Split, a_Player)
+	-- //count <blocktype>
+	
+	local State = GetPlayerState(a_Player)
+
+	-- Check the selection:
+	if not(State.Selection:IsValid()) then
+		a_Player:SendMessage(cChatColor.Rose .. "No region set")
+		return true
+	end
+	
+	-- Check the params:
+	if (a_Split[2] == nil) then
+		a_Player:SendMessage(cChatColor.Rose .. "Usage: //count <BlockType>")
+		return true
+	end
+	
+	-- Retrieve the blocktypes from the params:
+	local RawDstBlockTable = StringSplit(a_Split[2], ",")
+	local BlockTable = {}
+	for Idx, Value in ipairs(RawDstBlockTable) do
+		local BlockType, BlockMeta, TypeOnly = GetBlockTypeMeta(Value)
+		if not(BlockType) then
+			a_Player:SendMessage(cChatColor.LightPurple .. "Unknown dst block type: '" .. Value .. "'.")
+			return true
+		end
+		BlockTable[BlockType] = {BlockMeta = BlockMeta, TypeOnly = TypeOnly or false}
+	end
+	
+	-- Count the blocks:
+	local NumBlocks = CountBlocks(State, a_Player, a_Player:GetWorld(), BlockTable)
+	a_Player:SendMessage(cChatColor.LightPurple .. "Counted: " .. NumBlocks)
+	return true
+end
+
+
+
+
+
 function HandleExpandCommand(a_Split, a_Player)
 	-- //expand [Amount] [Direction]
 	
@@ -279,15 +318,20 @@ function HandleFacesCommand(a_Split, a_Player)
 		return true
 	end
 	
-	-- Retrieve the blocktype from the params:
-	local BlockType, BlockMeta = GetBlockTypeMeta(a_Split[2])
-	if not(BlockType) then
-		a_Player:SendMessage(cChatColor.LightPurple .. "Unknown block type: '" .. a_Split[2] .. "'.")
-		return true
+	-- Retrieve the blocktypes from the params:
+	local RawDstBlockTable = StringSplit(a_Split[2], ",")
+	local DstBlockTable = {}
+	for Idx, Value in ipairs(RawDstBlockTable) do
+		local DstBlockType, DstBlockMeta = GetBlockTypeMeta(Value)
+		if not(DstBlockType) then
+			a_Player:SendMessage(cChatColor.LightPurple .. "Unknown dst block type: '" .. Value .. "'.")
+			return true
+		end
+		table.insert(DstBlockTable, {BlockType = DstBlockType, BlockMeta = DstBlockMeta})
 	end
 	
 	-- Fill the selection:
-	local NumBlocks = FillFaces(State, a_Player, a_Player:GetWorld(), BlockType, BlockMeta)
+	local NumBlocks = FillFaces(State, a_Player, a_Player:GetWorld(), DstBlockTable)
 	if (NumBlocks) then
 		a_Player:SendMessage(cChatColor.LightPurple .. NumBlocks .. " block(s) have been changed.")
 	end
@@ -457,7 +501,7 @@ function HandleReplaceCommand(a_Split, a_Player)
 	end
 	
 	-- Retrieve the blocktypes from the params:
-	local RawSrcBlockTable = StringSplit(a_Split[2], ";")
+	local RawSrcBlockTable = StringSplit(a_Split[2], ",")
 	local SrcBlockTable = {}
 	for Idx, Value in ipairs(RawSrcBlockTable) do
 		local SrcBlockType, SrcBlockMeta, TypeOnly = GetBlockTypeMeta(Value)
@@ -468,7 +512,7 @@ function HandleReplaceCommand(a_Split, a_Player)
 		SrcBlockTable[SrcBlockType] = {SrcBlockMeta = SrcBlockMeta, TypeOnly = TypeOnly or false}
 	end
 	
-	local RawDstBlockTable = StringSplit(a_Split[3], ";")
+	local RawDstBlockTable = StringSplit(a_Split[3], ",")
 	local DstBlockTable = {}
 	for Idx, Value in ipairs(RawDstBlockTable) do
 		local DstBlockType, DstBlockMeta = GetBlockTypeMeta(Value)
@@ -537,15 +581,20 @@ function HandleSetCommand(a_Split, a_Player)
 		return true
 	end
 	
-	-- Retrieve the blocktype from the params:
-	local BlockType, BlockMeta = GetBlockTypeMeta(a_Split[2])
-	if not(BlockType) then
-		a_Player:SendMessage(cChatColor.LightPurple .. "Unknown block type: '" .. a_Split[2] .. "'.")
-		return true
+	-- Retrieve the blocktypes from the params:
+	local RawDstBlockTable = StringSplit(a_Split[2], ",")
+	local DstBlockTable = {}
+	for Idx, Value in ipairs(RawDstBlockTable) do
+		local DstBlockType, DstBlockMeta = GetBlockTypeMeta(Value)
+		if not(DstBlockType) then
+			a_Player:SendMessage(cChatColor.LightPurple .. "Unknown dst block type: '" .. Value .. "'.")
+			return true
+		end
+		table.insert(DstBlockTable, {BlockType = DstBlockType, BlockMeta = DstBlockMeta})
 	end
 	
 	-- Fill the selection:
-	local NumBlocks = FillSelection(State, a_Player, a_Player:GetWorld(), BlockType, BlockMeta)
+	local NumBlocks = FillSelection(State, a_Player, a_Player:GetWorld(), DstBlockTable)
 	if (NumBlocks) then
 		a_Player:SendMessage(cChatColor.LightPurple .. NumBlocks .. " block(s) have been changed.")
 	end
@@ -728,15 +777,20 @@ function HandleWallsCommand(a_Split, a_Player)
 		return true
 	end
 	
-	-- Retrieve the blocktype from the params:
-	local BlockType, BlockMeta = GetBlockTypeMeta(a_Split[2])
-	if not(BlockType) then
-		a_Player:SendMessage(cChatColor.LightPurple .. "Unknown block type: '" .. a_Split[2] .. "'.")
-		return true
+	-- Retrieve the blocktypes from the params:
+	local RawDstBlockTable = StringSplit(a_Split[2], ",")
+	local DstBlockTable = {}
+	for Idx, Value in ipairs(RawDstBlockTable) do
+		local DstBlockType, DstBlockMeta = GetBlockTypeMeta(Value)
+		if not(DstBlockType) then
+			a_Player:SendMessage(cChatColor.LightPurple .. "Unknown dst block type: '" .. Value .. "'.")
+			return true
+		end
+		table.insert(DstBlockTable, {BlockType = DstBlockType, BlockMeta = DstBlockMeta})
 	end
 	
 	-- Fill the selection:
-	local NumBlocks = FillWalls(State, a_Player, a_Player:GetWorld(), BlockType, BlockMeta)
+	local NumBlocks = FillWalls(State, a_Player, a_Player:GetWorld(), DstBlockTable)
 	if (NumBlocks) then
 		a_Player:SendMessage(cChatColor.LightPurple .. NumBlocks .. " block(s) have been changed.")
 	end
@@ -747,6 +801,7 @@ end
 
 
 
+<<<<<<< HEAD
 function HandleLeafDecayCommand(a_Split, a_Player)
 	-- //leafdecay
 	
@@ -836,9 +891,122 @@ function HandleLeafDecayCommand(a_Split, a_Player)
 	
 	BA2:Write(World, SrcCuboid.p1, cBlockArea.baTypes + cBlockArea.baMetas)
 	a_Player:SendMessage(cChatColor.LightPurple .. "Removed " .. NumChangedBlocks .. " leaf block(s)")
+=======
+function HandleStackCommand(a_Split, a_Player)
+	-- //stack [Amount] [Direction]
+	
+	-- Check the selection:
+	local State = GetPlayerState(a_Player)
+	if not(State.Selection:IsValid()) then
+		a_Player:SendMessage(cChatColor.Rose .. "No region set")
+		return true
+	end
+	
+	if (a_Split[2] ~= nil) and (tonumber(a_Split[2]) == nil) then
+		a_Player:SendMessage(cChatColor.Rose .. "Usage: //stack [Blocks] [Direction]")
+		return true
+	end
+	
+	-- The amount of time the selection should be stacked
+	local NumStacks = a_Split[2] or 1 -- Use the given amount or 1 if nil
+	local Direction = string.lower(a_Split[3] or ((a_Player:GetPitch() > 70) and "down") or ((a_Player:GetPitch() < -70) and "up") or "forward")
+	
+	local SelectionCuboid = State.Selection:GetSortedCuboid()
+	local World = a_Player:GetWorld()
+	
+	-- Read the selection
+	local BA = cBlockArea()
+	BA:Read(World, SelectionCuboid, cBlockArea.baTypes + cBlockArea.baMetas)
+	
+	local VectorDirection = Vector3i()
+	local LookDirection = Round((a_Player:GetYaw() + 180) / 90)
+	
+	-- Find the proper direction and set the VectorDirection using it.
+	if (Direction == "up") then
+		VectorDirection.y = BA:GetSizeY()
+	elseif (Direction == "down") then
+		VectorDirection.y = -BA:GetSizeY()
+	elseif (Direction == "left") then
+		if (LookDirection == E_DIRECTION_SOUTH) then
+			VectorDirection.x = BA:GetSizeY()
+		elseif (LookDirection == E_DIRECTION_EAST) then
+			VectorDirection.z = -BA:GetSizeZ()
+		elseif (LookDirection == E_DIRECTION_NORTH1) or (LookDirection == E_DIRECTION_NORTH2) then
+			VectorDirection.x = -BA:GetSizeX()
+		elseif (LookDirection == E_DIRECTION_WEST) then
+			VectorDirection.z = BA:GetSizeZ()
+		end
+	elseif (Direction == "right") then
+		if (LookDirection == E_DIRECTION_SOUTH) then
+			VectorDirection.x = -BA:GetSizeX()
+		elseif (LookDirection == E_DIRECTION_EAST) then
+			VectorDirection.z = BA:GetSizeZ()
+		elseif (LookDirection == E_DIRECTION_NORTH1) or (LookDirection == E_DIRECTION_NORTH2) then
+			VectorDirection.x = BA:GetSizeX()
+		elseif (LookDirection == E_DIRECTION_WEST) then
+			VectorDirection.z = BA:GetSizeZ()
+		end
+	elseif (Direction == "south") then
+		VectorDirection.z = BA:GetSizeZ()
+	elseif (Direction == "east") then
+		VectorDirection.x = BA:GetSizeX()
+	elseif (Direction == "north") then
+		VectorDirection.z = -BA:GetSizeZ()
+	elseif (Direction == "west") then
+		VectorDirection.x = -BA:GetSizeY()
+	elseif ((Direction == "forward") or (Direction == "me")) then
+		if (LookDirection == E_DIRECTION_SOUTH) then
+			VectorDirection.z = BA:GetSizeZ()
+		elseif (LookDirection == E_DIRECTION_EAST) then
+			VectorDirection.x = BA:GetSizeX()
+		elseif ((LookDirection == E_DIRECTION_NORTH1) or (LookDirection == E_DIRECTION_NORTH2)) then
+			VectorDirection.z = -BA:GetSizeZ()
+		elseif (LookDirection == E_DIRECTION_WEST) then
+			VectorDirection.x = -BA:GetSizeX()
+		end
+	elseif ((Direction == "backwards") or (Direction == "back")) then
+		if (LookDirection == E_DIRECTION_SOUTH) then
+			VectorDirection.z = -BA:GetSizeZ()
+		elseif (LookDirection == E_DIRECTION_EAST) then
+			VectorDirection.x = -BA:GetSizeX()
+		elseif ((LookDirection == E_DIRECTION_NORTH1) or (LookDirection == E_DIRECTION_NORTH2)) then
+			VectorDirection.z = BA:GetSizeZ()
+		elseif (LookDirection == E_DIRECTION_WEST) then
+			VectorDirection.x = BA:GetSizeX()
+		end
+	else
+		a_Player:SendMessage(cChatColor.Rose .. "Unknown direction \"" .. Direction .. "\".")
+		return true
+	end
+	
+	-- Create a cuboid that contains the complete area that is going to change
+	local UndoStackCuboid = cCuboid(SelectionCuboid)
+	UndoStackCuboid.p2 = UndoStackCuboid.p2 + (VectorDirection * NumStacks)
+	
+	-- Check other plugins if they agree
+	if not(CheckAreaCallbacks(UndoStackCuboid, a_Player, World, "stack")) then
+		return true
+	end
+	
+	-- Push the selection that is going to change into the UndoStack
+	State.UndoStack:PushUndoFromCuboid(World, UndoStackCuboid)
+	
+	-- Stack the selection in the given Direction.
+	local Pos = SelectionCuboid.p1 + VectorDirection
+	for I=1, NumStacks do
+		BA:Write(World, Pos, cBlockArea.baTypes + cBlockArea.baMetas)
+		Pos = Pos + VectorDirection
+	end
+	
+	a_Player:SendMessage(cChatColor.LightPurple .. BA:GetVolume() * VectorDirection:Length() .. " blocks changed. Undo with //undo")
+>>>>>>> 2b1590d6a8831d33b52b01074a389d6e42855dec
 	return true
 end
 
 
 
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 2b1590d6a8831d33b52b01074a389d6e42855dec

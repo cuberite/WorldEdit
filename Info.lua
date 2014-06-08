@@ -33,6 +33,14 @@ g_PluginInfo =
 			Category = "Tool",
 		},
 		
+		["//count"] =
+		{
+			Permission = "worldedit.selection.count",
+			Handler = HandleCountCommand,
+			HelpString = " Count the number of blocks in the region.",
+			Category = "Selection",
+		},
+		
 		["//copy"] =
 		{
 			Permission = "worldedit.clipboard.copy",
@@ -84,6 +92,7 @@ g_PluginInfo =
 		
 		["//faces"] =
 		{
+			Alias = {"//outline"},
 			Permission = "worldedit.region.faces",
 			Handler = HandleFacesCommand,
 			HelpString = " Build the walls, ceiling, and floor of a selection",
@@ -96,6 +105,14 @@ g_PluginInfo =
 			Handler = HandleGreenCommand,
 			HelpString = " Changes all the dirt to grass.",
 			Category = "Terraforming",
+		},
+		
+		["//hcyl"] =
+		{
+			Permission = "worldedit.selection.cylinder",
+			Handler = HandleHCylCommand,
+			HelpString = "Generates a hollow cylinder",
+			Category = "Generation",
 		},
 		
 		["//hpos1"] =
@@ -286,6 +303,14 @@ g_PluginInfo =
 			Handler = HandleSphereCommand,
 			HelpString = " Generates a filled sphere.",
 			Category = "Generation",
+		},
+		
+		["//stack"] =
+		{
+			Permission = "worldedit.region.stack",
+			Handler = HandleStackCommand,
+			HelpString = "Repeat the contents of the selection.",
+			Category = "Selection",
 		},
 		
 		["//undo"] =

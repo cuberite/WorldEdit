@@ -52,7 +52,10 @@ Commands that generates structures.
 
 | Command | Permission | Description | 
 | ------- | ---------- | ----------- | 
+|//cyl | worldedit.generation.cylinder | Generates a cylinder.| 
+|//hpyramid | worldedit.generation.pyramid | Generate a hollow pyramid| 
 |//hsphere | worldedit.generation.hsphere |  Generates a hollow sphere.| 
+|//pyramid | worldedit.generation.pyramid | Generate a filled pyramid| 
 |//sphere | worldedit.generation.sphere |  Generates a filled sphere.| 
 
 
@@ -86,9 +89,19 @@ Commands in this category will allow the player to edit the region he/she has se
 | Command | Permission | Description | 
 | ------- | ---------- | ----------- | 
 |//faces | worldedit.region.faces |  Build the walls, ceiling, and floor of a selection| 
+|//mirror | worldedit.region.mirror | Mirrors the selection by the specified plane| 
 |//replace | worldedit.region.replace |  Replace all the blocks in the selection with another| 
 |//set | worldedit.region.set |  Set all the blocks inside the selection to a block| 
+|//vmirror | worldedit.region.vmirror | Mirrors the selection vertically| 
 |//walls | worldedit.region.walls |  Build the four sides of the selection| 
+
+
+
+### Scripting
+| Command | Permission | Description | 
+| ------- | ---------- | ----------- | 
+|/.s | worldedit.scripting.execute | Execute last CraftScript| 
+|/cs | worldedit.scripting.execute |  Execute a CraftScript| 
 
 
 
@@ -139,6 +152,7 @@ Commands that activate a tool. If a tool is activated you can use it by right or
 | Command | Permission | Description | 
 | ------- | ---------- | ----------- | 
 |// | worldedit.superpickaxe |  Toggle the super pickaxe pickaxe function| 
+|//addleaves | worldedit.addleaves |  Adds leaves next to log blocks| 
 |/none |  |  Unbind a bound tool from your current item| 
 |/repl | worldedit.tool.replacer |  Block replace tool| 
 |/tree | worldedit.tool.tree |  Tree generator tool| 
@@ -148,6 +162,7 @@ Commands that activate a tool. If a tool is activated you can use it by right or
 # Permissions
 | Permissions | Description | Commands | Recommended groups |
 | ----------- | ----------- | -------- | ------------------ |
+worldedit.addleaves |  | `//addleaves` | 
 worldedit.biome.info |  | `/biomeinfo` | 
 worldedit.biome.set |  | `//setbiome` | 
 worldedit.biomelist |  | `/biomelist` | 
@@ -158,8 +173,10 @@ worldedit.clipboard.paste |  | `//paste` |
 worldedit.clipboard.rotate |  | `//rotate` | 
 worldedit.drain |  | `//drain` | 
 worldedit.extinguish |  | `//extinguish` | 
+worldedit.generation.cylinder |  | `//cyl` | 
 worldedit.generation.hsphere |  | `//hsphere` | 
 worldedit.generation.pumpkins |  | `/pumpkins` | 
+worldedit.generation.pyramid |  | `//hpyramid`, `//pyramid` | 
 worldedit.generation.sphere |  | `//sphere` | 
 worldedit.green |  | `//green` | 
 worldedit.history.redo |  | `//redo` | 
@@ -170,8 +187,10 @@ worldedit.navigation.jumpto.command |  | `/jumpto` |
 worldedit.navigation.thru.command |  | `/thru` | 
 worldedit.navigation.up |  | `/up` | 
 worldedit.region.faces |  | `//faces` | 
+worldedit.region.mirror |  | `//mirror` | 
 worldedit.region.replace |  | `//replace` | 
 worldedit.region.set |  | `//set` | 
+worldedit.region.vmirror |  | `//vmirror` | 
 worldedit.region.walls |  | `//walls` | 
 worldedit.remove |  | `/remove` | 
 worldedit.removeabove |  | `/removeabove` | 
@@ -179,8 +198,9 @@ worldedit.removebelow |  | `/removebelow` |
 worldedit.schematic.list |  | `//schematic formats`, `//schematic list` | 
 worldedit.schematic.load |  | `//schematic load` | 
 worldedit.schematic.save |  | `//schematic save` | 
+worldedit.scripting.execute |  | `/.s`, `/cs` | 
 worldedit.selection.expand |  | `//expand` | 
-worldedit.selection.pos |  | `//hpos2`, `//hpos1`, `//pos2`, `//pos1` | 
+worldedit.selection.pos |  | `//hpos2`, `//hpos1`, `//pos1`, `//pos2` | 
 worldedit.selection.size |  | `//size`, `//shift` | 
 worldedit.snow |  | `/snow` | 
 worldedit.superpickaxe |  | `//` | 

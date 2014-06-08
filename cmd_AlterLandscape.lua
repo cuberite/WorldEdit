@@ -765,7 +765,7 @@ function HandleCylCommand(a_Split, a_Player)
 	
 	Radius = Round(Radius)
 	
-	local Height = tonumber(a_Split[4] or 0)
+	local Height = tonumber(a_Split[4] or 1) - 1
 	
 	local Pos = a_Player:GetPosition()
 	local MinX, MaxX = Pos.x - Radius, Pos.x + Radius
@@ -814,3 +814,84 @@ function HandleCylCommand(a_Split, a_Player)
 	a_Player:SendMessage(cChatColor.LightPurple .. AffectedBlocks .. " block(s) have been created.")
 	return true
 end
+
+
+
+
+
+function HandleHCylCommand(a_Split, a_Player)
+	-- //hcyl <BlockType> <Radius> [Height]
+	
+	if ((a_Split[2] == nil) or (a_Split[3] == nil)) then
+		a_Player:SendMessage(cChatColor.Rose .. "Too few arguments.")
+		a_Player:SendMessage(cChatColor.Rose .. "//hcyl <block> <radius> [height]")
+		return true
+	end
+	
+	local BlockType, BlockMeta = GetBlockTypeMeta(a_Split[2])
+	if (not BlockType) then
+		a_Player:SendMessage(cChatColor.Rose .. "Block name '" .. a_Split[2] .. "' was not recognized.")
+		return true
+	end
+	
+	local Radius = tonumber(a_Split[3])
+	if (not Radius) then
+		a_Player:SendMessage(cChatColor.Rose .. "Number expected; string \"" .. a_Split[3] .. "\" given.")
+		return true
+	end
+	
+	Radius = Round(Radius)
+	
+	local Height = tonumber(a_Split[4] or 1) - 1
+	
+	local Pos = a_Player:GetPosition()
+	local MinX, MaxX = Pos.x - Radius, Pos.x + Radius
+	local MinY, MaxY = Pos.y, Pos.y + Height
+	local MinZ, MaxZ = Pos.z - Radius, Pos.z + Radius
+	
+	local World = a_Player:GetWorld()
+	
+	if (MinY > 254) then
+		a_Player:SendMessage(cChatColor.LightPurple .. "0 block(s) have been created.")
+		return true
+	elseif (MaxY > 254) then
+		MaxY = 254
+	end
+	
+	local Cuboid = cCuboid(MinX, MinY, MinZ, MaxX, MaxY, MaxZ)
+	Cuboid:ClampY(0, 255)
+	if not(CheckAreaCallbacks(Cuboid, a_Player, World, "hcyl")) then
+		return true
+	end
+	
+	-- Push the area into an undo stack:
+	local State = GetPlayerState(a_Player)
+	State.UndoStack:PushUndoFromCuboid(World, Cuboid)
+	
+	local BlockArea = cBlockArea()
+	BlockArea:Read(World, MinX, MaxX, MinY, MaxY, MinZ, MaxZ, cBlockArea.baTypes + cBlockArea.baMetas)
+	local Size = Radius * 2
+	local MiddleVector = Vector3d(Radius, 0, Radius)
+	local AffectedBlocks = 0
+	for Y = 0, Height do
+		for X = 0, Size do
+			for Z = 0, Size do
+				local TempVector = Vector3d(X, 0, Z)
+				local Distance = math.floor((MiddleVector - TempVector):Length())
+
+				if (Distance == Radius) then
+					BlockArea:SetRelBlockTypeMeta(X, Y, Z, BlockType, BlockMeta)
+					AffectedBlocks = AffectedBlocks + 1
+				end
+			end
+		end
+	end
+	
+	BlockArea:Write(World, MinX, MinY, MinZ)
+	a_Player:SendMessage(cChatColor.LightPurple .. AffectedBlocks .. " block(s) have been created.")
+	return true
+end
+
+
+
+
