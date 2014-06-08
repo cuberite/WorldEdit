@@ -165,12 +165,27 @@ function FillSelection(a_PlayerState, a_Player, a_World, a_DstBlockTable)
 	local SizeX, SizeY, SizeZ = Area:GetSize()
 	SizeX, SizeY, SizeZ = SizeX - 1, SizeY - 1, SizeZ - 1
 
-	local NumDstBlocks = #a_DstBlockTable
+	local MaxChance = 0
+	for Idx, Value in ipairs(a_DstBlockTable) do
+		MaxChance = MaxChance + Value.Chance
+	end
+	
+	local Temp = 0
+	for Idx, Value in ipairs(a_DstBlockTable) do
+		Temp = Temp + Value.Chance / MaxChance
+		Value.Chance = Temp
+	end
+	
 	for X = 0, SizeX do
 		for Y = 0, SizeY do
 			for Z = 0, SizeZ do
-				local Block = a_DstBlockTable[math.random(1, NumDstBlocks)]
-				Area:SetRelBlockTypeMeta(X, Y, Z, Block.BlockType, Block.BlockMeta)
+				local RandomNumber = math.random()
+				for Idx, Value in ipairs(a_DstBlockTable) do
+					if (RandomNumber <= Value.Chance) then
+						Area:SetRelBlockTypeMeta(X, Y, Z, Value.BlockType, Value.BlockMeta)
+						break
+					end
+				end
 			end
 		end
 	end
