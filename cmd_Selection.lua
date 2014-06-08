@@ -476,12 +476,29 @@ function HandleReplaceCommand(a_Split, a_Player)
 	local RawDstBlockTable = StringSplit(a_Split[3], ",")
 	local DstBlockTable = {}
 	for Idx, Value in ipairs(RawDstBlockTable) do
+		-- Block chance
+		local Chance = 100
+		if (string.find(Value, "%", 1, true) ~= nil) then
+			local SplittedValue = StringSplit(Value, "%")
+			if (#SplittedValue ~= 2) then
+				a_Player:SendMessage(cChatColor.LightPurple .. "Unknown dst block type: '" .. Value .. "'.")
+				return true
+			end
+			Chance = tonumber(SplittedValue[1])
+			Value = SplittedValue[2]
+			
+			if (Chance == nil) then
+				a_Player:SendMessage(cChatColor.LightPurple .. "Unknown chance: '" .. SplittedValue[1] .. "'.")
+				return true
+			end
+		end
+		
 		local DstBlockType, DstBlockMeta = GetBlockTypeMeta(Value)
 		if not(DstBlockType) then
 			a_Player:SendMessage(cChatColor.LightPurple .. "Unknown dst block type: '" .. Value .. "'.")
 			return true
 		end
-		DstBlockTable[Idx] = {DstBlockType = DstBlockType, DstBlockMeta = DstBlockMeta}
+		DstBlockTable[Idx] = {BlockType = DstBlockType, BlockMeta = DstBlockMeta, Chance = Chance}
 	end
 	
 	-- Replace the blocks:
@@ -759,12 +776,29 @@ function HandleWallsCommand(a_Split, a_Player)
 	local RawDstBlockTable = StringSplit(a_Split[2], ",")
 	local DstBlockTable = {}
 	for Idx, Value in ipairs(RawDstBlockTable) do
+		-- Block chance
+		local Chance = 100
+		if (string.find(Value, "%", 1, true) ~= nil) then
+			local SplittedValue = StringSplit(Value, "%")
+			if (#SplittedValue ~= 2) then
+				a_Player:SendMessage(cChatColor.LightPurple .. "Unknown dst block type: '" .. Value .. "'.")
+				return true
+			end
+			Chance = tonumber(SplittedValue[1])
+			Value = SplittedValue[2]
+			
+			if (Chance == nil) then
+				a_Player:SendMessage(cChatColor.LightPurple .. "Unknown chance: '" .. SplittedValue[1] .. "'.")
+				return true
+			end
+		end
+		
 		local DstBlockType, DstBlockMeta = GetBlockTypeMeta(Value)
 		if not(DstBlockType) then
 			a_Player:SendMessage(cChatColor.LightPurple .. "Unknown dst block type: '" .. Value .. "'.")
 			return true
 		end
-		table.insert(DstBlockTable, {BlockType = DstBlockType, BlockMeta = DstBlockMeta})
+		table.insert(DstBlockTable, {BlockType = DstBlockType, BlockMeta = DstBlockMeta, Chance = Chance})
 	end
 	
 	-- Fill the selection:
