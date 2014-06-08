@@ -801,7 +801,6 @@ end
 
 
 
-<<<<<<< HEAD
 function HandleLeafDecayCommand(a_Split, a_Player)
 	-- //leafdecay
 	
@@ -891,7 +890,13 @@ function HandleLeafDecayCommand(a_Split, a_Player)
 	
 	BA2:Write(World, SrcCuboid.p1, cBlockArea.baTypes + cBlockArea.baMetas)
 	a_Player:SendMessage(cChatColor.LightPurple .. "Removed " .. NumChangedBlocks .. " leaf block(s)")
-=======
+	return true
+end
+
+
+
+
+
 function HandleStackCommand(a_Split, a_Player)
 	-- //stack [Amount] [Direction]
 	
@@ -999,14 +1004,9 @@ function HandleStackCommand(a_Split, a_Player)
 	end
 	
 	a_Player:SendMessage(cChatColor.LightPurple .. BA:GetVolume() * VectorDirection:Length() .. " blocks changed. Undo with //undo")
->>>>>>> 2b1590d6a8831d33b52b01074a389d6e42855dec
 	return true
 end
 
 
 
 
-<<<<<<< HEAD
-=======
-
->>>>>>> 2b1590d6a8831d33b52b01074a389d6e42855dec
