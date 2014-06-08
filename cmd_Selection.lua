@@ -163,6 +163,45 @@ end
 
 
 
+function HandleCountCommand(a_Split, a_Player)
+	-- //count <blocktype>
+	
+	local State = GetPlayerState(a_Player)
+
+	-- Check the selection:
+	if not(State.Selection:IsValid()) then
+		a_Player:SendMessage(cChatColor.Rose .. "No region set")
+		return true
+	end
+	
+	-- Check the params:
+	if (a_Split[2] == nil) then
+		a_Player:SendMessage(cChatColor.Rose .. "Usage: //count <BlockType>")
+		return true
+	end
+	
+	-- Retrieve the blocktypes from the params:
+	local RawDstBlockTable = StringSplit(a_Split[2], ",")
+	local BlockTable = {}
+	for Idx, Value in ipairs(RawDstBlockTable) do
+		local BlockType, BlockMeta, TypeOnly = GetBlockTypeMeta(Value)
+		if not(BlockType) then
+			a_Player:SendMessage(cChatColor.LightPurple .. "Unknown dst block type: '" .. Value .. "'.")
+			return true
+		end
+		BlockTable[BlockType] = {BlockMeta = BlockMeta, TypeOnly = TypeOnly or false}
+	end
+	
+	-- Count the blocks:
+	local NumBlocks = CountBlocks(State, a_Player, a_Player:GetWorld(), BlockTable)
+	a_Player:SendMessage(cChatColor.LightPurple .. "Counted: " .. NumBlocks)
+	return true
+end
+
+
+
+
+
 function HandleExpandCommand(a_Split, a_Player)
 	-- //expand [Amount] [Direction]
 	

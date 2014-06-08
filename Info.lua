@@ -33,6 +33,14 @@ g_PluginInfo =
 			Category = "Tool",
 		},
 		
+		["//count"] =
+		{
+			Permission = "worldedit.selection.count",
+			Handler = HandleCountCommand,
+			HelpString = " Count the number of blocks in the region.",
+			Category = "Selection",
+		},
+		
 		["//copy"] =
 		{
 			Permission = "worldedit.clipboard.copy",
