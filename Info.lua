@@ -33,6 +33,14 @@ g_PluginInfo =
 			Category = "Tool",
 		},
 		
+		["//count"] =
+		{
+			Permission = "worldedit.selection.count",
+			Handler = HandleCountCommand,
+			HelpString = " Count the number of blocks in the region.",
+			Category = "Selection",
+		},
+		
 		["//copy"] =
 		{
 			Permission = "worldedit.clipboard.copy",
@@ -137,6 +145,14 @@ g_PluginInfo =
 			Handler = HandleHSphereCommand,
 			HelpString = " Generates a hollow sphere.",
 			Category = "Generation",
+		},
+		
+		["//leafdecay"] =
+		{
+			Permission = "worldedit.region.leafdecay",
+			Handler = HandleLeafDecayCommand,
+			HelpString = "Removes all the leaves in the selection that would decay",
+			Category = "Selection",
 		},
 		
 		["//mirror"] =

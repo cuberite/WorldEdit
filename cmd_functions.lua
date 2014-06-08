@@ -7,6 +7,39 @@
 
 
 
+
+--- Gets the number of blocks in that region.
+function CountBlocks(a_PlayerState, a_Player, a_World, a_BlockTable)
+	-- Read the area:
+	local Area = cBlockArea()
+	local MinX, MaxX = a_PlayerState.Selection:GetXCoordsSorted()
+	local MinY, MaxY = a_PlayerState.Selection:GetYCoordsSorted()
+	local MinZ, MaxZ = a_PlayerState.Selection:GetZCoordsSorted()
+	Area:Read(a_World, MinX, MaxX, MinY, MaxY, MinZ, MaxZ)
+	
+	-- Replace the blocks:
+	local XSize = MaxX - MinX
+	local YSize = MaxY - MinY
+	local ZSize = MaxZ - MinZ
+	local NumBlocks = 0
+	
+	for X = 0, XSize do
+		for Y = 0, YSize do
+			for Z = 0, ZSize do
+				local BlockType, BlockMeta = Area:GetRelBlockTypeMeta(X, Y, Z)
+				if (a_BlockTable[BlockType] and (a_BlockTable[BlockType].TypeOnly or a_BlockTable[BlockType].BlockMeta == BlockMeta)) then
+					NumBlocks = NumBlocks + 1
+				end
+			end
+		end
+	end
+	
+	return NumBlocks
+end
+
+
+
+
 --- Fills the walls of the selection stored in the specified cPlayerState with the specified block type
 -- Returns the number of blocks changed, or no value if disallowed
 -- The original contents are pushed onto PlayerState's Undo stack
