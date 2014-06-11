@@ -198,12 +198,28 @@ function FillSelection(a_PlayerState, a_Player, a_World, a_DstBlockTable)
 	local SizeX, SizeY, SizeZ = Area:GetSize()
 	SizeX, SizeY, SizeZ = SizeX - 1, SizeY - 1, SizeZ - 1
 
-	local NumDstBlocks = #a_DstBlockTable
+	local MaxChance = 0
+	for Idx, Value in ipairs(a_DstBlockTable) do
+		MaxChance = MaxChance + Value.Chance
+	end
+	
+	local BlockTable = {}
+	local Temp = 0
+	for Idx, Value in ipairs(a_DstBlockTable) do
+		Temp = Temp + Value.Chance / MaxChance
+		table.insert(BlockTable, {BlockType = Value.BlockType, BlockMeta = Value.BlockMeta, Chance = Temp})
+	end
+	
 	for X = 0, SizeX do
 		for Y = 0, SizeY do
 			for Z = 0, SizeZ do
-				local Block = a_DstBlockTable[math.random(1, NumDstBlocks)]
-				Area:SetRelBlockTypeMeta(X, Y, Z, Block.BlockType, Block.BlockMeta)
+				local RandomNumber = math.random()
+				for Idx, Value in ipairs(BlockTable) do
+					if (RandomNumber <= Value.Chance) then
+						Area:SetRelBlockTypeMeta(X, Y, Z, Value.BlockType, Value.BlockMeta)
+						break
+					end
+				end
 			end
 		end
 	end
@@ -239,6 +255,19 @@ function ReplaceSelection(a_PlayerState, a_Player, a_World, a_SrcBlockTable, a_D
 	local MinZ, MaxZ = a_PlayerState.Selection:GetZCoordsSorted()
 	Area:Read(a_World, MinX, MaxX, MinY, MaxY, MinZ, MaxZ)
 	
+	-- Read percents from the DstBlock table
+	local MaxChance = 0
+	for Idx, Value in ipairs(a_DstBlockTable) do
+		MaxChance = MaxChance + Value.Chance
+	end
+	
+	local BlockTable = {}
+	local Temp = 0
+	for Idx, Value in ipairs(a_DstBlockTable) do
+		Temp = Temp + Value.Chance / MaxChance
+		table.insert(BlockTable, {BlockType = Value.BlockType, BlockMeta = Value.BlockMeta, Chance = Temp})
+	end
+	
 	-- Replace the blocks:
 	local XSize = MaxX - MinX
 	local YSize = MaxY - MinY
@@ -249,10 +278,15 @@ function ReplaceSelection(a_PlayerState, a_Player, a_World, a_SrcBlockTable, a_D
 		for Y = 0, YSize do
 			for Z = 0, ZSize do
 				local BlockType, BlockMeta = Area:GetRelBlockTypeMeta(X, Y, Z)
-				if (a_SrcBlockTable[BlockType] and (a_SrcBlockTable[BlockType].TypeOnly or a_SrcBlockTable[BlockType].SrcBlockMeta == BlockMeta)) then
-					local DstBlock = a_DstBlockTable[math.random(1, #a_DstBlockTable)]
-					Area:SetRelBlockTypeMeta(X, Y, Z, DstBlock.DstBlockType, DstBlock.DstBlockMeta)
-					NumBlocks = NumBlocks + 1
+				if (a_SrcBlockTable[BlockType] and (a_SrcBlockTable[BlockType].TypeOnly or a_SrcBlockTable[BlockType].BlockMeta == BlockMeta)) then
+					local RandomNumber = math.random()
+					for Idx, Value in ipairs(BlockTable) do
+						if (RandomNumber <= Value.Chance) then
+							Area:SetRelBlockTypeMeta(X, Y, Z, Value.BlockType, Value.BlockMeta)
+							NumBlocks = NumBlocks + 1
+							break
+						end
+					end
 				end
 			end
 		end
@@ -263,6 +297,44 @@ function ReplaceSelection(a_PlayerState, a_Player, a_World, a_SrcBlockTable, a_D
 	a_World:WakeUpSimulatorsInArea(MinX - 1, MaxX + 1, MinY - 1, MaxY + 1, MinZ - 1, MaxZ + 1)
 	
 	return NumBlocks
+end
+
+
+
+
+RetrieveBlockTypesTemp = {}
+function RetrieveBlockTypes(Input)
+	if (RetrieveBlockTypesTemp[Input] ~= nil) then
+		return RetrieveBlockTypesTemp[Input]
+	end
+	
+	local RawDstBlockTable = StringSplit(Input, ",")
+	local BlockTable = {}
+	for Idx, Value in ipairs(RawDstBlockTable) do
+		-- Block chance
+		local Chance = 100
+		if (string.find(Value, "%", 1, true) ~= nil) then
+			local SplittedValues = StringSplit(Value, "%")
+			if (#SplittedValues ~= 2) then
+				return false
+			end
+			Chance = tonumber(SplittedValues[1])
+			Value = SplittedValues[2]
+			
+			if (Chance == nil) then
+				return false
+			end
+		end
+		
+		local BlockType, BlockMeta = GetBlockTypeMeta(Value)
+		if not(BlockType) then
+			return false
+		end
+		table.insert(BlockTable, {BlockType = BlockType, BlockMeta = BlockMeta, Chance = Chance})
+	end
+	
+	RetrieveBlockTypesTemp[Input] = BlockTable
+	return BlockTable
 end
 
 

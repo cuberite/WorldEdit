@@ -512,15 +512,10 @@ function HandleReplaceCommand(a_Split, a_Player)
 		SrcBlockTable[SrcBlockType] = {SrcBlockMeta = SrcBlockMeta, TypeOnly = TypeOnly or false}
 	end
 	
-	local RawDstBlockTable = StringSplit(a_Split[3], ",")
-	local DstBlockTable = {}
-	for Idx, Value in ipairs(RawDstBlockTable) do
-		local DstBlockType, DstBlockMeta = GetBlockTypeMeta(Value)
-		if not(DstBlockType) then
-			a_Player:SendMessage(cChatColor.LightPurple .. "Unknown dst block type: '" .. Value .. "'.")
-			return true
-		end
-		DstBlockTable[Idx] = {DstBlockType = DstBlockType, DstBlockMeta = DstBlockMeta}
+	local DstBlockTable = RetrieveBlockTypes(a_Split[3])
+	if not(DstBlockTable) then
+		a_Player:SendMessage(cChatColor.LightPurple .. "Unknown dst block type: '" .. a_Split[3] .. "'.")
+		return true
 	end
 	
 	-- Replace the blocks:
@@ -582,15 +577,10 @@ function HandleSetCommand(a_Split, a_Player)
 	end
 	
 	-- Retrieve the blocktypes from the params:
-	local RawDstBlockTable = StringSplit(a_Split[2], ",")
-	local DstBlockTable = {}
-	for Idx, Value in ipairs(RawDstBlockTable) do
-		local DstBlockType, DstBlockMeta = GetBlockTypeMeta(Value)
-		if not(DstBlockType) then
-			a_Player:SendMessage(cChatColor.LightPurple .. "Unknown dst block type: '" .. Value .. "'.")
-			return true
-		end
-		table.insert(DstBlockTable, {BlockType = DstBlockType, BlockMeta = DstBlockMeta})
+	local DstBlockTable = RetrieveBlockTypes(a_Split[2])
+	if not(DstBlockTable) then
+		a_Player:SendMessage(cChatColor.LightPurple .. "Unknown dst block type: '" .. a_Split[2] .. "'.")
+		return true
 	end
 	
 	-- Fill the selection:
@@ -778,15 +768,10 @@ function HandleWallsCommand(a_Split, a_Player)
 	end
 	
 	-- Retrieve the blocktypes from the params:
-	local RawDstBlockTable = StringSplit(a_Split[2], ",")
-	local DstBlockTable = {}
-	for Idx, Value in ipairs(RawDstBlockTable) do
-		local DstBlockType, DstBlockMeta = GetBlockTypeMeta(Value)
-		if not(DstBlockType) then
-			a_Player:SendMessage(cChatColor.LightPurple .. "Unknown dst block type: '" .. Value .. "'.")
-			return true
-		end
-		table.insert(DstBlockTable, {BlockType = DstBlockType, BlockMeta = DstBlockMeta})
+	local DstBlockTable = RetrieveBlockTypes(a_Split[2])
+	if not(DstBlockTable) then
+		a_Player:SendMessage(cChatColor.LightPurple .. "Unknown dst block type: '" .. a_Split[2] .. "'.")
+		return true
 	end
 	
 	-- Fill the selection:
