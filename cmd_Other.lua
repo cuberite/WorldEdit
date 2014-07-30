@@ -1,6 +1,19 @@
 -------------------------------------------------
 --------------------WORLDEDIT--------------------
 -------------------------------------------------
+
+-- Complete CUI handshake
+function HandleWorldEditCuiCommand(a_Split, a_Player)
+	local State = GetPlayerState(a_Player)
+	State.IsWECUIActivated = true
+	State.Selection:NotifySelectionChanged()
+	return true
+end
+
+
+
+
+
 -- Sends the version of the plugin.
 function HandleWorldEditVersionCommand(Split, Player)
 	Player:SendMessage(cChatColor.LightPurple .. "This is version " .. PLUGIN:GetVersion())
