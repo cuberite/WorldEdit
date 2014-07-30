@@ -75,12 +75,6 @@ function HandlePasteCommand(a_Split, a_Player)
 		return true
 	end
 	
-	-- Check with other plugins if the operation is okay:
-	local DstCuboid = State.Clipboard:GetPasteDestCuboid(a_Player)
-	if not(CheckAreaCallbacks(DstCuboid, a_Player, a_Player:GetWorld(), "paste")) then
-		return
-	end
-	
 	-- Check for parameters
 	local UseOffset = true
 	
@@ -90,9 +84,15 @@ function HandlePasteCommand(a_Split, a_Player)
 		end
 	end
 	
+	-- Check with other plugins if the operation is okay:
+	local DstCuboid = State.Clipboard:GetPasteDestCuboid(a_Player, UseOffset)
+	if not(CheckAreaCallbacks(DstCuboid, a_Player, a_Player:GetWorld(), "paste")) then
+		return
+	end
+	
 	-- Paste:
 	State.UndoStack:PushUndoFromCuboid(a_Player:GetWorld(), DstCuboid, "paste")
-	local NumBlocks = State.Clipboard:Paste(a_Player, DstCuboid.p1, UseOffset)
+	local NumBlocks = State.Clipboard:Paste(a_Player, DstCuboid.p1)
 	if (UseOffset) then
 		a_Player:SendMessage(cChatColor.LightPurple .. NumBlocks .. " block(s) pasted relative to you.")
 	else
