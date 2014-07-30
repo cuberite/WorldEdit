@@ -24,7 +24,7 @@ function HandleCopyCommand(a_Split, a_Player)
 	end
 	
 	-- Cut into the clipboard:
-	local NumBlocks = State.Clipboard:Copy(World, SrcCuboid, Vector3i(a_Player:GetPosition()) - SrcCuboid.p1)
+	local NumBlocks = State.Clipboard:Copy(World, SrcCuboid, SrcCuboid.p1 - Vector3i(a_Player:GetPosition()))
 	a_Player:SendMessage(cChatColor.LightPurple .. NumBlocks .. " block(s) copied.")
 	a_Player:SendMessage(cChatColor.LightPurple .. "Clipboard size: " .. State.Clipboard:GetSizeDesc())
 	return true
@@ -55,7 +55,7 @@ function HandleCutCommand(a_Split, a_Player)
 	State.UndoStack:PushUndoFromCuboid(World, SrcCuboid, "cut")
 	
 	-- Cut into the clipboard:
-	local NumBlocks = State.Clipboard:Cut(World, SrcCuboid, Vector3i(a_Player:GetPosition()) - SrcCuboid.p1)
+	local NumBlocks = State.Clipboard:Cut(World, SrcCuboid, SrcCuboid.p1 - Vector3i(a_Player:GetPosition()))
 	a_Player:SendMessage(cChatColor.LightPurple .. NumBlocks .. " block(s) cut.")
 	a_Player:SendMessage(cChatColor.LightPurple .. "Clipboard size: " .. State.Clipboard:GetSizeDesc())
 	return true

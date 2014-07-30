@@ -81,9 +81,9 @@ function cClipboard:GetPasteDestCuboid(a_Player)
 	
 	-- Base the cuboid on the player position:
 	local Offset = self.Area:GetWEOffset()
-	local MinX = math.floor(a_Player:GetPosX()) - Offset.x
-	local MinY = math.floor(a_Player:GetPosY()) - Offset.y
-	local MinZ = math.floor(a_Player:GetPosZ()) - Offset.z
+	local MinX = math.floor(a_Player:GetPosX()) + Offset.x
+	local MinY = math.floor(a_Player:GetPosY()) + Offset.y
+	local MinZ = math.floor(a_Player:GetPosZ()) + Offset.z
 	local XSize, YSize, ZSize = self.Area:GetSize()
 	return cCuboid(MinX, MinY, MinZ, MinX + XSize, MinY + YSize, MinZ + ZSize)
 end
