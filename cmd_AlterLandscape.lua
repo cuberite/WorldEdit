@@ -19,13 +19,6 @@ function RemoveColumnPart(a_Player, a_Cuboid, a_OperationName, a_UndoName)
 	assert(type(a_OperationName) == "string")
 	assert(type(a_UndoName) == "string")
 	
-	-- DEBUG:
-	LOG(string.format("%s cuboid: {%d, %d, %d} - {%d, %d, %d}",
-		a_UndoName,
-		a_Cuboid.p1.x, a_Cuboid.p1.y, a_Cuboid.p1.z,
-		a_Cuboid.p2.x, a_Cuboid.p2.y, a_Cuboid.p2.z
-	))
-	
 	-- Check if other plugins allow the operation:
 	local World = a_Player:GetWorld()
 	if not(CheckAreaCallbacks(a_Cuboid, a_Player, World, a_OperationName)) then
