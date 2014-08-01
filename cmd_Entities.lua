@@ -7,9 +7,7 @@
 
 
 
-------------------------------------------------
----------------------REMOVE---------------------
-------------------------------------------------
+-- Remove all entities of a or multiple types
 function HandleRemoveCommand(a_Split, a_Player)
 	-- /remove <EntityTypes>
 	
@@ -72,38 +70,51 @@ function HandleRemoveCommand(a_Split, a_Player)
 end
 
 
--------------------------------------------------
----------------------BUTCHER---------------------
--------------------------------------------------
-function HandleButcherCommand(Split, Player)
-	if Split[2] == nil then -- if the player did not give a radius then the radius is the normal radius
+
+
+
+-- Kill all or nearby mobs 
+function HandleButcherCommand(a_Split, a_Player)
+	-- /butcher [Radius]
+	
+	local Radius;
+	if (a_Split[2] == nil) then -- if the player did not give a radius then the radius is the normal radius
 		Radius = ButcherRadius
-	elseif tonumber(Split[2]) == nil then -- if the player gave a string as radius then stop
-		Player:SendMessage(cChatColor.Rose .. 'Number expected; string "' .. Split[2] .. '" given')
+	elseif (tonumber(a_Split[2]) == nil) then -- if the player gave a string as radius then stop
+		a_Player:SendMessage(cChatColor.Rose .. 'Number expected; string "' .. Split[2] .. '" given')
 		return true
 	else -- the radius is set to the given radius
-		Radius = tonumber(Split[2])
+		Radius = tonumber(a_Split[2])
 	end
-	local Cuboid = cCuboid()
-	Cuboid.p1 = Vector3i(Player:GetPosX() + Radius, Player:GetPosY() + Radius, Player:GetPosZ() + Radius)
-	Cuboid.p2 = Vector3i(Player:GetPosX() - Radius, Player:GetPosY() - Radius, Player:GetPosZ() - Radius)
-	Cuboid:Sort()
-	local Mobs = 0
-	local EachEntity = function(Entity)
-		if (Entity:IsMob()) then -- if the entity is a mob 
-			if Radius == 0 then -- if the radius is 0 then destroy all the mobs
-				Entity:Destroy() -- destroy the mob
-				Mobs = Mobs + 1
-			else
-				if Cuboid:IsInside(Entity:GetPosX(), Entity:GetPosY(), Entity:GetPosZ()) then -- If the mob is inside the radius then destroy it.
-					Entity:Destroy()
-					Mobs = Mobs + 1
+	
+	-- If this is true then the mob will be destroyed regardless of how far he is from the player.
+	local ShouldRemoveAllMobs = Radius <= 0
+	
+	-- Number of mobs that were destroyed.
+	local NumDestroyedMobs = 0
+	
+	-- Loop through all the entities and destroy all/nearby mobs
+	a_Player:GetWorld():ForEachEntity(
+		function(a_Entity)
+			if (a_Entity:IsMob()) then
+				if (ShouldRemoveAllMobs) then
+					a_Entity:Destroy()
+					NumDestroyedMobs = NumDestroyedMobs + 1
+				else
+					if ((a_Player:GetPosition() - a_Entity:GetPosition()):Length() <= Radius) then -- If the mob is inside the radius then destroy it.
+						a_Entity:Destroy()
+						NumDestroyedMobs = NumDestroyedMobs + 1
+					end
 				end
 			end
 		end
-	end
-	local World = Player:GetWorld()
-	World:ForEachEntity(EachEntity) -- loop through all the entitys
-	Player:SendMessage(cChatColor.LightPurple .. "Killed " .. Mobs .. " mobs.")
+	)
+	
+	-- Send a message to the player.
+	a_Player:SendMessage(cChatColor.LightPurple .. "Killed " .. NumDestroyedMobs .. " mobs.")
 	return true
 end
+
+
+
+
