@@ -278,7 +278,7 @@ function ReplaceSelection(a_PlayerState, a_Player, a_World, a_SrcBlockTable, a_D
 		for Y = 0, YSize do
 			for Z = 0, ZSize do
 				local BlockType, BlockMeta = Area:GetRelBlockTypeMeta(X, Y, Z)
-				if (a_SrcBlockTable[BlockType] and (a_SrcBlockTable[BlockType].TypeOnly or a_SrcBlockTable[BlockType].BlockMeta == BlockMeta)) then
+				if (a_SrcBlockTable[BlockType] and (a_SrcBlockTable[BlockType].TypeOnly or a_SrcBlockTable[BlockType].SrcBlockMeta == BlockMeta)) then
 					local RandomNumber = math.random()
 					for Idx, Value in ipairs(BlockTable) do
 						if (RandomNumber <= Value.Chance) then
