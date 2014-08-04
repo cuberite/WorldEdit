@@ -437,7 +437,7 @@ function CreateCylinderAt(BlockType, BlockMeta, Position, Player, Radius, Height
 	local Cuboid = cCuboid(MinX, MinY, MinZ, MaxX, MaxY, MaxZ)
 	Cuboid:ClampY(0, 255)
 	if not(CheckAreaCallbacks(Cuboid, Player, World, "cyl")) then
-		return true
+		return 0
 	end
 	
 	-- Push the area into an undo stack:

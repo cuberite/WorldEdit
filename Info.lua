@@ -396,6 +396,12 @@ g_PluginInfo =
 					Permission = "worldedit.brush.sphere",
 					Handler = HandleSphereBrush,
 				},
+				cylinder =
+				{
+					HelpString = " Switch to the cylinder brush tool.",
+					Permission = "worldedit.brush.cylinder",
+					Handler = HandleCylinderBrush,
+				},
 			},
 		},
 		
