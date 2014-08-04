@@ -211,6 +211,15 @@ function HandleExpandCommand(a_Split, a_Player)
 		a_Player:SendMessage(cChatColor.Rose .. "No region set")
 		return true
 	end
+
+	if (a_Split[2] == "vert") then
+		State.Selection.Cuboid.p1.y = 0
+		State.Selection.Cuboid.p2.y = 255
+
+		a_Player:SendMessage(cChatColor.LightPurple .. "Expanded the selection from top to bottom.")
+		a_Player:SendMessage(cChatColor.LightPurple .. "Selection is now " .. State.Selection:GetSizeDesc())
+		return true
+	end
 	
 	if (a_Split[2] ~= nil) and (tonumber(a_Split[2]) == nil) then
 		a_Player:SendMessage(cChatColor.Rose .. "Usage: //expand [Blocks] [Direction]")
@@ -222,9 +231,9 @@ function HandleExpandCommand(a_Split, a_Player)
 	local SubMinX, SubMinY, SubMinZ, AddMaxX, AddMaxY, AddMaxZ = 0, 0, 0, 0, 0, 0
 	local LookDirection = Round((a_Player:GetYaw() + 180) / 90)
 	
-	if (Direction == "up") then
+	if ((Direction == "up") or (Direction == "u")) then
 		AddMaxY = NumBlocks
-	elseif (Direction == "down") then
+	elseif ((Direction == "down") or (Direction == "d")) then
 		SubMinY = NumBlocks
 	elseif (Direction == "left") then
 		if (LookDirection == E_DIRECTION_SOUTH) then
@@ -290,9 +299,10 @@ function HandleExpandCommand(a_Split, a_Player)
 		a_Player:SendMessage(cChatColor.Rose .. "Unknown direction \"" .. Direction .. "\".")
 		return true
 	end
-	
+
+	-- Expand the region
 	State.Selection:Expand(SubMinX, SubMinY, SubMinZ, AddMaxX, AddMaxY, AddMaxZ)
-	a_Player:SendMessage(cChatColor.LightPurple .. "Expaned the selection.")
+	a_Player:SendMessage(cChatColor.LightPurple .. "Expanded the selection.")
 	a_Player:SendMessage(cChatColor.LightPurple .. "Selection is now " .. State.Selection:GetSizeDesc())
 	return true
 end
