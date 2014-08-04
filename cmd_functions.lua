@@ -419,6 +419,57 @@ end
 
 
 
+-- Create a cylinder at these coordinates. Returns the affected blocks count.
+function CreateCylinderAt(BlockType, BlockMeta, Position, Player, Radius, Height)
+	local MinX, MaxX = Position.x - Radius, Position.x + Radius
+	local MinY, MaxY = Position.y, Position.y + Height
+	local MinZ, MaxZ = Position.z - Radius, Position.z + Radius
+	local World = Player:GetWorld()
+	
+	if (MinY > 254) then
+		return 0
+	elseif (MaxY > 254) then
+		MaxY = 254
+	end
+	
+	local Cuboid = cCuboid(MinX, MinY, MinZ, MaxX, MaxY, MaxZ)
+	Cuboid:ClampY(0, 255)
+	if not(CheckAreaCallbacks(Cuboid, Player, World, "cyl")) then
+		return true
+	end
+	
+	-- Push the area into an undo stack:
+	local State = GetPlayerState(Player)
+	State.UndoStack:PushUndoFromCuboid(World, Cuboid)
+	
+	local BlockArea = cBlockArea()
+	BlockArea:Read(World, MinX, MaxX, MinY, MaxY, MinZ, MaxZ, cBlockArea.baTypes + cBlockArea.baMetas)
+	local Size = Radius * 2
+	local MiddleVector = Vector3d(Radius, 0, Radius)
+	local NumBlocks = 0
+
+	for Y = 0, Height do
+		for X = 0, Size do
+			for Z = 0, Size do
+				local TempVector = Vector3d(X, 0, Z)
+				local Distance = math.floor((MiddleVector - TempVector):Length())
+
+				if (Distance <= Radius) then
+					BlockArea:SetRelBlockTypeMeta(X, Y, Z, BlockType, BlockMeta)
+					NumBlocks = NumBlocks + 1
+				end
+			end
+		end
+	end
+	
+	BlockArea:Write(World, MinX, MinY, MinZ)
+	return NumBlocks
+end
+
+
+
+
+
 -------------------------------------------
 ------------RIGHTCLICKCOMPASS--------------
 -------------------------------------------
