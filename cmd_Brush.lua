@@ -65,7 +65,7 @@ end
 function HandleCylinderBrush(a_Split, a_Player)
 	-- //brush cyl [-h] <Block> <Radius> <Height>
 	if (#a_Split < 5) then
-		a_Player:SendMessage(cChatColor.Rose .. "Usage: /brush cyl [-h] <Block> <Radius> <Height>")
+		a_Player:SendMessage(cChatColor.Rose .. "Usage: /brush cylinder [-h] <Block> <Radius> <Height>")
 		return true
 	end
 
