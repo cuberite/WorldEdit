@@ -216,9 +216,8 @@ function HandleExpandCommand(a_Split, a_Player)
 		State.Selection.Cuboid.p1.y = 0
 		State.Selection.Cuboid.p2.y = 255
 
-		local DifX, DifY, DifZ = State.Selection:GetCoordDiffs()
-		local Volume = (DifX + 1) * (DifY + 1) * (DifZ + 1)
-		a_Player:SendMessage(cChatColor.LightPurple .. "Region expanded " .. Volume .. " blocks [top-to-bottom].")
+		a_Player:SendMessage(cChatColor.LightPurple .. "Expanded the selection from top to bottom.")
+		a_Player:SendMessage(cChatColor.LightPurple .. "Selection is now " .. State.Selection:GetSizeDesc())
 		return true
 	end
 	
@@ -301,19 +300,10 @@ function HandleExpandCommand(a_Split, a_Player)
 		return true
 	end
 
-	-- Volume before the change
-	local DifX, DifY, DifZ = State.Selection:GetCoordDiffs()
-	local Volume1 = (DifX + 1) * (DifY + 1) * (DifZ + 1)
-
 	-- Expand the region
 	State.Selection:Expand(SubMinX, SubMinY, SubMinZ, AddMaxX, AddMaxY, AddMaxZ)
-
-	-- Volume after the change
-	local DifX, DifY, DifZ = State.Selection:GetCoordDiffs()
-	local Volume2 = (DifX + 1) * (DifY + 1) * (DifZ + 1)
-	local ExpandedBlocks = Volume2 - Volume1
-
-	a_Player:SendMessage(cChatColor.LightPurple .. "Region expanded " .. ExpandedBlocks .. " blocks.")
+	a_Player:SendMessage(cChatColor.LightPurple .. "Expanded the selection.")
+	a_Player:SendMessage(cChatColor.LightPurple .. "Selection is now " .. State.Selection:GetSizeDesc())
 	return true
 end
 
