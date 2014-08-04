@@ -341,6 +341,40 @@ end
 
 
 
+-- Returns the block that the player has targeted.
+function GetTargetBlock(Player)
+	local MaxDistance = 150  -- A max distance of 150 blocks
+
+	local FoundBlock = nil
+	local Callbacks = {
+		OnNextBlock = function(a_BlockX, a_BlockY, a_BlockZ, a_BlockType, a_BlockMeta)
+			if (a_BlockType ~= E_BLOCK_AIR) then
+				FoundBlock = { x = a_BlockX, y = a_BlockY, z = a_BlockZ }
+				return true
+			end
+		end
+	};
+
+	local EyePos = Player:GetEyePosition()
+	local LookVector = Player:GetLookVector()
+	LookVector:Normalize()
+
+	local Start = EyePos + LookVector + LookVector
+	local End = EyePos + LookVector * MaxDistance
+
+	local Success = cLineBlockTracer.Trace(Player:GetWorld(), Callbacks, Start.x, Start.y, Start.z, End.x, End.y, End.z)
+	if (Success) then
+		-- No block found
+		return nil
+	end
+
+	return FoundBlock.x, FoundBlock.y, FoundBlock.z
+end
+
+
+
+
+
 -------------------------------------------
 ------------RIGHTCLICKCOMPASS--------------
 -------------------------------------------
