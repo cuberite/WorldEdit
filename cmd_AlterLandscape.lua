@@ -501,46 +501,9 @@ function HandleSphereCommand(a_Split, a_Player)
 		a_Player:SendMessage(cChatColor.Rose .. "Cannot convert radius \"" .. a_Split[3] .. "\" to a number.")
 		return true
 	end
-	
-	-- Check if other plugins agree with the operation:
-	local World = a_Player:GetWorld()
-	local PosX = math.floor(a_Player:GetPosX())
-	local PosY = math.floor(a_Player:GetPosY())
-	local PosZ = math.floor(a_Player:GetPosZ())
-	local MinX, MaxX, MinY, MaxY, MinZ, MaxZ = PosX - Radius, PosX + Radius, PosY - Radius, PosY + Radius, PosZ - Radius, PosZ + Radius
-	local Cuboid = cCuboid(MinX, MinY, MinZ, MaxX, MaxY, MaxZ)
-	Cuboid:ClampY(0, 255)
-	if not(CheckAreaCallbacks(Cuboid, a_Player, World, "sphere")) then
-		return true
-	end
-	
-	-- Push the area into an undo stack:
-	local State = GetPlayerState(a_Player)
-	State.UndoStack:PushUndoFromCuboid(World, Cuboid)
-	
-	-- Read the current contents of the world:
-	local BlockArea = cBlockArea()
-	BlockArea:Read(World, Cuboid, cBlockArea.baTypes + cBlockArea.baMetas)
 
-	-- Change blocks inside the sphere:
-	local MidPoint = Vector3d(Radius, PosY - MinY, Radius)  -- Midpoint of the sphere, relative to the area
-	local NumBlocks = 0
-	local SqrRadius = Radius * Radius
-	for Y = 0, Cuboid.p2.y - Cuboid.p1.y do  -- The Cuboid has been Y-clamped correctly, take advantage of that
-		for Z = 0, 2 * Radius do
-			for X = 0, 2 * Radius do
-				local Distance = math.floor((MidPoint - Vector3d(X, Y, Z)):SqrLength())
-				if (Distance <= SqrRadius) then
-					BlockArea:SetRelBlockTypeMeta(X, Y, Z, BlockType, BlockMeta)
-					NumBlocks = NumBlocks + 1
-				end
-			end
-		end
-	end
-
-	-- Write the area back to world:
-	BlockArea:Write(World, MinX, MinY, MinZ)
-	a_Player:SendMessage(cChatColor.LightPurple .. NumBlocks .. " block(s) were affected.")
+	local AffectedBlocks = CreateSphereAt(BlockType, BlockMeta, math.floor(a_Player:GetPosX()), math.floor(a_Player:GetPosY()), math.floor(a_Player:GetPosZ()), a_Player, Radius)
+	a_Player:SendMessage(cChatColor.LightPurple .. AffectedBlocks .. " block(s) were affected.")
 	return true
 end
 
