@@ -32,19 +32,17 @@ function HandleSphereBrush(a_Split, a_Player)
 
 	-- Initialize the handler.
 	local function BrushHandler(a_Player, a_BlockX, a_BlockY, a_BlockZ, a_BlockFace)
-		local PosX = a_BlockX
-		local PosY = a_BlockY
-		local PosZ = a_BlockZ
+		local Position = Vector3i(a_BlockX, a_BlockY, a_BlockZ)
 
 		if (a_BlockFace == BLOCK_FACE_NONE) then
-			PosX, PosY, PosZ = GetTargetBlock(a_Player)
+			Position = GetTargetBlock(a_Player)
 
-			if (PosX == nil) then
+			if (Position == nil) then
 				return true
 			end
 		end
 
-		CreateSphereAt(BlockType, BlockMeta, PosX, PosY, PosZ, a_Player, Radius)
+		CreateSphereAt(BlockType, BlockMeta, Position, a_Player, Radius)
 		return true
 	end
 

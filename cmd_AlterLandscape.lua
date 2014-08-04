@@ -502,7 +502,8 @@ function HandleSphereCommand(a_Split, a_Player)
 		return true
 	end
 
-	local AffectedBlocks = CreateSphereAt(BlockType, BlockMeta, math.floor(a_Player:GetPosX()), math.floor(a_Player:GetPosY()), math.floor(a_Player:GetPosZ()), a_Player, Radius)
+	local Position = Vector3i(a_Player:GetPosX(), a_Player:GetPosY(), a_Player:GetPosZ())
+	local AffectedBlocks = CreateSphereAt(BlockType, BlockMeta, Position, a_Player, Radius)
 	a_Player:SendMessage(cChatColor.LightPurple .. AffectedBlocks .. " block(s) were affected.")
 	return true
 end

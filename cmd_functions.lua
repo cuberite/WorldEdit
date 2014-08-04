@@ -341,7 +341,7 @@ end
 
 
 
--- Returns the block that the player has targeted.
+-- Returns the coordinates (in a vector) from a block that the player has targeted. Returns nil if not block found.
 function GetTargetBlock(Player)
 	local MaxDistance = 150  -- A max distance of 150 blocks
 
@@ -368,7 +368,7 @@ function GetTargetBlock(Player)
 		return nil
 	end
 
-	return FoundBlock.x, FoundBlock.y, FoundBlock.z
+	return Vector3i(FoundBlock.x, FoundBlock.y, FoundBlock.z)
 end
 
 
@@ -376,26 +376,28 @@ end
 
 
 -- Create a sphere at these coordinates. Returns the affected blocks count.
-function CreateSphereAt(BlockType, BlockMeta, BlockX, BlockY, BlockZ, Player, Radius)
+function CreateSphereAt(BlockType, BlockMeta, Position, Player, Radius)
 	-- Check if other plugins agree with the operation:
 	local World = Player:GetWorld()
-	local MinX, MaxX, MinY, MaxY, MinZ, MaxZ = BlockX - Radius, BlockX + Radius, BlockY - Radius, BlockY + Radius, BlockZ - Radius, BlockZ + Radius
+	local MinX, MaxX = Position.x - Radius, Position.x + Radius
+	local MinY, MaxY = Position.y - Radius, Position.y + Radius
+	local MinZ, MaxZ = Position.z - Radius, Position.z + Radius
 	local Cuboid = cCuboid(MinX, MinY, MinZ, MaxX, MaxY, MaxZ)
 	Cuboid:ClampY(0, 255)
 	if not(CheckAreaCallbacks(Cuboid, Player, World, "sphere")) then
 		return 0
 	end
-	
+
 	-- Push the area into an undo stack:
 	local State = GetPlayerState(Player)
 	State.UndoStack:PushUndoFromCuboid(World, Cuboid)
-	
+
 	-- Read the current contents of the world:
 	local BlockArea = cBlockArea()
 	BlockArea:Read(World, Cuboid, cBlockArea.baTypes + cBlockArea.baMetas)
 
 	-- Change blocks inside the sphere:
-	local MidPoint = Vector3d(Radius, BlockY - MinY, Radius)  -- Midpoint of the sphere, relative to the area
+	local MidPoint = Vector3d(Radius, Position.y - MinY, Radius)  -- Midpoint of the sphere, relative to the area
 	local NumBlocks = 0
 	local SqrRadius = Radius * Radius
 	for Y = 0, Cuboid.p2.y - Cuboid.p1.y do  -- The Cuboid has been Y-clamped correctly, take advantage of that
