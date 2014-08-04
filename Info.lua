@@ -381,6 +381,24 @@ g_PluginInfo =
 			Category = "Biome",
 		},
 		
+		["/brush"] =
+		{
+			Alias = { "//brush", "/br", "//br", },
+			Permission = "",
+			Handler = nil,
+			HelpString = " Brush commands",
+			Category = "Brush",
+			Subcommands =
+			{
+				sphere =
+				{
+					HelpString = " Switch to the sphere brush tool.",
+					Permission = "worldedit.brush.sphere",
+					Handler = HandleSphereBrush,
+				},
+			},
+		},
+		
 		["/butcher"] =
 		{
 			Permission = "worldedit.butcher",
