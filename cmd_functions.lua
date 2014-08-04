@@ -362,8 +362,8 @@ function GetTargetBlock(Player)
 	local Start = EyePos + LookVector + LookVector
 	local End = EyePos + LookVector * MaxDistance
 
-	local Success = cLineBlockTracer.Trace(Player:GetWorld(), Callbacks, Start.x, Start.y, Start.z, End.x, End.y, End.z)
-	if (Success) then
+	local HitNothing = cLineBlockTracer.Trace(Player:GetWorld(), Callbacks, Start.x, Start.y, Start.z, End.x, End.y, End.z)
+	if (HitNothing) then
 		-- No block found
 		return nil
 	end
@@ -427,12 +427,6 @@ function CreateCylinderAt(BlockType, BlockMeta, Position, Player, Radius, Height
 	local MinY, MaxY = Position.y, Position.y + Height
 	local MinZ, MaxZ = Position.z - Radius, Position.z + Radius
 	local World = Player:GetWorld()
-	
-	if (MinY > 254) then
-		return 0
-	elseif (MaxY > 254) then
-		MaxY = 254
-	end
 	
 	local Cuboid = cCuboid(MinX, MinY, MinZ, MaxX, MaxY, MaxZ)
 	Cuboid:ClampY(0, 255)

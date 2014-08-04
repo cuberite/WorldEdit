@@ -503,8 +503,8 @@ function HandleSphereCommand(a_Split, a_Player)
 	end
 
 	local Position = Vector3i(a_Player:GetPosX(), a_Player:GetPosY(), a_Player:GetPosZ())
-	local AffectedBlocks = CreateSphereAt(BlockType, BlockMeta, Position, a_Player, Radius)
-	a_Player:SendMessage(cChatColor.LightPurple .. AffectedBlocks .. " block(s) were affected.")
+	local NumAffectedBlocks = CreateSphereAt(BlockType, BlockMeta, Position, a_Player, Radius)
+	a_Player:SendMessage(cChatColor.LightPurple .. NumAffectedBlocks .. " block(s) were affected.")
 	return true
 end
 
@@ -723,8 +723,8 @@ function HandleCylCommand(a_Split, a_Player)
 	local Height = tonumber(a_Split[4] or 1) - 1
 	local Position = Vector3i(a_Player:GetPosX(), a_Player:GetPosY(), a_Player:GetPosZ())
 
-	local AffectedBlocks = CreateCylinderAt(BlockType, BlockMeta, Position, a_Player, Radius, Height)
-	a_Player:SendMessage(cChatColor.LightPurple .. AffectedBlocks .. " block(s) have been created.")
+	local NumAffectedBlocks = CreateCylinderAt(BlockType, BlockMeta, Position, a_Player, Radius, Height)
+	a_Player:SendMessage(cChatColor.LightPurple .. NumAffectedBlocks .. " block(s) have been created.")
 	return true
 end
 
