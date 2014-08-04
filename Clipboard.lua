@@ -75,16 +75,18 @@ end
 
 
 --- Returns the cuboid that holds the area which would be affected by a paste operation
-function cClipboard:GetPasteDestCuboid(a_Player)
+function cClipboard:GetPasteDestCuboid(a_Player, a_UseOffset)
 	assert(tolua.type(a_Player) == "cPlayer")
 	assert(self:IsValid())
 	
-	-- Base the cuboid on the player position:
-	local Offset = self.Area:GetWEOffset()
+	local MinX, MinY, MinZ = math.floor(a_Player:GetPosX()), math.floor(a_Player:GetPosY()), math.floor(a_Player:GetPosZ())
+	if (a_UseOffset) then
+		local Offset = self.Area:GetWEOffset()
+		MinX = MinX + Offset.x
+		MinY = MinY + Offset.y
+		MinZ = MinZ + Offset.z
+	end
 	
-	local MinX = math.floor(a_Player:GetPosX()) + Offset.x
-	local MinY = math.floor(a_Player:GetPosY()) + Offset.y
-	local MinZ = math.floor(a_Player:GetPosZ()) + Offset.z
 	local XSize, YSize, ZSize = self.Area:GetSize()
 	return cCuboid(MinX, MinY, MinZ, MinX + XSize, MinY + YSize, MinZ + ZSize)
 end
@@ -137,13 +139,8 @@ end
 --- Pastes the clipboard contents into the world relative to the player
 -- a_DstPoint is the optional min-coord Vector3i where to paste; if not specified, the default is used
 -- Returns the number of blocks pasted
-function cClipboard:Paste(a_Player, a_DstPoint, a_UseOffset)
+function cClipboard:Paste(a_Player, a_DstPoint)
 	local World = a_Player:GetWorld()
-	if (a_UseOffset) then
-		a_DstPoint = (a_DstPoint or Vector3i(a_Player:GetPosition())) - (self.Area:GetWEOffset() * 2) + Vector3i(1, 0, 1)
-	else
-		a_DstPoint = (a_DstPoint or Vector3i(a_Player:GetPosition())) - self.Area:GetWEOffset()
-	end
 	
 	-- Write the area:
 	self.Area:Write(World, a_DstPoint.x, a_DstPoint.y, a_DstPoint.z)

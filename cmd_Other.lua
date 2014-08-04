@@ -1,19 +1,47 @@
--------------------------------------------------
---------------------WORLDEDIT--------------------
--------------------------------------------------
--- Sends the version of the plugin.
-function HandleWorldEditVersionCommand(Split, Player)
-	Player:SendMessage(cChatColor.LightPurple .. "This is version " .. PLUGIN:GetVersion())
+
+-- cmd_Other.lua
+
+-- Has the commands that don't really fit in a category.
+
+
+
+
+
+-- Complete CUI handshake
+function HandleWorldEditCuiCommand(a_Split, a_Player)
+	-- /we cui
+	
+	local State = GetPlayerState(a_Player)
+	State.IsWECUIActivated = true
+	State.Selection:NotifySelectionChanged()
 	return true
 end
 
 
--- Reloads the WorldEdit plugun.
+
+
+
+-- Sends the version of the plugin.
+function HandleWorldEditVersionCommand(a_Split, a_Player)
+	-- /we version
+	
+	a_Player:SendMessage(cChatColor.LightPurple .. "This is version " .. PLUGIN:GetVersion())
+	return true
+end
+
+
+
+
+
+-- Reloads the WorldEdit plugin.
 function HandleWorldEditReloadCommand(Split, Player)
-	if not PlayerHasWEPermission(Player, "worldedit.reload") then
+	-- /we reload
+	
+	if (not Player:HasPermission("worldedit.reload")) then
 		Player:SendMessage(cChatColor.Rose .. "You do not have permission to reload WorldEdit.")
 		return true
 	end
+	
 	Player:SendMessage(cChatColor.LightPurple .. "Worldedit is reloading")
 	cRoot:Get():GetPluginManager():DisablePlugin(PLUGIN:GetName()) -- disable the plugin
 	DisablePlugin = true -- make sure the plugin loads again ;)
@@ -21,16 +49,23 @@ function HandleWorldEditReloadCommand(Split, Player)
 end
 
 
+
+
+
 -- Sends all the available commands to the player.
 function HandleWorldEditHelpCommand(Split, Player)
+	-- /we help
+	
 	if not PlayerHasWEPermission(Player, "worldedit.help") then
 		Player:SendMessage(cChatColor.Rose .. "You do not have permission for this command.")
 		return true
 	end
+	
 	local Commands = ""
 	for Command, Information in pairs(g_PluginInfo.Commands) do
 		Commands = Commands .. cChatColor.LightPurple .. Command .. ", "
 	end
+	
 	Player:SendMessage(cChatColor.LightPurple .. "Available commands:")
 	Player:SendMessage(string.sub(Commands, 1, string.len(Commands) - 2)) -- Remove the last ", "
 	return true
@@ -40,9 +75,11 @@ end
 
 
 
+-- Gives the player the wand item.
 function HandleWandCommand(Split, Player)
 	-- //wand
-	Item = cItem(Wand, 1) -- create the cItem object
+	
+	Item = cItem(Wand) -- create the cItem object
 	if (Player:GetInventory():AddItem(Item)) then -- check if the player got the item
 		Player:SendMessage(cChatColor.Green .. "You have received the wand.")
 	else
@@ -55,6 +92,7 @@ end
 
 
 
+-- Toggles if the wand is active or not.
 function HandleToggleEditWandCommand(a_Split, a_Player)
 	-- //togglewand
 	
@@ -73,6 +111,7 @@ end
 
 
 
+-- Loads and executes a craftscript
 function HandleCraftScriptCommand(a_Split, a_Player)
 	-- /cs <scriptname>
 	
@@ -106,6 +145,7 @@ end
 
 
 
+-- Executes the last used craftscript.
 function HandleLastCraftScriptCommand(a_Split, a_Player)
 	-- /.s
 	
@@ -123,3 +163,7 @@ function HandleLastCraftScriptCommand(a_Split, a_Player)
 	a_Player:SendMessage(cChatColor.Rose .. "Script Executed")
 	return true
 end
+
+
+
+

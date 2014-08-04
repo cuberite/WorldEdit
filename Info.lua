@@ -521,6 +521,12 @@ g_PluginInfo =
 			Category = "Special",
 			Subcommands =
 			{
+				cui =
+				{
+					HelpString = "Complete CUI handshake",
+					Permission = "",
+					Handler = HandleWorldEditCuiCommand,
+				},
 				version =
 				{
 					HelpString = "Sends the plugin version to the player.",
