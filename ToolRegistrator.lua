@@ -31,10 +31,6 @@ end
 
 -- Binds an callback to a given item. Returns true on succes and returns false + errormessage when it fails.
 function cToolRegistrator:BindTool(a_ItemType, a_UsageCallback)
-	if (self.Tools[a_ItemType] ~= nil) then
-		return false, "The item is already bound."
-	end
-	
 	if (not ItemCategory.IsTool(a_ItemType)) then
 		return false, "Can't bind tool to \"" .. ItemToString(cItem(a_ItemType)) .. "\": Only tools can be used."
 	end
