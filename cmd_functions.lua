@@ -341,6 +341,131 @@ end
 
 
 
+-- Returns the coordinates (in a vector) from a block that the player has targeted. Returns nil if not block found.
+function GetTargetBlock(a_Player)
+	local MaxDistance = 150  -- A max distance of 150 blocks
+
+	local FoundBlock = nil
+	local Callbacks = {
+		OnNextBlock = function(a_BlockX, a_BlockY, a_BlockZ, a_BlockType, a_BlockMeta)
+			if (a_BlockType ~= E_BLOCK_AIR) then
+				FoundBlock = { x = a_BlockX, y = a_BlockY, z = a_BlockZ }
+				return true
+			end
+		end
+	};
+
+	local EyePos = a_Player:GetEyePosition()
+	local LookVector = a_Player:GetLookVector()
+	LookVector:Normalize()
+
+	local Start = EyePos + LookVector + LookVector
+	local End = EyePos + LookVector * MaxDistance
+
+	local HitNothing = cLineBlockTracer.Trace(a_Player:GetWorld(), Callbacks, Start.x, Start.y, Start.z, End.x, End.y, End.z)
+	if (HitNothing) then
+		-- No block found
+		return nil
+	end
+
+	return Vector3i(FoundBlock.x, FoundBlock.y, FoundBlock.z)
+end
+
+
+
+
+
+-- Create a sphere at these coordinates. Returns the affected blocks count.
+function CreateSphereAt(a_BlockType, a_BlockMeta, a_Position, a_Player, a_Radius)
+	-- Check if other plugins agree with the operation:
+	local World = a_Player:GetWorld()
+	local MinX, MaxX = a_Position.x - a_Radius, a_Position.x + a_Radius
+	local MinY, MaxY = a_Position.y - a_Radius, a_Position.y + a_Radius
+	local MinZ, MaxZ = a_Position.z - a_Radius, a_Position.z + a_Radius
+	local Cuboid = cCuboid(MinX, MinY, MinZ, MaxX, MaxY, MaxZ)
+	Cuboid:ClampY(0, 255)
+	if not(CheckAreaCallbacks(Cuboid, a_Player, World, "sphere")) then
+		return 0
+	end
+
+	-- Push the area into an undo stack:
+	local State = GetPlayerState(a_Player)
+	State.UndoStack:PushUndoFromCuboid(World, Cuboid)
+
+	-- Read the current contents of the world:
+	local BlockArea = cBlockArea()
+	BlockArea:Read(World, Cuboid, cBlockArea.baTypes + cBlockArea.baMetas)
+
+	-- Change blocks inside the sphere:
+	local MidPoint = Vector3d(a_Radius, a_Position.y - MinY, a_Radius)  -- Midpoint of the sphere, relative to the area
+	local NumBlocks = 0
+	local SqrRadius = a_Radius * a_Radius
+	for Y = 0, Cuboid.p2.y - Cuboid.p1.y do  -- The Cuboid has been Y-clamped correctly, take advantage of that
+		for Z = 0, 2 * a_Radius do
+			for X = 0, 2 * a_Radius do
+				local Distance = math.floor((MidPoint - Vector3d(X, Y, Z)):SqrLength())
+				if (Distance <= SqrRadius) then
+					BlockArea:SetRelBlockTypeMeta(X, Y, Z, a_BlockType, a_BlockMeta)
+					NumBlocks = NumBlocks + 1
+				end
+			end
+		end
+	end
+
+	-- Write the area back to world:
+	BlockArea:Write(World, MinX, MinY, MinZ)
+	return NumBlocks
+end
+
+
+
+
+
+-- Create a cylinder at these coordinates. Returns the affected blocks count.
+function CreateCylinderAt(a_BlockType, a_BlockMeta, a_Position, a_Player, a_Radius, a_Height)
+	local MinX, MaxX = a_Position.x - a_Radius, a_Position.x + a_Radius
+	local MinY, MaxY = a_Position.y, a_Position.y + a_Height
+	local MinZ, MaxZ = a_Position.z - a_Radius, a_Position.z + a_Radius
+	local World = a_Player:GetWorld()
+	
+	local Cuboid = cCuboid(MinX, MinY, MinZ, MaxX, MaxY, MaxZ)
+	Cuboid:ClampY(0, 255)
+	if not(CheckAreaCallbacks(Cuboid, a_Player, World, "cyl")) then
+		return 0
+	end
+	
+	-- Push the area into an undo stack:
+	local State = GetPlayerState(a_Player)
+	State.UndoStack:PushUndoFromCuboid(World, Cuboid)
+	
+	local BlockArea = cBlockArea()
+	BlockArea:Read(World, MinX, MaxX, MinY, MaxY, MinZ, MaxZ, cBlockArea.baTypes + cBlockArea.baMetas)
+	local Size = a_Radius * 2
+	local MiddleVector = Vector3d(a_Radius, 0, a_Radius)
+	local NumBlocks = 0
+
+	for Y = 0, a_Height do
+		for X = 0, Size do
+			for Z = 0, Size do
+				local TempVector = Vector3d(X, 0, Z)
+				local Distance = math.floor((MiddleVector - TempVector):Length())
+
+				if (Distance <= a_Radius) then
+					BlockArea:SetRelBlockTypeMeta(X, Y, Z, a_BlockType, a_BlockMeta)
+					NumBlocks = NumBlocks + 1
+				end
+			end
+		end
+	end
+	
+	BlockArea:Write(World, MinX, MinY, MinZ)
+	return NumBlocks
+end
+
+
+
+
+
 -------------------------------------------
 ------------RIGHTCLICKCOMPASS--------------
 -------------------------------------------
