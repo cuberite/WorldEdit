@@ -21,8 +21,49 @@ function cToolRegistrator:new(a_Obj)
 	
 	-- Initialize the object members:
 	a_Obj.Tools = {}
+	a_Obj.Masks = {}
 	
 	return a_Obj
+end
+
+
+
+
+
+-- Get the blocks from the mask on this item. If the item hasn't a mask, it returns nil.
+function cToolRegistrator:GetMask(a_ItemType)
+	if (self.Masks[a_ItemType] == nil) then
+		return nil
+	end
+
+	return self.Masks[a_ItemType]
+end
+
+
+
+
+
+-- Binds a mask to a given item. Returns true on success and returns false + errormessage when it fails.
+function cToolRegistrator:BindMask(a_ItemType, a_Blocks)
+	if (not ItemCategory.IsTool(a_ItemType)) then
+		return false, "Can't bind tool to \"" .. ItemToString(cItem(a_ItemType)) .. "\": Only tools can be used."
+	end
+
+	self.Masks[a_ItemType] = a_Blocks
+	return true
+end
+
+
+
+
+
+function cToolRegistrator:UnbindMask(a_ItemType)
+	if (self.Masks[a_ItemType] == nil) then
+		return false, "The item didn't have any masks bound on it."
+	end
+
+	self.Masks[a_ItemType] = nil
+	return true
 end
 
 

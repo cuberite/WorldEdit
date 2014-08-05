@@ -387,7 +387,7 @@ end
 
 
 -- Create a sphere at these coordinates. Returns the affected blocks count.
-function CreateSphereAt(a_BlockTable, a_Position, a_Player, a_Radius, a_Hollow)
+function CreateSphereAt(a_BlockTable, a_Position, a_Player, a_Radius, a_Hollow, a_IsBrush)
 	-- Check if other plugins agree with the operation:
 	local World = a_Player:GetWorld()
 	local MinX, MaxX = a_Position.x - a_Radius, a_Position.x + a_Radius
@@ -436,6 +436,22 @@ function CreateSphereAt(a_BlockTable, a_Position, a_Player, a_Radius, a_Hollow)
 				end
 
 				if (ChangeBlock) then
+					if (a_IsBrush) then
+						local State = GetPlayerState(a_Player)
+						local BlockTable = State.ToolRegistrator:GetMask(a_Player:GetEquippedItem().m_ItemType)
+						if (BlockTable ~= nil) then
+							local WorldBlock, WorldBlockMeta = BlockArea:GetRelBlockTypeMeta(X, Y, Z)
+							for Idx, Block in ipairs(BlockTable) do
+								if ((Block.BlockType ~= WorldBlock) or (Block.BlockMeta ~= WorldBlockMeta)) then
+									ChangeBlock = false
+									break
+								end
+							end
+						end
+					end
+				end
+
+				if (ChangeBlock) then
 					local RandomNumber = math.random()
 					for Idx, Value in ipairs(BlockTable) do
 						if (RandomNumber <= Value.Chance) then
@@ -459,7 +475,7 @@ end
 
 
 -- Create a cylinder at these coordinates. Returns the affected blocks count.
-function CreateCylinderAt(a_BlockTable, a_Position, a_Player, a_Radius, a_Height, a_Hollow)
+function CreateCylinderAt(a_BlockTable, a_Position, a_Player, a_Radius, a_Height, a_Hollow, a_IsBrush)
 	local MinX, MaxX = a_Position.x - a_Radius, a_Position.x + a_Radius
 	local MinY, MaxY = a_Position.y, a_Position.y + a_Height
 	local MinZ, MaxZ = a_Position.z - a_Radius, a_Position.z + a_Radius
@@ -498,14 +514,31 @@ function CreateCylinderAt(a_BlockTable, a_Position, a_Player, a_Radius, a_Height
 					((Distance <= a_Radius) and (not a_Hollow)) or
 					((Distance == a_Radius) and a_Hollow)
 				) then
-					local RandomNumber = math.random()
-					for Idx, Value in ipairs(BlockTable) do
-						if (RandomNumber <= Value.Chance) then
-							BlockArea:SetRelBlockTypeMeta(X, Y, Z, Value.BlockType, Value.BlockMeta)
-							break
+					local ChangeBlock = true
+					if (a_IsBrush) then
+						local State = GetPlayerState(a_Player)
+						local BlockTable = State.ToolRegistrator:GetMask(a_Player:GetEquippedItem().m_ItemType)
+						if (BlockTable ~= nil) then
+							local WorldBlock, WorldBlockMeta = BlockArea:GetRelBlockTypeMeta(X, Y, Z)
+							for Idx, Block in ipairs(BlockTable) do
+								if ((Block.BlockType ~= WorldBlock) or (Block.BlockMeta ~= WorldBlockMeta)) then
+									ChangeBlock = false
+									break
+								end
+							end
 						end
 					end
-					NumBlocks = NumBlocks + 1
+
+					if (ChangeBlock) then
+						local RandomNumber = math.random()
+						for Idx, Value in ipairs(BlockTable) do
+							if (RandomNumber <= Value.Chance) then
+								BlockArea:SetRelBlockTypeMeta(X, Y, Z, Value.BlockType, Value.BlockMeta)
+								break
+							end
+						end
+						NumBlocks = NumBlocks + 1
+					end
 				end
 			end
 		end

@@ -438,6 +438,14 @@ g_PluginInfo =
 			Category = "Navigation",
 		},
 		
+		["/mask"] =
+		{
+			Permission = "worldedit.brush.options.mask",
+			Handler = HandleMaskCommand,
+			HelpString = " Set the brush mask",
+			Category = "Brush",
+		},
+		
 		["/none"] =
 		{
 			Handler = HandleNoneCommand,
