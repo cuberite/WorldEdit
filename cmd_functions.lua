@@ -376,7 +376,7 @@ end
 
 
 -- Create a sphere at these coordinates. Returns the affected blocks count.
-function CreateSphereAt(a_BlockType, a_BlockMeta, a_Position, a_Player, a_Radius)
+function CreateSphereAt(a_BlockType, a_BlockMeta, a_Position, a_Player, a_Radius, a_Hollow)
 	-- Check if other plugins agree with the operation:
 	local World = a_Player:GetWorld()
 	local MinX, MaxX = a_Position.x - a_Radius, a_Position.x + a_Radius
@@ -384,7 +384,13 @@ function CreateSphereAt(a_BlockType, a_BlockMeta, a_Position, a_Player, a_Radius
 	local MinZ, MaxZ = a_Position.z - a_Radius, a_Position.z + a_Radius
 	local Cuboid = cCuboid(MinX, MinY, MinZ, MaxX, MaxY, MaxZ)
 	Cuboid:ClampY(0, 255)
-	if not(CheckAreaCallbacks(Cuboid, a_Player, World, "sphere")) then
+
+	local ActionName = "sphere"
+	if (a_Hollow) then
+		ActionName = "hsphere"
+	end
+
+	if not(CheckAreaCallbacks(Cuboid, a_Player, World, ActionName)) then
 		return 0
 	end
 
@@ -403,10 +409,18 @@ function CreateSphereAt(a_BlockType, a_BlockMeta, a_Position, a_Player, a_Radius
 	for Y = 0, Cuboid.p2.y - Cuboid.p1.y do  -- The Cuboid has been Y-clamped correctly, take advantage of that
 		for Z = 0, 2 * a_Radius do
 			for X = 0, 2 * a_Radius do
-				local Distance = math.floor((MidPoint - Vector3d(X, Y, Z)):SqrLength())
-				if (Distance <= SqrRadius) then
-					BlockArea:SetRelBlockTypeMeta(X, Y, Z, a_BlockType, a_BlockMeta)
-					NumBlocks = NumBlocks + 1
+				if (a_Hollow) then
+					local Distance = math.floor((MidPoint - Vector3d(X, Y, Z)):Length())
+					if (Distance == a_Radius) then
+						BlockArea:SetRelBlockTypeMeta(X, Y, Z, a_BlockType, a_BlockMeta)
+						NumBlocks = NumBlocks + 1
+					end
+				else
+					local Distance = math.floor((MidPoint - Vector3d(X, Y, Z)):SqrLength())
+					if (Distance <= SqrRadius) then
+						BlockArea:SetRelBlockTypeMeta(X, Y, Z, a_BlockType, a_BlockMeta)
+						NumBlocks = NumBlocks + 1
+					end
 				end
 			end
 		end
@@ -422,7 +436,7 @@ end
 
 
 -- Create a cylinder at these coordinates. Returns the affected blocks count.
-function CreateCylinderAt(a_BlockType, a_BlockMeta, a_Position, a_Player, a_Radius, a_Height)
+function CreateCylinderAt(a_BlockType, a_BlockMeta, a_Position, a_Player, a_Radius, a_Height, a_Hollow)
 	local MinX, MaxX = a_Position.x - a_Radius, a_Position.x + a_Radius
 	local MinY, MaxY = a_Position.y, a_Position.y + a_Height
 	local MinZ, MaxZ = a_Position.z - a_Radius, a_Position.z + a_Radius
@@ -430,7 +444,13 @@ function CreateCylinderAt(a_BlockType, a_BlockMeta, a_Position, a_Player, a_Radi
 	
 	local Cuboid = cCuboid(MinX, MinY, MinZ, MaxX, MaxY, MaxZ)
 	Cuboid:ClampY(0, 255)
-	if not(CheckAreaCallbacks(Cuboid, a_Player, World, "cyl")) then
+
+	local ActionName = "cyl"
+	if (a_Hollow) then
+		ActionName = "hcyl"
+	end
+
+	if not(CheckAreaCallbacks(Cuboid, a_Player, World, ActionName)) then
 		return 0
 	end
 	
@@ -450,7 +470,10 @@ function CreateCylinderAt(a_BlockType, a_BlockMeta, a_Position, a_Player, a_Radi
 				local TempVector = Vector3d(X, 0, Z)
 				local Distance = math.floor((MiddleVector - TempVector):Length())
 
-				if (Distance <= a_Radius) then
+				if (
+					((Distance <= a_Radius) and (not a_Hollow)) or
+					((Distance == a_Radius) and a_Hollow)
+				) then
 					BlockArea:SetRelBlockTypeMeta(X, Y, Z, a_BlockType, a_BlockMeta)
 					NumBlocks = NumBlocks + 1
 				end

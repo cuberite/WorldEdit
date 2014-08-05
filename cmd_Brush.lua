@@ -14,7 +14,11 @@ function HandleSphereBrush(a_Split, a_Player)
 		return true
 	end
 
-	-- TODO: Implement -h
+	local Hollow = false
+	if (a_Split[3] == "-h") then
+		Hollow = true
+		table.remove(a_Split, 3)
+	end
 
 	-- Convert the block param:
 	local BlockType, BlockMeta = GetBlockTypeMeta(a_Split[3])
@@ -42,7 +46,7 @@ function HandleSphereBrush(a_Split, a_Player)
 			end
 		end
 
-		CreateSphereAt(BlockType, BlockMeta, Position, a_Player, Radius)
+		CreateSphereAt(BlockType, BlockMeta, Position, a_Player, Radius, Hollow)
 		return true
 	end
 
@@ -69,7 +73,11 @@ function HandleCylinderBrush(a_Split, a_Player)
 		return true
 	end
 
-	-- TODO: Implement -h
+	local Hollow = false
+	if (a_Split[3] == "-h") then
+		Hollow = true
+		table.remove(a_Split, 3)
+	end
 
 	-- Convert the block param:
 	local BlockType, BlockMeta = GetBlockTypeMeta(a_Split[3])
@@ -104,7 +112,7 @@ function HandleCylinderBrush(a_Split, a_Player)
 			end
 		end
 
-		CreateCylinderAt(BlockType, BlockMeta, Position, a_Player, Radius, Height)
+		CreateCylinderAt(BlockType, BlockMeta, Position, a_Player, Radius, Height, Hollow)
 		return true
 	end
 

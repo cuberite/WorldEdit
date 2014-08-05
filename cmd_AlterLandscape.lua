@@ -503,7 +503,7 @@ function HandleSphereCommand(a_Split, a_Player)
 	end
 
 	local Position = Vector3i(a_Player:GetPosX(), a_Player:GetPosY(), a_Player:GetPosZ())
-	local NumAffectedBlocks = CreateSphereAt(BlockType, BlockMeta, Position, a_Player, Radius)
+	local NumAffectedBlocks = CreateSphereAt(BlockType, BlockMeta, Position, a_Player, Radius, false)
 	a_Player:SendMessage(cChatColor.LightPurple .. NumAffectedBlocks .. " block(s) were affected.")
 	return true
 end
@@ -535,44 +535,9 @@ function HandleHSphereCommand(a_Split, a_Player)
 		return true
 	end
 	
-	-- Check if other plugins agree with the operation:
-	local World = a_Player:GetWorld()
-	local PosX = math.floor(a_Player:GetPosX())
-	local PosY = math.floor(a_Player:GetPosY())
-	local PosZ = math.floor(a_Player:GetPosZ())
-	local MinX, MaxX, MinY, MaxY, MinZ, MaxZ = PosX - Radius, PosX + Radius, PosY - Radius, PosY + Radius, PosZ - Radius, PosZ + Radius
-	local Cuboid = cCuboid(MinX, MinY, MinZ, MaxX, MaxY, MaxZ)
-	Cuboid:ClampY(0, 255)
-	if not(CheckAreaCallbacks(Cuboid, a_Player, World, "sphere")) then
-		return true
-	end
-	
-	-- Push the area into an undo stack:
-	local State = GetPlayerState(a_Player)
-	State.UndoStack:PushUndoFromCuboid(World, Cuboid)
-	
-	-- Read the current contents of the world:
-	local BlockArea = cBlockArea()
-	BlockArea:Read(World, Cuboid, cBlockArea.baTypes + cBlockArea.baMetas)
-
-	-- Change blocks inside the sphere:
-	local MidPoint = Vector3d(Radius, PosY - MinY, Radius)  -- Midpoint of the sphere, relative to the area
-	local NumBlocks = 0
-	for Y = 0, Cuboid.p2.y - Cuboid.p1.y do  -- The Cuboid has been Y-clamped correctly, take advantage of that
-		for Z = 0, 2 * Radius do
-			for X = 0, 2 * Radius do
-				local Distance = math.floor((MidPoint - Vector3d(X, Y, Z)):Length())
-				if (Distance == Radius) then
-					BlockArea:SetRelBlockTypeMeta(X, Y, Z, BlockType, BlockMeta)
-					NumBlocks = NumBlocks + 1
-				end
-			end
-		end
-	end
-
-	-- Write the area back to world:
-	BlockArea:Write(World, MinX, MinY, MinZ)
-	a_Player:SendMessage(cChatColor.LightPurple .. NumBlocks .. " block(s) were affected.")
+	local Position = Vector3i(a_Player:GetPosX(), a_Player:GetPosY(), a_Player:GetPosZ())
+	local NumAffectedBlocks = CreateSphereAt(BlockType, BlockMeta, Position, a_Player, Radius, true)
+	a_Player:SendMessage(cChatColor.LightPurple .. NumAffectedBlocks .. " block(s) were affected.")
 	return true
 end
 
@@ -723,7 +688,7 @@ function HandleCylCommand(a_Split, a_Player)
 	local Height = tonumber(a_Split[4] or 1) - 1
 	local Position = Vector3i(a_Player:GetPosX(), a_Player:GetPosY(), a_Player:GetPosZ())
 
-	local NumAffectedBlocks = CreateCylinderAt(BlockType, BlockMeta, Position, a_Player, Radius, Height)
+	local NumAffectedBlocks = CreateCylinderAt(BlockType, BlockMeta, Position, a_Player, Radius, Height, false)
 	a_Player:SendMessage(cChatColor.LightPurple .. NumAffectedBlocks .. " block(s) have been created.")
 	return true
 end
@@ -734,74 +699,30 @@ end
 
 function HandleHCylCommand(a_Split, a_Player)
 	-- //hcyl <BlockType> <Radius> [Height]
-	
+
 	if ((a_Split[2] == nil) or (a_Split[3] == nil)) then
 		a_Player:SendMessage(cChatColor.Rose .. "Too few arguments.")
 		a_Player:SendMessage(cChatColor.Rose .. "//hcyl <block> <radius> [height]")
 		return true
 	end
-	
+
 	local BlockType, BlockMeta = GetBlockTypeMeta(a_Split[2])
 	if (not BlockType) then
 		a_Player:SendMessage(cChatColor.Rose .. "Block name '" .. a_Split[2] .. "' was not recognized.")
 		return true
 	end
-	
+
 	local Radius = tonumber(a_Split[3])
 	if (not Radius) then
 		a_Player:SendMessage(cChatColor.Rose .. "Number expected; string \"" .. a_Split[3] .. "\" given.")
 		return true
 	end
 	
-	Radius = Round(Radius)
-	
 	local Height = tonumber(a_Split[4] or 1) - 1
-	
-	local Pos = a_Player:GetPosition()
-	local MinX, MaxX = Pos.x - Radius, Pos.x + Radius
-	local MinY, MaxY = Pos.y, Pos.y + Height
-	local MinZ, MaxZ = Pos.z - Radius, Pos.z + Radius
-	
-	local World = a_Player:GetWorld()
-	
-	if (MinY > 254) then
-		a_Player:SendMessage(cChatColor.LightPurple .. "0 block(s) have been created.")
-		return true
-	elseif (MaxY > 254) then
-		MaxY = 254
-	end
-	
-	local Cuboid = cCuboid(MinX, MinY, MinZ, MaxX, MaxY, MaxZ)
-	Cuboid:ClampY(0, 255)
-	if not(CheckAreaCallbacks(Cuboid, a_Player, World, "hcyl")) then
-		return true
-	end
-	
-	-- Push the area into an undo stack:
-	local State = GetPlayerState(a_Player)
-	State.UndoStack:PushUndoFromCuboid(World, Cuboid)
-	
-	local BlockArea = cBlockArea()
-	BlockArea:Read(World, MinX, MaxX, MinY, MaxY, MinZ, MaxZ, cBlockArea.baTypes + cBlockArea.baMetas)
-	local Size = Radius * 2
-	local MiddleVector = Vector3d(Radius, 0, Radius)
-	local AffectedBlocks = 0
-	for Y = 0, Height do
-		for X = 0, Size do
-			for Z = 0, Size do
-				local TempVector = Vector3d(X, 0, Z)
-				local Distance = math.floor((MiddleVector - TempVector):Length())
+	local Position = Vector3i(a_Player:GetPosX(), a_Player:GetPosY(), a_Player:GetPosZ())
 
-				if (Distance == Radius) then
-					BlockArea:SetRelBlockTypeMeta(X, Y, Z, BlockType, BlockMeta)
-					AffectedBlocks = AffectedBlocks + 1
-				end
-			end
-		end
-	end
-	
-	BlockArea:Write(World, MinX, MinY, MinZ)
-	a_Player:SendMessage(cChatColor.LightPurple .. AffectedBlocks .. " block(s) have been created.")
+	local NumAffectedBlocks = CreateCylinderAt(BlockType, BlockMeta, Position, a_Player, Radius, Height, true)
+	a_Player:SendMessage(cChatColor.LightPurple .. NumAffectedBlocks .. " block(s) have been created.")
 	return true
 end
 
