@@ -20,10 +20,10 @@ function HandleSphereBrush(a_Split, a_Player)
 		table.remove(a_Split, 3)
 	end
 
-	-- Convert the block param:
-	local BlockType, BlockMeta = GetBlockTypeMeta(a_Split[3])
-	if not(BlockType) then
-		a_Player:SendMessage(cChatColor.Rose .. "Unknown block type: \"" .. a_Split[3] .. "\"")
+	-- Retrieve the blocktypes from the params:
+	local BlockTable = RetrieveBlockTypes(a_Split[3])
+	if not(BlockTable) then
+		a_Player:SendMessage(cChatColor.LightPurple .. "Unknown block type: '" .. a_Split[3] .. "'.")
 		return true
 	end
 
@@ -46,7 +46,7 @@ function HandleSphereBrush(a_Split, a_Player)
 			end
 		end
 
-		CreateSphereAt(BlockType, BlockMeta, Position, a_Player, Radius, Hollow)
+		CreateSphereAt(BlockTable, Position, a_Player, Radius, Hollow)
 		return true
 	end
 
@@ -79,10 +79,10 @@ function HandleCylinderBrush(a_Split, a_Player)
 		table.remove(a_Split, 3)
 	end
 
-	-- Convert the block param:
-	local BlockType, BlockMeta = GetBlockTypeMeta(a_Split[3])
-	if not(BlockType) then
-		a_Player:SendMessage(cChatColor.Rose .. "Unknown block type: \"" .. a_Split[3] .. "\"")
+	-- Retrieve the blocktypes from the params:
+	local BlockTable = RetrieveBlockTypes(a_Split[3])
+	if not(BlockTable) then
+		a_Player:SendMessage(cChatColor.LightPurple .. "Unknown block type: '" .. a_Split[3] .. "'.")
 		return true
 	end
 
@@ -112,7 +112,7 @@ function HandleCylinderBrush(a_Split, a_Player)
 			end
 		end
 
-		CreateCylinderAt(BlockType, BlockMeta, Position, a_Player, Radius, Height, Hollow)
+		CreateCylinderAt(BlockTable, Position, a_Player, Radius, Height, Hollow)
 		return true
 	end
 
