@@ -529,11 +529,11 @@ function RightClickCompass(Player)
 	
 	local Callbacks = {
 		OnNextBlock = function(X, Y, Z, BlockType, BlockMeta)
-			if not cBlockInfo:IsTransparent(BlockType) then
+			if (not cBlockInfo:IsTransparent(BlockType)) then
 				WentThroughBlock = true
 			else
-				if WentThroughBlock then
-					if BlockType == E_BLOCK_AIR and cBlockInfo:IsSolid(World:GetBlock(X, Y - 1, Z)) then
+				if (WentThroughBlock) then
+					if ((BlockType == E_BLOCK_AIR) and (World:GetBlock(X, Y + 1, Z) == E_BLOCK_AIR) and (cBlockInfo:IsSolid(World:GetBlock(X, Y - 1, Z)) or Player:IsFlying())) then
 						Player:TeleportToCoords(X + 0.5, Y, Z + 0.5)
 						Teleported = true
 						return true
