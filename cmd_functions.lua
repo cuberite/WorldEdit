@@ -437,14 +437,12 @@ function CreateSphereAt(a_BlockTable, a_Position, a_Player, a_Radius, a_Hollow, 
 
 				if (ChangeBlock and a_IsBrush) then
 					local State = GetPlayerState(a_Player)
-					local BlockTable = State.ToolRegistrator:GetMask(a_Player:GetEquippedItem().m_ItemType)
-					if (BlockTable ~= nil) then
+					local MaskTable = State.ToolRegistrator:GetMask(a_Player:GetEquippedItem().m_ItemType)
+					if (MaskTable ~= nil) then
 						local WorldBlock, WorldBlockMeta = BlockArea:GetRelBlockTypeMeta(X, Y, Z)
-						for Idx, Block in ipairs(BlockTable) do
-							if ((Block.BlockType ~= WorldBlock) or ((not Block.TypeOnly) and (Block.BlockMeta ~= WorldBlockMeta))) then
-								ChangeBlock = false
-								break
-							end
+						local Block = MaskTable[WorldBlock]
+						if ((Block == nil) or ((not Block.TypeOnly) and (Block.BlockMeta ~= WorldBlockMeta))) then
+							ChangeBlock = false
 						end
 					end
 				end
@@ -515,14 +513,12 @@ function CreateCylinderAt(a_BlockTable, a_Position, a_Player, a_Radius, a_Height
 					local ChangeBlock = true
 					if (a_IsBrush) then
 						local State = GetPlayerState(a_Player)
-						local BlockTable = State.ToolRegistrator:GetMask(a_Player:GetEquippedItem().m_ItemType)
-						if (BlockTable ~= nil) then
+						local MaskTable = State.ToolRegistrator:GetMask(a_Player:GetEquippedItem().m_ItemType)
+						if (MaskTable ~= nil) then
 							local WorldBlock, WorldBlockMeta = BlockArea:GetRelBlockTypeMeta(X, Y, Z)
-							for Idx, Block in ipairs(BlockTable) do
-								if ((Block.BlockType ~= WorldBlock) or ((not Block.TypeOnly) and (Block.BlockMeta ~= WorldBlockMeta))) then
-									ChangeBlock = false
-									break
-								end
+							local Block = MaskTable[WorldBlock]
+							if ((Block == nil) or ((not Block.TypeOnly) and (Block.BlockMeta ~= WorldBlockMeta))) then
+								ChangeBlock = false
 							end
 						end
 					end

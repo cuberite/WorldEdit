@@ -29,8 +29,14 @@ function HandleMaskCommand(a_Split, a_Player)
 		return true
 	end
 
+	-- Convert the BlockTable to a mask table (It's better for the performance)
+	local MaskTable = {}
+	for Idx, Block in ipairs(BlockTable) do
+		MaskTable[Block.BlockType] = { BlockMeta = Block.BlockMeta, TypeOnly = Block.TypeOnly, Chance = Block.Chance }
+	end
+
 	local State = GetPlayerState(a_Player)
-	local Succes, error = State.ToolRegistrator:BindMask(a_Player:GetEquippedItem().m_ItemType, BlockTable)
+	local Succes, error = State.ToolRegistrator:BindMask(a_Player:GetEquippedItem().m_ItemType, MaskTable)
 	
 	if (not Succes) then
 		a_Player:SendMessage(cChatColor.Rose .. error)
