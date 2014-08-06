@@ -7,6 +7,49 @@
 
 
 
+function HandleMaskCommand(a_Split, a_Player)
+	-- /mask <Blocks>
+	if (#a_Split == 1) then
+		-- Remove mask
+		local State = GetPlayerState(a_Player)
+		local Succes, error = State.ToolRegistrator:UnbindMask(a_Player:GetEquippedItem().m_ItemType)
+
+		if (not Succes) then
+			a_Player:SendMessage(cChatColor.Rose .. error)
+			return true
+		end
+		a_Player:SendMessage(cChatColor.LightPurple .. "Brush mask disabled.")
+		return true
+	end
+
+	-- Retrieve the blocktypes from the params:
+	local BlockTable = RetrieveBlockTypes(a_Split[2])
+	if not(BlockTable) then
+		a_Player:SendMessage(cChatColor.Rose .. "Unknown block type: '" .. a_Split[2] .. "'.")
+		return true
+	end
+
+	-- Convert the BlockTable to a mask table (It's better for the performance)
+	local MaskTable = {}
+	for Idx, Block in ipairs(BlockTable) do
+		MaskTable[Block.BlockType] = { BlockMeta = Block.BlockMeta, TypeOnly = Block.TypeOnly, Chance = Block.Chance }
+	end
+
+	local State = GetPlayerState(a_Player)
+	local Succes, error = State.ToolRegistrator:BindMask(a_Player:GetEquippedItem().m_ItemType, MaskTable)
+	
+	if (not Succes) then
+		a_Player:SendMessage(cChatColor.Rose .. error)
+		return true
+	end
+	a_Player:SendMessage(cChatColor.LightPurple .. "Brush mask set.")
+	return true
+end
+
+
+
+
+
 function HandleSphereBrush(a_Split, a_Player)
 	-- //brush sphere [-h] <Block> <Radius>
 	if (#a_Split < 4) then
@@ -46,7 +89,7 @@ function HandleSphereBrush(a_Split, a_Player)
 			end
 		end
 
-		CreateSphereAt(BlockTable, Position, a_Player, Radius, Hollow)
+		CreateSphereAt(BlockTable, Position, a_Player, Radius, Hollow, true)
 		return true
 	end
 
@@ -112,7 +155,7 @@ function HandleCylinderBrush(a_Split, a_Player)
 			end
 		end
 
-		CreateCylinderAt(BlockTable, Position, a_Player, Radius, Height, Hollow)
+		CreateCylinderAt(BlockTable, Position, a_Player, Radius, Height, Hollow, true)
 		return true
 	end
 

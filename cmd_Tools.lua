@@ -52,9 +52,10 @@ end
 ------------------------------------------------
 function HandleNoneCommand(a_Split, a_Player)
 	local State = GetPlayerState(a_Player)
-	local Succes, error = State.ToolRegistrator:UnbindTool(a_Player:GetEquippedItem().m_ItemType)
+	local Success, error = State.ToolRegistrator:UnbindTool(a_Player:GetEquippedItem().m_ItemType)
+	local SuccessMask, errorMask = State.ToolRegistrator:UnbindMask(a_Player:GetEquippedItem().m_ItemType)
 	
-	if (not Succes) then
+	if ((not Success) and (not SuccessMask)) then
 		a_Player:SendMessage(cChatColor.Rose .. error)
 		return true
 	end
