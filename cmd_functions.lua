@@ -198,18 +198,8 @@ function FillSelection(a_PlayerState, a_Player, a_World, a_DstBlockTable)
 	local SizeX, SizeY, SizeZ = Area:GetSize()
 	SizeX, SizeY, SizeZ = SizeX - 1, SizeY - 1, SizeZ - 1
 
-	local MaxChance = 0
-	for Idx, Value in ipairs(a_DstBlockTable) do
-		MaxChance = MaxChance + Value.Chance
-	end
-	
-	local BlockTable = {}
-	local Temp = 0
-	for Idx, Value in ipairs(a_DstBlockTable) do
-		Temp = Temp + Value.Chance / MaxChance
-		table.insert(BlockTable, {BlockType = Value.BlockType, BlockMeta = Value.BlockMeta, Chance = Temp})
-	end
-	
+	local BlockTable = CalculateBlockChances(a_DstBlockTable)
+
 	for X = 0, SizeX do
 		for Y = 0, SizeY do
 			for Z = 0, SizeZ do
@@ -341,6 +331,27 @@ end
 
 
 
+-- Calculate the chances for a block and returns the changed table. It is used for % params.
+function CalculateBlockChances(BlockTable)
+	local MaxChance = 0
+	for Idx, Value in ipairs(BlockTable) do
+		MaxChance = MaxChance + Value.Chance
+	end
+	
+	local NewBlockTable = {}
+	local Temp = 0
+	for Idx, Value in ipairs(BlockTable) do
+		Temp = Temp + Value.Chance / MaxChance
+		table.insert(NewBlockTable, {BlockType = Value.BlockType, BlockMeta = Value.BlockMeta, Chance = Temp})
+	end
+
+	return NewBlockTable
+end
+
+
+
+
+
 -- Returns the coordinates (in a vector) from a block that the player has targeted. Returns nil if not block found.
 function GetTargetBlock(a_Player)
 	local MaxDistance = 150  -- A max distance of 150 blocks
@@ -376,7 +387,7 @@ end
 
 
 -- Create a sphere at these coordinates. Returns the affected blocks count.
-function CreateSphereAt(a_BlockType, a_BlockMeta, a_Position, a_Player, a_Radius, a_Hollow)
+function CreateSphereAt(a_BlockTable, a_Position, a_Player, a_Radius, a_Hollow)
 	-- Check if other plugins agree with the operation:
 	local World = a_Player:GetWorld()
 	local MinX, MaxX = a_Position.x - a_Radius, a_Position.x + a_Radius
@@ -402,6 +413,8 @@ function CreateSphereAt(a_BlockType, a_BlockMeta, a_Position, a_Player, a_Radius
 	local BlockArea = cBlockArea()
 	BlockArea:Read(World, Cuboid, cBlockArea.baTypes + cBlockArea.baMetas)
 
+	local BlockTable = CalculateBlockChances(a_BlockTable)
+
 	-- Change blocks inside the sphere:
 	local MidPoint = Vector3d(a_Radius, a_Position.y - MinY, a_Radius)  -- Midpoint of the sphere, relative to the area
 	local NumBlocks = 0
@@ -409,18 +422,28 @@ function CreateSphereAt(a_BlockType, a_BlockMeta, a_Position, a_Player, a_Radius
 	for Y = 0, Cuboid.p2.y - Cuboid.p1.y do  -- The Cuboid has been Y-clamped correctly, take advantage of that
 		for Z = 0, 2 * a_Radius do
 			for X = 0, 2 * a_Radius do
+				local ChangeBlock = false
 				if (a_Hollow) then
 					local Distance = math.floor((MidPoint - Vector3d(X, Y, Z)):Length())
 					if (Distance == a_Radius) then
-						BlockArea:SetRelBlockTypeMeta(X, Y, Z, a_BlockType, a_BlockMeta)
-						NumBlocks = NumBlocks + 1
+						ChangeBlock = true
 					end
 				else
 					local Distance = math.floor((MidPoint - Vector3d(X, Y, Z)):SqrLength())
 					if (Distance <= SqrRadius) then
-						BlockArea:SetRelBlockTypeMeta(X, Y, Z, a_BlockType, a_BlockMeta)
-						NumBlocks = NumBlocks + 1
+						ChangeBlock = true
 					end
+				end
+
+				if (ChangeBlock) then
+					local RandomNumber = math.random()
+					for Idx, Value in ipairs(BlockTable) do
+						if (RandomNumber <= Value.Chance) then
+							BlockArea:SetRelBlockTypeMeta(X, Y, Z, Value.BlockType, Value.BlockMeta)
+							break
+						end
+					end
+					NumBlocks = NumBlocks + 1
 				end
 			end
 		end
@@ -436,7 +459,7 @@ end
 
 
 -- Create a cylinder at these coordinates. Returns the affected blocks count.
-function CreateCylinderAt(a_BlockType, a_BlockMeta, a_Position, a_Player, a_Radius, a_Height, a_Hollow)
+function CreateCylinderAt(a_BlockTable, a_Position, a_Player, a_Radius, a_Height, a_Hollow)
 	local MinX, MaxX = a_Position.x - a_Radius, a_Position.x + a_Radius
 	local MinY, MaxY = a_Position.y, a_Position.y + a_Height
 	local MinZ, MaxZ = a_Position.z - a_Radius, a_Position.z + a_Radius
@@ -457,7 +480,8 @@ function CreateCylinderAt(a_BlockType, a_BlockMeta, a_Position, a_Player, a_Radi
 	-- Push the area into an undo stack:
 	local State = GetPlayerState(a_Player)
 	State.UndoStack:PushUndoFromCuboid(World, Cuboid)
-	
+
+	local BlockTable = CalculateBlockChances(a_BlockTable)
 	local BlockArea = cBlockArea()
 	BlockArea:Read(World, MinX, MaxX, MinY, MaxY, MinZ, MaxZ, cBlockArea.baTypes + cBlockArea.baMetas)
 	local Size = a_Radius * 2
@@ -474,7 +498,13 @@ function CreateCylinderAt(a_BlockType, a_BlockMeta, a_Position, a_Player, a_Radi
 					((Distance <= a_Radius) and (not a_Hollow)) or
 					((Distance == a_Radius) and a_Hollow)
 				) then
-					BlockArea:SetRelBlockTypeMeta(X, Y, Z, a_BlockType, a_BlockMeta)
+					local RandomNumber = math.random()
+					for Idx, Value in ipairs(BlockTable) do
+						if (RandomNumber <= Value.Chance) then
+							BlockArea:SetRelBlockTypeMeta(X, Y, Z, Value.BlockType, Value.BlockMeta)
+							break
+						end
+					end
 					NumBlocks = NumBlocks + 1
 				end
 			end

@@ -480,18 +480,18 @@ end
 
 
 function HandleSphereCommand(a_Split, a_Player)
-	-- //sphere <BlockType> <Radius>
+	-- //sphere <Block> <Radius>
 	
 	-- Check the params:
 	if ((a_Split[2] == nil) or (a_Split[3] == nil)) then
-		a_Player:SendMessage(cChatColor.Rose .. "Usage: //sphere <BlockType> <Radius>")
+		a_Player:SendMessage(cChatColor.Rose .. "Usage: //sphere <Block> <Radius>")
 		return true
 	end
 	
-	-- Convert the blocktype param:
-	local BlockType, BlockMeta = GetBlockTypeMeta(a_Split[2])
-	if not(BlockType) then
-		a_Player:SendMessage(cChatColor.Rose .. "Unknown block type: \"" .. a_Split[2] .. "\"")
+	-- Retrieve the blocktypes from the params:
+	local BlockTable = RetrieveBlockTypes(a_Split[2])
+	if not(BlockTable) then
+		a_Player:SendMessage(cChatColor.LightPurple .. "Unknown block type: '" .. a_Split[2] .. "'.")
 		return true
 	end
 	
@@ -503,7 +503,7 @@ function HandleSphereCommand(a_Split, a_Player)
 	end
 
 	local Position = Vector3i(a_Player:GetPosX(), a_Player:GetPosY(), a_Player:GetPosZ())
-	local NumAffectedBlocks = CreateSphereAt(BlockType, BlockMeta, Position, a_Player, Radius, false)
+	local NumAffectedBlocks = CreateSphereAt(BlockTable, Position, a_Player, Radius, false)
 	a_Player:SendMessage(cChatColor.LightPurple .. NumAffectedBlocks .. " block(s) were affected.")
 	return true
 end
@@ -513,18 +513,18 @@ end
 
 
 function HandleHSphereCommand(a_Split, a_Player)
-	-- //hsphere <BlockType> <Radius>
+	-- //hsphere <Block> <Radius>
 	
 	-- Check the number of params:
 	if ((a_Split[2] == nil) or (a_Split[3] == nil)) then
-		a_Player:SendMessage(cChatColor.Rose .. "Usage: //hsphere <BlockType> <Radius>")
+		a_Player:SendMessage(cChatColor.Rose .. "Usage: //hsphere <Block> <Radius>")
 		return true
 	end
 	
-	-- Convert the blocktype param:
-	local BlockType, BlockMeta = GetBlockTypeMeta(a_Split[2])
-	if not(BlockType) then
-		a_Player:SendMessage(cChatColor.Rose .. "Unknown block type: \"" .. a_Split[2] .. "\"")
+	-- Retrieve the blocktypes from the params:
+	local BlockTable = RetrieveBlockTypes(a_Split[2])
+	if not(BlockTable) then
+		a_Player:SendMessage(cChatColor.LightPurple .. "Unknown block type: '" .. a_Split[2] .. "'.")
 		return true
 	end
 	
@@ -536,7 +536,7 @@ function HandleHSphereCommand(a_Split, a_Player)
 	end
 	
 	local Position = Vector3i(a_Player:GetPosX(), a_Player:GetPosY(), a_Player:GetPosZ())
-	local NumAffectedBlocks = CreateSphereAt(BlockType, BlockMeta, Position, a_Player, Radius, true)
+	local NumAffectedBlocks = CreateSphereAt(BlockTable, Position, a_Player, Radius, true)
 	a_Player:SendMessage(cChatColor.LightPurple .. NumAffectedBlocks .. " block(s) were affected.")
 	return true
 end
@@ -673,9 +673,10 @@ function HandleCylCommand(a_Split, a_Player)
 		return true
 	end
 	
-	local BlockType, BlockMeta = GetBlockTypeMeta(a_Split[2])
-	if (not BlockType) then
-		a_Player:SendMessage(cChatColor.Rose .. "Block name '" .. a_Split[2] .. "' was not recognized.")
+	-- Retrieve the blocktypes from the params:
+	local BlockTable = RetrieveBlockTypes(a_Split[2])
+	if not(BlockTable) then
+		a_Player:SendMessage(cChatColor.LightPurple .. "Unknown block type: '" .. a_Split[2] .. "'.")
 		return true
 	end
 	
@@ -688,7 +689,7 @@ function HandleCylCommand(a_Split, a_Player)
 	local Height = tonumber(a_Split[4] or 1) - 1
 	local Position = Vector3i(a_Player:GetPosX(), a_Player:GetPosY(), a_Player:GetPosZ())
 
-	local NumAffectedBlocks = CreateCylinderAt(BlockType, BlockMeta, Position, a_Player, Radius, Height, false)
+	local NumAffectedBlocks = CreateCylinderAt(BlockTable, Position, a_Player, Radius, Height, false)
 	a_Player:SendMessage(cChatColor.LightPurple .. NumAffectedBlocks .. " block(s) have been created.")
 	return true
 end
@@ -706,9 +707,10 @@ function HandleHCylCommand(a_Split, a_Player)
 		return true
 	end
 
-	local BlockType, BlockMeta = GetBlockTypeMeta(a_Split[2])
-	if (not BlockType) then
-		a_Player:SendMessage(cChatColor.Rose .. "Block name '" .. a_Split[2] .. "' was not recognized.")
+	-- Retrieve the blocktypes from the params:
+	local BlockTable = RetrieveBlockTypes(a_Split[2])
+	if not(BlockTable) then
+		a_Player:SendMessage(cChatColor.LightPurple .. "Unknown block type: '" .. a_Split[2] .. "'.")
 		return true
 	end
 
@@ -721,7 +723,7 @@ function HandleHCylCommand(a_Split, a_Player)
 	local Height = tonumber(a_Split[4] or 1) - 1
 	local Position = Vector3i(a_Player:GetPosX(), a_Player:GetPosY(), a_Player:GetPosZ())
 
-	local NumAffectedBlocks = CreateCylinderAt(BlockType, BlockMeta, Position, a_Player, Radius, Height, true)
+	local NumAffectedBlocks = CreateCylinderAt(BlockTable, Position, a_Player, Radius, Height, true)
 	a_Player:SendMessage(cChatColor.LightPurple .. NumAffectedBlocks .. " block(s) have been created.")
 	return true
 end
