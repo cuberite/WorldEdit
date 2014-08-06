@@ -316,11 +316,11 @@ function RetrieveBlockTypes(Input)
 			end
 		end
 		
-		local BlockType, BlockMeta = GetBlockTypeMeta(Value)
+		local BlockType, BlockMeta, TypeOnly = GetBlockTypeMeta(Value)
 		if not(BlockType) then
 			return false
 		end
-		table.insert(BlockTable, {BlockType = BlockType, BlockMeta = BlockMeta, Chance = Chance})
+		table.insert(BlockTable, {BlockType = BlockType, BlockMeta = BlockMeta, TypeOnly = TypeOnly or false, Chance = Chance})
 	end
 	
 	RetrieveBlockTypesTemp[Input] = BlockTable
@@ -435,17 +435,15 @@ function CreateSphereAt(a_BlockTable, a_Position, a_Player, a_Radius, a_Hollow, 
 					end
 				end
 
-				if (ChangeBlock) then
-					if (a_IsBrush) then
-						local State = GetPlayerState(a_Player)
-						local BlockTable = State.ToolRegistrator:GetMask(a_Player:GetEquippedItem().m_ItemType)
-						if (BlockTable ~= nil) then
-							local WorldBlock, WorldBlockMeta = BlockArea:GetRelBlockTypeMeta(X, Y, Z)
-							for Idx, Block in ipairs(BlockTable) do
-								if ((Block.BlockType ~= WorldBlock) or (Block.BlockMeta ~= WorldBlockMeta)) then
-									ChangeBlock = false
-									break
-								end
+				if (ChangeBlock and a_IsBrush) then
+					local State = GetPlayerState(a_Player)
+					local BlockTable = State.ToolRegistrator:GetMask(a_Player:GetEquippedItem().m_ItemType)
+					if (BlockTable ~= nil) then
+						local WorldBlock, WorldBlockMeta = BlockArea:GetRelBlockTypeMeta(X, Y, Z)
+						for Idx, Block in ipairs(BlockTable) do
+							if ((Block.BlockType ~= WorldBlock) or ((not Block.TypeOnly) and (Block.BlockMeta ~= WorldBlockMeta))) then
+								ChangeBlock = false
+								break
 							end
 						end
 					end
@@ -521,7 +519,7 @@ function CreateCylinderAt(a_BlockTable, a_Position, a_Player, a_Radius, a_Height
 						if (BlockTable ~= nil) then
 							local WorldBlock, WorldBlockMeta = BlockArea:GetRelBlockTypeMeta(X, Y, Z)
 							for Idx, Block in ipairs(BlockTable) do
-								if ((Block.BlockType ~= WorldBlock) or (Block.BlockMeta ~= WorldBlockMeta)) then
+								if ((Block.BlockType ~= WorldBlock) or ((not Block.TypeOnly) and (Block.BlockMeta ~= WorldBlockMeta))) then
 									ChangeBlock = false
 									break
 								end
