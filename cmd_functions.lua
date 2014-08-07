@@ -414,6 +414,11 @@ function CreateSphereAt(a_BlockTable, a_Position, a_Player, a_Radius, a_Hollow, 
 	BlockArea:Read(World, Cuboid, cBlockArea.baTypes + cBlockArea.baMetas)
 
 	local BlockTable = CalculateBlockChances(a_BlockTable)
+	local MaskTable = nil
+	if (a_IsBrush) then
+		local State = GetPlayerState(a_Player)
+		MaskTable = State.ToolRegistrator:GetMask(a_Player:GetEquippedItem().m_ItemType)
+	end
 
 	-- Change blocks inside the sphere:
 	local MidPoint = Vector3d(a_Radius, a_Position.y - MinY, a_Radius)  -- Midpoint of the sphere, relative to the area
@@ -435,15 +440,11 @@ function CreateSphereAt(a_BlockTable, a_Position, a_Player, a_Radius, a_Hollow, 
 					end
 				end
 
-				if (ChangeBlock and a_IsBrush) then
-					local State = GetPlayerState(a_Player)
-					local MaskTable = State.ToolRegistrator:GetMask(a_Player:GetEquippedItem().m_ItemType)
-					if (MaskTable ~= nil) then
-						local WorldBlock, WorldBlockMeta = BlockArea:GetRelBlockTypeMeta(X, Y, Z)
-						local Block = MaskTable[WorldBlock]
-						if ((Block == nil) or ((not Block.TypeOnly) and (Block.BlockMeta ~= WorldBlockMeta))) then
-							ChangeBlock = false
-						end
+				if (ChangeBlock and (MaskTable ~= nil)) then
+					local WorldBlock, WorldBlockMeta = BlockArea:GetRelBlockTypeMeta(X, Y, Z)
+					local Block = MaskTable[WorldBlock]
+					if ((Block == nil) or ((not Block.TypeOnly) and (Block.BlockMeta ~= WorldBlockMeta))) then
+						ChangeBlock = false
 					end
 				end
 
@@ -494,6 +495,12 @@ function CreateCylinderAt(a_BlockTable, a_Position, a_Player, a_Radius, a_Height
 	State.UndoStack:PushUndoFromCuboid(World, Cuboid)
 
 	local BlockTable = CalculateBlockChances(a_BlockTable)
+	local MaskTable = nil
+	if (a_IsBrush) then
+		local State = GetPlayerState(a_Player)
+		MaskTable = State.ToolRegistrator:GetMask(a_Player:GetEquippedItem().m_ItemType)
+	end
+
 	local BlockArea = cBlockArea()
 	BlockArea:Read(World, MinX, MaxX, MinY, MaxY, MinZ, MaxZ, cBlockArea.baTypes + cBlockArea.baMetas)
 	local Size = a_Radius * 2
@@ -511,15 +518,11 @@ function CreateCylinderAt(a_BlockTable, a_Position, a_Player, a_Radius, a_Height
 					((Distance == a_Radius) and a_Hollow)
 				) then
 					local ChangeBlock = true
-					if (a_IsBrush) then
-						local State = GetPlayerState(a_Player)
-						local MaskTable = State.ToolRegistrator:GetMask(a_Player:GetEquippedItem().m_ItemType)
-						if (MaskTable ~= nil) then
-							local WorldBlock, WorldBlockMeta = BlockArea:GetRelBlockTypeMeta(X, Y, Z)
-							local Block = MaskTable[WorldBlock]
-							if ((Block == nil) or ((not Block.TypeOnly) and (Block.BlockMeta ~= WorldBlockMeta))) then
-								ChangeBlock = false
-							end
+					if (MaskTable ~= nil) then
+						local WorldBlock, WorldBlockMeta = BlockArea:GetRelBlockTypeMeta(X, Y, Z)
+						local Block = MaskTable[WorldBlock]
+						if ((Block == nil) or ((not Block.TypeOnly) and (Block.BlockMeta ~= WorldBlockMeta))) then
+							ChangeBlock = false
 						end
 					end
 
