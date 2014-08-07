@@ -316,11 +316,11 @@ function RetrieveBlockTypes(Input)
 			end
 		end
 		
-		local BlockType, BlockMeta = GetBlockTypeMeta(Value)
+		local BlockType, BlockMeta, TypeOnly = GetBlockTypeMeta(Value)
 		if not(BlockType) then
 			return false
 		end
-		table.insert(BlockTable, {BlockType = BlockType, BlockMeta = BlockMeta, Chance = Chance})
+		table.insert(BlockTable, {BlockType = BlockType, BlockMeta = BlockMeta, TypeOnly = TypeOnly or false, Chance = Chance})
 	end
 	
 	RetrieveBlockTypesTemp[Input] = BlockTable
@@ -387,7 +387,7 @@ end
 
 
 -- Create a sphere at these coordinates. Returns the affected blocks count.
-function CreateSphereAt(a_BlockTable, a_Position, a_Player, a_Radius, a_Hollow)
+function CreateSphereAt(a_BlockTable, a_Position, a_Player, a_Radius, a_Hollow, a_IsBrush)
 	-- Check if other plugins agree with the operation:
 	local World = a_Player:GetWorld()
 	local MinX, MaxX = a_Position.x - a_Radius, a_Position.x + a_Radius
@@ -414,6 +414,11 @@ function CreateSphereAt(a_BlockTable, a_Position, a_Player, a_Radius, a_Hollow)
 	BlockArea:Read(World, Cuboid, cBlockArea.baTypes + cBlockArea.baMetas)
 
 	local BlockTable = CalculateBlockChances(a_BlockTable)
+	local MaskTable = nil
+	if (a_IsBrush) then
+		local State = GetPlayerState(a_Player)
+		MaskTable = State.ToolRegistrator:GetMask(a_Player:GetEquippedItem().m_ItemType)
+	end
 
 	-- Change blocks inside the sphere:
 	local MidPoint = Vector3d(a_Radius, a_Position.y - MinY, a_Radius)  -- Midpoint of the sphere, relative to the area
@@ -432,6 +437,14 @@ function CreateSphereAt(a_BlockTable, a_Position, a_Player, a_Radius, a_Hollow)
 					local Distance = math.floor((MidPoint - Vector3d(X, Y, Z)):SqrLength())
 					if (Distance <= SqrRadius) then
 						ChangeBlock = true
+					end
+				end
+
+				if (ChangeBlock and (MaskTable ~= nil)) then
+					local WorldBlock, WorldBlockMeta = BlockArea:GetRelBlockTypeMeta(X, Y, Z)
+					local Block = MaskTable[WorldBlock]
+					if ((Block == nil) or ((not Block.TypeOnly) and (Block.BlockMeta ~= WorldBlockMeta))) then
+						ChangeBlock = false
 					end
 				end
 
@@ -459,7 +472,7 @@ end
 
 
 -- Create a cylinder at these coordinates. Returns the affected blocks count.
-function CreateCylinderAt(a_BlockTable, a_Position, a_Player, a_Radius, a_Height, a_Hollow)
+function CreateCylinderAt(a_BlockTable, a_Position, a_Player, a_Radius, a_Height, a_Hollow, a_IsBrush)
 	local MinX, MaxX = a_Position.x - a_Radius, a_Position.x + a_Radius
 	local MinY, MaxY = a_Position.y, a_Position.y + a_Height
 	local MinZ, MaxZ = a_Position.z - a_Radius, a_Position.z + a_Radius
@@ -482,6 +495,12 @@ function CreateCylinderAt(a_BlockTable, a_Position, a_Player, a_Radius, a_Height
 	State.UndoStack:PushUndoFromCuboid(World, Cuboid)
 
 	local BlockTable = CalculateBlockChances(a_BlockTable)
+	local MaskTable = nil
+	if (a_IsBrush) then
+		local State = GetPlayerState(a_Player)
+		MaskTable = State.ToolRegistrator:GetMask(a_Player:GetEquippedItem().m_ItemType)
+	end
+
 	local BlockArea = cBlockArea()
 	BlockArea:Read(World, MinX, MaxX, MinY, MaxY, MinZ, MaxZ, cBlockArea.baTypes + cBlockArea.baMetas)
 	local Size = a_Radius * 2
@@ -498,14 +517,25 @@ function CreateCylinderAt(a_BlockTable, a_Position, a_Player, a_Radius, a_Height
 					((Distance <= a_Radius) and (not a_Hollow)) or
 					((Distance == a_Radius) and a_Hollow)
 				) then
-					local RandomNumber = math.random()
-					for Idx, Value in ipairs(BlockTable) do
-						if (RandomNumber <= Value.Chance) then
-							BlockArea:SetRelBlockTypeMeta(X, Y, Z, Value.BlockType, Value.BlockMeta)
-							break
+					local ChangeBlock = true
+					if (MaskTable ~= nil) then
+						local WorldBlock, WorldBlockMeta = BlockArea:GetRelBlockTypeMeta(X, Y, Z)
+						local Block = MaskTable[WorldBlock]
+						if ((Block == nil) or ((not Block.TypeOnly) and (Block.BlockMeta ~= WorldBlockMeta))) then
+							ChangeBlock = false
 						end
 					end
-					NumBlocks = NumBlocks + 1
+
+					if (ChangeBlock) then
+						local RandomNumber = math.random()
+						for Idx, Value in ipairs(BlockTable) do
+							if (RandomNumber <= Value.Chance) then
+								BlockArea:SetRelBlockTypeMeta(X, Y, Z, Value.BlockType, Value.BlockMeta)
+								break
+							end
+						end
+						NumBlocks = NumBlocks + 1
+					end
 				end
 			end
 		end

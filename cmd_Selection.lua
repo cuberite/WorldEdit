@@ -186,7 +186,7 @@ function HandleCountCommand(a_Split, a_Player)
 	for Idx, Value in ipairs(RawDstBlockTable) do
 		local BlockType, BlockMeta, TypeOnly = GetBlockTypeMeta(Value)
 		if not(BlockType) then
-			a_Player:SendMessage(cChatColor.LightPurple .. "Unknown dst block type: '" .. Value .. "'.")
+			a_Player:SendMessage(cChatColor.Rose .. "Unknown dst block type: '" .. Value .. "'.")
 			return true
 		end
 		BlockTable[BlockType] = {BlockMeta = BlockMeta, TypeOnly = TypeOnly or false}
@@ -334,7 +334,7 @@ function HandleFacesCommand(a_Split, a_Player)
 	for Idx, Value in ipairs(RawDstBlockTable) do
 		local DstBlockType, DstBlockMeta = GetBlockTypeMeta(Value)
 		if not(DstBlockType) then
-			a_Player:SendMessage(cChatColor.LightPurple .. "Unknown dst block type: '" .. Value .. "'.")
+			a_Player:SendMessage(cChatColor.Rose .. "Unknown dst block type: '" .. Value .. "'.")
 			return true
 		end
 		table.insert(DstBlockTable, {BlockType = DstBlockType, BlockMeta = DstBlockMeta})
@@ -524,7 +524,7 @@ function HandleReplaceCommand(a_Split, a_Player)
 	
 	local DstBlockTable = RetrieveBlockTypes(a_Split[3])
 	if not(DstBlockTable) then
-		a_Player:SendMessage(cChatColor.LightPurple .. "Unknown dst block type: '" .. a_Split[3] .. "'.")
+		a_Player:SendMessage(cChatColor.Rose .. "Unknown dst block type: '" .. a_Split[3] .. "'.")
 		return true
 	end
 	
@@ -589,7 +589,7 @@ function HandleSetCommand(a_Split, a_Player)
 	-- Retrieve the blocktypes from the params:
 	local DstBlockTable = RetrieveBlockTypes(a_Split[2])
 	if not(DstBlockTable) then
-		a_Player:SendMessage(cChatColor.LightPurple .. "Unknown dst block type: '" .. a_Split[2] .. "'.")
+		a_Player:SendMessage(cChatColor.Rose .. "Unknown dst block type: '" .. a_Split[2] .. "'.")
 		return true
 	end
 	
@@ -780,7 +780,7 @@ function HandleWallsCommand(a_Split, a_Player)
 	-- Retrieve the blocktypes from the params:
 	local DstBlockTable = RetrieveBlockTypes(a_Split[2])
 	if not(DstBlockTable) then
-		a_Player:SendMessage(cChatColor.LightPurple .. "Unknown dst block type: '" .. a_Split[2] .. "'.")
+		a_Player:SendMessage(cChatColor.Rose .. "Unknown dst block type: '" .. a_Split[2] .. "'.")
 		return true
 	end
 	
