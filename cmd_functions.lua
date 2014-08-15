@@ -533,7 +533,11 @@ function RightClickCompass(Player)
 				WentThroughBlock = true
 			else
 				if (WentThroughBlock) then
-					if ((BlockType == E_BLOCK_AIR) and (World:GetBlock(X, Y + 1, Z) == E_BLOCK_AIR) and (cBlockInfo:IsSolid(World:GetBlock(X, Y - 1, Z)) or Player:IsFlying())) then
+					if (
+						(BlockType == E_BLOCK_AIR) and
+						(World:GetBlock(X, Y + 1, Z) == E_BLOCK_AIR) and
+						(cBlockInfo:IsSolid(World:GetBlock(X, Y - 1, Z)) or Player:IsFlying())
+					) then
 						Player:TeleportToCoords(X + 0.5, Y, Z + 0.5)
 						Teleported = true
 						return true
