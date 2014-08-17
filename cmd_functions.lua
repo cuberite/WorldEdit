@@ -149,7 +149,7 @@ function FillFaces(a_PlayerState, a_Player, a_World, a_DstBlockTable)
 	end
 	
 	-- Place the ceiling and floor
-	for Y = 0, YSize, YSize do
+	for Y = 0, YSize, ((YSize == 0 and 1) or YSize) do
 		for X = 0, XSize do
 			for Z = 0, ZSize do
 				local Block = a_DstBlockTable[math.random(1, NumDstBlocks)]
