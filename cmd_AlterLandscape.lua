@@ -565,6 +565,7 @@ function HandlePyramidCommand(a_Split, a_Player)
 	end
 	
 	local Pos = a_Player:GetPosition()
+	Pos.x, Pos.y, Pos.z = math.floor(Pos.x), math.floor(Pos.y), math.floor(Pos.z)
 	local MinX, MaxX = Pos.x - Radius, Pos.x + Radius
 	local MinY, MaxY = Pos.y, Pos.y + Radius
 	local MinZ, MaxZ = Pos.z - Radius, Pos.z + Radius
@@ -624,6 +625,7 @@ function HandleHPyramidCommand(a_Split, a_Player)
 	end
 	
 	local Pos = a_Player:GetPosition()
+	Pos.x, Pos.y, Pos.z = math.floor(Pos.x), math.floor(Pos.y), math.floor(Pos.z)
 	local MinX, MaxX = Pos.x - Radius, Pos.x + Radius
 	local MinY, MaxY = Pos.y, Pos.y + Radius
 	local MinZ, MaxZ = Pos.z - Radius, Pos.z + Radius
