@@ -91,7 +91,7 @@ function OnPlayerAnimation(Player, Animation)
 		return false
 	end
 	
-	if not PlayerHasWEPermission(Player, "worldedit.navigation.jumpto.tool") then
+	if (not Player:HasPermission("worldedit.navigation.jumpto.tool") then
 		return false
 	end
 	
