@@ -56,7 +56,7 @@ end
 function HandleWorldEditHelpCommand(Split, Player)
 	-- /we help
 	
-	if not PlayerHasWEPermission(Player, "worldedit.help") then
+	if (Player:HasPermission("worldedit.help")) then
 		Player:SendMessage(cChatColor.Rose .. "You do not have permission for this command.")
 		return true
 	end

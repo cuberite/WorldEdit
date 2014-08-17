@@ -41,7 +41,7 @@ function RightClickCompassHook(Player, BlockX, BlockY, BlockZ, BlockFace, Cursor
 	end
 
 	-- Check if the equipped item is a compass.
-	if (Player:GetEquippedItem().m_ItemType == E_ITEM_COMPASS) and PlayerHasWEPermission(Player, "worldedit.navigation.thru.tool") then
+	if (Player:GetEquippedItem().m_ItemType == E_ITEM_COMPASS) and Player:HasPermission("worldedit.navigation.thru.tool") then
 		RightClickCompass(Player, Player:GetWorld())
 	end
 end
@@ -57,15 +57,15 @@ function LeftClickCompassHook(Player, BlockX, BlockY, BlockZ, BlockFace, Status)
 		return false
 	end
 	
-	if not PlayerHasWEPermission(Player, "worldedit.navigation.jumpto.tool") then
+	if (not Player:HasPermission("worldedit.navigation.jumpto.tool")) then
 		return false
 	end
 	
-	if Player:GetEquippedItem().m_ItemType ~= E_ITEM_COMPASS then
+	if (Player:GetEquippedItem().m_ItemType ~= E_ITEM_COMPASS) then
 		return false
 	end
 	
-	if LeftClickCompassUsed[Player:GetName()] then
+	if (LeftClickCompassUsed[Player:GetName()]) then
 		return false
 	end
 	return true

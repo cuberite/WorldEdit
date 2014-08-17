@@ -123,7 +123,7 @@ function HandleBiomeInfoCommand(Split, Player)
 
 	-- If a "-p" param is present, report the biome at player's position:
 	if (Split[2] == "-p") then
-		local Biome = GetStringFromBiome(Player:GetWorld():GetBiomeAt(math.floor(Player:GetPosX()), math.floor(Player:GetPosZ())))
+		local Biome = BiomeToString(Player:GetWorld():GetBiomeAt(math.floor(Player:GetPosX()), math.floor(Player:GetPosZ())))
 		Player:SendMessage(cChatColor.LightPurple .. "Biome: " .. Biome)
 		return true
 	end
@@ -150,7 +150,7 @@ function HandleBiomeInfoCommand(Split, Player)
 	local BiomesArr = {}
 	for b, val in pairs(BiomesSet) do
 		if (val) then
-			table.insert(BiomesArr, GetStringFromBiome(b))
+			table.insert(BiomesArr, BiomeToString(b))
 		end
 	end
 	

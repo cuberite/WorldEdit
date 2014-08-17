@@ -1,281 +1,83 @@
------------------------------------------------
-------------------LOADSETTINGS-----------------
------------------------------------------------
-function LoadSettings(Path)
+
+-- functions.lua
+
+-- Contains global functions.
+
+
+
+
+
+-- Loads all the settings.
+function LoadSettings(a_Path)
 	SettingsIni = cIniFile()
-	SettingsIni:ReadFile(Path)
-	Wand = ConsoleGetBlockTypeMeta(SettingsIni:GetValueSet("General", "WandItem", 271))
-	if not Wand then
+	SettingsIni:ReadFile(a_Path)
+	Wand = GetBlockTypeMeta(SettingsIni:GetValueSet("General", "WandItem", 271))
+	if (not Wand) then
 		LOGWARN("The given wand ID is not valid. Using wooden axe.")
 		Wand = E_ITEM_WOODEN_AXE
 	end
 	ButcherRadius = SettingsIni:GetValueSetI("General", "ButcherRadius", 0)
-	SettingsIni:WriteFile(Path)
+	SettingsIni:WriteFile(a_Path)
 end
 
 
------------------------------------------------
-------------------CREATETABLES-----------------
------------------------------------------------
+
+
+
+-- Creates tables used to manage players actions or plugins
 function CreateTables()
 	SP = {}
-	Repl = {}
-	ReplItem = {}
-	GrowTreeItem = {}
 	LeftClickCompassUsed = {}
 	ExclusionAreaPlugins = {}
 	PlayerSelectPointHooks = {}
-	cRoot:Get():ForEachWorld(function(World)
-		ExclusionAreaPlugins[World:GetName()] = {}
-	end)
+	cRoot:Get():ForEachWorld(
+		function(World)
+			ExclusionAreaPlugins[World:GetName()] = {}
+		end
+	)
 end
 
 
 
 
 
----------------------------------------------
-------------GET_BIOME_FROM_STRING------------
----------------------------------------------
-function GetBiomeFromString(Split, Player) -- this simply checks what the player said and then returns the network number that that biome has
-	Split[2] = string.upper(Split[2])
-	if Split[2] == "OCEAN" then
-		return 0
-	elseif Split[2] == "PLAINS" then
-		return 1
-	elseif Split[2] == "DESERT" then
-		return 2
-	elseif Split[2] == "EXTEME_HILLS" then
-		return 3
-	elseif Split[2] == "FOREST" then
-		return 4
-	elseif Split[2] == "TAIGA" then
-		return 5
-	elseif Split[2] == "SWAMPLAND" then
-		return 6
-	elseif Split[2] == "RIVER" then
-		return 7
-	elseif Split[2] == "HELL" then
-		return 8
-	elseif Split[2] == "SKY" then
-		return 9
-	elseif Split[2] == "FROZENOCEAN" then
-		return 10
-	elseif Split[2] == "FROZENRIVER" then
-		return 11
-	elseif Split[2] == "ICE_PLAINS" then
-		return 12
-	elseif Split[2] == "ICE_MOUNTAINS" then
-		return 13
-	elseif Split[2] == "MUSHROOMISLAND" then
-		return 14
-	elseif Split[2] == "MUSHROOMISLANDSHORE" then
-		return 15
-	elseif Split[2] == "BEACH" then
-		return 16
-	elseif Split[2] == "DESERTHILLS" then
-		return 17
-	elseif Split[2] == "FORESTHILLS" then
-		return 18
-	elseif Split[2] == "TAIGAHILLS" then
-		return 19
-	elseif Split[2] == "EXTEME_HILLS_EDGE" then
-		return 20
-	elseif Split[2] == "JUNGLE" then
-		return 21
-	elseif Split[2] == "JUNGLEHILLS" then
-		return 22
-	else
-		return false
-	end
-end
-
-
-
-
-
-----------------------------------------------
----------------GETBLOCKTYPEMETA---------------
-----------------------------------------------
-function GetBlockTypeMeta(Blocks)
-	local Tonumber = tonumber(Blocks)
-	if Tonumber == nil then	
+-- Returns the block type (and block meta) from a string. This can be something like "1", "1:0", "stone" and "stone:0"
+function GetBlockTypeMeta(a_BlockString)
+	local BlockID = tonumber(a_BlockString)
+	if (not BlockID) then	
 		local Item = cItem()
-		if StringToItem(Blocks, Item) == false then
+		if (not StringToItem(a_BlockString, Item)) then
 			return false
 		else
 			return Item.m_ItemType, Item.m_ItemDamage
 		end
-		local Block = StringSplit(Blocks, ":")		
-		if tonumber(Block[1]) == nil then
+		
+		local Block = StringSplit(a_BlockString, ":")		
+		if (not tonumber(Block[1])) then
 			return false
 		else
-			if Block[2] == nil then
+			if (not Block[2]) then
 				return Block[1], 0
 			else
 				return Block[1], Block[2]
 			end
 		end
 	else
-		return Tonumber, 0, true
+		return BlockID, 0, true
 	end
 end
 
 
------------------------------------------------
-------------CONSOLEGETBLOCKTYPEMETA------------
------------------------------------------------
-function ConsoleGetBlockTypeMeta(Blocks)
-	local Tonumber = tonumber(Blocks)
-	if Tonumber == nil then	
-		local Item = cItem()
-		if StringToItem(Blocks, Item) == false then
-			return false
-		else
-			return Item.m_ItemType, Item.m_ItemDamage
-		end
-		local Block = StringSplit(Blocks, ":")		
-		if tonumber(Block[1]) == nil then
-			return false
-		else
-			if Block[2] == nil then
-				return Block[1], 0
-			else
-				return Block[1], Block[2]
-			end
-		end
-	else
-		return Tonumber, 0, true
-	end
-end
-----------------------------------------------
---------------GETSTRINGFROMBIOME--------------
-----------------------------------------------
-function GetStringFromBiome(Biome)
-	if Biome == 0 then
-		return "ocean"
-	elseif Biome == 1 then
-		return "plains"
-	elseif Biome == 2 then
-		return "desert"
-	elseif Biome == 3 then
-		return "extreme hills"
-	elseif Biome == 4 then
-		return "forest"
-	elseif Biome == 5 then
-		return "taiga"
-	elseif Biome == 6 then
-		return "swampland"
-	elseif Biome == 7 then
-		return "river"
-	elseif Biome == 8 then
-		return "hell"
-	elseif Biome == 9 then
-		return "sky"
-	elseif Biome == 10 then
-		return "frozen ocean"
-	elseif Biome == 11 then
-		return "frozen river"
-	elseif Biome == 12 then
-		return "ice plains"
-	elseif Biome == 13 then
-		return "ice mountains"
-	elseif Biome == 14 then
-		return "mushroom island"
-	elseif Biome == 15 then
-		return "mushroom island shore"
-	elseif Biome == 16 then
-		return "beach"
-	elseif Biome == 17 then
-		return "desert hills"
-	elseif Biome == 18 then
-		return "forest hills"
-	elseif Biome == 19 then
-		return "taiga hills"
-	elseif Biome == 20 then
-		return "extreme hills edge"
-	elseif Biome == 21 then
-		return "jungle"
-	elseif Biome == 22 then
-		return "jungle hills"
-	elseif Biome == 23 then
-		return "jungle edge"
-	elseif Biome == 24 then
-		return "deep ocean"
-	elseif Biome == 25 then
-		return "stone beach"
-	elseif Biome == 26 then
-		return "cold beach"
-	elseif Biome == 27 then
-		return "birch forest"
-	elseif Biome == 28 then
-		return "birch forest hills"
-	elseif Biome == 29 then
-		return "roofed forest"
-	elseif Biome == 30 then
-		return "cold taiga"
-	elseif Biome == 31 then
-		return "cold taiga hills"
-	elseif Biome == 32 then
-		return "mega taiga"
-	elseif Biome == 33 then
-		return "mega taiga hills"
-	elseif Biome == 34 then
-		return "extreme hills+"
-	elseif Biome == 35 then
-		return "savanna"
-	elseif Biome == 36 then
-		return "savanna plateau"
-	elseif Biome == 37 then
-		return "mesa"
-	elseif Biome == 38 then
-		return "mesa plateau f"
-	elseif Biome == 39 then
-		return "mesa plateau"
-	end
-end
-
-
----------------------------------------------
-----------------TABLECONTAINS----------------
----------------------------------------------
-function table.contains(table, element)
-  for _, value in pairs(table) do
-    if value == element then
-      return true
-    end
-  end
-  return false
-end
-
-
------------------------------------------
-----------PLAYERHASWEPERMISSION----------
------------------------------------------
-function PlayerHasWEPermission(Player, ...)
-	local arg = {...}
-	if Player:HasPermission("worldedit.*") then
-		return true
-	end
-	for Idx, Permission in ipairs(arg) do
-		if Player:HasPermission(Permission) then
-			return true
-		end
-	end
-	return false
-end
 
 
 
-
------------------------------------------------
----------------------ROUND---------------------
------------------------------------------------
-function Round(GivenNumber)
-	assert(type(GivenNumber) == 'number')
-	local Number, Decimal = math.modf(GivenNumber)
+-- Rounds the number.
+function Round(a_GivenNumber)
+	assert(type(a_GivenNumber) == 'number')
+	
+	local Number, Decimal = math.modf(a_GivenNumber)
 	if Decimal >= 0.5 then
-		return math.ceil(GivenNumber)
+		return math.ceil(a_GivenNumber)
 	else
 		return Number
 	end
