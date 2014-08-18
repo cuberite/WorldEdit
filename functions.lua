@@ -44,26 +44,30 @@ end
 -- Returns the block type (and block meta) from a string. This can be something like "1", "1:0", "stone" and "stone:0"
 function GetBlockTypeMeta(a_BlockString)
 	local BlockID = tonumber(a_BlockString)
-	if (not BlockID) then	
-		local Item = cItem()
-		if (not StringToItem(a_BlockString, Item)) then
-			return false
-		else
-			return Item.m_ItemType, Item.m_ItemDamage
-		end
-		
-		local Block = StringSplit(a_BlockString, ":")		
-		if (not tonumber(Block[1])) then
-			return false
-		else
-			if (not Block[2]) then
-				return Block[1], 0
-			else
-				return Block[1], Block[2]
-			end
-		end
-	else
+	
+	-- Check if it was a normal number
+	if (BlockID) then
 		return BlockID, 0, true
+	end
+	
+	-- Check if it was a name.
+	local Item = cItem()
+	if (not StringToItem(a_BlockString, Item)) then
+		return false
+	else
+		return Item.m_ItemType, Item.m_ItemDamage
+	end
+	
+	-- Check if it was an BlockType + Meta
+	local Block = StringSplit(a_BlockString, ":")		
+	if (not tonumber(Block[1])) then
+		return false
+	else
+		if (not Block[2]) then
+			return Block[1], 0
+		else
+			return Block[1], Block[2]
+		end
 	end
 end
 
