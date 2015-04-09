@@ -913,11 +913,11 @@ function HandleGenerationShapeCommand(a_Split, a_Player)
 		for Idx, Coord in ipairs(Coords) do
 			local CoordAround = a_BlockPos + Coord
 			if (
-				(CoordAround.x > 0) and
+				(CoordAround.x >= 0) and
 				(CoordAround.x <= SizeX) and
-				(CoordAround.y > 0) and
+				(CoordAround.y >= 0) and
 				(CoordAround.y <= SizeY) and
-				(CoordAround.z > 0) and
+				(CoordAround.z >= 0) and
 				(CoordAround.z <= SizeZ)
 			) then
 				local DoSet = GetBlockFromFormula(CoordAround)
