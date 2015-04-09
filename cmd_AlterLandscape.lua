@@ -733,3 +733,233 @@ end
 
 
 
+
+function HandleGenerationShapeCommand(a_Split, a_Player)
+	-- //generate <block> <formula>
+	
+	local IsHollow     = false
+	local UseRawCoords = false
+	local Offset       = false
+	local OffsetCenter = false
+	
+	local NumFlags = 0
+	for Idx, Value in ipairs(a_Split) do
+		NumFlags = NumFlags + 1
+		if (Value == "-h") then
+			IsHollow = true
+		elseif (Value == "-r") then
+			UseRawCoords = true
+		elseif (Value == "-o") then
+			Offset = true
+		elseif (Value == "-c") then
+			OffsetCenter = true
+		else
+			NumFlags = NumFlags - 1
+		end
+	end
+	
+	if ((a_Split[2 + NumFlags] == nil) or (a_Split[3 + NumFlags] == nil)) then
+		a_Player:SendMessage(cChatColor.Rose .. "Too few arguments.")
+		a_Player:SendMessage(cChatColor.Rose .. "//generate [Flags] <block> <formula>")
+		return true
+	end
+	
+	-- Check the selection:
+	local State = GetPlayerState(a_Player)
+	if not(State.Selection:IsValid()) then
+		a_Player:SendMessage(cChatColor.Rose .. "No region set")
+		return true
+	end
+	
+	local BlockTable = RetrieveBlockTypes(a_Split[2 + NumFlags])
+	if not(BlockTable) then
+		a_Player:SendMessage(cChatColor.LightPurple .. "Unknown block type: '" .. a_Split[2 + NumFlags] .. "'.")
+		return true
+	end
+	
+	-- Check with other plugins if the operation is okay:
+	local SrcCuboid = State.Selection:GetSortedCuboid()
+	local World = a_Player:GetWorld()
+	if not(CheckAreaCallbacks(SrcCuboid, a_Player, World, "generation")) then
+		return
+	end
+	
+	-- Push an undo snapshot:
+	State.UndoStack:PushUndoFromCuboid(World, SrcCuboid, "generation")
+	
+	local FormulaString = table.concat(a_Split, " ", 3 + NumFlags)
+	:gsub(";", ",") -- Replace ";" to ",". This makes it possible to set block types/metas in the formula.
+	:gsub("!=", "~=") -- Lua operator for not equal is ~=
+	
+	-- Create a loader for the formula checker. (UNSAFE, FIX USING setfenv)
+	local FormulaLoader = loadstring([[
+	local abs, acos, asin, atan, atan2,
+	ceil, cos, cosh, exp, floor, ln, 
+	log, log10, max, min, round, sin,
+	sinh, sqrt, tan, tanh, random, pi, e
+	=
+	math.abs, math.acos, math.asin, math.atan, math.atan2,
+	math.ceil, math.cos, math.cosh, math.exp, math.floor, math.log,
+	math.log, math.log10, math.max, math.min, Round, math.sin,
+	math.sinh, math.sqrt, math.tan, math.tanh, math.random, math.pi, math.exp(1)
+	
+	-- These functions have no build in function:
+	local cbrt = function(x) return sqrt(x^(1/3)) end
+	local randint = function(max) return random(0, max) end
+	-- TODO: rint function
+
+	return function(x, y, z, type, data)
+		local res = {]] .. FormulaString .. [[}
+		return res[1], res.type or type, res.data or data
+	end]])
+	
+	-- Try to get the formula checker
+	local Succes, Formula = pcall(FormulaLoader)
+	if (not Succes) then
+		a_Player:SendMessage(cChatColor.Rose .. "You gave an invalid formula")
+		return true
+	end
+	
+	-- Prevent the Formula function from interacting with the rest of the server.
+	local newenv = {}
+	setfenv(Formula, newenv)
+	
+	-- Test the formula to check if it is a comparison.
+	local Succes, TestResult = pcall(Formula, 1, 1, 1)
+	if (not Succes or (type(TestResult) ~= "boolean")) then
+		a_Player:SendMessage(cChatColor.Rose .. "The formula isn't a comparison")
+		return true
+	end
+	
+	local zero, unit
+	
+	-- Read the selected cuboid into a cBlockArea:
+	local BA = cBlockArea()
+	BA:Read(World, SrcCuboid)
+	
+	local SizeX, SizeY, SizeZ = BA:GetCoordRange()
+	
+	-- Get the proper zero and unit values
+	if (UseRawCoords) then
+		zero = Vector3f(0, 0, 0)
+		unit = Vector3f(1, 1, 1)
+	elseif (Offset) then
+		zero = Vector3f(SrcCuboid.p1) - Vector3f(a_Player:GetPosition())
+		unit = Vector3f(1, 1, 1)
+	elseif (OffsetCenter) then
+		-- The lowest coordinate in the region
+		local Min = Vector3f(0, 0, 0)
+		
+		-- The highest coordinate in the region.
+		local Max = Vector3f(SizeX, SizeY, SizeZ)
+		
+		zero = (Max + Min) * 0.5
+		unit = Vector3f(1, 1, 1)
+	else
+		-- The lowest coordinate in the region
+		local Min = Vector3f(0, 0, 0)
+		
+		-- The highest coordinate in the region.
+		local Max = Vector3f(SizeX, SizeY, SizeZ)
+		
+		zero = (Max + Min) * 0.5
+		unit = Max - zero
+	end
+	
+	
+	local BlockTable = CalculateBlockChances(BlockTable)
+	local NumChangedBlocks = 0
+	local Cache = {}
+	
+	local function ChooseBlockTypeMeta()
+		local RandomNumber = math.random()
+		for Idx, Value in ipairs(BlockTable) do
+			if (RandomNumber <= Value.Chance) then
+				return Value.BlockType, Value.BlockMeta
+			end
+		end
+		
+		return E_BLOCK_AIR, 0
+	end
+	
+	local function GetBlockFromFormula(a_BlockPos)
+		local Index = a_BlockPos.x + (a_BlockPos.z * SizeX) + (a_BlockPos.y * SizeX * SizeZ)
+		local BlockInfo = Cache[Index]
+		
+		-- The block already exists in the cache. Return the info from that.
+		if (BlockInfo) then
+			return BlockInfo.DoSet, BlockInfo.BlockType, BlockInfo.BlockMeta
+		end
+		
+		local scaled = (a_BlockPos - zero) / unit
+		local BlockType, BlockMeta = ChooseBlockTypeMeta()
+		
+		local DoSet, BlockType, BlockMeta = Formula(scaled.x, scaled.y, scaled.z, BlockType, BlockMeta)
+		-- DoSet = DoSet and BlockType ~= E_BLOCK_AIR
+		
+		Cache[Index] = {DoSet = DoSet, BlockType = BlockType, BlockMeta = BlockMeta}
+		
+		return DoSet, BlockType, BlockMeta
+	end
+	
+	local Coords =
+	{
+		Vector3f(1, 0, 0), Vector3f(-1, 0, 0), -- X coords
+		Vector3f(0, 1, 0), Vector3f(0, -1, 0), -- Y coords
+		Vector3f(0, 0, 1), Vector3f(0, 0, -1), -- Z coords
+	}
+	
+	local function HollowHandler(a_BlockPos, a_BlockType, a_BlockMeta)
+		for Idx, Coord in ipairs(Coords) do
+			local CoordAround = a_BlockPos + Coord
+			if (
+				(CoordAround.x > 0) and
+				(CoordAround.x <= SizeX) and
+				(CoordAround.y > 0) and
+				(CoordAround.y <= SizeY) and
+				(CoordAround.z > 0) and
+				(CoordAround.z <= SizeZ)
+			) then
+				local DoSet = GetBlockFromFormula(CoordAround)
+				if (not DoSet) then
+					NumChangedBlocks = NumChangedBlocks + 1
+					BA:SetRelBlockTypeMeta(a_BlockPos.x, a_BlockPos.y, a_BlockPos.z, a_BlockType, a_BlockMeta)
+					break
+				end
+			end
+		end --  /for Coords
+	end
+	
+	
+	local function SolidHandler(a_BlockPos, a_BlockType, a_BlockMeta)
+		NumChangedBlocks = NumChangedBlocks + 1
+		BA:SetRelBlockTypeMeta(a_BlockPos.x, a_BlockPos.y, a_BlockPos.z, a_BlockType, a_BlockMeta)
+	end
+	
+	local Handler = (IsHollow and HollowHandler) or SolidHandler
+	
+	local CurrentBlock = Vector3f(0, 0, 0)
+	for X = 0, SizeX do
+		CurrentBlock.x = X
+		for Y = 0, SizeY do
+			CurrentBlock.y = Y
+			for Z = 0, SizeZ do
+				CurrentBlock.z = Z
+				
+				local DoSet, BlockType, BlockMeta = GetBlockFromFormula(CurrentBlock)
+				
+				if (DoSet) then
+					Handler(CurrentBlock, BlockType, BlockMeta)
+				end
+			end --  /for Z
+		end --  /for Y
+	end --  /for X
+	
+	a_Player:SendMessage(cChatColor.LightPurple .. NumChangedBlocks .. " block(s) changed")
+	BA:Write(World, SrcCuboid.p1)
+	return true
+end
+
+
+
+
