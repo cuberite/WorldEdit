@@ -791,7 +791,7 @@ function HandleGenerationShapeCommand(a_Split, a_Player)
 	:gsub(";", ",") -- Replace ";" to ",". This makes it possible to set block types/metas in the formula.
 	:gsub("!=", "~=") -- Lua operator for not equal is ~=
 	
-	-- Create a loader for the formula checker. (UNSAFE, FIX USING setfenv)
+	-- Create a loader for the formula checker.
 	local FormulaLoader = loadstring([[
 	local abs, acos, asin, atan, atan2,
 	ceil, cos, cosh, exp, floor, ln, 
@@ -812,6 +812,13 @@ function HandleGenerationShapeCommand(a_Split, a_Player)
 		local res = {]] .. FormulaString .. [[}
 		return res[1], res.type or type, res.data or data
 	end]])
+    
+    local LoaderEnv =
+    {
+        math = math,
+        Round = Round,
+    }
+    setfenv(FormulaLoader, LoaderEnv)
 	
 	-- Try to get the formula checker
 	local Succes, Formula = pcall(FormulaLoader)
@@ -821,8 +828,8 @@ function HandleGenerationShapeCommand(a_Split, a_Player)
 	end
 	
 	-- Prevent the Formula function from interacting with the rest of the server.
-	local newenv = {}
-	setfenv(Formula, newenv)
+	local FormulaEnv = {}
+	setfenv(Formula, FormulaEnv)
 	
 	-- Test the formula to check if it is a comparison.
 	local Succes, TestResult = pcall(Formula, 1, 1, 1)
@@ -871,6 +878,7 @@ function HandleGenerationShapeCommand(a_Split, a_Player)
 	local NumChangedBlocks = 0
 	local Cache = {}
 	
+    -- Returns a block with blockmeta from the BlockTable.
 	local function ChooseBlockTypeMeta()
 		local RandomNumber = math.random()
 		for Idx, Value in ipairs(BlockTable) do
@@ -882,6 +890,7 @@ function HandleGenerationShapeCommand(a_Split, a_Player)
 		return E_BLOCK_AIR, 0
 	end
 	
+    -- Checks if a block is already in the cache, and generates it from the formula if it doesn't exist yet.
 	local function GetBlockFromFormula(a_BlockPos)
 		local Index = a_BlockPos.x + (a_BlockPos.z * SizeX) + (a_BlockPos.y * SizeX * SizeZ)
 		local BlockInfo = Cache[Index]
@@ -894,14 +903,16 @@ function HandleGenerationShapeCommand(a_Split, a_Player)
 		local scaled = (a_BlockPos - zero) / unit
 		local BlockType, BlockMeta = ChooseBlockTypeMeta()
 		
+        -- Execute the formula to get the info from it.
 		local DoSet, BlockType, BlockMeta = Formula(scaled.x, scaled.y, scaled.z, BlockType, BlockMeta)
-		-- DoSet = DoSet and BlockType ~= E_BLOCK_AIR
 		
+        -- Save the block info in the cache
 		Cache[Index] = {DoSet = DoSet, BlockType = BlockType, BlockMeta = BlockMeta}
 		
 		return DoSet, BlockType, BlockMeta
 	end
 	
+    -- The coordinates around a single point
 	local Coords =
 	{
 		Vector3f(1, 0, 0), Vector3f(-1, 0, 0), -- X coords
@@ -909,7 +920,9 @@ function HandleGenerationShapeCommand(a_Split, a_Player)
 		Vector3f(0, 0, 1), Vector3f(0, 0, -1), -- Z coords
 	}
 	
+    -- Handler that makes the structure hollow
 	local function HollowHandler(a_BlockPos, a_BlockType, a_BlockMeta)
+        -- Check around the block coordinates if it has at least one single position that doesn't get set
 		for Idx, Coord in ipairs(Coords) do
 			local CoordAround = a_BlockPos + Coord
 			if (
@@ -922,6 +935,7 @@ function HandleGenerationShapeCommand(a_Split, a_Player)
 			) then
 				local DoSet = GetBlockFromFormula(CoordAround)
 				if (not DoSet) then
+                    -- Empty spot around the block. Place at the current coordinates.
 					NumChangedBlocks = NumChangedBlocks + 1
 					BA:SetRelBlockTypeMeta(a_BlockPos.x, a_BlockPos.y, a_BlockPos.z, a_BlockType, a_BlockMeta)
 					break
@@ -930,12 +944,13 @@ function HandleGenerationShapeCommand(a_Split, a_Player)
 		end --  /for Coords
 	end
 	
-	
+	-- Handler that makes the structure solid
 	local function SolidHandler(a_BlockPos, a_BlockType, a_BlockMeta)
 		NumChangedBlocks = NumChangedBlocks + 1
 		BA:SetRelBlockTypeMeta(a_BlockPos.x, a_BlockPos.y, a_BlockPos.z, a_BlockType, a_BlockMeta)
 	end
 	
+    -- Choose the handler. If the player had a -h flag in the command, then use the hollow handler, otherwise take the solid handler
 	local Handler = (IsHollow and HollowHandler) or SolidHandler
 	
 	local CurrentBlock = Vector3f(0, 0, 0)
@@ -955,7 +970,10 @@ function HandleGenerationShapeCommand(a_Split, a_Player)
 		end --  /for Y
 	end --  /for X
 	
+    -- Send a message to the player with the number of changed blocks
 	a_Player:SendMessage(cChatColor.LightPurple .. NumChangedBlocks .. " block(s) changed")
+    
+    -- Write the blockarea in the world
 	BA:Write(World, SrcCuboid.p1)
 	return true
 end
