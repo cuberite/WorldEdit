@@ -99,6 +99,15 @@ g_PluginInfo =
 			Category = "Region",
 		},
 		
+		["//generate"] =
+		{
+			Alias = {"//g", "//gen"},
+			Permission = "worldedit.generation.shape",
+			Handler = HandleGenerationShapeCommand,
+			HelpString = " Generates a shape according to a formula",
+			Category = "Generation",
+		},
+		
 		["//green"] =
 		{
 			Permission = "worldedit.green",
