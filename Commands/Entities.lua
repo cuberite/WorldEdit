@@ -1,5 +1,5 @@
 
--- cmd_Entities.lua
+-- Entities.lua
 
 -- Contains commands that do things with entities.
 

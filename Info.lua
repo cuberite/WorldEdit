@@ -78,7 +78,7 @@ g_PluginInfo =
 			Permission = "worldedit.selection.expand",
 			Handler = HandleExpandCommand,
 			HelpString = " Expand the selection area",
-			Category = "Clipboard",
+			Category = "Selection",
 		},
 		
 		["//extinguish"] =
@@ -119,7 +119,7 @@ g_PluginInfo =
 		["//hcyl"] =
 		{
 			Permission = "worldedit.selection.cylinder",
-			Handler = HandleHCylCommand,
+			Handler = HandleCylCommand,
 			HelpString = "Generates a hollow cylinder",
 			Category = "Generation",
 		},
@@ -143,7 +143,7 @@ g_PluginInfo =
 		["//hpyramid"] =
 		{
 			Permission = "worldedit.generation.pyramid",
-			Handler = HandleHPyramidCommand,
+			Handler = HandlePyramidCommand,
 			HelpString = "Generate a hollow pyramid",
 			Category = "Generation",
 		},
@@ -151,7 +151,7 @@ g_PluginInfo =
 		["//hsphere"] =
 		{
 			Permission = "worldedit.generation.hsphere",
-			Handler = HandleHSphereCommand,
+			Handler = HandleSphereCommand,
 			HelpString = " Generates a hollow sphere.",
 			Category = "Generation",
 		},
@@ -483,7 +483,7 @@ g_PluginInfo =
 		{
 			Alias = "//removeabove",
 			Permission = "worldedit.removeabove",
-			Handler = HandleRemoveAboveCommand,
+			Handler = HandleRemoveColumnCommand,
 			HelpString = " Remove all the blocks above you.",
 			Category = "Terraforming",
 		},
@@ -492,7 +492,7 @@ g_PluginInfo =
 		{
 			Alias = "//removebelow",
 			Permission = "worldedit.removebelow",
-			Handler = HandleRemoveBelowCommand,
+			Handler = HandleRemoveColumnCommand,
 			HelpString = " Remove all the blocks below you.",
 			Category = "Terraforming",
 		},

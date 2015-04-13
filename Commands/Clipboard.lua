@@ -1,5 +1,5 @@
 
--- cmd_Clipboard.lua
+-- Clipboard.lua
 
 -- Implements command handlers for the clipboard-related commands
 

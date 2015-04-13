@@ -1,5 +1,5 @@
 
--- cmd_Selection.lua
+-- Selection.lua
 
 -- Implements handlers for the selection-related commands
 
@@ -111,51 +111,6 @@ function HandleAddLeavesCommand(a_Split, a_Player)
 	
 	-- Write the block area back to world:
 	BA:Write(World, BA:GetOrigin())
-	return true
-end
-
-
-
-
-
-function HandleBiomeInfoCommand(Split, Player)
-	-- /biomeinfo
-
-	-- If a "-p" param is present, report the biome at player's position:
-	if (Split[2] == "-p") then
-		local Biome = BiomeToString(Player:GetWorld():GetBiomeAt(math.floor(Player:GetPosX()), math.floor(Player:GetPosZ())))
-		Player:SendMessage(cChatColor.LightPurple .. "Biome: " .. Biome)
-		return true
-	end
-	
-	-- Get the player state:
-	local State = GetPlayerState(Player)
-	if not(State.Selection:IsValid()) then
-		Player:SendMessage(cChatColor.Rose .. "Make a region selection first.")
-		return true
-	end
-	
-	-- Retrieve set of biomes in the selection:
-	local BiomesSet = {}
-	local MinX, MaxX = State.Selection:GetXCoordsSorted()
-	local MinZ, MaxZ = State.Selection:GetZCoordsSorted()
-	local World = Player:GetWorld()
-	for X = MinX, MaxX do
-		for Z = MinZ, MaxZ do
-			BiomesSet[World:GetBiomeAt(X, Z)] = true
-		end
-	end
-	
-	-- Convert set to array of names:
-	local BiomesArr = {}
-	for b, val in pairs(BiomesSet) do
-		if (val) then
-			table.insert(BiomesArr, BiomeToString(b))
-		end
-	end
-	
-	-- Send the list to the player:
-	Player:SendMessage(cChatColor.LightPurple .. "Biomes: " .. table.concat(BiomesArr, ", "))
 	return true
 end
 
@@ -454,7 +409,7 @@ function HandlePos1Command(a_Split, a_Player)
 	local BlockY = math.floor(a_Player:GetPosY())
 	local BlockZ = math.floor(a_Player:GetPosZ())
 	State.Selection:SetFirstPoint(BlockX, BlockY, BlockZ)
-	a_Player:SendMessage("First position set to {" .. BlockX .. ", " .. BlockY .. ", " .. BlockZ .. "}.")
+	a_Player:SendMessage(cChatColor.LightPurple .. "First position set to {" .. BlockX .. ", " .. BlockY .. ", " .. BlockZ .. "}.")
 	return true
 end
 
@@ -469,23 +424,7 @@ function HandlePos2Command(a_Split, a_Player)
 	local BlockY = math.floor(a_Player:GetPosY())
 	local BlockZ = math.floor(a_Player:GetPosZ())
 	State.Selection:SetSecondPoint(BlockX, BlockY, BlockZ)
-	a_Player:SendMessage("Second position set to {" .. BlockX .. ", " .. BlockY .. ", " .. BlockZ .. "}.")
-	return true
-end
-
-
-
-
-
-function HandleRedoCommand(a_Split, a_Player)
-	-- //redo
-	local State = GetPlayerState(a_Player)
-	local IsSuccess, Msg = State.UndoStack:Redo(a_Player:GetWorld())
-	if (IsSuccess) then
-		a_Player:SendMessage(cChatColor.LightPurple .. "Redo Successful.")
-	else
-		a_Player:SendMessage(cChatColor.Rose .. "Cannot redo: " .. (Msg or "<unknown error>"))
-	end
+	a_Player:SendMessage(cChatColor.LightPurple .. "Second position set to {" .. BlockX .. ", " .. BlockY .. ", " .. BlockZ .. "}.")
 	return true
 end
 
@@ -706,22 +645,6 @@ end
 
 
 
-function HandleUndoCommand(a_Split, a_Player)
-	-- //undo
-	local State = GetPlayerState(a_Player)
-	local IsSuccess, Msg = State.UndoStack:Undo(a_Player:GetWorld())
-	if (IsSuccess) then
-		a_Player:SendMessage(cChatColor.LightPurple .. "Undo Successful.")
-	else
-		a_Player:SendMessage(cChatColor.Rose .. "Cannot undo: " .. (Msg or "<unknown error>"))
-	end
-	return true
-end
-
-
-
-
-
 function HandleVMirrorCommand(a_Split, a_Player)
 	-- //vmirror
 	
@@ -752,7 +675,7 @@ function HandleVMirrorCommand(a_Split, a_Player)
 	Area:Write(World, Selection.p1, cBlockArea.baTypes + cBlockArea.baMetas)
 	
 	-- Notify of success:
-	a_Player:SendMessage(cChatColor.Rose .. "Selection mirrored")
+	a_Player:SendMessage(cChatColor.LightPurple .. "Selection mirrored")
 	return true
 end
 

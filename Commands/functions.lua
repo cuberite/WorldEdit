@@ -1,5 +1,5 @@
 
--- cmd_functions.lua
+-- functions.lua
 
 -- Implements the helper functions that do the actual filling / replacing / blocktracing work
 

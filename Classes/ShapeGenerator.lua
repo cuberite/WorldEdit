@@ -1,0 +1,309 @@
+
+-- ShapeGenerator.lua
+
+-- Capable of generating shapes in BlockAreas. Either a predefined shape like a cylinder, or a shape from a mathematical formula
+-- TODO: Add support for masks
+
+
+
+
+cShapeGenerator = {}
+
+
+
+
+
+-- The coordinates around a single point
+cShapeGenerator.m_Coords =
+{
+	Vector3f(1, 0, 0), Vector3f(-1, 0, 0), -- X coords
+	Vector3f(0, 1, 0), Vector3f(0, -1, 0), -- Y coords
+	Vector3f(0, 0, 1), Vector3f(0, 0, -1), -- Z coords
+}
+
+
+
+
+
+-- Handler that makes the structure hollow
+cShapeGenerator.m_HollowHandler = function(a_ShapeGenerator, a_BlockArea, a_BlockPos)
+	-- Check around the block coordinates if it has at least one single position that doesn't get set
+	for Idx, Coord in ipairs(cShapeGenerator.m_Coords) do
+		local CoordAround = a_BlockPos + Coord
+		local DoSet = a_ShapeGenerator:GetBlockInfoFromFormula(CoordAround)
+		if (not DoSet) then
+			-- Empty spot around the block.
+			return true
+		end
+	end --  /for Coords
+	return false
+end
+
+
+
+
+
+-- Handler that makes the structure solid
+cShapeGenerator.m_SolidHandler = function(a_ShapeGenerator, a_BlockArea, a_BlockPos)
+	return true
+end
+
+
+
+
+function cShapeGenerator:new(a_Zero, a_Unit, a_BlockTable, a_Expression)
+	local Obj = {}
+	
+	setmetatable(Obj, cShapeGenerator)
+	self.__index = self
+	
+	-- Bind the parameters that will be used in the expression
+	a_Expression:BindParam("x")
+	:BindParam("y")
+	:BindParam("z")
+	:BindParam("type", true)
+	:BindParam("data", true)
+	
+	local Formula, Error = a_Expression:Compile()
+	if (not Formula) then
+		return false, "Invalid formula"
+	end
+	
+	-- Test the formula to check if it is a comparison.
+	local Succes, TestResult = pcall(Formula, 1, 1, 1, 1, 1)
+	if (not Succes or (type(TestResult) ~= "boolean")) then
+		return false, "The formula isn't a comparison"
+	end
+	
+	Obj.m_Cache      = {}
+	Obj.m_BlockTable = a_BlockTable
+	Obj.m_Formula    = Formula
+	Obj.m_Unit       = a_Unit
+	Obj.m_Zero       = a_Zero
+	Obj.m_Size       = Vector3f()
+	
+	return Obj
+end
+
+
+
+
+
+function cShapeGenerator:ChooseBlockTypeMeta()
+	local RandomNumber = math.random()
+	for Idx, Value in ipairs(self.m_BlockTable) do
+		if (RandomNumber <= Value.Chance) then
+			return Value.BlockType, Value.BlockMeta
+		end
+	end
+	
+	return E_BLOCK_AIR, 0
+end
+
+
+
+
+
+function cShapeGenerator:GetBlockInfoFromFormula(a_BlockPos)
+	local Index = a_BlockPos.x + (a_BlockPos.z * self.m_Size.x) + (a_BlockPos.y * self.m_Size.x * self.m_Size.z)
+	local BlockInfo = self.m_Cache[Index]
+	
+	-- The block already exists in the cache. Return the info from that.
+	if (BlockInfo) then
+		return BlockInfo.DoSet, BlockInfo.BlockType, BlockInfo.BlockMeta
+	end
+	
+	local scaled = (a_BlockPos - self.m_Zero) / self.m_Unit
+	local BlockType, BlockMeta = self:ChooseBlockTypeMeta()
+	
+	-- Execute the formula to get the info from it.
+	local DoSet, BlockType, BlockMeta = self.m_Formula(scaled.x, scaled.y, scaled.z, BlockType, BlockMeta)
+	
+	-- Save the block info in the cache
+	self.m_Cache[Index] = {DoSet = DoSet, BlockType = BlockType, BlockMeta = BlockMeta}
+	
+	return DoSet, BlockType, BlockMeta
+end
+
+
+
+
+
+function cShapeGenerator:MakeShape(a_BlockArea, a_MinVector, a_MaxVector, a_IsHollow)
+	local Handler = a_IsHollow and cShapeGenerator.m_HollowHandler or cShapeGenerator.m_SolidHandler
+	local NumAffectedBlocks = 0
+	self.m_Size = Vector3f(a_BlockArea:GetSize())
+	
+	local CurrentBlock = Vector3f(a_MinVector)
+	for X = a_MinVector.x, a_MaxVector.x do
+		CurrentBlock.x = X
+		for Y = a_MinVector.y, a_MaxVector.y do
+			CurrentBlock.y = Y
+			for Z = a_MinVector.z, a_MaxVector.z do
+				CurrentBlock.z = Z
+				local DoSet, BlockType, BlockMeta = self:GetBlockInfoFromFormula(CurrentBlock)
+				if (DoSet and Handler(self, a_BlockArea, CurrentBlock)) then
+					a_BlockArea:SetRelBlockTypeMeta(X, Y, Z, BlockType, BlockMeta)
+					NumAffectedBlocks = NumAffectedBlocks + 1
+				end
+			end --  /for Z
+		end --  /for Y
+	end --  /for X
+	
+	return NumAffectedBlocks
+end
+
+
+
+
+
+-- (STATIC) Creates a cylinder in the given blockarea
+function cShapeGenerator.MakeCylinder(a_BlockArea, a_BlockTable, a_Radius, a_IsHollow)
+	local SizeX, SizeY, SizeZ = a_BlockArea:GetCoordRange()
+	local MiddleVector = Vector3f(SizeX / 2, 0, SizeZ / 2)
+	local NumAffectedBlocks = 0
+	local CurrentBlock = Vector3f(0, 0, 0)
+	
+	for X = 0, SizeX do
+		CurrentBlock.x = X
+		for Z = 0, SizeZ do
+			CurrentBlock.z = Z
+			
+			local PlaceBlocks = false
+			local Distance = math.floor(((MiddleVector - CurrentBlock):Length()))
+			if (
+				((Distance <= a_Radius) and (not a_IsHollow)) or
+				((Distance == a_Radius) and a_IsHollow)
+			) then
+				PlaceBlocks = true
+			end
+			
+			if (PlaceBlocks) then
+				for Y = 0, SizeY do
+					NumAffectedBlocks = NumAffectedBlocks + 1
+					local RandomNumber = math.random()
+					for Idx, Value in ipairs(a_BlockTable) do
+						if (RandomNumber <= Value.Chance) then
+							a_BlockArea:SetRelBlockTypeMeta(X, Y, Z, Value.BlockType, Value.BlockMeta)
+							break
+						end
+					end -- /for Y
+				end
+			end
+		end -- /for Z
+	end -- /for X
+	
+	return NumAffectedBlocks
+end
+
+
+
+
+
+-- (STATIC) Creates a sphere in the given blockarea.
+function cShapeGenerator.MakeSphere(a_BlockArea, a_BlockTable, a_Radius, a_IsHollow)
+	local SizeX, SizeY, SizeZ = a_BlockArea:GetCoordRange()
+	local MiddleVector = Vector3f(SizeX / 2, SizeY / 2, SizeZ / 2)
+	local NumAffectedBlocks = 0
+	local CurrentBlock = Vector3f(0, 0, 0)
+	
+	for X = 0, SizeX do
+		CurrentBlock.x = X
+		for Y = 0, SizeY do
+			CurrentBlock.y = Y
+			for Z = 0, SizeZ do
+				CurrentBlock.z = Z
+				
+				local PlaceBlocks = false
+				local Distance = math.floor(((MiddleVector - CurrentBlock):Length()))
+				if (
+					((Distance <= a_Radius) and (not a_IsHollow)) or
+					((Distance == a_Radius) and a_IsHollow)
+				) then
+					PlaceBlocks = true
+				end
+				
+				if (PlaceBlocks) then
+					NumAffectedBlocks = NumAffectedBlocks + 1
+					local RandomNumber = math.random()
+					for Idx, Value in ipairs(a_BlockTable) do
+						if (RandomNumber <= Value.Chance) then
+							a_BlockArea:SetRelBlockTypeMeta(X, Y, Z, Value.BlockType, Value.BlockMeta)
+							break
+						end
+					end
+				end
+			end -- /for Z
+		end -- /for Y
+	end -- /for X
+	
+	return NumAffectedBlocks
+end
+
+
+
+
+
+-- (STATIC) Creates a pyramid in the given BlockArea.
+function cShapeGenerator.MakePyramid(a_BlockArea, a_BlockTable, a_IsHollow)
+	local SizeX, SizeY, SizeZ = a_BlockArea:GetCoordRange()
+	local NumAffectedBlocks = 0
+	
+	-- Returns a random block from a_BlockTable
+	local GetBlockTypeMeta = function()
+		local RandomNumber = math.random()
+		for Idx, Value in ipairs(a_BlockTable) do
+			if (RandomNumber <= Value.Chance) then
+				return Value.BlockType, Value.BlockMeta
+			end
+		end
+	end
+	
+	-- Makes a hollow layer
+	local HollowLayer = function(a_Y)
+		local MinX = a_Y
+		local MaxX = SizeX - a_Y
+		local MinZ = a_Y
+		local MaxZ = SizeZ - a_Y
+		for X = MinX, MaxX do
+			local BlockType, BlockMeta = GetBlockTypeMeta()
+			a_BlockArea:SetRelBlockTypeMeta(X, a_Y, MinZ, BlockType, BlockMeta)
+			
+			BlockType, BlockMeta = GetBlockTypeMeta()
+			a_BlockArea:SetRelBlockTypeMeta(X, a_Y, MaxZ, BlockType, BlockMeta)
+		end
+		
+		for Z = MinZ + 1, MaxZ - 1 do
+			local BlockType, BlockMeta = GetBlockTypeMeta()
+			a_BlockArea:SetRelBlockTypeMeta(MinX, a_Y, Z, BlockType, BlockMeta)
+			
+			BlockType, BlockMeta = GetBlockTypeMeta()
+			a_BlockArea:SetRelBlockTypeMeta(MaxX, a_Y, Z, BlockType, BlockMeta)
+		end
+	end
+	
+	-- Makes a solid layer
+	local SolidLayer = function(a_Y)
+		local MinX = a_Y
+		local MaxX = SizeX - a_Y
+		local MinZ = a_Y
+		local MaxZ = SizeZ - a_Y
+		for X = MinX, MaxX do
+			for Z = MinZ, MaxZ do
+				NumAffectedBlocks = NumAffectedBlocks + 1
+				local BlockType, BlockMeta = GetBlockTypeMeta()
+				a_BlockArea:SetRelBlockTypeMeta(X, a_Y, Z, BlockType, BlockMeta)
+			end
+		end
+	end
+	
+	local LayerHandler = (a_IsHollow and HollowLayer) or SolidLayer;
+	for Y = 0, SizeY do		
+		LayerHandler(Y)
+	end
+	
+	return NumAffectedBlocks;
+end
+
+
+
