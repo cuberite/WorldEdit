@@ -131,7 +131,7 @@ end
 
 
 function cShapeGenerator:MakeShape(a_BlockArea, a_MinVector, a_MaxVector, a_IsHollow, a_Mask)
-	local Mask = a_Mask ~= nil and a_Mask or {}
+	local DoCheckMask = #(a_Mask ~= nil and a_Mask or {}) ~= 0
 	local Handler = a_IsHollow and cShapeGenerator.m_HollowHandler or cShapeGenerator.m_SolidHandler
 	local NumAffectedBlocks = 0
 	self.m_Size = Vector3f(a_BlockArea:GetSize())
@@ -146,9 +146,9 @@ function cShapeGenerator:MakeShape(a_BlockArea, a_MinVector, a_MaxVector, a_IsHo
 				local DoSet, BlockType, BlockMeta = self:GetBlockInfoFromFormula(CurrentBlock)
 				
 				-- Check for the mask. 
-				if (DoSet) then
+				if (DoSet and DoCheckMask) then
 					local CurrentBlock, CurrentMeta = a_BlockArea:GetRelBlockTypeMeta(X, Y, Z)
-					local MaskBlock = Mask[CurrentBlock]
+					local MaskBlock = a_Mask[CurrentBlock]
 					
 					if ((MaskBlock == nil) or ((not MaskBlock.TypeOnly) and (MaskBlock.BlockMeta ~= CurrentMeta))) then
 						DoSet = false
@@ -172,7 +172,7 @@ end
 
 -- (STATIC) Creates a cylinder in the given blockarea
 function cShapeGenerator.MakeCylinder(a_BlockArea, a_BlockTable, a_Radius, a_IsHollow, a_Mask)
-	local Mask = a_Mask ~= nil and a_Mask or {}
+	local DoCheckMask = #(a_Mask ~= nil and a_Mask or {}) ~= 0
 	local SizeX, SizeY, SizeZ = a_BlockArea:GetCoordRange()
 	local MiddleVector = Vector3f(SizeX / 2, 0, SizeZ / 2)
 	local NumAffectedBlocks = 0
@@ -193,9 +193,9 @@ function cShapeGenerator.MakeCylinder(a_BlockArea, a_BlockTable, a_Radius, a_IsH
 			end
 			
 			-- Check for the mask. 
-			if (PlaceBlocks) then
+			if (PlaceBlocks and DoCheckMask) then
 				local CurrentBlock, CurrentMeta = a_BlockArea:GetRelBlockTypeMeta(X, Y, Z)
-				local MaskBlock = Mask[CurrentBlock]
+				local MaskBlock = a_Mask[CurrentBlock]
 				
 				if ((MaskBlock == nil) or ((not MaskBlock.TypeOnly) and (MaskBlock.BlockMeta ~= CurrentMeta))) then
 					PlaceBlocks = false
@@ -226,7 +226,7 @@ end
 
 -- (STATIC) Creates a sphere in the given blockarea.
 function cShapeGenerator.MakeSphere(a_BlockArea, a_BlockTable, a_Radius, a_IsHollow, a_Mask)
-	local Mask = a_Mask ~= nil and a_Mask or {}
+	local DoCheckMask = #(a_Mask ~= nil and a_Mask or {}) ~= 0
 	local SizeX, SizeY, SizeZ = a_BlockArea:GetCoordRange()
 	local MiddleVector = Vector3f(SizeX / 2, SizeY / 2, SizeZ / 2)
 	local NumAffectedBlocks = 0
@@ -249,9 +249,9 @@ function cShapeGenerator.MakeSphere(a_BlockArea, a_BlockTable, a_Radius, a_IsHol
 				end
 				
 				-- Check for the mask. 
-				if (PlaceBlocks) then
+				if (PlaceBlocks and DoCheckMask) then
 					local CurrentBlock, CurrentMeta = a_BlockArea:GetRelBlockTypeMeta(X, Y, Z)
-					local MaskBlock = Mask[CurrentBlock]
+					local MaskBlock = a_Mask[CurrentBlock]
 					
 					if ((MaskBlock == nil) or ((not MaskBlock.TypeOnly) and (MaskBlock.BlockMeta ~= CurrentMeta))) then
 						PlaceBlocks = false
@@ -281,14 +281,18 @@ end
 
 -- (STATIC) Creates a pyramid in the given BlockArea.
 function cShapeGenerator.MakePyramid(a_BlockArea, a_BlockTable, a_IsHollow, a_Mask)
-	local Mask = a_Mask ~= nil and a_Mask or {}
+	local DoCheckMask = #(a_Mask ~= nil and a_Mask or {}) ~= 0
 	local SizeX, SizeY, SizeZ = a_BlockArea:GetCoordRange()
 	local NumAffectedBlocks = 0
 	
 	-- Function that checks in the mask if a block can be placed. 
 	local function CheckMask(a_X, a_Y, a_Z)
+		if (not DoCheckMask) then
+			return true
+		end
+		
 		local CurrentBlock, CurrentMeta = a_BlockArea:GetRelBlockTypeMeta(a_X, a_Y, a_Z)
-		local MaskBlock = Mask[CurrentBlock]
+		local MaskBlock = a_Mask[CurrentBlock]
 		
 		if ((MaskBlock == nil) or ((not MaskBlock.TypeOnly) and (MaskBlock.BlockMeta ~= CurrentMeta))) then
 			return false
