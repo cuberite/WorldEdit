@@ -51,13 +51,14 @@ end
 
 
 
+
 function cShapeGenerator:new(a_Zero, a_Unit, a_BlockTable, a_Expression)
 	local Obj = {}
 	
 	setmetatable(Obj, cShapeGenerator)
 	self.__index = self
 	
-	-- Bind the parameters that will be used in the expression
+	-- Bind the parameters that will be used in the expression. We want the data and type returned again.
 	a_Expression:BindParam("x")
 	:BindParam("y")
 	:BindParam("z")
@@ -129,7 +130,8 @@ end
 
 
 
-function cShapeGenerator:MakeShape(a_BlockArea, a_MinVector, a_MaxVector, a_IsHollow)
+function cShapeGenerator:MakeShape(a_BlockArea, a_MinVector, a_MaxVector, a_IsHollow, a_Mask)
+	local Mask = a_Mask ~= nil and a_Mask or {}
 	local Handler = a_IsHollow and cShapeGenerator.m_HollowHandler or cShapeGenerator.m_SolidHandler
 	local NumAffectedBlocks = 0
 	self.m_Size = Vector3f(a_BlockArea:GetSize())
@@ -142,6 +144,17 @@ function cShapeGenerator:MakeShape(a_BlockArea, a_MinVector, a_MaxVector, a_IsHo
 			for Z = a_MinVector.z, a_MaxVector.z do
 				CurrentBlock.z = Z
 				local DoSet, BlockType, BlockMeta = self:GetBlockInfoFromFormula(CurrentBlock)
+				
+				-- Check for the mask. 
+				if (DoSet) then
+					local CurrentBlock, CurrentMeta = a_BlockArea:GetRelBlockTypeMeta(X, Y, Z)
+					local MaskBlock = Mask[CurrentBlock]
+					
+					if ((MaskBlock == nil) or ((not MaskBlock.TypeOnly) and (MaskBlock.BlockMeta ~= CurrentMeta))) then
+						DoSet = false
+					end
+				end
+					
 				if (DoSet and Handler(self, a_BlockArea, CurrentBlock)) then
 					a_BlockArea:SetRelBlockTypeMeta(X, Y, Z, BlockType, BlockMeta)
 					NumAffectedBlocks = NumAffectedBlocks + 1
@@ -158,7 +171,8 @@ end
 
 
 -- (STATIC) Creates a cylinder in the given blockarea
-function cShapeGenerator.MakeCylinder(a_BlockArea, a_BlockTable, a_Radius, a_IsHollow)
+function cShapeGenerator.MakeCylinder(a_BlockArea, a_BlockTable, a_Radius, a_IsHollow, a_Mask)
+	local Mask = a_Mask ~= nil and a_Mask or {}
 	local SizeX, SizeY, SizeZ = a_BlockArea:GetCoordRange()
 	local MiddleVector = Vector3f(SizeX / 2, 0, SizeZ / 2)
 	local NumAffectedBlocks = 0
@@ -176,6 +190,16 @@ function cShapeGenerator.MakeCylinder(a_BlockArea, a_BlockTable, a_Radius, a_IsH
 				((Distance == a_Radius) and a_IsHollow)
 			) then
 				PlaceBlocks = true
+			end
+			
+			-- Check for the mask. 
+			if (PlaceBlocks) then
+				local CurrentBlock, CurrentMeta = a_BlockArea:GetRelBlockTypeMeta(X, Y, Z)
+				local MaskBlock = Mask[CurrentBlock]
+				
+				if ((MaskBlock == nil) or ((not MaskBlock.TypeOnly) and (MaskBlock.BlockMeta ~= CurrentMeta))) then
+					PlaceBlocks = false
+				end
 			end
 			
 			if (PlaceBlocks) then
@@ -201,7 +225,8 @@ end
 
 
 -- (STATIC) Creates a sphere in the given blockarea.
-function cShapeGenerator.MakeSphere(a_BlockArea, a_BlockTable, a_Radius, a_IsHollow)
+function cShapeGenerator.MakeSphere(a_BlockArea, a_BlockTable, a_Radius, a_IsHollow, a_Mask)
+	local Mask = a_Mask ~= nil and a_Mask or {}
 	local SizeX, SizeY, SizeZ = a_BlockArea:GetCoordRange()
 	local MiddleVector = Vector3f(SizeX / 2, SizeY / 2, SizeZ / 2)
 	local NumAffectedBlocks = 0
@@ -223,6 +248,16 @@ function cShapeGenerator.MakeSphere(a_BlockArea, a_BlockTable, a_Radius, a_IsHol
 					PlaceBlocks = true
 				end
 				
+				-- Check for the mask. 
+				if (PlaceBlocks) then
+					local CurrentBlock, CurrentMeta = a_BlockArea:GetRelBlockTypeMeta(X, Y, Z)
+					local MaskBlock = Mask[CurrentBlock]
+					
+					if ((MaskBlock == nil) or ((not MaskBlock.TypeOnly) and (MaskBlock.BlockMeta ~= CurrentMeta))) then
+						PlaceBlocks = false
+					end
+				end
+			
 				if (PlaceBlocks) then
 					NumAffectedBlocks = NumAffectedBlocks + 1
 					local RandomNumber = math.random()
@@ -245,9 +280,21 @@ end
 
 
 -- (STATIC) Creates a pyramid in the given BlockArea.
-function cShapeGenerator.MakePyramid(a_BlockArea, a_BlockTable, a_IsHollow)
+function cShapeGenerator.MakePyramid(a_BlockArea, a_BlockTable, a_IsHollow, a_Mask)
+	local Mask = a_Mask ~= nil and a_Mask or {}
 	local SizeX, SizeY, SizeZ = a_BlockArea:GetCoordRange()
 	local NumAffectedBlocks = 0
+	
+	-- Function that checks in the mask if a block can be placed. 
+	local function CheckMask(a_X, a_Y, a_Z)
+		local CurrentBlock, CurrentMeta = a_BlockArea:GetRelBlockTypeMeta(a_X, a_Y, a_Z)
+		local MaskBlock = Mask[CurrentBlock]
+		
+		if ((MaskBlock == nil) or ((not MaskBlock.TypeOnly) and (MaskBlock.BlockMeta ~= CurrentMeta))) then
+			return false
+		end
+		return true
+	end
 	
 	-- Returns a random block from a_BlockTable
 	local GetBlockTypeMeta = function()
@@ -266,19 +313,31 @@ function cShapeGenerator.MakePyramid(a_BlockArea, a_BlockTable, a_IsHollow)
 		local MinZ = a_Y
 		local MaxZ = SizeZ - a_Y
 		for X = MinX, MaxX do
-			local BlockType, BlockMeta = GetBlockTypeMeta()
-			a_BlockArea:SetRelBlockTypeMeta(X, a_Y, MinZ, BlockType, BlockMeta)
+			if (CheckMask(X, a_Y, MinZ)) then
+				NumAffectedBlocks = NumAffectedBlocks + 1
+				local BlockType, BlockMeta = GetBlockTypeMeta()
+				a_BlockArea:SetRelBlockTypeMeta(X, a_Y, MinZ, BlockType, BlockMeta)
+			end
 			
-			BlockType, BlockMeta = GetBlockTypeMeta()
-			a_BlockArea:SetRelBlockTypeMeta(X, a_Y, MaxZ, BlockType, BlockMeta)
+			if (CheckMask(X, a_Y, MaxZ)) then
+				NumAffectedBlocks = NumAffectedBlocks + 1
+				local BlockType, BlockMeta = GetBlockTypeMeta()
+				a_BlockArea:SetRelBlockTypeMeta(X, a_Y, MaxZ, BlockType, BlockMeta)
+			end
 		end
 		
 		for Z = MinZ + 1, MaxZ - 1 do
-			local BlockType, BlockMeta = GetBlockTypeMeta()
-			a_BlockArea:SetRelBlockTypeMeta(MinX, a_Y, Z, BlockType, BlockMeta)
+			if (CheckMask(MinX, a_Y, Z)) then
+				NumAffectedBlocks = NumAffectedBlocks + 1
+				local BlockType, BlockMeta = GetBlockTypeMeta()
+				a_BlockArea:SetRelBlockTypeMeta(MinX, a_Y, Z, BlockType, BlockMeta)
+			end
 			
-			BlockType, BlockMeta = GetBlockTypeMeta()
-			a_BlockArea:SetRelBlockTypeMeta(MaxX, a_Y, Z, BlockType, BlockMeta)
+			if (CheckMask(MaxX, a_Y, Z)) then
+				NumAffectedBlocks = NumAffectedBlocks + 1
+				local BlockType, BlockMeta = GetBlockTypeMeta()
+				a_BlockArea:SetRelBlockTypeMeta(MaxX, a_Y, Z, BlockType, BlockMeta)
+			end
 		end
 	end
 	
@@ -290,18 +349,24 @@ function cShapeGenerator.MakePyramid(a_BlockArea, a_BlockTable, a_IsHollow)
 		local MaxZ = SizeZ - a_Y
 		for X = MinX, MaxX do
 			for Z = MinZ, MaxZ do
-				NumAffectedBlocks = NumAffectedBlocks + 1
-				local BlockType, BlockMeta = GetBlockTypeMeta()
-				a_BlockArea:SetRelBlockTypeMeta(X, a_Y, Z, BlockType, BlockMeta)
+				if (CheckMask(X, a_Y, Z)) then
+					NumAffectedBlocks = NumAffectedBlocks + 1
+					local BlockType, BlockMeta = GetBlockTypeMeta()
+					a_BlockArea:SetRelBlockTypeMeta(X, a_Y, Z, BlockType, BlockMeta)
+				end
 			end
 		end
 	end
 	
+	-- Choose the layer handler
 	local LayerHandler = (a_IsHollow and HollowLayer) or SolidLayer;
+	
+	-- Call the layer handler on each layer.
 	for Y = 0, SizeY do		
 		LayerHandler(Y)
 	end
 	
+	-- Return the number of changed blocks
 	return NumAffectedBlocks;
 end
 

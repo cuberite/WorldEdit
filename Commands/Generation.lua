@@ -122,8 +122,11 @@ function HandleGenerationShapeCommand(a_Split, a_Player)
 	-- Push an undo snapshot:
 	State.UndoStack:PushUndoFromCuboid(World, SrcCuboid, "generation")
 	
+	-- Get the mask for the equipped item
+	local Mask = State.ToolRegistrator:GetMask(a_Player:GetEquippedItem().m_ItemType)
+	
 	-- Write the shape in the block area
-	local NumAffectedBlocks = ShapeGenerator:MakeShape(BA, Vector3f(1, 1, 1), Vector3f(SizeX, SizeY, SizeZ), IsHollow)
+	local NumAffectedBlocks = ShapeGenerator:MakeShape(BA, Vector3f(1, 1, 1), Vector3f(SizeX, SizeY, SizeZ), IsHollow, Mask)
 	
 	-- Send a message to the player with the number of changed blocks
 	a_Player:SendMessage(cChatColor.LightPurple .. NumAffectedBlocks .. " block(s) changed")
@@ -183,8 +186,11 @@ function HandleCylCommand(a_Split, a_Player)
 	local BlockArea = cBlockArea()
 	BlockArea:Read(World, Cuboid)
 	
+	-- Get the mask for the equipped item
+	local Mask = State.ToolRegistrator:GetMask(a_Player:GetEquippedItem().m_ItemType)
+	
 	-- Create the cylinder in the blockarea
-	local NumAffectedBlocks = cShapeGenerator.MakeCylinder(BlockArea, BlockTable, Radius, a_Split[1] == "//hcyl")
+	local NumAffectedBlocks = cShapeGenerator.MakeCylinder(BlockArea, BlockTable, Radius, a_Split[1] == "//hcyl", Mask)
 	
 	-- Write the changes in the world
 	BlockArea:Write(World, Cuboid.p1)
@@ -243,8 +249,11 @@ function HandleSphereCommand(a_Split, a_Player)
 	local BlockArea = cBlockArea()
 	BlockArea:Read(World, Cuboid)
 	
+	-- Get the mask for the equipped item
+	local Mask = State.ToolRegistrator:GetMask(a_Player:GetEquippedItem().m_ItemType)
+	
 	-- Create the cylinder in the blockarea
-	local NumAffectedBlocks = cShapeGenerator.MakeSphere(BlockArea, BlockTable, Radius, a_Split[1] == "//hsphere")
+	local NumAffectedBlocks = cShapeGenerator.MakeSphere(BlockArea, BlockTable, Radius, a_Split[1] == "//hsphere", Mask)
 	
 	-- Write the changes in the world
 	BlockArea:Write(World, Cuboid.p1)
@@ -309,10 +318,16 @@ function HandlePyramidCommand(a_Split, a_Player)
 	-- Read the affected area from the world.
 	BlockArea:Read(World, Cuboid, cBlockArea.baTypes + cBlockArea.baMetas)
 	
-	-- Create the pyramid in the blockarea.
-	local AffectedBlocks = cShapeGenerator.MakePyramid(BlockArea, BlockTable, a_Split[1] == "//hpyramid");
+	-- Get the mask for the equipped item
+	local Mask = State.ToolRegistrator:GetMask(a_Player:GetEquippedItem().m_ItemType)
 	
+	-- Create the pyramid in the blockarea.
+	local AffectedBlocks = cShapeGenerator.MakePyramid(BlockArea, BlockTable, a_Split[1] == "//hpyramid", Mask);
+	
+	-- Write the changes into the world
 	BlockArea:Write(World, Cuboid.p1)
+	
+	-- Send a message to the player with the amount of changed blocks
 	a_Player:SendMessage(cChatColor.LightPurple .. AffectedBlocks .. " block(s) have been created.")
 	
 	return true
