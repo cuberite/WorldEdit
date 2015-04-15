@@ -240,7 +240,7 @@ g_PluginInfo =
 			Permission = "",  -- Multi-commands shouldn't specify a permission
 			Handler = nil,  -- Provide a standard multi-command handler
 			HelpString = "",  -- Don't show in help
-			Category = "Clipboard",
+			Category = "Schematic",
 			Subcommands =
 			{
 				save =
@@ -249,6 +249,7 @@ g_PluginInfo =
 					Permission = "worldedit.schematic.save",
 					Handler = HandleSchematicSaveCommand,
 					Alias = "s",
+					Category = "Schematic",
 				},
 				load =
 				{
@@ -256,6 +257,7 @@ g_PluginInfo =
 					Permission = "worldedit.schematic.load",
 					Handler = HandleSchematicLoadCommand,
 					Alias = "l",
+					Category = "Schematic",
 				},
 				formats =
 				{
@@ -263,6 +265,7 @@ g_PluginInfo =
 					Permission = "worldedit.schematic.list",
 					Handler = HandleSchematicFormatsCommand,
 					Alias = {"listformats", "f" },
+					Category = "Schematic",
 				},
 				list =
 				{
@@ -270,6 +273,7 @@ g_PluginInfo =
 					Permission = "worldedit.schematic.list",
 					Handler = HandleSchematicListCommand,
 					Alias = { "all", "ls", },
+					Category = "Schematic",
 				},
 			},
 		},
@@ -404,12 +408,14 @@ g_PluginInfo =
 					HelpString = " Switch to the sphere brush tool.",
 					Permission = "worldedit.brush.sphere",
 					Handler = HandleSphereBrush,
+					Category = "Brush",
 				},
 				cylinder =
 				{
 					HelpString = " Switch to the cylinder brush tool.",
 					Permission = "worldedit.brush.cylinder",
 					Handler = HandleCylinderBrush,
+					Category = "Brush",
 				},
 			},
 		},
@@ -609,6 +615,10 @@ g_PluginInfo =
 		{
 			Description = "Commands in this category will allow the player to edit the region he/she has selected using //pos[1/2] or using the wand item.",
 		},
+		Schematic =
+		{
+			Description = "Commands that load or save schematic's",
+		}
 		Selection =
 		{
 			Description = "Commands that give info/help setting the region you have selected.",

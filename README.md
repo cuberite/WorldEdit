@@ -5,12 +5,6 @@ This plugin allows you to easily manage the world, edit the world, navigate arou
 ### General
 | Command | Permission | Description |
 | ------- | ---------- | ----------- |
-|//schematic formats | worldedit.schematic.list | List available schematic formats|
-|//schematic list | worldedit.schematic.list | List available schematics|
-|//schematic load | worldedit.schematic.load | Loads the given schematic file.|
-|//schematic save | worldedit.schematic.save | Saves the current clipboard to a file with the given filename.|
-|/brush cylinder | worldedit.brush.cylinder |  Switch to the cylinder brush tool.|
-|/brush sphere | worldedit.brush.sphere |  Switch to the sphere brush tool.|
 |/we cui |  | Complete CUI handshake|
 |/we help |  | Sends all the available commands to the player.|
 |/we reload |  | Reloads the WorldEdit plugin.|
@@ -33,6 +27,8 @@ Any biome specific commands.
 | Command | Permission | Description |
 | ------- | ---------- | ----------- |
 |/brush |  |  Brush commands|
+|/brush cylinder | worldedit.brush.cylinder |  Switch to the cylinder brush tool.|
+|/brush sphere | worldedit.brush.sphere |  Switch to the sphere brush tool.|
 |/mask | worldedit.brush.options.mask |  Set the brush mask|
 
 
@@ -108,6 +104,16 @@ Commands in this category will allow the player to edit the region he/she has se
 |//set | worldedit.region.set |  Set all the blocks inside the selection to a block|
 |//vmirror | worldedit.region.vmirror | Mirrors the selection vertically|
 |//walls | worldedit.region.walls |  Build the four sides of the selection|
+
+
+
+### Schematic
+| Command | Permission | Description |
+| ------- | ---------- | ----------- |
+|//schematic formats | worldedit.schematic.list | List available schematic formats|
+|//schematic list | worldedit.schematic.list | List available schematics|
+|//schematic load | worldedit.schematic.load | Loads the given schematic file.|
+|//schematic save | worldedit.schematic.save | Saves the current clipboard to a file with the given filename.|
 
 
 
