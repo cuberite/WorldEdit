@@ -262,14 +262,14 @@ end
 
 
 function HandlePumpkinsCommand(a_Split, a_Player)
-	if a_Split[2] == nil then
-		Radius = 10
-	elseif tonumber(a_Split[2]) == nil then
+	-- /pumpkins [Radius]
+	
+	local Radius = not a_Split[2] and 10 or tonumber(a_Split[2])
+	if (not Radius) then
 		a_Player:SendMessage(cChatColor.Rose .. "invaild argument")
 		return true
 	end
 		
-	local Radius = a_Split[2]
 	
 	local PosX = math.floor(a_Player:GetPosX())
 	local PosZ = math.floor(a_Player:GetPosZ())
@@ -317,6 +317,7 @@ function HandlePumpkinsCommand(a_Split, a_Player)
 	end
 	return true
 end
+
 
 
 
