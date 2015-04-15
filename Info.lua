@@ -27,10 +27,10 @@ g_PluginInfo =
 		
 		["//addleaves"] =
 		{
-			Permission = "worldedit.addleaves",
+			Permission = "worldedit.region.addleaves",
 			Handler = HandleAddLeavesCommand,
 			HelpString = " Adds leaves next to log blocks",
-			Category = "Tool",
+			Category = "Region",
 		},
 		
 		["//count"] =
@@ -161,7 +161,7 @@ g_PluginInfo =
 			Permission = "worldedit.region.leafdecay",
 			Handler = HandleLeafDecayCommand,
 			HelpString = "Removes all the leaves in the selection that would decay",
-			Category = "Selection",
+			Category = "Region",
 		},
 		
 		["//mirror"] =

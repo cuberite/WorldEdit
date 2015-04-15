@@ -105,3 +105,32 @@ end
 
 
 
+function HandleRotateCommand(a_Split, a_Player)
+	-- //rotate [NumDegrees]
+	
+	-- Check if the clipboard is valid:
+	local State = GetPlayerState(a_Player)
+	if not(State.Clipboard:IsValid()) then
+		a_Player:SendMessage(cChatColor.Rose .. "Nothing in the clipboard. Use //copy or //cut first.")
+		return true
+	end
+	
+	-- Check if the player gave an angle:
+	local Angle = tonumber(a_Split[2])
+	if (Angle == nil) then
+		a_Player:SendMessage(cChatColor.Rose .. "Usage: //rotate [90, 180, 270, -90, -180, -270]")
+		return true
+	end
+	
+	-- Rotate the clipboard:
+	local NumRots = math.floor(Angle / 90 + 0.5)  -- round to nearest 90-degree step
+	State.Clipboard:Rotate(NumRots)
+	a_Player:SendMessage(cChatColor.LightPurple .. "Rotated the clipboard by " .. (NumRots * 90) .. " degrees CCW")
+	a_Player:SendMessage(cChatColor.LightPurple .. "Clipboard size: " .. State.Clipboard:GetSizeDesc())
+	return true
+end
+
+
+
+
+
