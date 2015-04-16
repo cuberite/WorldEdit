@@ -2,16 +2,6 @@ This plugin allows you to easily manage the world, edit the world, navigate arou
 
 # Commands
 
-### General
-| Command | Permission | Description |
-| ------- | ---------- | ----------- |
-|/we cui |  | Complete CUI handshake|
-|/we help |  | Sends all the available commands to the player.|
-|/we reload |  | Reloads the WorldEdit plugin.|
-|/we version |  | Sends the plugin version to the player.|
-
-
-
 ### Biome
 Any biome specific commands.
 
@@ -108,6 +98,8 @@ Commands in this category will allow the player to edit the region he/she has se
 
 
 ### Schematic
+Commands that load or save schematic's
+
 | Command | Permission | Description |
 | ------- | ---------- | ----------- |
 |//schematic formats | worldedit.schematic.list | List available schematic formats|
@@ -150,6 +142,10 @@ Commands that don't realy fit in another category.
 |//wand | worldedit.wand |  Get the wand object|
 |/toggleeditwand | worldedit.wand.toggle |  Toggle functionality of the edit wand|
 |/we |  |  World edit command|
+|/we cui |  | Complete CUI handshake|
+|/we help |  | Sends all the available commands to the player.|
+|/we reload |  | Reloads the WorldEdit plugin.|
+|/we version |  | Sends the plugin version to the player.|
 
 
 

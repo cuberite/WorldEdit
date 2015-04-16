@@ -573,24 +573,28 @@ g_PluginInfo =
 					HelpString = "Complete CUI handshake",
 					Permission = "",
 					Handler = HandleWorldEditCuiCommand,
+					Category = "Special",
 				},
 				version =
 				{
 					HelpString = "Sends the plugin version to the player.",
 					Permission = "",
 					Handler = HandleWorldEditVersionCommand,
+					Category = "Special",
 				},
 				reload =
 				{
 					HelpString = "Reloads the WorldEdit plugin.",
 					Permission = "",
 					Handler = HandleWorldEditReloadCommand,
+					Category = "Special",
 				},
 				help =
 				{
 					HelpString = "Sends all the available commands to the player.",
 					Permission = "",
 					Handler = HandleWorldEditHelpCommand,
+					Category = "Special",
 				},
 			},
 		},
@@ -618,7 +622,7 @@ g_PluginInfo =
 		Schematic =
 		{
 			Description = "Commands that load or save schematic's",
-		}
+		},
 		Selection =
 		{
 			Description = "Commands that give info/help setting the region you have selected.",
