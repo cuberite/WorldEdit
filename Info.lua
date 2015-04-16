@@ -323,7 +323,7 @@ g_PluginInfo =
 			Permission = "worldedit.region.stack",
 			Handler = HandleStackCommand,
 			HelpString = "Repeat the contents of the selection.",
-			Category = "Selection",
+			Category = "Region",
 		},
 		
 		["//undo"] =

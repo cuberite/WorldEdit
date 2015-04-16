@@ -92,6 +92,7 @@ Commands in this category will allow the player to edit the region he/she has se
 |//mirror | worldedit.region.mirror | Mirrors the selection by the specified plane|
 |//replace | worldedit.region.replace |  Replace all the blocks in the selection with another|
 |//set | worldedit.region.set |  Set all the blocks inside the selection to a block|
+|//stack | worldedit.region.stack | Repeat the contents of the selection.|
 |//vmirror | worldedit.region.vmirror | Mirrors the selection vertically|
 |//walls | worldedit.region.walls |  Build the four sides of the selection|
 
@@ -130,7 +131,6 @@ Commands that give info/help setting the region you have selected.
 |//pos2 | worldedit.selection.pos |  Set position 2|
 |//shift | worldedit.selection.size |  Move the selection area|
 |//size | worldedit.selection.size |  Get the size of the selection|
-|//stack | worldedit.region.stack | Repeat the contents of the selection.|
 
 
 
