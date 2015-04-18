@@ -29,7 +29,7 @@ function Initialize(a_Plugin)
 	RegisterPluginInfoCommands();
 	
 	CreateTables() -- create all the tables
-	LoadSettings(a_Plugin:GetLocalDirectory() .. "/Config.ini") -- load all the settings
+	LoadSettings(a_Plugin:GetLocalFolder() .. "/Config.ini") -- load all the settings
 	
 	cFile:CreateFolder("schematics")
 	
