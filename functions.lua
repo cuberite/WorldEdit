@@ -97,7 +97,7 @@ end
 -- Assumes that the cuboid is sorted
 function ListChunksForCuboid(a_Cuboid)
 	-- Check the params:
-	assert(tolua.type(a_Cuboid) == "a_Cuboid")
+	assert(tolua.type(a_Cuboid) == "cCuboid")
 	
 	-- Get the min / max chunk coords:
 	local MinChunkX = math.floor(a_Cuboid.p1.x / 16)

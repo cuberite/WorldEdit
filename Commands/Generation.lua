@@ -167,33 +167,13 @@ function HandleCylCommand(a_Split, a_Player)
 	
 	local Height = tonumber(a_Split[4] or 1) - 1
 	local Pos = a_Player:GetPosition():Floor()
-	local World = a_Player:GetWorld()
 	
 	local Cuboid = cCuboid(Pos, Pos)
 	Cuboid:Expand(Radius, Radius, 0, Height, Radius, Radius)
 	Cuboid:Sort()
 	
-	-- Check if other plugins want to block this action
-	if not(CheckAreaCallbacks(Cuboid, a_Player, World, a_Split[1]:sub(3, -1))) then
-		return true
-	end
-	
-	-- Push the area to Undo stack:
-	local State = GetPlayerState(a_Player)
-	State.UndoStack:PushUndoFromCuboid(World, Cuboid, a_Split[1]:sub(3, -1))
-	
-	-- Read the affected area into a block area
-	local BlockArea = cBlockArea()
-	BlockArea:Read(World, Cuboid)
-	
-	-- Get the mask for the equipped item
-	local Mask = State.ToolRegistrator:GetMask(a_Player:GetEquippedItem().m_ItemType)
-	
-	-- Create the cylinder in the blockarea
-	local NumAffectedBlocks = cShapeGenerator.MakeCylinder(BlockArea, BlockTable, Radius, a_Split[1] == "//hcyl", Mask)
-	
-	-- Write the changes in the world
-	BlockArea:Write(World, Cuboid.p1)
+	-- Create the sphere in the world
+	local NumAffectedBlocks = CreateCylinderInCuboid(a_Player, Cuboid, BlockTable, a_Split[1] == "//hcyl")
 	
 	-- Send a message to the player with the amount of affected blocks
 	a_Player:SendMessage(cChatColor.LightPurple .. NumAffectedBlocks .. " block(s) have been created.")
@@ -229,34 +209,14 @@ function HandleSphereCommand(a_Split, a_Player)
 		return true
 	end
 	
-	local Height = tonumber(a_Split[4] or 1) - 1
 	local Pos    = a_Player:GetPosition():Floor()
-	local World  = a_Player:GetWorld()
 	
 	local Cuboid = cCuboid(Pos, Pos)
 	Cuboid:Expand(Radius, Radius, Radius, Radius, Radius, Radius)
 	Cuboid:Sort()
 	
-	-- Check if other plugins want to block this action
-	if not(CheckAreaCallbacks(Cuboid, a_Player, World, a_Split[1]:sub(3, -1))) then
-		return true
-	end
-	
-	-- Push the area to Undo stack:
-	local State = GetPlayerState(a_Player)
-	State.UndoStack:PushUndoFromCuboid(World, Cuboid, a_Split[1]:sub(3, -1))
-	
-	local BlockArea = cBlockArea()
-	BlockArea:Read(World, Cuboid)
-	
-	-- Get the mask for the equipped item
-	local Mask = State.ToolRegistrator:GetMask(a_Player:GetEquippedItem().m_ItemType)
-	
-	-- Create the cylinder in the blockarea
-	local NumAffectedBlocks = cShapeGenerator.MakeSphere(BlockArea, BlockTable, Radius, a_Split[1] == "//hsphere", Mask)
-	
-	-- Write the changes in the world
-	BlockArea:Write(World, Cuboid.p1)
+	-- Create the sphere in the world
+	local NumAffectedBlocks = CreateSphereInCuboid(a_Player, Cuboid, BlockTable, a_Split[1] == "//hsphere")
 	
 	-- Send a message to the player with the amount of affected blocks
 	a_Player:SendMessage(cChatColor.LightPurple .. NumAffectedBlocks .. " block(s) have been created.")

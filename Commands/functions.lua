@@ -386,85 +386,47 @@ end
 
 
 
--- Create a sphere at these coordinates. Returns the affected blocks count.
-function CreateSphereAt(a_BlockTable, a_Position, a_Player, a_Radius, a_Hollow, a_IsBrush)
-	-- Check if other plugins agree with the operation:
+-- Create a sphere at these coordinates. It uses ChunkStay to make sure the chunks are loaded. Returns the affected blocks count.
+-- a_Player is the player who wants to place the sphere
+-- a_Cuboid is the area where the sphere has to be placed in
+-- a_BlockTable is a table containing all the blocks types/(metas) to place
+-- a_IsHollow is a bool value if the sphere has to be hollow
+-- a_Mask is either nil or a table containing the masked blocks
+function CreateSphereInCuboid(a_Player, a_Cuboid, a_BlockTable, a_IsHollow, a_Mask)
 	local World = a_Player:GetWorld()
-	local MinX, MaxX = a_Position.x - a_Radius, a_Position.x + a_Radius
-	local MinY, MaxY = a_Position.y - a_Radius, a_Position.y + a_Radius
-	local MinZ, MaxZ = a_Position.z - a_Radius, a_Position.z + a_Radius
-	local Cuboid = cCuboid(MinX, MinY, MinZ, MaxX, MaxY, MaxZ)
-	Cuboid:ClampY(0, 255)
-
-	local ActionName = "sphere"
-	if (a_Hollow) then
-		ActionName = "hsphere"
-	end
-
-	if not(CheckAreaCallbacks(Cuboid, a_Player, World, ActionName)) then
+	local ActionName = (a_IsHollow and "hsphere") or "sphere"
+	
+	-- Check if other plugins agree with the operation:
+	if not(CheckAreaCallbacks(a_Cuboid, a_Player, World, ActionName)) then
 		return 0
 	end
+	
+	-- Create a table with all the chunks that will be affected
+	local AffectedChunks = ListChunksForCuboid(a_Cuboid)
 
 	-- Push the area into an undo stack:
 	local State = GetPlayerState(a_Player)
-	State.UndoStack:PushUndoFromCuboid(World, Cuboid)
+	State.UndoStack:PushUndoFromCuboid(World, a_Cuboid)
 
-	-- Read the current contents of the world:
-	local BlockArea = cBlockArea()
-	BlockArea:Read(World, Cuboid, cBlockArea.baTypes + cBlockArea.baMetas)
-
+	-- Calculate the chances for all the blocks
 	local BlockTable = CalculateBlockChances(a_BlockTable)
-	local MaskTable = nil
-	if (a_IsBrush) then
-		local State = GetPlayerState(a_Player)
-		MaskTable = State.ToolRegistrator:GetMask(a_Player:GetEquippedItem().m_ItemType)
-	end
+	local NumAffectedBlocks = 0
+	
+	local BlockArea = cBlockArea()
+	World:ChunkStay(AffectedChunks, nil,
+		function()
+			-- Read the area
+			BlockArea:Read(World, a_Cuboid, cBlockArea.baTypes + cBlockArea.baMetas)
+			
+			local Radius = BlockArea:GetSizeX() / 2
+			
+			NumAffectedBlocks = cShapeGenerator.MakeSphere(BlockArea, BlockTable, Radius, a_IsHollow, a_Mask)
 
-	-- Change blocks inside the sphere:
-	local MidPoint = Vector3d(a_Radius, a_Position.y - MinY, a_Radius)  -- Midpoint of the sphere, relative to the area
-	local NumBlocks = 0
-	local SqrRadius = a_Radius * a_Radius
-	for Y = 0, Cuboid.p2.y - Cuboid.p1.y do  -- The Cuboid has been Y-clamped correctly, take advantage of that
-		for Z = 0, 2 * a_Radius do
-			for X = 0, 2 * a_Radius do
-				local ChangeBlock = false
-				if (a_Hollow) then
-					local Distance = math.floor((MidPoint - Vector3d(X, Y, Z)):Length())
-					if (Distance == a_Radius) then
-						ChangeBlock = true
-					end
-				else
-					local Distance = math.floor((MidPoint - Vector3d(X, Y, Z)):SqrLength())
-					if (Distance <= SqrRadius) then
-						ChangeBlock = true
-					end
-				end
-
-				if (ChangeBlock and (MaskTable ~= nil)) then
-					local WorldBlock, WorldBlockMeta = BlockArea:GetRelBlockTypeMeta(X, Y, Z)
-					local Block = MaskTable[WorldBlock]
-					if ((Block == nil) or ((not Block.TypeOnly) and (Block.BlockMeta ~= WorldBlockMeta))) then
-						ChangeBlock = false
-					end
-				end
-
-				if (ChangeBlock) then
-					local RandomNumber = math.random()
-					for Idx, Value in ipairs(BlockTable) do
-						if (RandomNumber <= Value.Chance) then
-							BlockArea:SetRelBlockTypeMeta(X, Y, Z, Value.BlockType, Value.BlockMeta)
-							break
-						end
-					end
-					NumBlocks = NumBlocks + 1
-				end
-			end
+			-- Write the area back to world:
+			BlockArea:Write(World, a_Cuboid.p1)
 		end
-	end
-
-	-- Write the area back to world:
-	BlockArea:Write(World, MinX, MinY, MinZ)
-	return NumBlocks
+	)
+	return NumAffectedBlocks
 end
 
 
@@ -472,77 +434,46 @@ end
 
 
 -- Create a cylinder at these coordinates. Returns the affected blocks count.
-function CreateCylinderAt(a_BlockTable, a_Position, a_Player, a_Radius, a_Height, a_Hollow, a_IsBrush)
-	local MinX, MaxX = a_Position.x - a_Radius, a_Position.x + a_Radius
-	local MinY, MaxY = a_Position.y, a_Position.y + a_Height
-	local MinZ, MaxZ = a_Position.z - a_Radius, a_Position.z + a_Radius
+-- a_Player is the player who wants to place the cylinder
+-- a_Cuboid is the area where the cylinder has to be placed in
+-- a_BlockTable is a table containing all the blocks types/(metas) to place
+-- a_IsHollow is a bool value if the cylinder has to be hollow
+-- a_Mask is either nil or a table containing the masked blocks
+function CreateCylinderInCuboid(a_Player, a_Cuboid, a_BlockTable, a_IsHollow, a_Mask)
 	local World = a_Player:GetWorld()
 	
-	local Cuboid = cCuboid(MinX, MinY, MinZ, MaxX, MaxY, MaxZ)
-	Cuboid:ClampY(0, 255)
-
-	local ActionName = "cyl"
-	if (a_Hollow) then
-		ActionName = "hcyl"
-	end
-
-	if not(CheckAreaCallbacks(Cuboid, a_Player, World, ActionName)) then
+	local ActionName = (a_IsHollow and "hcyl") or "cyl"
+	-- Check if other plugins agree with the operation:
+	if not(CheckAreaCallbacks(a_Cuboid, a_Player, World, ActionName)) then
 		return 0
 	end
 	
+	-- Create a table with all the chunks that will be affected
+	local AffectedChunks = ListChunksForCuboid(a_Cuboid)
+
 	-- Push the area into an undo stack:
 	local State = GetPlayerState(a_Player)
-	State.UndoStack:PushUndoFromCuboid(World, Cuboid)
+	State.UndoStack:PushUndoFromCuboid(World, a_Cuboid)
 
+	-- Calculate the chances for all the blocks
 	local BlockTable = CalculateBlockChances(a_BlockTable)
-	local MaskTable = nil
-	if (a_IsBrush) then
-		local State = GetPlayerState(a_Player)
-		MaskTable = State.ToolRegistrator:GetMask(a_Player:GetEquippedItem().m_ItemType)
-	end
-
-	local BlockArea = cBlockArea()
-	BlockArea:Read(World, MinX, MaxX, MinY, MaxY, MinZ, MaxZ, cBlockArea.baTypes + cBlockArea.baMetas)
-	local Size = a_Radius * 2
-	local MiddleVector = Vector3d(a_Radius, 0, a_Radius)
-	local NumBlocks = 0
-
-	for Y = 0, a_Height do
-		for X = 0, Size do
-			for Z = 0, Size do
-				local TempVector = Vector3d(X, 0, Z)
-				local Distance = math.floor((MiddleVector - TempVector):Length())
-
-				if (
-					((Distance <= a_Radius) and (not a_Hollow)) or
-					((Distance == a_Radius) and a_Hollow)
-				) then
-					local ChangeBlock = true
-					if (MaskTable ~= nil) then
-						local WorldBlock, WorldBlockMeta = BlockArea:GetRelBlockTypeMeta(X, Y, Z)
-						local Block = MaskTable[WorldBlock]
-						if ((Block == nil) or ((not Block.TypeOnly) and (Block.BlockMeta ~= WorldBlockMeta))) then
-							ChangeBlock = false
-						end
-					end
-
-					if (ChangeBlock) then
-						local RandomNumber = math.random()
-						for Idx, Value in ipairs(BlockTable) do
-							if (RandomNumber <= Value.Chance) then
-								BlockArea:SetRelBlockTypeMeta(X, Y, Z, Value.BlockType, Value.BlockMeta)
-								break
-							end
-						end
-						NumBlocks = NumBlocks + 1
-					end
-				end
-			end
-		end
-	end
+	local NumAffectedBlocks = 0
 	
-	BlockArea:Write(World, MinX, MinY, MinZ)
-	return NumBlocks
+	local BlockArea = cBlockArea()
+	World:ChunkStay(AffectedChunks, nil,
+		function()
+			-- Read the area
+			BlockArea:Read(World, a_Cuboid, cBlockArea.baTypes + cBlockArea.baMetas)
+			
+			local Radius = BlockArea:GetSizeX() / 2
+			
+			NumAffectedBlocks = cShapeGenerator.MakeCylinder(BlockArea, BlockTable, Radius, a_IsHollow, a_Mask)
+
+			-- Write the area back to world:
+			BlockArea:Write(World, a_Cuboid.p1)
+		end
+	)
+	return NumAffectedBlocks
 end
 
 
