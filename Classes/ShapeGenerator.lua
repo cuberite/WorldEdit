@@ -2,7 +2,7 @@
 -- ShapeGenerator.lua
 
 -- Capable of generating shapes in BlockAreas. Either a predefined shape like a cylinder, or a shape from a mathematical formula
--- TODO: Add support for masks
+
 
 
 
@@ -216,8 +216,8 @@ function cShapeGenerator.MakeCylinder(a_BlockArea, a_BlockTable, a_Radius, a_IsH
 								break
 							end
 						end
-					end -- /for Y
-				end
+					end
+				end -- /for Y
 			end
 		end -- /for Z
 	end -- /for X
