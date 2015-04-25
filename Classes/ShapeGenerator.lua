@@ -131,7 +131,7 @@ end
 
 
 function cShapeGenerator:MakeShape(a_BlockArea, a_MinVector, a_MaxVector, a_IsHollow, a_Mask)
-	local DoCheckMask = #(a_Mask ~= nil and a_Mask or {}) ~= 0
+	local DoCheckMask = a_Mask ~= nil
 	local Handler = a_IsHollow and cShapeGenerator.m_HollowHandler or cShapeGenerator.m_SolidHandler
 	local NumAffectedBlocks = 0
 	self.m_Size = Vector3f(a_BlockArea:GetSize())
@@ -172,44 +172,49 @@ end
 
 -- (STATIC) Creates a cylinder in the given blockarea
 function cShapeGenerator.MakeCylinder(a_BlockArea, a_BlockTable, a_Radius, a_IsHollow, a_Mask)
-	local DoCheckMask = #(a_Mask ~= nil and a_Mask or {}) ~= 0
+	local DoCheckMask = a_Mask ~= nil
 	local SizeX, SizeY, SizeZ = a_BlockArea:GetCoordRange()
 	local MiddleVector = Vector3f(SizeX / 2, 0, SizeZ / 2)
 	local NumAffectedBlocks = 0
 	local CurrentBlock = Vector3f(0, 0, 0)
+	local Radius = (a_IsHollow and math.floor(a_Radius)) or a_Radius
 	
 	for X = 0, SizeX do
 		CurrentBlock.x = X
 		for Z = 0, SizeZ do
 			CurrentBlock.z = Z
 			
-			local PlaceBlocks = false
+			local PlaceColumn = false
 			local Distance = math.floor(((MiddleVector - CurrentBlock):Length()))
 			if (
-				((Distance <= a_Radius) and (not a_IsHollow)) or
-				((Distance == a_Radius) and a_IsHollow)
+				((Distance <= Radius) and (not a_IsHollow)) or
+				((Distance == Radius) and a_IsHollow)
 			) then
-				PlaceBlocks = true
+				PlaceColumn = true
 			end
 			
-			-- Check for the mask. 
-			if (PlaceBlocks and DoCheckMask) then
-				local CurrentBlock, CurrentMeta = a_BlockArea:GetRelBlockTypeMeta(X, Y, Z)
-				local MaskBlock = a_Mask[CurrentBlock]
-				
-				if ((MaskBlock == nil) or ((not MaskBlock.TypeOnly) and (MaskBlock.BlockMeta ~= CurrentMeta))) then
-					PlaceBlocks = false
-				end
-			end
-			
-			if (PlaceBlocks) then
+			if (PlaceColumn) then
 				for Y = 0, SizeY do
-					NumAffectedBlocks = NumAffectedBlocks + 1
-					local RandomNumber = math.random()
-					for Idx, Value in ipairs(a_BlockTable) do
-						if (RandomNumber <= Value.Chance) then
-							a_BlockArea:SetRelBlockTypeMeta(X, Y, Z, Value.BlockType, Value.BlockMeta)
-							break
+					local PlaceBlock = true
+					
+					-- Check for the mask. 
+					if (PlaceColumn and DoCheckMask) then
+						local CurrentBlock, CurrentMeta = a_BlockArea:GetRelBlockTypeMeta(X, Y, Z)
+						local MaskBlock = a_Mask[CurrentBlock]
+						
+						if ((MaskBlock == nil) or ((not MaskBlock.TypeOnly) and (MaskBlock.BlockMeta ~= CurrentMeta))) then
+							PlaceBlock = false
+						end
+					end
+					
+					if (PlaceBlock) then
+						NumAffectedBlocks = NumAffectedBlocks + 1
+						local RandomNumber = math.random()
+						for Idx, Value in ipairs(a_BlockTable) do
+							if (RandomNumber <= Value.Chance) then
+								a_BlockArea:SetRelBlockTypeMeta(X, Y, Z, Value.BlockType, Value.BlockMeta)
+								break
+							end
 						end
 					end -- /for Y
 				end
@@ -226,11 +231,12 @@ end
 
 -- (STATIC) Creates a sphere in the given blockarea.
 function cShapeGenerator.MakeSphere(a_BlockArea, a_BlockTable, a_Radius, a_IsHollow, a_Mask)
-	local DoCheckMask = #(a_Mask ~= nil and a_Mask or {}) ~= 0
+	local DoCheckMask = a_Mask ~= nil
 	local SizeX, SizeY, SizeZ = a_BlockArea:GetCoordRange()
 	local MiddleVector = Vector3f(SizeX / 2, SizeY / 2, SizeZ / 2)
 	local NumAffectedBlocks = 0
 	local CurrentBlock = Vector3f(0, 0, 0)
+	local Radius = (a_IsHollow and math.floor(a_Radius)) or a_Radius
 	
 	for X = 0, SizeX do
 		CurrentBlock.x = X
@@ -239,26 +245,26 @@ function cShapeGenerator.MakeSphere(a_BlockArea, a_BlockTable, a_Radius, a_IsHol
 			for Z = 0, SizeZ do
 				CurrentBlock.z = Z
 				
-				local PlaceBlocks = false
+				local PlaceBlock = false
 				local Distance = math.floor(((MiddleVector - CurrentBlock):Length()))
 				if (
-					((Distance <= a_Radius) and (not a_IsHollow)) or
-					((Distance == a_Radius) and a_IsHollow)
+					((Distance <= Radius) and (not a_IsHollow)) or
+					((Distance == Radius) and a_IsHollow)
 				) then
-					PlaceBlocks = true
+					PlaceBlock = true
 				end
 				
 				-- Check for the mask. 
-				if (PlaceBlocks and DoCheckMask) then
+				if (PlaceBlock and DoCheckMask) then
 					local CurrentBlock, CurrentMeta = a_BlockArea:GetRelBlockTypeMeta(X, Y, Z)
 					local MaskBlock = a_Mask[CurrentBlock]
 					
 					if ((MaskBlock == nil) or ((not MaskBlock.TypeOnly) and (MaskBlock.BlockMeta ~= CurrentMeta))) then
-						PlaceBlocks = false
+						PlaceBlock = false
 					end
 				end
 			
-				if (PlaceBlocks) then
+				if (PlaceBlock) then
 					NumAffectedBlocks = NumAffectedBlocks + 1
 					local RandomNumber = math.random()
 					for Idx, Value in ipairs(a_BlockTable) do
@@ -281,7 +287,7 @@ end
 
 -- (STATIC) Creates a pyramid in the given BlockArea.
 function cShapeGenerator.MakePyramid(a_BlockArea, a_BlockTable, a_IsHollow, a_Mask)
-	local DoCheckMask = #(a_Mask ~= nil and a_Mask or {}) ~= 0
+	local DoCheckMask = a_Mask ~= nil
 	local SizeX, SizeY, SizeZ = a_BlockArea:GetCoordRange()
 	local NumAffectedBlocks = 0
 	
