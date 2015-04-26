@@ -1,7 +1,8 @@
 
 -- ShapeGenerator.lua
 
--- Capable of generating shapes in BlockAreas. Either a predefined shape like a cylinder, or a shape from a mathematical formula
+-- Capable of generating shapes in BlockAreas. Either a predefined shape like a cylinder, or a shape from a mathematical formula.
+-- Only for a shape made using a mathematical formula the constructor has to be used. For other shapes there are static functions to create the shape in a blockarea.
 
 
 
@@ -43,7 +44,7 @@ end
 
 
 
--- Handler that makes the structure solid
+-- Handler that makes the structure solid. 
 cShapeGenerator.m_SolidHandler = function(a_ShapeGenerator, a_BlockArea, a_BlockPos)
 	return true
 end
@@ -77,12 +78,21 @@ function cShapeGenerator:new(a_Zero, a_Unit, a_BlockTable, a_Expression)
 		return false, "The formula isn't a comparison"
 	end
 	
+	-- A cache with blocktypes by x, y, z coordinates.
+	-- It's only used when the shape is hollow
 	Obj.m_Cache      = {}
+	
+	-- A table containing all the blocks to use. The block chances are already calculated
 	Obj.m_BlockTable = a_BlockTable
+	
+	-- A function that will calculate the shape
 	Obj.m_Formula    = Formula
-	Obj.m_Unit       = a_Unit
-	Obj.m_Zero       = a_Zero
-	Obj.m_Size       = Vector3f()
+	
+	Obj.m_Unit = a_Unit
+	Obj.m_Zero = a_Zero
+	
+	-- The size of the blockarea we're going to work in.
+	Obj.m_Size = Vector3f()
 	
 	return Obj
 end
@@ -91,6 +101,7 @@ end
 
 
 
+-- Returns a random block from self.m_BlockTable
 function cShapeGenerator:ChooseBlockTypeMeta()
 	local RandomNumber = math.random()
 	for Idx, Value in ipairs(self.m_BlockTable) do
@@ -106,6 +117,9 @@ end
 
 
 
+-- Checks the cache if there already is a block calculated for the coordinates.
+-- Generates a new one if it doesn't exist in the cache
+-- a_BlockPos is a Vector3f with the coordinates to get the block for
 function cShapeGenerator:GetBlockInfoFromFormula(a_BlockPos)
 	local Index = a_BlockPos.x + (a_BlockPos.z * self.m_Size.x) + (a_BlockPos.y * self.m_Size.x * self.m_Size.z)
 	local BlockInfo = self.m_Cache[Index]
@@ -131,6 +145,11 @@ end
 
 
 
+-- Generates a shape from m_Formula
+-- a_BlockArea is a cBlockArea to build the shape in
+-- a_MinVector and a_MaxVector are Vector3f classes. The shape will be build inside those coordinates
+-- a_IsHollow is a boolean value. If true the the shape will be made hollow
+-- a_Mask is a table or nil. If it's a table it will only change blocks if the block that is going to change is in the table.
 function cShapeGenerator:MakeShape(a_BlockArea, a_MinVector, a_MaxVector, a_IsHollow, a_Mask)
 	local DoCheckMask = a_Mask ~= nil
 	local Handler = a_IsHollow and cShapeGenerator.m_HollowHandler or cShapeGenerator.m_SolidHandler
@@ -152,6 +171,8 @@ function cShapeGenerator:MakeShape(a_BlockArea, a_MinVector, a_MaxVector, a_IsHo
 					local MaskBlock = a_Mask[CurrentBlock]
 					
 					if ((MaskBlock == nil) or ((not MaskBlock.TypeOnly) and (MaskBlock.BlockMeta ~= CurrentMeta))) then
+						-- The block does not exist in the mask, or the meta isn't set/is different.
+						-- Don't change the block.
 						DoSet = false
 					end
 				end
@@ -172,12 +193,19 @@ end
 
 
 -- (STATIC) Creates a cylinder in the given blockarea
+-- a_BlockArea is the cBlockArea to build the cylinder in
+-- a_BlockTable are the blocks to make the cylinder out of
+-- a_Radius is the radius to make the cylinder out of. This will be removed later when malformed cylinders are supported.
+-- a_IsHollow is a boolean value. If true the cylinder will be made hollow.
+-- a_Mask is a table or nil. If it's a table it will only change blocks if the block that is going to change is in the table.
 function cShapeGenerator.MakeCylinder(a_BlockArea, a_BlockTable, a_Radius, a_IsHollow, a_Mask)
 	local DoCheckMask = a_Mask ~= nil
 	local SizeX, SizeY, SizeZ = a_BlockArea:GetCoordRange()
 	local MiddleVector = Vector3f(SizeX / 2, 0, SizeZ / 2)
 	local NumAffectedBlocks = 0
 	local CurrentBlock = Vector3f(0, 0, 0)
+	
+	-- TODO: change this to not take a radius parameter, but rather make it support malformed cylinders (for example SizeX = 5 while SizeZ = 8)
 	local Radius = (a_IsHollow and math.floor(a_Radius)) or a_Radius
 	
 	for X = 0, SizeX do
@@ -204,12 +232,16 @@ function cShapeGenerator.MakeCylinder(a_BlockArea, a_BlockTable, a_Radius, a_IsH
 						local MaskBlock = a_Mask[CurrentBlock]
 						
 						if ((MaskBlock == nil) or ((not MaskBlock.TypeOnly) and (MaskBlock.BlockMeta ~= CurrentMeta))) then
+							-- The block does not exist in the mask, or the meta isn't set/is different.
+							-- Don't change the block.
 							PlaceBlock = false
 						end
 					end
 					
 					if (PlaceBlock) then
+						-- We want to place the block. Choose a blocktype and set it in the blockarea
 						NumAffectedBlocks = NumAffectedBlocks + 1
+						
 						local RandomNumber = math.random()
 						for Idx, Value in ipairs(a_BlockTable) do
 							if (RandomNumber <= Value.Chance) then
@@ -231,12 +263,19 @@ end
 
 
 -- (STATIC) Creates a sphere in the given blockarea.
+-- a_BlockArea is the cBlockArea to build the sphere in
+-- a_BlockTable are the blocks to make the sphere out of
+-- a_Radius is the radius to make the sphere out of. This will be removed later when malformed spheres are supported.
+-- a_IsHollow is a boolean value. If true the sphere will be made hollow.
+-- a_Mask is a table or nil. If it's a table it will only change blocks if the block that is going to change is in the table.
 function cShapeGenerator.MakeSphere(a_BlockArea, a_BlockTable, a_Radius, a_IsHollow, a_Mask)
 	local DoCheckMask = a_Mask ~= nil
 	local SizeX, SizeY, SizeZ = a_BlockArea:GetCoordRange()
 	local MiddleVector = Vector3f(SizeX / 2, SizeY / 2, SizeZ / 2)
 	local NumAffectedBlocks = 0
 	local CurrentBlock = Vector3f(0, 0, 0)
+	
+	-- TODO: change this to not take a radius parameter, but rather make it support malformed sphere (for example SizeX = 5 while SizeZ = 8)
 	local Radius = (a_IsHollow and math.floor(a_Radius)) or a_Radius
 	
 	for X = 0, SizeX do
@@ -266,6 +305,8 @@ function cShapeGenerator.MakeSphere(a_BlockArea, a_BlockTable, a_Radius, a_IsHol
 				end
 			
 				if (PlaceBlock) then
+					-- We want to place the block. Choose a blocktype and set it in the blockarea
+					
 					NumAffectedBlocks = NumAffectedBlocks + 1
 					local RandomNumber = math.random()
 					for Idx, Value in ipairs(a_BlockTable) do
@@ -287,6 +328,10 @@ end
 
 
 -- (STATIC) Creates a pyramid in the given BlockArea.
+-- a_BlockArea is the cBlockArea to build the pyramid in
+-- a_BlockTable are the blocks to make the pyramid out of
+-- a_IsHollow is a boolean value. If true the pyramid will be made hollow.
+-- a_Mask is a table or nil. If it's a table it will only change blocks if the block that is going to change is in the table.
 function cShapeGenerator.MakePyramid(a_BlockArea, a_BlockTable, a_IsHollow, a_Mask)
 	local DoCheckMask = a_Mask ~= nil
 	local SizeX, SizeY, SizeZ = a_BlockArea:GetCoordRange()
@@ -295,6 +340,7 @@ function cShapeGenerator.MakePyramid(a_BlockArea, a_BlockTable, a_IsHollow, a_Ma
 	-- Function that checks in the mask if a block can be placed. 
 	local function CheckMask(a_X, a_Y, a_Z)
 		if (not DoCheckMask) then
+			-- We don't have to check the mask, because a_Mask is nil
 			return true
 		end
 		
