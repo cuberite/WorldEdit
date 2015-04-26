@@ -59,11 +59,12 @@ function cShapeGenerator:new(a_Zero, a_Unit, a_BlockTable, a_Expression)
 	self.__index = self
 	
 	-- Bind the parameters that will be used in the expression. We want the data and type returned again.
-	a_Expression:BindParam("x")
-	:BindParam("y")
-	:BindParam("z")
-	:BindParam("type", true)
-	:BindParam("data", true)
+	a_Expression:BindParam("Comp1", true, false)
+	:BindParam("x", false, true)
+	:BindParam("y", false, true)
+	:BindParam("z", false, true)
+	:BindParam("type", true, true)
+	:BindParam("data", true, true)
 	
 	local Formula, Error = a_Expression:Compile()
 	if (not Formula) then

@@ -60,10 +60,6 @@ function HandleGenerationShapeCommand(a_Split, a_Player)
 	SrcCuboid:Sort()
 	
 	local FormulaString = table.concat(a_Split, " ", 3 + NumFlags)
-	:gsub(";", ",") -- Replace ";" to ",". This makes it possible to set block types/metas in the formula.
-	:gsub("!=", "~=") -- Lua operator for not equal is ~=
-	:gsub("&&", " and ")
-	:gsub("||", " or ")
 	
 	local zero, unit
 	

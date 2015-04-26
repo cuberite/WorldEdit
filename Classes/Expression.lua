@@ -18,7 +18,7 @@ sinh, sqrt, tan, tanh, random, pi, e
 =
 math.abs, math.acos, math.asin, math.atan, math.atan2,
 math.ceil, math.cos, math.cosh, math.exp, math.floor, math.log,
-math.log, math.log10, math.max, math.min, Round, math.sin,
+math.log, math.log10, math.max, math.min, math.round, math.sin,
 math.sinh, math.sqrt, math.tan, math.tanh, math.random, math.pi, math.exp(1)
 
 -- These functions are not build into Lua:
@@ -29,9 +29,48 @@ local randint = function(max) return random(0, max) end
 %s
 
 return function(%s)
-	local res = {%s}
-	return res[1]%s
+	%s
+	return %s
 end]]
+
+
+
+
+
+cExpression.m_LoaderEnv =
+{
+	math = math,
+}
+
+
+
+
+
+cExpression.m_Assignments =
+{
+	"=",
+	"%+=",
+	"%-=",
+	"%*=",
+	"%%=",
+	"%^=",
+	"/=",
+}
+
+
+
+
+
+cExpression.m_Comparisons =
+{
+	"<",
+	">",
+	"<=",
+	">=",
+	"==",
+	"!=",
+	"~=",
+}
 
 
 
@@ -39,6 +78,11 @@ end]]
 
 function cExpression:new(a_Formula)
 	local Obj = {}
+	
+	a_Formula = a_Formula
+	:gsub("!=", "~=") -- Lua operator for not equal is ~=
+	:gsub("&&", " and ")
+	:gsub("||", " or ")
 	
 	setmetatable(Obj, cExpression)
 	self.__index = self
@@ -54,8 +98,8 @@ end
 
 
 
-function cExpression:BindParam(a_Name, a_DoReturn)
-	table.insert(self.m_Parameters, {name = a_Name, doreturn = a_DoReturn})
+function cExpression:BindParam(a_Name, a_DoReturn, a_IsParameter)
+	table.insert(self.m_Parameters, {name = a_Name, doreturn = a_DoReturn, isparam = a_IsParameter})
 	return self
 end
 
@@ -76,12 +120,16 @@ function cExpression:Compile()
 	local Parameters   = ""
 	local ReturnValues = ""
 	for _, Parameter in ipairs(self.m_Parameters) do
-		Parameters = Parameters .. ", " .. Parameter.name
+		if (Parameter.isparam) then
+			Parameters = Parameters .. ", " .. Parameter.name
+		end
+		
 		if (Parameter.doreturn) then
-			ReturnValues = ReturnValues .. ", res." .. Parameter.name .. " or " .. Parameter.name
+			ReturnValues = ReturnValues .. ", " .. Parameter.name
 		end
 	end
-	Parameters = Parameters:sub(3, -1)
+	Parameters   = Parameters:sub(3, -1)
+	ReturnValues = ReturnValues:sub(3, -1)
 	
 	local PredefinedVariables = ""
 	for _, Variable in ipairs(self.m_PredefinedVariables) do
@@ -93,19 +141,44 @@ function cExpression:Compile()
 		PredefinedVariables = PredefinedVariables .. "local " .. Variable.name .. " = " .. Value .. "\n"
 	end
 	
-	local FormulaLoader = loadstring(cExpression.m_ExpressionTemplate:format(PredefinedVariables, Parameters, self.m_Formula, ReturnValues))
+	local NumComparison = 1
+	local Actions = StringSplitAndTrim(self.m_Formula, ";")
+	for Idx, Action in ipairs(Actions) do
+		Action = Action:gsub("%s+", "")
+		
+		local IsAssignment = true
+		
+		-- If one of the comparison operator's are in the action we can be sure that it's an assignment
+		for _, Comparison in ipairs(cExpression.m_Comparisons) do
+			IsAssignment = IsAssignment and not Action:match(Comparison)
+		end
+		
+		if (IsAssignment) then
+			-- m_Assignments[1] is an =, and that doesn't need any special handeling
+			for I = 2, #cExpression.m_Assignments do
+				local Assignment = cExpression.m_Assignments[I]:match(".="):sub(1, 1)
+				local Pattern = "(.*)" .. cExpression.m_Assignments[I] .. "(.*)"
+				Action:gsub(Pattern,
+					function(a_Variable, a_Val2)
+						Action = a_Variable .. " = " .. a_Variable .. Assignment .. a_Val2
+					end
+				)
+			end
+			
+			Actions[Idx] = "local " .. Action
+		else
+			Actions[Idx]  = "local Comp" .. NumComparison .. " = " .. Action
+			NumComparison = NumComparison + 1
+		end
+	end
+	
+	local FormulaLoader = loadstring(cExpression.m_ExpressionTemplate:format(PredefinedVariables, Parameters, table.concat(Actions, "\n\t"), ReturnValues))
 	if (not FormulaLoader) then
 		return false, "Invalid formula"
 	end
 	
-	local LoaderEnv =
-	{
-		math = math,
-		Round = Round,
-	}
-	
 	-- Only allow the FormulaLoader to use the math library and the Round function
-	setfenv(FormulaLoader, LoaderEnv)
+	setfenv(FormulaLoader, cExpression.m_LoaderEnv)
 	
 	-- Try to get the formula checker
 	local Succes, Formula = pcall(FormulaLoader)
@@ -118,6 +191,7 @@ function cExpression:Compile()
 	
 	return Formula
 end
+
 
 
 

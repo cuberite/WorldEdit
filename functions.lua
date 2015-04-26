@@ -76,7 +76,7 @@ end
 
 
 -- Rounds the number.
-function Round(a_GivenNumber)
+function math.round(a_GivenNumber)
 	assert(type(a_GivenNumber) == 'number')
 	
 	local Number, Decimal = math.modf(a_GivenNumber)

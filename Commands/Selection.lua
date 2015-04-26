@@ -73,7 +73,7 @@ function HandleExpandCommand(a_Split, a_Player)
 	local NumBlocks = a_Split[2] or 1 -- Use the given amount or 1 if nil
 	local Direction = string.lower(a_Split[3] or ((a_Player:GetPitch() > 70) and "down") or ((a_Player:GetPitch() < -70) and "up") or "forward")
 	local SubMinX, SubMinY, SubMinZ, AddMaxX, AddMaxY, AddMaxZ = 0, 0, 0, 0, 0, 0
-	local LookDirection = Round((a_Player:GetYaw() + 180) / 90)
+	local LookDirection = math.round((a_Player:GetYaw() + 180) / 90)
 	
 	if ((Direction == "up") or (Direction == "u")) then
 		AddMaxY = NumBlocks
