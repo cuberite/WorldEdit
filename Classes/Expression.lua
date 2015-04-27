@@ -100,11 +100,14 @@ function cExpression:new(a_Formula)
 	-- The string of the formula
 	Obj.m_Formula = a_Formula
 	
-	-- All the parameters that are going to be used. A new one can be bind using the BindParam function.
+	-- All the variables that that the formula can use. For example x, y and z
 	Obj.m_Parameters = {}
 	
+	-- All the variables the formula will return after executing
+	Obj.m_ReturnValues = {}
+	
 	-- A table containing predefined variables. A new one can be added using the PredefineVariable function
-	Obj.m_PredefinedVariables = {}
+	Obj.m_PredefinedConstants = {}
 	
 	return Obj
 end
@@ -113,13 +116,10 @@ end
 
 
 
--- Binds a new parameter to the formula.
+-- Adds a new parameter to the formula. The formula can use this in the calculation.
 -- a_Name is a string that will be the name of the parameter
--- a_DoReturn is a boolean value. If true the value will be returned when executing the variable.
--- a_IsParameter is a boolean value. If true the parameter will be an argument for the formula. This is only used to bind new comparison values since they don't have a name by default.
--- The comparison values will be "Comp<ComparisonNr>"
-function cExpression:BindParam(a_Name, a_DoReturn, a_IsParameter)
-	table.insert(self.m_Parameters, {name = a_Name, doreturn = a_DoReturn, isparam = a_IsParameter})
+function cExpression:AddParameter(a_Name)
+	table.insert(self.m_Parameters, a_Name)
 	return self
 end
 
@@ -127,11 +127,22 @@ end
 
 
 
--- Adds a new variable. The formula will be able to use this variable in it's calculation.
--- a_VarName is a string that will be the name of the variable.
+-- Makes the formula return a variable when executing
+-- a_Name is the name of the variable that will be returned.
+function cExpression:AddReturnValue(a_Name)
+	table.insert(self.m_ReturnValues, a_Name)
+	return self
+end
+
+
+
+
+
+-- Adds a new constant. The formula will be able to use this in it's calculation.
+-- a_VarName is a string that will be the name of the constant.
 -- a_Value can only be a string or a number, since the environment blocks all other functions and tables.
-function cExpression:PredefineVariable(a_VarName, a_Value)
-	table.insert(self.m_PredefinedVariables, {name = a_VarName, value = a_Value})
+function cExpression:PredefineConstant(a_VarName, a_Value)
+	table.insert(self.m_PredefinedConstants, {name = a_VarName, value = a_Value})
 	return self
 end
 
@@ -141,28 +152,11 @@ end
 
 -- Creates a safe function from the formula string, the bound parameters and the predefined variables.
 function cExpression:Compile()
-	local Arguments    = ""
-	local ReturnValues = ""
-	
-	-- Concat the parameters.
-	for _, Parameter in ipairs(self.m_Parameters) do
-		if (Parameter.isparam) then
-			-- Only add the parameter as argument to the function formula if it was set.
-			Arguments = Arguments  .. ", " .. Parameter.name
-		end
-		
-		if (Parameter.doreturn) then
-			-- Only return the value if it was said to.
-			ReturnValues = ReturnValues .. ", " .. Parameter.name
-		end
-	end
-	
-	-- Remove the first comma in both the Arguments, and the ReturnValues.
-	Arguments    = Arguments:sub(3, -1)
-	ReturnValues = ReturnValues:sub(3, -1)
+	local Arguments    = table.concat(self.m_Parameters, ", ")
+	local ReturnValues = table.concat(self.m_ReturnValues, ", ")
 	
 	local PredefinedVariables = ""
-	for _, Variable in ipairs(self.m_PredefinedVariables) do
+	for _, Variable in ipairs(self.m_PredefinedConstants) do
 		local Value = Variable.value
 		if (type(Value) == "string") then
 			Value = "\"" .. Value .. "\""

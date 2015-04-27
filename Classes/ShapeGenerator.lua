@@ -59,14 +59,14 @@ function cShapeGenerator:new(a_Zero, a_Unit, a_BlockTable, a_Expression)
 	setmetatable(Obj, cShapeGenerator)
 	self.__index = self
 	
-	-- Bind the parameters that will be used in the expression. We want the data and type returned again.
-	a_Expression:BindParam("Comp1", true, false)
-	:BindParam("x", false, true)
-	:BindParam("y", false, true)
-	:BindParam("z", false, true)
-	:BindParam("type", true, true)
-	:BindParam("data", true, true)
-	
+	-- Bind the parameters that will be used in the expression. We want the data and type returned again with the first comparison
+	a_Expression:AddReturnValue("Comp1")
+	:AddParameter("x")
+	:AddParameter("y")
+	:AddParameter("z")
+	:AddParameter("type"):AddReturnValue("type")
+	:AddParameter("data"):AddReturnValue("data")
+
 	local Formula, Error = a_Expression:Compile()
 	if (not Formula) then
 		return false, "Invalid formula"
