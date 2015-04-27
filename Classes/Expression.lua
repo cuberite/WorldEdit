@@ -179,8 +179,6 @@ function cExpression:Compile()
 	
 	-- Loop through each action to check if the action is an comparison or an assignment. Handle the actions accordingly.
 	for Idx, Action in ipairs(Actions) do
-		Action = Action:gsub("%s+", "")
-		
 		local IsAssignment = true
 		
 		-- If one of the comparison operator's are in the action we can be sure that it's an assignment
@@ -213,6 +211,7 @@ function cExpression:Compile()
 		end
 	end
 	
+	print(cExpression.m_ExpressionTemplate:format(PredefinedVariables, Arguments, table.concat(Actions, "\n\t"), ReturnValues))
 	local FormulaLoader = loadstring(cExpression.m_ExpressionTemplate:format(PredefinedVariables, Arguments, table.concat(Actions, "\n\t"), ReturnValues))
 	if (not FormulaLoader) then
 		return false, "Invalid formula"
