@@ -211,7 +211,6 @@ function cExpression:Compile()
 		end
 	end
 	
-	print(cExpression.m_ExpressionTemplate:format(PredefinedVariables, Arguments, table.concat(Actions, "\n\t"), ReturnValues))
 	local FormulaLoader = loadstring(cExpression.m_ExpressionTemplate:format(PredefinedVariables, Arguments, table.concat(Actions, "\n\t"), ReturnValues))
 	if (not FormulaLoader) then
 		return false, "Invalid formula"
