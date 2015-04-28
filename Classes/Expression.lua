@@ -2,6 +2,27 @@
 -- Expression.lua
 
 -- Contains the cExpression class. This allows formulas to be executed safely in an empty environment.
+--[[ Usage example:
+local FormulaString = "data=4; x > y"
+local Expression = cExpression:new(FormulaString)
+
+Expression:AddReturnValue("Comp1")           -- Return the first known comparisons
+:AddParameter("x")                           -- Add x and y as a parameter
+:AddParameter("y")
+:AddParameter("type"):AddReturnValue("type") -- Add type and data as a parameter and return it
+:AddParameter("data"):AddReturnValue("data")
+
+local Formula = Expression:Compile()
+
+for X = 1, 5 do
+	for Y = 1, 5 do
+		local PlaceBlock, BlockType, BlockMeta = Formula(X, Y, E_BLOCK_AIR, 0)
+		if (PlaceBlock) then
+			-- Place the block
+		end
+	end
+end
+]]
 
 
 
