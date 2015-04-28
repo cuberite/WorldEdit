@@ -150,7 +150,8 @@ end
 
 
 
--- Creates a safe function from the formula string, the bound parameters and the predefined variables.
+-- Creates a safe function from the formula string.
+-- The returned function takes the previously-bound parameters (AddParameter()), does the calculations using any predefined constants (PredefineConstant()) and returns the named values (AddReturnValue())
 function cExpression:Compile()
 	local Arguments    = table.concat(self.m_Parameters, ", ")
 	local ReturnValues = table.concat(self.m_ReturnValues, ", ")
@@ -171,7 +172,8 @@ function cExpression:Compile()
 	-- Split the formula into actions (For example in "data=5; x<y" data=5 is an action, and x<y is an action.)
 	local Actions = StringSplitAndTrim(self.m_Formula, ";")
 	
-	-- Loop through each action to check if the action is an comparison or an assignment. Handle the actions accordingly.
+	-- If an action is an assignment in a format unsupported by Lua (a += 1), convert it into a supported format (a = a + 1). 
+	-- If an action is a comparison then give it the name "Comp<nr>"
 	for Idx, Action in ipairs(Actions) do
 		local IsAssignment = true
 		

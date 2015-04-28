@@ -53,6 +53,10 @@ end
 
 
 
+-- Creates a new cShapeGenerator object.
+-- a_Zero and a_Unit are Vector3f vectors used to calculate a scaled vector3f. The formula will use the scaled vector as x, y and z values.
+-- a_BlockTable are the blocks to make the shape out of.
+-- a_Expression is a cExpression object that compiles the formula into a safe function.
 function cShapeGenerator:new(a_Zero, a_Unit, a_BlockTable, a_Expression)
 	local Obj = {}
 	
@@ -66,7 +70,7 @@ function cShapeGenerator:new(a_Zero, a_Unit, a_BlockTable, a_Expression)
 	:AddParameter("z")
 	:AddParameter("type"):AddReturnValue("type")
 	:AddParameter("data"):AddReturnValue("data")
-
+	
 	local Formula, Error = a_Expression:Compile()
 	if (not Formula) then
 		return false, "Invalid formula"
