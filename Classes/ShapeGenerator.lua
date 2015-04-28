@@ -56,7 +56,7 @@ end
 -- Creates a new cShapeGenerator object.
 -- a_Zero and a_Unit are Vector3f vectors used to calculate a scaled vector3f. The formula will use the scaled vector as x, y and z values.
 -- a_BlockTable are the blocks to make the shape out of.
--- a_Expression is a cExpression object that compiles the formula into a safe function.
+-- a_Expression is a cExpression object that ShapeGenerator will compile. The ShapeGenerator will bind all the parameters and return values in the constructor.
 function cShapeGenerator:new(a_Zero, a_Unit, a_BlockTable, a_Expression)
 	local Obj = {}
 	

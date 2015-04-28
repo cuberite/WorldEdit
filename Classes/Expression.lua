@@ -173,6 +173,7 @@ end
 
 -- Creates a safe function from the formula string.
 -- The returned function takes the previously-bound parameters (AddParameter()), does the calculations using any predefined constants (PredefineConstant()) and returns the named values (AddReturnValue())
+-- Comparisons can be returned by adding a return value called "Comp<nr>" where <nr> is the ID of the comparison starting from 1. For example in the formula "x<z; y>z" x<z is Comp1, and y>z is Comp2
 function cExpression:Compile()
 	local Arguments    = table.concat(self.m_Parameters, ", ")
 	local ReturnValues = table.concat(self.m_ReturnValues, ", ")
@@ -198,7 +199,7 @@ function cExpression:Compile()
 	for Idx, Action in ipairs(Actions) do
 		local IsAssignment = true
 		
-		-- If one of the comparison operator's are in the action we can be sure that it's an assignment
+		-- Check if one of the comparison operators is found. If none are found it's certain that the action is an assignment
 		for _, Comparison in ipairs(cExpression.m_Comparisons) do
 			IsAssignment = IsAssignment and not Action:match(Comparison)
 		end
