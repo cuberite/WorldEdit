@@ -150,6 +150,8 @@ end
 
 -- Makes the formula return a variable when executing
 -- a_Name is the name of the variable that will be returned.
+-- If a comparison has to be returned you can add a return value called Comp<id> where <id> is how many comparisons there were starting from 1.
+-- For example in the formula "x<z; y>z" x<z is Comp1, and y>z is Comp2
 function cExpression:AddReturnValue(a_Name)
 	table.insert(self.m_ReturnValues, a_Name)
 	return self
@@ -173,7 +175,7 @@ end
 
 -- Creates a safe function from the formula string.
 -- The returned function takes the previously-bound parameters (AddParameter()), does the calculations using any predefined constants (PredefineConstant()) and returns the named values (AddReturnValue())
--- Comparisons can be returned by adding a return value called "Comp<nr>" where <nr> is the ID of the comparison starting from 1. For example in the formula "x<z; y>z" x<z is Comp1, and y>z is Comp2
+-- Comparisons can be returned by adding a return value called "Comp<id>" where <nr> is the ID of the comparison starting from 1. For example in the formula "x<z; y>z" x<z is Comp1, and y>z is Comp2
 function cExpression:Compile()
 	local Arguments    = table.concat(self.m_Parameters, ", ")
 	local ReturnValues = table.concat(self.m_ReturnValues, ", ")
@@ -188,14 +190,14 @@ function cExpression:Compile()
 		PredefinedVariables = PredefinedVariables .. "local " .. Variable.name .. " = " .. Value .. "\n"
 	end
 	
-	-- The number of comparisons. This will be used to give each comparison a name (Comp<nr>)
+	-- The number of comparisons. This will be used to give each comparison a name (Comp<id>)
 	local NumComparison = 1
 	
 	-- Split the formula into actions (For example in "data=5; x<y" data=5 is an action, and x<y is an action.)
 	local Actions = StringSplitAndTrim(self.m_Formula, ";")
 	
 	-- If an action is an assignment in a format unsupported by Lua (a += 1), convert it into a supported format (a = a + 1). 
-	-- If an action is a comparison then give it the name "Comp<nr>"
+	-- If an action is a comparison then give it the name "Comp<id>"
 	for Idx, Action in ipairs(Actions) do
 		local IsAssignment = true
 		
@@ -223,7 +225,7 @@ function cExpression:Compile()
 			-- Add the assignment in the formula function
 			Actions[Idx] = "local " .. Action
 		else
-			-- Add the comparison. The name will be Comp<nr> where nr is how many comparison's there currently are.
+			-- Add the comparison. The name will be Comp<id> where nr is how many comparison's there currently are.
 			Actions[Idx]  = "local Comp" .. NumComparison .. " = " .. Action
 			NumComparison = NumComparison + 1
 		end
