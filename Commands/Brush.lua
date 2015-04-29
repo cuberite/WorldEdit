@@ -9,6 +9,7 @@
 
 function HandleMaskCommand(a_Split, a_Player)
 	-- /mask <Blocks>
+	
 	if (#a_Split == 1) then
 		-- Remove mask
 		local State = GetPlayerState(a_Player)
@@ -52,6 +53,7 @@ end
 
 function HandleSphereBrush(a_Split, a_Player)
 	-- //brush sphere [-h] <Block> <Radius>
+	
 	if (#a_Split < 4) then
 		a_Player:SendMessage(cChatColor.Rose .. "Usage: /brush sphere [-h] <Block> <Radius>")
 		return true
@@ -76,24 +78,29 @@ function HandleSphereBrush(a_Split, a_Player)
 		a_Player:SendMessage(cChatColor.Rose .. "Cannot convert radius \"" .. a_Split[4] .. "\" to a number.")
 		return true
 	end
-
+	
+	-- The player state is used to get the player's mask, and to bind the tool
+	local State = GetPlayerState(a_Player)
+	
 	-- Initialize the handler.
 	local function BrushHandler(a_Player, a_BlockX, a_BlockY, a_BlockZ, a_BlockFace)
-		local Position = Vector3i(a_BlockX, a_BlockY, a_BlockZ)
-
-		if (a_BlockFace == BLOCK_FACE_NONE) then
-			Position = GetTargetBlock(a_Player)
-
-			if (Position == nil) then
-				return true
-			end
+		local Position = (a_BlockFace == BLOCK_FACE_NONE and GetTargetBlock(a_Player)) or Vector3i(a_BlockX, a_BlockY, a_BlockZ)
+		
+		if (not Position) then
+			return true
 		end
-
-		CreateSphereAt(BlockTable, Position, a_Player, Radius, Hollow, true)
+		
+		local AffectedArea = cCuboid(Position, Position)
+		AffectedArea:Expand(Radius, Radius, Radius, Radius, Radius, Radius)
+		AffectedArea:Sort()
+		
+		-- Get the mask. We can't put this outside the brush handler, because the player might have changed it already.
+		local Mask = State.ToolRegistrator:GetMask(a_Player:GetEquippedItem().m_ItemType)
+		
+		CreateSphereInCuboid(a_Player, AffectedArea, BlockTable, Hollow, Mask)
 		return true
 	end
 
-	local State = GetPlayerState(a_Player)
 	local Succes, error = State.ToolRegistrator:BindTool(a_Player:GetEquippedItem().m_ItemType, BrushHandler)
 	
 	if (not Succes) then
@@ -111,6 +118,7 @@ end
 
 function HandleCylinderBrush(a_Split, a_Player)
 	-- //brush cyl [-h] <Block> <Radius> <Height>
+	
 	if (#a_Split < 5) then
 		a_Player:SendMessage(cChatColor.Rose .. "Usage: /brush cylinder [-h] <Block> <Radius> <Height>")
 		return true
@@ -142,24 +150,32 @@ function HandleCylinderBrush(a_Split, a_Player)
 		a_Player:SendMessage(cChatColor.Rose .. "Cannot convert height \"" .. a_Split[5] .. "\" to a number.")
 		return true
 	end
-
+	
+	-- The height used in the brush handler. If Height is negative we add one, if positive we lower by one
+	local UsedHeight = (Height > 0 and (Height - 1)) or (Height + 1)
+	
+	-- The player state is used to get the player's mask, and to bind the tool
+	local State = GetPlayerState(a_Player)
+	
 	-- Initialize the handler.
 	local function BrushHandler(a_Player, a_BlockX, a_BlockY, a_BlockZ, a_BlockFace)
-		local Position = Vector3i(a_BlockX, a_BlockY, a_BlockZ)
-
-		if (a_BlockFace == BLOCK_FACE_NONE) then
-			Position = GetTargetBlock(a_Player)
-
-			if (Position == nil) then
-				return true
-			end
+		local Position = (a_BlockFace == BLOCK_FACE_NONE and GetTargetBlock(a_Player)) or Vector3i(a_BlockX, a_BlockY, a_BlockZ)
+		
+		if (not Position) then
+			return true
 		end
-
-		CreateCylinderAt(BlockTable, Position, a_Player, Radius, Height, Hollow, true)
+		
+		local AffectedArea = cCuboid(Position, Position)
+		AffectedArea:Expand(Radius, Radius, 0, UsedHeight, Radius, Radius)
+		AffectedArea:Sort()
+		
+		-- Get the mask. We can't put this outside the brush handler, because the player might have changed it already.
+		local Mask = State.ToolRegistrator:GetMask(a_Player:GetEquippedItem().m_ItemType)
+		
+		CreateCylinderInCuboid(a_Player, AffectedArea, BlockTable, Hollow, Mask)
 		return true
 	end
 
-	local State = GetPlayerState(a_Player)
 	local Succes, error = State.ToolRegistrator:BindTool(a_Player:GetEquippedItem().m_ItemType, BrushHandler)
 	
 	if (not Succes) then

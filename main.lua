@@ -1,3 +1,55 @@
+
+local g_ExcludedFolders =
+{
+	"craftscripts",
+}
+
+-- Include all the lua files in the folders
+local g_WorldEditPath = cPluginManager:GetCurrentPlugin():GetLocalFolder()
+local Folders = cFile:GetFolderContents(g_WorldEditPath)
+for _, Folder in ipairs(Folders) do repeat
+	if ((Folder == ".") or (Folder == "..")) then
+		break -- Is a continue due to a do-while directly after the for
+	end
+	
+	local Path = g_WorldEditPath .. "/" .. Folder
+	if (not cFile:IsFolder(Path)) then
+		break -- Is a continue due to a do-while directly after the for
+	end
+	
+	local IsExcludedFolder = false
+	for _, ExcludedFolder in ipairs(g_ExcludedFolders) do
+		if (Folder == ExcludedFolder) then
+			IsExcludedFolder = true
+			break
+		end
+	end
+	
+	if (IsExcludedFolder) then
+		break -- Is a continue due to a do-while directly after the for
+	end
+	
+	local FolderContents= cFile:GetFolderContents(Path)
+	for _, FileName in ipairs(FolderContents) do repeat
+		if (not cFile:IsFile(Path .. "/" .. FileName)) then
+			break -- Is a continue due to a do-while directly after the for
+		end
+		
+		local FileExtension = StringSplit(FileName, ".")
+		FileExtension = FileExtension[#FileExtension]
+		
+		if (FileExtension ~= "lua") then
+			break -- Is a continue due to a do-while directly after the for
+		end
+		
+		dofile(Path .. "/" .. FileName)
+	until true end
+until true end
+
+
+
+
+
 E_SELECTIONPOINT_LEFT  = 0
 E_SELECTIONPOINT_RIGHT = 1
 
@@ -49,3 +101,5 @@ function OnDisable()
 		LOG("[WorldEdit] Disabling WorldEdit v" .. PLUGIN:GetVersion())
 	end
 end
+
+

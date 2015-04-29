@@ -27,10 +27,10 @@ g_PluginInfo =
 		
 		["//addleaves"] =
 		{
-			Permission = "worldedit.addleaves",
+			Permission = "worldedit.region.addleaves",
 			Handler = HandleAddLeavesCommand,
 			HelpString = " Adds leaves next to log blocks",
-			Category = "Tool",
+			Category = "Region",
 		},
 		
 		["//count"] =
@@ -78,7 +78,7 @@ g_PluginInfo =
 			Permission = "worldedit.selection.expand",
 			Handler = HandleExpandCommand,
 			HelpString = " Expand the selection area",
-			Category = "Clipboard",
+			Category = "Selection",
 		},
 		
 		["//extinguish"] =
@@ -119,7 +119,7 @@ g_PluginInfo =
 		["//hcyl"] =
 		{
 			Permission = "worldedit.selection.cylinder",
-			Handler = HandleHCylCommand,
+			Handler = HandleCylCommand,
 			HelpString = "Generates a hollow cylinder",
 			Category = "Generation",
 		},
@@ -143,7 +143,7 @@ g_PluginInfo =
 		["//hpyramid"] =
 		{
 			Permission = "worldedit.generation.pyramid",
-			Handler = HandleHPyramidCommand,
+			Handler = HandlePyramidCommand,
 			HelpString = "Generate a hollow pyramid",
 			Category = "Generation",
 		},
@@ -151,7 +151,7 @@ g_PluginInfo =
 		["//hsphere"] =
 		{
 			Permission = "worldedit.generation.hsphere",
-			Handler = HandleHSphereCommand,
+			Handler = HandleSphereCommand,
 			HelpString = " Generates a hollow sphere.",
 			Category = "Generation",
 		},
@@ -161,7 +161,7 @@ g_PluginInfo =
 			Permission = "worldedit.region.leafdecay",
 			Handler = HandleLeafDecayCommand,
 			HelpString = "Removes all the leaves in the selection that would decay",
-			Category = "Selection",
+			Category = "Region",
 		},
 		
 		["//mirror"] =
@@ -240,7 +240,7 @@ g_PluginInfo =
 			Permission = "",  -- Multi-commands shouldn't specify a permission
 			Handler = nil,  -- Provide a standard multi-command handler
 			HelpString = "",  -- Don't show in help
-			Category = "Clipboard",
+			Category = "Schematic",
 			Subcommands =
 			{
 				save =
@@ -249,6 +249,7 @@ g_PluginInfo =
 					Permission = "worldedit.schematic.save",
 					Handler = HandleSchematicSaveCommand,
 					Alias = "s",
+					Category = "Schematic",
 				},
 				load =
 				{
@@ -256,6 +257,7 @@ g_PluginInfo =
 					Permission = "worldedit.schematic.load",
 					Handler = HandleSchematicLoadCommand,
 					Alias = "l",
+					Category = "Schematic",
 				},
 				formats =
 				{
@@ -263,6 +265,7 @@ g_PluginInfo =
 					Permission = "worldedit.schematic.list",
 					Handler = HandleSchematicFormatsCommand,
 					Alias = {"listformats", "f" },
+					Category = "Schematic",
 				},
 				list =
 				{
@@ -270,6 +273,7 @@ g_PluginInfo =
 					Permission = "worldedit.schematic.list",
 					Handler = HandleSchematicListCommand,
 					Alias = { "all", "ls", },
+					Category = "Schematic",
 				},
 			},
 		},
@@ -319,7 +323,7 @@ g_PluginInfo =
 			Permission = "worldedit.region.stack",
 			Handler = HandleStackCommand,
 			HelpString = "Repeat the contents of the selection.",
-			Category = "Selection",
+			Category = "Region",
 		},
 		
 		["//undo"] =
@@ -404,12 +408,14 @@ g_PluginInfo =
 					HelpString = " Switch to the sphere brush tool.",
 					Permission = "worldedit.brush.sphere",
 					Handler = HandleSphereBrush,
+					Category = "Brush",
 				},
 				cylinder =
 				{
 					HelpString = " Switch to the cylinder brush tool.",
 					Permission = "worldedit.brush.cylinder",
 					Handler = HandleCylinderBrush,
+					Category = "Brush",
 				},
 			},
 		},
@@ -483,7 +489,7 @@ g_PluginInfo =
 		{
 			Alias = "//removeabove",
 			Permission = "worldedit.removeabove",
-			Handler = HandleRemoveAboveCommand,
+			Handler = HandleRemoveColumnCommand,
 			HelpString = " Remove all the blocks above you.",
 			Category = "Terraforming",
 		},
@@ -492,7 +498,7 @@ g_PluginInfo =
 		{
 			Alias = "//removebelow",
 			Permission = "worldedit.removebelow",
-			Handler = HandleRemoveBelowCommand,
+			Handler = HandleRemoveColumnCommand,
 			HelpString = " Remove all the blocks below you.",
 			Category = "Terraforming",
 		},
@@ -567,24 +573,28 @@ g_PluginInfo =
 					HelpString = "Complete CUI handshake",
 					Permission = "",
 					Handler = HandleWorldEditCuiCommand,
+					Category = "Special",
 				},
 				version =
 				{
 					HelpString = "Sends the plugin version to the player.",
 					Permission = "",
 					Handler = HandleWorldEditVersionCommand,
+					Category = "Special",
 				},
 				reload =
 				{
 					HelpString = "Reloads the WorldEdit plugin.",
 					Permission = "",
 					Handler = HandleWorldEditReloadCommand,
+					Category = "Special",
 				},
 				help =
 				{
 					HelpString = "Sends all the available commands to the player.",
 					Permission = "",
 					Handler = HandleWorldEditHelpCommand,
+					Category = "Special",
 				},
 			},
 		},
@@ -608,6 +618,10 @@ g_PluginInfo =
 		Region =
 		{
 			Description = "Commands in this category will allow the player to edit the region he/she has selected using //pos[1/2] or using the wand item.",
+		},
+		Schematic =
+		{
+			Description = "Commands that load or save schematic's",
 		},
 		Selection =
 		{
