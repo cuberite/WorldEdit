@@ -7,6 +7,16 @@
 
 
 
+-- Table containing all the plugins who want to check if they allow WorldEdit to change the world
+g_ExclusionAreaPlugins = {}
+
+-- Table containing all the plugins who want to check if they allow a player to change his selection.
+g_PlayerSelectPointHooks = {}
+
+
+
+
+
 --- Registers a function from an external plugin that will be called for each operation in the specified world
 -- Returns true to signalize call success to the caller
 -- Callbacks should have the following signature:
@@ -29,7 +39,7 @@ function RegisterAreaCallback(a_PluginName, a_FunctionName, a_WorldName)
 	end
 	
 	-- Insert the callback into the callback table:
-	table.insert(ExclusionAreaPlugins[a_WorldName], {PluginName = a_PluginName, FunctionName = a_FunctionName})
+	table.insert(g_ExclusionAreaPlugins[a_WorldName], {PluginName = a_PluginName, FunctionName = a_FunctionName})
 	return true
 end
 
@@ -58,7 +68,7 @@ function RegisterPlayerSelectingPoint(a_PluginName, a_FunctionName)
 	end
 	
 	-- Insert the callback into the table.
-	table.insert(PlayerSelectPointHooks, {PluginName = a_PluginName, FunctionName = a_FunctionName})
+	table.insert(g_PlayerSelectPointHooks, {PluginName = a_PluginName, FunctionName = a_FunctionName})
 	return true
 end
 

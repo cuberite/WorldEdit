@@ -25,14 +25,11 @@ end
 
 
 -- Creates tables used to manage players actions or plugins
-function CreateTables()
-	SP = {}
+function InitializeTables()
 	LeftClickCompassUsed = {}
-	ExclusionAreaPlugins = {}
-	PlayerSelectPointHooks = {}
 	cRoot:Get():ForEachWorld(
 		function(World)
-			ExclusionAreaPlugins[World:GetName()] = {}
+			g_ExclusionAreaPlugins[World:GetName()] = {}
 		end
 	)
 end

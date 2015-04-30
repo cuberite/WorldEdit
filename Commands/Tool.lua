@@ -1,7 +1,11 @@
-------------------------------------------------
-----------------------REPL----------------------
-------------------------------------------------
+
+
+
+
+
 function HandleReplCommand(a_Split, a_Player)
+	-- //repl <item>
+	
 	if a_Split[2] == nil then -- check if the player gave a block id
 		a_Player:SendMessage(cChatColor.Rose .. "Too few arguments.")
 		a_Player:SendMessage(cChatColor.Rose .. "/repl <block ID>")
@@ -35,7 +39,7 @@ function HandleReplCommand(a_Split, a_Player)
 	end
 	
 	local State = GetPlayerState(a_Player)
-	local Succes, error = State.ToolRegistrator:BindTool(a_Player:GetEquippedItem().m_ItemType, ReplaceHandler)
+	local Succes, error = State.ToolRegistrator:BindRightClickTool(a_Player:GetEquippedItem().m_ItemType, ReplaceHandler, "replacetool")
 	
 	if (not Succes) then
 		a_Player:SendMessage(cChatColor.Rose .. error)
@@ -76,7 +80,7 @@ function HandleTreeCommand(a_Split, a_Player)
 		end
 		
 		local World = a_Player:GetWorld()
-		if World:GetBlock(a_BlockX, a_BlockY, a_BlockZ) == 2 or World:GetBlock(a_BlockX, a_BlockY, a_BlockZ) == 3 then
+		if (World:GetBlock(a_BlockX, a_BlockY, a_BlockZ) == E_BLOCK_GRASS) or (World:GetBlock(a_BlockX, a_BlockY, a_BlockZ) == E_BLOCK_DIRT) then
 			World:GrowTree(a_BlockX, a_BlockY + 1, a_BlockZ)
 		else
 			a_Player:SendMessage(cChatColor.Rose .. "A tree can't go there.")
@@ -84,7 +88,7 @@ function HandleTreeCommand(a_Split, a_Player)
 	end
 	
 	local State = GetPlayerState(a_Player)
-	local Succes, error = State.ToolRegistrator:BindTool(a_Player:GetEquippedItem().m_ItemType, HandleTree)
+	local Succes, error = State.ToolRegistrator:BindRightClickTool(a_Player:GetEquippedItem().m_ItemType, HandleTree, "tree")
 	
 	if (not Succes) then
 		a_Player:SendMessage(cChatColor.Rose .. error)
@@ -99,14 +103,51 @@ end
 -----------------------------------------------
 -------------------SUPERPICK-------------------
 -----------------------------------------------
-function HandleSuperPickCommand(Split, Player)
-	if SP[Player:GetName()] == nil or not SP[Player:GetName()] then -- check if super pickaxe is activated
-		SP[Player:GetName()] = true
-		Player:SendMessage(cChatColor.LightPurple .. "Super pick activated")
-	else -- else deactivate the superpickaxe
-		SP[Player:GetName()] = false
-		Player:SendMessage(cChatColor.LightPurple .. "Super pick deactivated")
+function HandleSuperPickCommand(a_Split, a_Player)
+	-- //
+	-- /,
+	
+	-- A table containing all the ID's of the pickaxes
+	local Pickaxes = 
+	{
+		E_ITEM_WOODEN_PICKAXE,
+		E_ITEM_STONE_PICKAXE,
+		E_ITEM_IRON_PICKAXE,
+		E_ITEM_GOLD_PICKAXE,
+		E_ITEM_DIAMOND_PICKAXE,
+	}
+	
+	-- The handler that breaks the block of the superpickaxe.
+	local function SuperPickaxe(a_Player, a_BlockX, a_BlockY, a_BlockZ, a_BlockFace)
+		if CheckIfInsideAreas(a_BlockX, a_BlockX, a_BlockY, a_BlockY, a_BlockZ, a_BlockZ, a_Player, a_Player:GetWorld(), "superpickaxe") then
+			return true
+		end
+		
+		local World = a_Player:GetWorld()
+		World:BroadcastSoundParticleEffect(2001, a_BlockX, a_BlockY, a_BlockZ, World:GetBlock(a_BlockX, a_BlockY, a_BlockZ))
+		World:DigBlock(a_BlockX, a_BlockY, a_BlockZ)
 	end
+	
+	local State = GetPlayerState(a_Player)
+	
+	-- Check if at least one of the pickaxe types has the superpickaxe tool. 
+	-- If not then we bind the superpickaxe tool, otherwise unbind all the pickaxes
+	local WasActivated = false
+	for Idx, Pickaxe in ipairs(Pickaxes) do
+		local Info = State.ToolRegistrator:GetLeftClickCallbackInfo(Pickaxe)
+		if (Info) then
+			WasActivated = WasActivated or (Info.ToolName == "superpickaxe")
+		end
+	end
+	
+	if (WasActivated) then
+		a_Player:SendMessage(cChatColor.LightPurple .. "Super pick axe disabled")
+		State.ToolRegistrator:UnbindTool(Pickaxes, "superpickaxe")
+	else
+		a_Player:SendMessage(cChatColor.LightPurple .. "Super pick axe enabled")
+		State.ToolRegistrator:BindLeftClickTool(Pickaxes, SuperPickaxe, "superpickaxe")
+	end
+	
 	return true
 end
 

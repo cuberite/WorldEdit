@@ -2,7 +2,7 @@
 --- Called before each operation to check with the callbacks whether other plugins allow the operation
 -- Returns true if the operation is to be aborted, false to continue
 function CheckIfInsideAreas(a_MinX, a_MaxX, a_MinY, a_MaxY, a_MinZ, a_MaxZ, a_Player, a_World, a_Operation)
-	for idx, callback in ipairs(ExclusionAreaPlugins[a_World:GetName()]) do
+	for idx, callback in ipairs(g_ExclusionAreaPlugins[a_World:GetName()]) do
 		local res = cPluginManager:CallPlugin(callback.PluginName, callback.FunctionName, a_MinX, a_MaxX, a_MinY, a_MaxY, a_MinZ, a_MaxZ, a_Player, a_World, a_Operation)
 		if (res) then
 			-- The plugin wants to abort the operation
@@ -23,7 +23,7 @@ end
 function CheckAreaCallbacks(a_Cuboid, a_Player, a_World, a_Operation)
 	assert(tolua.type(a_Cuboid) == "cCuboid")
 	
-	for idx, callback in ipairs(ExclusionAreaPlugins[a_World:GetName()]) do
+	for idx, callback in ipairs(g_ExclusionAreaPlugins[a_World:GetName()]) do
 		local res = cPluginManager:CallPlugin(
 			callback.PluginName, callback.FunctionName,
 			a_Cuboid.p1.x, a_Cuboid.p2.x,
@@ -67,7 +67,7 @@ end
 
 
 function CheckIfAllowedToChangeSelection(a_Player, a_PosX, a_PosY, a_PosZ, a_PointNr)
-	for idx, callback in ipairs(PlayerSelectPointHooks) do
+	for idx, callback in ipairs(g_PlayerSelectPointHooks) do
 		local res = cPluginManager:CallPlugin(callback.PluginName, callback.FunctionName, a_Player, a_PosX, a_PosY, a_PosZ, a_PointNr)
 		if (res) then
 			-- The plugin wants to abort the operation.
