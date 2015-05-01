@@ -8,20 +8,6 @@
 
 
 
----------------------------------------------------
--------------------SUPERPICKAXE--------------------
----------------------------------------------------
-function SuperPickaxeHook(Player, BlockX, BlockY, BlockZ, BlockFace, Status)
-	if (SP[Player:GetName()]) then
-		if CheckIfInsideAreas(BlockX, BlockX, BlockY, BlockY, BlockZ, BlockZ, Player, Player:GetWorld(), "superpickaxe") then
-			return true
-		end
-		local World = Player:GetWorld()
-		World:DigBlock(BlockX, BlockY, BlockZ) 		
-	end
-end
-
-
 ----------------------------------------------------
 ---------------------TOOLSHOOK----------------------
 ----------------------------------------------------
