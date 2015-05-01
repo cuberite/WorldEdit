@@ -18,7 +18,7 @@ g_PluginInfo =
 
 		["//"] =
 		{
-			Alias = "/",
+			Alias = {"/,"},
 			Permission = "worldedit.superpickaxe",
 			Handler = HandleSuperPickCommand,
 			HelpString = " Toggle the super pickaxe pickaxe function",
