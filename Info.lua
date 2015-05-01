@@ -302,6 +302,14 @@ g_PluginInfo =
 			Category = "Selection",
 		},
 		
+		["//shrink"] =
+		{
+			Permission = "worldedit.selection.shrink",
+			Handler = HandleShrinkCommand,
+			HelpString = " shrink the current selection to exclude air-only layers of the selection",
+			Category = "Selection"
+		},
+		
 		["//size"] =
 		{
 			Permission = "worldedit.selection.size",

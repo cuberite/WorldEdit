@@ -314,6 +314,36 @@ end
 
 
 
+function HandleShrinkCommand(a_Split, a_Player)
+	-- //shrink
+	
+	local State = GetPlayerState(a_Player)
+	
+	if not(State.Selection:IsValid()) then
+		a_Player:SendMessage(cChatColor.Rose .. "No region set")
+		return true
+	end
+	
+	local SrcCuboid = State.Selection:GetSortedCuboid()
+	local BlockArea = cBlockArea()
+	BlockArea:Read(a_Player:GetWorld(), SrcCuboid)
+	local MinRelX, MinRelY, MinRelZ, MaxRelX, MaxRelY, MaxRelZ = BlockArea:GetNonAirCropRelCoords()
+	
+	-- Set the new points. This will not take the previous points in account. (For example p1 and p2 could get switched)
+	State.Selection:SetFirstPoint(SrcCuboid.p1.x + MinRelX, SrcCuboid.p1.y + MinRelY, SrcCuboid.p1.z + MinRelZ)
+	State.Selection:SetSecondPoint(SrcCuboid.p1.x + MaxRelX, SrcCuboid.p1.y + MaxRelY, SrcCuboid.p1.z + MaxRelZ)
+	
+	-- Send the change of the selection to the client
+	State.Selection:NotifySelectionChanged()
+	
+	a_Player:SendMessage(cChatColor.LightPurple .. "Region shrunk")
+	return true
+end
+
+
+
+
+
 function HandleSizeCommand(a_Split, a_Player)
 	-- //size
 	
