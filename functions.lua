@@ -9,7 +9,6 @@
 
 -- Creates tables used to manage players actions or plugins
 function InitializeTables()
-	LeftClickCompassUsed = {}
 	cRoot:Get():ForEachWorld(
 		function(World)
 			g_ExclusionAreaPlugins[World:GetName()] = {}
