@@ -15,7 +15,7 @@ g_Config = {}
 
 local g_ConfigDefault =
 [[
-WandItem = 271,
+WandItem = woodenaxe,
 Limits =
 {
 	ButcherRadius = -1,
@@ -29,7 +29,7 @@ Defaults =
 
 NavigationWand =
 {
-	Item = 345,
+	Item = compass,
 	MaxDistance = 120,
 	TeleportNoHit = true,
 },
@@ -100,6 +100,17 @@ function InitializeConfiguration(a_Path)
 		LoadDefaultConfiguration()
 		return
 	end
+	
+	-- Create an environment for the loader where the admin can use item names directly without quotes.
+	local LoaderEnv = {}
+	for Key, Value in pairs(_G) do
+		if (Key:match("E_.*")) then
+			LoaderEnv[ItemTypeToString(Value)] = Value
+		end
+	end
+	
+	-- Apply the environment to the configloader.
+	setfenv(ConfigLoader, LoaderEnv)
 	
 	-- Execute the loader. It returns true + the configuration if it executed properly. Else it returns false with the error message.
 	local Succes, Result = pcall(ConfigLoader)
