@@ -57,22 +57,19 @@ end
 ---------------------------------------------------
 -----------------LeftClickCompass------------------
 ---------------------------------------------------
-function LeftClickCompassHook(Player, BlockX, BlockY, BlockZ, BlockFace, Status)
-	if Status ~= 0 then
+function LeftClickCompassHook(a_Player, BlockX, BlockY, BlockZ, BlockFace, Status)
+	if (Status ~= 0) then
 		return false
 	end
 	
-	if (not Player:HasPermission("worldedit.navigation.jumpto.tool")) then
+	if (not a_Player:HasPermission("worldedit.navigation.jumpto.tool")) then
 		return false
 	end
 	
-	if (Player:GetEquippedItem().m_ItemType ~= g_Config.NavigationWand.Item) then
+	if (a_Player:GetEquippedItem().m_ItemType ~= g_Config.NavigationWand.Item) then
 		return false
 	end
 	
-	if (LeftClickCompassUsed[Player:GetName()]) then
-		return false
-	end
 	return true
 end
 
@@ -80,38 +77,20 @@ end
 ----------------------------------------------------
 -----------------ONPLAYERANIMATION------------------
 ----------------------------------------------------
-function OnPlayerAnimation(Player, Animation)
-	if Animation ~= 1 then
+function OnPlayerAnimation(a_Player, a_Animation)
+	if (a_Animation ~= 0) then
 		return false
 	end
 	
-	local PlayerName = Player:GetName()
-	
-	if (not LeftClickCompassUsed[PlayerName]) and (LeftClickCompassUsed[PlayerName] ~= nil) then
-		LeftClickCompassUsed[PlayerName] = true
+	if (a_Player:GetEquippedItem().m_ItemType ~= g_Config.NavigationWand.Item) then
 		return false
 	end
 	
-	if Player:GetEquippedItem().m_ItemType ~= E_ITEM_COMPASS then
+	if (not a_Player:HasPermission("worldedit.navigation.jumpto.tool")) then
 		return false
 	end
 	
-	if (not Player:HasPermission("worldedit.navigation.jumpto.tool")) then
-		return false
-	end
-	
-	local World = Player:GetWorld()
-	local PlayerID = Player:GetUniqueID()
-	LeftClickCompassUsed[PlayerName] = false
-	World:ScheduleTask(1, function(World)
-		World:DoWithEntityByID(PlayerID, function(Player)
-			if not LeftClickCompass(Player, Player:GetWorld()) then
-				Player:SendMessage(cChatColor.Rose .. "No blocks in sight (or too far)!")
-			end
-			LeftClickCompassUsed[PlayerName] = true
-		end)
-	end)
-				
+	LeftClickCompass(a_Player, a_Player:GetWorld())
 	return true
 end
 
