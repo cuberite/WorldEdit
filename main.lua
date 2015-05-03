@@ -63,19 +63,12 @@ PLUGIN = nil
 
 
 function Initialize(a_Plugin)
-	-- Load the InfoReg shared library:
-	dofile(cPluginManager:GetPluginsPath() .. "/InfoReg.lua")
-	
 	PLUGIN = a_Plugin
 	PLUGIN:SetName(g_PluginInfo.Name)
 	PLUGIN:SetVersion(g_PluginInfo.Version)
-		
-	cPluginManager.AddHook(cPluginManager.HOOK_PLAYER_RIGHT_CLICK,    RightClickToolsHook);
-	cPluginManager.AddHook(cPluginManager.HOOK_PLAYER_LEFT_CLICK,     LeftClickToolsHook);
 	
-	cPluginManager.AddHook(cPluginManager.HOOK_PLAYER_RIGHT_CLICK,    RightClickCompassHook);
-	cPluginManager.AddHook(cPluginManager.HOOK_PLAYER_LEFT_CLICK,     LeftClickCompassHook);
-	cPluginManager.AddHook(cPluginManager.HOOK_PLAYER_ANIMATION,      OnPlayerAnimation);
+	-- Load the InfoReg shared library:
+	dofile(cPluginManager:GetPluginsPath() .. "/InfoReg.lua")
 	
 	--Bind all the commands:
 	RegisterPluginInfoCommands();

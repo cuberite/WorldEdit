@@ -152,66 +152,6 @@ end
 
 
 
---- Common code to set selection position based on player clicking somewhere
-local function SetPos(a_Player, a_BlockX, a_BlockY, a_BlockZ, a_BlockFace, a_SetFn, a_PosName)
-	-- Check if a valid click:
-	if (a_BlockFace == BLOCK_FACE_NONE) then
-		return false
-	end
-	
-	-- Check if a wand is used:
-	if (a_Player:GetEquippedItem().m_ItemType ~= g_Config.WandItem) then
-		return false
-	end
-	
-	-- Check the WE permission:
-	if not(a_Player:HasPermission("worldedit.selection.pos")) then
-		return false
-	end
-	
-	-- Check the wand activation state:
-	local State = GetPlayerState(a_Player)
-	if not(State.WandActivated) then
-		return false
-	end
-	
-	-- When shift is pressed, use the air block instead of the clicked block:
-	if (a_Player:IsCrouched()) then
-		a_BlockX, a_BlockY, a_BlockZ = AddFaceDirection(a_BlockX, a_BlockY, a_BlockZ, a_BlockFace)
-	end
-	
-	-- Set the position in the internal representation:
-	a_SetFn(State.Selection, a_BlockX, a_BlockY, a_BlockZ)
-	
-	-- Send a success message to the player:
-	a_Player:SendMessage(cChatColor.LightPurple .. a_PosName .. " position set to {" .. a_BlockX .. ", " .. a_BlockY .. ", " .. a_BlockZ .. "}.")
-	
-	return true
-end
-
-
-
-
-
-local function OnPlayerRightClick(Player, BlockX, BlockY, BlockZ, BlockFace, CursorX, CursorY, CursorZ)
-	return SetPos(Player, BlockX, BlockY, BlockZ, BlockFace, cPlayerSelection.SetSecondPoint, "Second")
-end
-
-
-
-
-
-local function OnPlayerLeftClick(Player, BlockX, BlockY, BlockZ, BlockFace, Action)
-	if ((Action ~= DIG_STATUS_STARTED) and (Action ~= DIG_STATUS_FINISHED)) then
-		return false
-	end
-	return SetPos(Player, BlockX, BlockY, BlockZ, BlockFace, cPlayerSelection.SetFirstPoint, "First")
-end
-
-
-
-
-
 local function OnPluginMessage(a_Client, a_Channel, a_Message)
 	if (a_Channel ~= "REGISTER") then
 		return
@@ -236,8 +176,6 @@ end
 
 -- Register the hooks needed:
 cPluginManager.AddHook(cPluginManager.HOOK_PLAYER_DESTROYED,   OnPlayerDestroyed)
-cPluginManager.AddHook(cPluginManager.HOOK_PLAYER_RIGHT_CLICK, OnPlayerRightClick)
-cPluginManager.AddHook(cPluginManager.HOOK_PLAYER_LEFT_CLICK,  OnPlayerLeftClick)
 cPluginManager.AddHook(cPluginManager.HOOK_PLUGIN_MESSAGE,     OnPluginMessage)
 
 

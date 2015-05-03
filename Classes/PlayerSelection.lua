@@ -337,3 +337,50 @@ end
 
 
 
+
+--- Common code to set selection position based on player clicking somewhere
+function cPlayerSelection:SetPos(a_BlockX, a_BlockY, a_BlockZ, a_BlockFace, a_PosName)
+	-- Check if a valid click:
+	if (a_BlockFace == BLOCK_FACE_NONE) then
+		return false
+	end
+	
+	-- Check the wand activation state:
+	if (not self.PlayerState.WandActivated) then
+		return false
+	end
+	
+	local Abort = false
+	self.PlayerState:DoWithPlayer(
+		function(a_Player)
+			-- Check the WE permission:
+			if not(a_Player:HasPermission("worldedit.selection.pos")) then
+				Abort = true
+				return true
+			end
+			
+			-- When shift is pressed, use the air block instead of the clicked block:
+			if (a_Player:IsCrouched()) then
+				a_BlockX, a_BlockY, a_BlockZ = AddFaceDirection(a_BlockX, a_BlockY, a_BlockZ, a_BlockFace)
+			end
+		end
+	)
+	
+	-- The callback decided to abort.
+	if (Abort) then
+		return false
+	end
+	
+	-- Determine what point we're trying to set and get the proper set function for it.
+	local SetFunc = (a_PosName == "First") and cPlayerSelection.SetFirstPoint or cPlayerSelection.SetSecondPoint
+	
+	-- Set the position in the internal representation:
+	SetFunc(self, a_BlockX, a_BlockY, a_BlockZ)
+	
+	-- Return a success message:
+	return true, cChatColor.LightPurple .. a_PosName .. " position set to {" .. a_BlockX .. ", " .. a_BlockY .. ", " .. a_BlockZ .. "}."
+end
+
+
+
+

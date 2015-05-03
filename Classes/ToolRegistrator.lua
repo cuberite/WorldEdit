@@ -24,7 +24,67 @@ function cToolRegistrator:new(a_Obj)
 	a_Obj.LeftClickTools  = {}
 	a_Obj.Masks = {}
 	
+	-- Bind the tools like navigation.
+	a_Obj:BindAbsoluteTools()
+	
 	return a_Obj
+end
+
+
+
+
+
+function cToolRegistrator:BindAbsoluteTools()
+	local function RightClickCompassCallback(a_Player, _, _, _, a_BlockFace)
+		if (a_BlockFace ~= BLOCK_FACE_NONE) then
+			return false
+		end
+		
+		-- The player can't use the navigation tool because he doesn't have permission use it.
+		if (not a_Player:HasPermission("worldedit.navigation.thru.tool")) then
+			return false
+		end
+		
+		RightClickCompass(a_Player)
+	end
+	
+	local function LeftClickCompassCallback(a_Player, _, _, _, a_BlockFace)
+		-- The player can't use the navigation tool because he doesn't have permission use it.
+		if (not a_Player:HasPermission("worldedit.navigation.jumpto.tool")) then
+			return false
+		end
+		
+		if (a_BlockFace ~= BLOCK_FACE_NONE) then
+			return true
+		end
+		
+		LeftClickCompass(a_Player)
+	end
+	
+	local function OnPlayerRightClick(a_Player, a_BlockX, a_BlockY, a_BlockZ, a_BlockFace)
+		local Succ, Message = GetPlayerState(a_Player).Selection:SetPos(a_BlockX, a_BlockY, a_BlockZ, a_BlockFace, "Second")
+		if (not Succ) then
+			return false
+		end
+		
+		a_Player:SendMessage(Message)
+		return true
+	end
+		
+	local function OnPlayerLeftClick(a_Player, a_BlockX, a_BlockY, a_BlockZ, a_BlockFace)
+		local Succ, Message = GetPlayerState(a_Player).Selection:SetPos(a_BlockX, a_BlockY, a_BlockZ, a_BlockFace, "First")
+		if (not Succ) then
+			return false
+		end
+		
+		a_Player:SendMessage(Message)
+		return true
+	end
+	
+	self:BindRightClickTool(g_Config.NavigationWand.Item, RightClickCompassCallback, "thru tool", true)
+	self:BindRightClickTool(g_Config.WandItem,            OnPlayerRightClick, "selection", true)
+	self:BindLeftClickTool(g_Config.NavigationWand.Item,  LeftClickCompassCallback, "jumpto tool", true)
+	self:BindLeftClickTool(g_Config.WandItem,             OnPlayerLeftClick, "selection", true)
 end
 
 
@@ -46,10 +106,6 @@ end
 
 -- Binds a mask to a given item. Returns true on success and returns false + errormessage when it fails.
 function cToolRegistrator:BindMask(a_ItemType, a_Blocks)
-	if (not ItemCategory.IsTool(a_ItemType)) then
-		return false, "Can't bind tool to \"" .. ItemToString(cItem(a_ItemType)) .. "\": Only tools can be used."
-	end
-
 	self.Masks[a_ItemType] = a_Blocks
 	return true
 end
@@ -75,7 +131,8 @@ end
 -- If an array is given then the function will loop through it calling itself with the itemtypes in the array. The returned error will be a table with errors.
 -- The callback is called when the player right clicks with the tool in hand.
 -- The toolname is the name of the tool
-function cToolRegistrator:BindRightClickTool(a_ItemType, a_UsageCallback, a_ToolName)
+-- IsAbsolute is a bool value. If false no other tool can bind that tool, and UnbindTool won't unbind it.
+function cToolRegistrator:BindRightClickTool(a_ItemType, a_UsageCallback, a_ToolName, a_IsAbsolute)
 	if (type(a_ItemType) == "table") then
 		local Succes, Error = nil, {}
 		for Idx, ItemType in ipairs(a_ItemType) do
@@ -86,11 +143,11 @@ function cToolRegistrator:BindRightClickTool(a_ItemType, a_UsageCallback, a_Tool
 		return Succes, Error
 	end
 	
-	if (not ItemCategory.IsTool(a_ItemType)) then
-		return false, "Can't bind tool to \"" .. ItemTypeToString(a_ItemType) .. "\": Only tools can be used."
+	if ((self.RightClickTools[a_ItemType] ~= nil) and self.RightClickTools[a_ItemType].IsAbsolute) then
+		return false, "Can't bind tool to \"" .. ItemTypeToString(a_ItemType) .. "\": Already used for the " .. self.RightClickTools[a_ItemType].ToolName
 	end
 	
-	self.RightClickTools[a_ItemType] = {Callback = a_UsageCallback, ToolName = a_ToolName}
+	self.RightClickTools[a_ItemType] = {Callback = a_UsageCallback, ToolName = a_ToolName, IsAbsolute = a_IsAbsolute}
 	return true
 end
 
@@ -125,7 +182,8 @@ end
 -- If an array is given then the function will loop through it calling itself with the itemtypes in the array. The returned error will be a table with errors.
 -- The callback is called when the player left clicks with the tool in hand.
 -- The toolname is the name of the tool
-function cToolRegistrator:BindLeftClickTool(a_ItemType, a_UsageCallback, a_ToolName)
+-- IsAbsolute is a bool value. If false no other tool can bind that tool, and UnbindTool won't unbind it.
+function cToolRegistrator:BindLeftClickTool(a_ItemType, a_UsageCallback, a_ToolName, a_IsAbsolute)
 	if (type(a_ItemType) == "table") then
 		local Succes, Error = nil, {}
 		for Idx, ItemType in ipairs(a_ItemType) do
@@ -136,8 +194,8 @@ function cToolRegistrator:BindLeftClickTool(a_ItemType, a_UsageCallback, a_ToolN
 		return Succes, Error
 	end
 	
-	if (not ItemCategory.IsTool(a_ItemType)) then
-		return false, "Can't bind tool to \"" .. ItemTypeToString(a_ItemType) .. "\": Only tools can be used."
+	if ((self.LeftClickTools[a_ItemType] ~= nil) and self.LeftClickTools[a_ItemType].IsAbsolute) then
+		return false, "Can't bind tool to \"" .. ItemTypeToString(a_ItemType) .. "\": Already used for the " .. self.LeftClickTools[a_ItemType].ToolName
 	end
 	
 	self.LeftClickTools[a_ItemType] = {Callback = a_UsageCallback, ToolName = a_ToolName}
@@ -153,7 +211,6 @@ function cToolRegistrator:UseLeftClickTool(a_Player, a_BlockX, a_BlockY, a_Block
 	if (self.LeftClickTools[a_ItemType] == nil) then
 		return false
 	end
-	
 	return self.LeftClickTools[a_ItemType].Callback(a_Player, a_BlockX, a_BlockY, a_BlockZ, a_BlockFace)
 end
 
@@ -200,12 +257,61 @@ function cToolRegistrator:UnbindTool(a_ItemType, a_ToolName)
 		return true
 	end
 	
-	self.LeftClickTools[a_ItemType] = nil
-	self.RightClickTools[a_ItemType] = nil
+	-- Only unbind the tool if it isn't absolute
+	if ((self.LeftClickTools[a_ItemType] ~= nil) and (not self.LeftClickTools[a_ItemType].IsAbsolute)) then
+		self.LeftClickTools[a_ItemType] = nil
+	end
+	
+	if ((self.RightClickTools[a_ItemType] ~= nil) and (not self.RightClickTools[a_ItemType].IsAbsolute)) then
+		self.RightClickTools[a_ItemType] = nil
+	end
 	return true
 end
 
 
 
+
+
+local function RightClickToolsHook(a_Player, a_BlockX, a_BlockY, a_BlockZ, a_BlockFace, a_CursorX, a_CursorY, a_CursorZ)
+	local State = GetPlayerState(a_Player)
+	
+	return State.ToolRegistrator:UseRightClickTool(a_Player, a_BlockX, a_BlockY, a_BlockZ, a_BlockFace, a_Player:GetEquippedItem().m_ItemType)
+end
+
+
+
+
+
+local function LeftClickToolsHook(a_Player, a_BlockX, a_BlockY, a_BlockZ, a_BlockFace, a_Action)
+	if (a_Action ~= 0) then
+		-- Left click is also called for other things like throwing items
+		return false
+	end
+	
+	local State = GetPlayerState(a_Player)
+	return State.ToolRegistrator:UseLeftClickTool(a_Player, a_BlockX, a_BlockY, a_BlockZ, a_BlockFace, a_Player:GetEquippedItem().m_ItemType)
+end
+
+
+
+
+
+local function LeftClickToolsAnimationHook(a_Player, a_Animation)
+	if (a_Animation ~= 0) then
+		return false
+	end
+	
+	local State = GetPlayerState(a_Player)
+	return State.ToolRegistrator:UseLeftClickTool(a_Player, 0, 0, 0, BLOCK_FACE_NONE, a_Player:GetEquippedItem().m_ItemType)
+end
+
+
+
+
+
+-- Register the hooks needed:
+cPluginManager.AddHook(cPluginManager.HOOK_PLAYER_RIGHT_CLICK, RightClickToolsHook);
+cPluginManager.AddHook(cPluginManager.HOOK_PLAYER_LEFT_CLICK,  LeftClickToolsHook);
+cPluginManager.AddHook(cPluginManager.HOOK_PLAYER_ANIMATION,   LeftClickToolsAnimationHook);
 
 
