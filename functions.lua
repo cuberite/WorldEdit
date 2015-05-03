@@ -7,23 +7,6 @@
 
 
 
--- Loads all the settings.
-function LoadSettings(a_Path)
-	SettingsIni = cIniFile()
-	SettingsIni:ReadFile(a_Path)
-	Wand = GetBlockTypeMeta(SettingsIni:GetValueSet("General", "WandItem", 271))
-	if (not Wand) then
-		LOGWARN("The given wand ID is not valid. Using wooden axe.")
-		Wand = E_ITEM_WOODEN_AXE
-	end
-	ButcherRadius = SettingsIni:GetValueSetI("General", "ButcherRadius", 0)
-	SettingsIni:WriteFile(a_Path)
-end
-
-
-
-
-
 -- Creates tables used to manage players actions or plugins
 function InitializeTables()
 	LeftClickCompassUsed = {}
@@ -81,6 +64,40 @@ function math.round(a_GivenNumber)
 		return math.ceil(a_GivenNumber)
 	else
 		return Number
+	end
+end
+
+
+
+
+
+-- Returns true if the given table is an array, otherwise it returns false
+function table.isarray(a_Table)
+	local i = 0
+	for _, t in pairs(a_Table) do
+		i = i + 1
+		if (not rawget(a_Table, i)) then
+			return false
+		end
+	end
+	
+	return true
+end
+
+
+
+
+
+-- Merges all values (except arrays) from a_DstTable into a_SrcTable if the key doesn't exist in a_SrcTable
+function table.merge(a_SrcTable, a_DstTable)
+	for Key, Value in pairs(a_DstTable) do
+		if (not a_SrcTable[Key]) then
+			a_SrcTable[Key] = Value
+		elseif ((type(Value) == "table") and (type(a_SrcTable[Key]) == "table")) then
+			if (not table.isarray(a_SrcTable[Key])) then
+				table.merge(a_SrcTable[Key], Value)
+			end
+		end
 	end
 end
 
@@ -629,7 +646,7 @@ function RightClickCompass(Player)
 	LookVector:Normalize()	
 
 	local Start = EyePos
-	local End = EyePos + LookVector * 75
+	local End = EyePos + LookVector * g_Config.NavigationWand.MaxDistance
 	
 	cLineBlockTracer.Trace(World, Callbacks, Start.x, Start.y, Start.z, End.x, End.y, End.z)
 	if not Teleported then
@@ -676,12 +693,16 @@ function LeftClickCompass(Player)
 	local LookVector = Player:GetLookVector()
 	LookVector:Normalize()
 	local Start = EyePos
-	local End = EyePos + LookVector * 75
+	local End = EyePos + LookVector * g_Config.NavigationWand.MaxDistance
 	cLineBlockTracer.Trace(World, Callbacks, Start.x, Start.y, Start.z, End.x, End.y, End.z)
 	
 	-- If no block has been hit, teleport the player to the last checked block location (known non-solid):
 	if not(HasHit) then
-		Player:TeleportToCoords(LastX + 0.5, LastY, LastZ + 0.5)
+		if (g_Config.NavigationWand.TeleportNoHit) then
+			Player:TeleportToCoords(LastX + 0.5, LastY, LastZ + 0.5)
+		else
+			Player:SendMessage(cChatColor.Rose .. "No block in sight (or too far)!")
+		end
 	end
 	
 	return true

@@ -70,10 +70,10 @@ function Initialize(a_Plugin)
 	PLUGIN:SetName(g_PluginInfo.Name)
 	PLUGIN:SetVersion(g_PluginInfo.Version)
 		
-	cPluginManager.AddHook(cPluginManager.HOOK_PLAYER_RIGHT_CLICK,    RightClickCompassHook);
 	cPluginManager.AddHook(cPluginManager.HOOK_PLAYER_RIGHT_CLICK,    RightClickToolsHook);
 	cPluginManager.AddHook(cPluginManager.HOOK_PLAYER_LEFT_CLICK,     LeftClickToolsHook);
 	
+	cPluginManager.AddHook(cPluginManager.HOOK_PLAYER_RIGHT_CLICK,    RightClickCompassHook);
 	cPluginManager.AddHook(cPluginManager.HOOK_PLAYER_LEFT_CLICK,     LeftClickCompassHook);
 	cPluginManager.AddHook(cPluginManager.HOOK_PLAYER_ANIMATION,      OnPlayerAnimation);
 	
@@ -81,7 +81,7 @@ function Initialize(a_Plugin)
 	RegisterPluginInfoCommands();
 	
 	InitializeTables() -- create all the tables
-	LoadSettings(a_Plugin:GetLocalFolder() .. "/Config.ini") -- load all the settings
+	InitializeConfiguration(a_Plugin:GetLocalFolder() .. "/config.cfg")
 	
 	cFile:CreateFolder("schematics")
 	

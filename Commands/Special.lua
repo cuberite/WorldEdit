@@ -79,7 +79,7 @@ end
 function HandleWandCommand(Split, Player)
 	-- //wand
 	
-	Item = cItem(Wand) -- create the cItem object
+	local Item = cItem(g_Config.WandItem) -- create the cItem object
 	if (Player:GetInventory():AddItem(Item)) then -- check if the player got the item
 		Player:SendMessage(cChatColor.Green .. "You have received the wand.")
 	else

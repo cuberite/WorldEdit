@@ -79,6 +79,12 @@ function HandleSphereBrush(a_Split, a_Player)
 		return true
 	end
 	
+	-- The radius is too large
+	if (Radius > g_Config.Limits.MaxBrushRadius) then
+		a_Player:SendMessage(cChatColor.Rose .. "Maximum brush radius: " .. g_Config.Limits.MaxBrushRadius)
+		return true
+	end
+	
 	-- The player state is used to get the player's mask, and to bind the tool
 	local State = GetPlayerState(a_Player)
 	
@@ -100,9 +106,8 @@ function HandleSphereBrush(a_Split, a_Player)
 		CreateSphereInCuboid(a_Player, AffectedArea, BlockTable, Hollow, Mask)
 		return true
 	end
-
-	local Succes, error = State.ToolRegistrator:BindTool(a_Player:GetEquippedItem().m_ItemType, BrushHandler)
 	
+	local Succes, error = State.ToolRegistrator:BindRightClickTool(a_Player:GetEquippedItem().m_ItemType, BrushHandler, "brush")
 	if (not Succes) then
 		a_Player:SendMessage(cChatColor.Rose .. error)
 		return true
@@ -143,6 +148,12 @@ function HandleCylinderBrush(a_Split, a_Player)
 		a_Player:SendMessage(cChatColor.Rose .. "Cannot convert radius \"" .. a_Split[4] .. "\" to a number.")
 		return true
 	end
+	
+	-- The radius is too large
+	if (Radius > g_Config.Limits.MaxBrushRadius) then
+		a_Player:SendMessage(cChatColor.Rose .. "Maximum brush radius: " .. g_Config.Limits.MaxBrushRadius)
+		return true
+	end
 
 	-- Convert the height param.
 	local Height = tonumber(a_Split[5])
@@ -176,8 +187,7 @@ function HandleCylinderBrush(a_Split, a_Player)
 		return true
 	end
 
-	local Succes, error = State.ToolRegistrator:BindTool(a_Player:GetEquippedItem().m_ItemType, BrushHandler)
-	
+	local Succes, error = State.ToolRegistrator:BindRightClickTool(a_Player:GetEquippedItem().m_ItemType, BrushHandler, "brush")
 	if (not Succes) then
 		a_Player:SendMessage(cChatColor.Rose .. error)
 		return true

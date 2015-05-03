@@ -160,7 +160,7 @@ local function SetPos(a_Player, a_BlockX, a_BlockY, a_BlockZ, a_BlockFace, a_Set
 	end
 	
 	-- Check if a wand is used:
-	if (a_Player:GetEquippedItem().m_ItemType ~= Wand) then
+	if (a_Player:GetEquippedItem().m_ItemType ~= g_Config.WandItem) then
 		return false
 	end
 	
