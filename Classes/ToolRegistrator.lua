@@ -36,16 +36,17 @@ end
 
 function cToolRegistrator:BindAbsoluteTools()
 	local function RightClickCompassCallback(a_Player, _, _, _, a_BlockFace)
-		if (a_BlockFace ~= BLOCK_FACE_NONE) then
-			return false
-		end
-		
 		-- The player can't use the navigation tool because he doesn't have permission use it.
 		if (not a_Player:HasPermission("worldedit.navigation.thru.tool")) then
 			return false
 		end
 		
+		if (a_BlockFace ~= BLOCK_FACE_NONE) then
+			return true
+		end
+		
 		RightClickCompass(a_Player)
+		return true
 	end
 	
 	local function LeftClickCompassCallback(a_Player, _, _, _, a_BlockFace)
@@ -59,6 +60,7 @@ function cToolRegistrator:BindAbsoluteTools()
 		end
 		
 		LeftClickCompass(a_Player)
+		return true
 	end
 	
 	local function OnPlayerRightClick(a_Player, a_BlockX, a_BlockY, a_BlockZ, a_BlockFace)
