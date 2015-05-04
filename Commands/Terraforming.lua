@@ -23,8 +23,10 @@ function HandleDrainCommand(a_Split, a_Player)
 	Cuboid:ClampY(0, 255)
 	Cuboid:Sort()
 	
+	local World = a_Player:GetWorld()
+	
 	-- Check if other plugins want to block this action
-	if not(CheckAreaCallbacks(Cuboid, a_Player, a_Player:GetWorld(), "drain")) then
+	if (CallHook("OnAreaChanging", Cuboid, a_Player, World, "drain")) then
 		return true
 	end
 	
@@ -33,7 +35,6 @@ function HandleDrainCommand(a_Split, a_Player)
 	
 	-- Push the area to Undo stack:
 	local State = GetPlayerState(a_Player)
-	local World = a_Player:GetWorld()
 	State.UndoStack:PushUndoFromCuboid(World, Cuboid, "drain")
 	
 	-- Process the area around the player using a cBlockArea:
@@ -58,6 +59,9 @@ function HandleDrainCommand(a_Split, a_Player)
 	
 	-- Write the block area back into the world
 	BlockArea:Write(World, Cuboid.p1)
+	
+	-- Notify other plugins of the change
+	CallHook("OnAreaChanged", Cuboid, a_Player, World, "drain")
 	
 	-- Send a message to the player with the amount of changed blocks
 	a_Player:SendMessage(cChatColor.LightPurple .. NumBlocks .. " block(s) changed.")
@@ -94,7 +98,7 @@ function HandleExtinguishCommand(a_Split, a_Player)
 	local World = a_Player:GetWorld()
 	
 	-- Check for other plugins if they want to block the action
-	if not(CheckAreaCallbacks(Cuboid, a_Player, World, "extinguish")) then
+	if (CallHook("OnAreaChanging", Cuboid, a_Player, World, "extinguish")) then
 		return true
 	end
 	
@@ -119,6 +123,9 @@ function HandleExtinguishCommand(a_Split, a_Player)
 	
 	-- Write the area in the world
 	BlockArea:Write(World, Cuboid.p1)
+	
+	-- Notify other plugins of the change
+	CallHook("OnAreaChanged", Cuboid, a_Player, World, "extinguish")
 	
 	-- Send a message to the player
 	a_Player:SendMessage(cChatColor.LightPurple .. NumAffectedBlocks .. " fire(s) put out")
@@ -341,7 +348,7 @@ function HandleRemoveColumnCommand(a_Split, a_Player)
 	
 	-- Check if other plugins allow the operation:
 	local World = a_Player:GetWorld()
-	if not(CheckAreaCallbacks(Cuboid, a_Player, World, a_Split[1]:sub(3, -1))) then
+	if (CallHook("OnAreaChanging", Cuboid, a_Player, World, a_Split[1]:sub(3, -1))) then
 		return false
 	end
 	
@@ -354,6 +361,9 @@ function HandleRemoveColumnCommand(a_Split, a_Player)
 	Area:Create(Cuboid:DifX() + 1, Cuboid:DifY() + 1, Cuboid:DifZ() + 1, cBlockArea.baTypes + cBlockArea.baMetas)
 	Area:Write(World, Cuboid.p1)
 	Area:Clear()
+	
+	-- Notify other plugins
+	CallHook("OnAreaChanged", Cuboid, a_Player, World, a_Split[1]:sub(3, -1))
 	
 	local ChangedBlocks = Cuboid.p2.y - Cuboid.p1.y
 	a_Player:SendMessage(cChatColor.LightPurple .. ChangedBlocks .. " block(s) have been removed.")

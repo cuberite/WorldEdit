@@ -47,7 +47,7 @@ function HandleAddLeavesCommand(a_Split, a_Player)
 	-- Check with other plugins if the operation is okay:
 	local SrcCuboid = State.Selection:GetSortedCuboid()
 	local World = a_Player:GetWorld()
-	if not(CheckAreaCallbacks(SrcCuboid, a_Player, World, "addleaves")) then
+	if (CallHook("OnAreaChanging", SrcCuboid, a_Player, World, "addleaves")) then
 		return
 	end
 	
@@ -112,6 +112,9 @@ function HandleAddLeavesCommand(a_Split, a_Player)
 	
 	-- Write the block area back to world:
 	BA:Write(World, BA:GetOrigin())
+	
+	-- Notify the other plugins of the change
+	CallHook("OnAreaChanged", SrcCuboid, a_Player, World, "addleaves")
 	return true
 end
 
@@ -176,7 +179,7 @@ function HandleLeafDecayCommand(a_Split, a_Player)
 	local World = a_Player:GetWorld()
 
 	-- Check if other plugins might want to block this action.
-	if not(CheckAreaCallbacks(SrcCuboid, a_Player, World, "leafdecay")) then
+	if (CallHook("OnAreaChanging", SrcCuboid, a_Player, World, "leafdecay")) then
 		return true
 	end
 
@@ -248,6 +251,10 @@ function HandleLeafDecayCommand(a_Split, a_Player)
 	end
 	
 	BA2:Write(World, SrcCuboid.p1, cBlockArea.baTypes + cBlockArea.baMetas)
+	
+	-- Notify the changes to other plugins
+	CallHook("OnAreaChanged", SrcCuboid, a_Player, World, "leafdecay")
+	
 	a_Player:SendMessage(cChatColor.LightPurple .. "Removed " .. NumChangedBlocks .. " leaf block(s)")
 	return true
 end
@@ -285,7 +292,7 @@ function HandleMirrorCommand(a_Split, a_Player)
 	-- Check with other plugins if the operation is okay:
 	local SrcCuboid = State.Selection:GetSortedCuboid()
 	local World = a_Player:GetWorld()
-	if not(CheckAreaCallbacks(SrcCuboid, a_Player, World, "mirror")) then
+	if (CallHook("OnAreaChanging", SrcCuboid, a_Player, World, "mirror")) then
 		return
 	end
 	
@@ -299,6 +306,9 @@ function HandleMirrorCommand(a_Split, a_Player)
 	Area:Read(World, Selection, cBlockArea.baTypes + cBlockArea.baMetas)
 	MirrorFn(Area)
 	Area:Write(World, Selection.p1, cBlockArea.baTypes + cBlockArea.baMetas)
+	
+	-- Notify other plugins of the change in the world
+	CallHook("OnAreaChanged", SrcCuboid, a_Player, World, "mirror")
 	
 	-- Notify of success:
 	a_Player:SendMessage(cChatColor.Rose .. "Selection mirrored")
@@ -401,7 +411,7 @@ function HandleStackCommand(a_Split, a_Player)
 	UndoStackCuboid.p2 = UndoStackCuboid.p2 + (VectorDirection * NumStacks)
 	
 	-- Check other plugins if they agree
-	if not(CheckAreaCallbacks(UndoStackCuboid, a_Player, World, "stack")) then
+	if (CallHook("OnAreaChanging", UndoStackCuboid, a_Player, World, "stack")) then
 		return true
 	end
 	
@@ -414,6 +424,9 @@ function HandleStackCommand(a_Split, a_Player)
 		BA:Write(World, Pos, cBlockArea.baTypes + cBlockArea.baMetas)
 		Pos = Pos + VectorDirection
 	end
+	
+	-- Notify the plugins of the change in the world
+	CallHook("OnAreaChanged", UndoStackCuboid, a_Player, World, "stack")
 	
 	a_Player:SendMessage(cChatColor.LightPurple .. BA:GetVolume() * VectorDirection:Length() .. " blocks changed. Undo with //undo")
 	return true
@@ -520,7 +533,7 @@ function HandleVMirrorCommand(a_Split, a_Player)
 	-- Check with other plugins if the operation is okay:
 	local SrcCuboid = State.Selection:GetSortedCuboid()
 	local World = a_Player:GetWorld()
-	if not(CheckAreaCallbacks(SrcCuboid, a_Player, World, "vmirror")) then
+	if (CallHook("OnAreaChanging", SrcCuboid, a_Player, World, "vmirror")) then
 		return
 	end
 	
@@ -535,7 +548,10 @@ function HandleVMirrorCommand(a_Split, a_Player)
 	Area:MirrorXZ()
 	Area:Write(World, Selection.p1, cBlockArea.baTypes + cBlockArea.baMetas)
 	
-	-- Notify of success:
+	-- Notify the plugins of the succes
+	CallHook("OnAreaChanged", SrcCuboid, a_Player, World, "vmirror")
+	
+	-- Notify the player of success:
 	a_Player:SendMessage(cChatColor.LightPurple .. "Selection mirrored")
 	return true
 end

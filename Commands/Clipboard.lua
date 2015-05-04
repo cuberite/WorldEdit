@@ -19,12 +19,16 @@ function HandleCopyCommand(a_Split, a_Player)
 	-- Check with other plugins if the operation is okay:
 	local SrcCuboid = State.Selection:GetSortedCuboid()
 	local World = a_Player:GetWorld()
-	if not(CheckAreaCallbacks(SrcCuboid, a_Player, World, "copy")) then
+	if (CallHook("OnAreaCopying", a_Player, World, SrcCuboid)) then
 		return
 	end
 	
 	-- Cut into the clipboard:
 	local NumBlocks = State.Clipboard:Copy(World, SrcCuboid, SrcCuboid.p1 - Vector3i(a_Player:GetPosition()))
+	
+	-- Call other plugins to notify that the player has copied the region
+	CallHook("OnAreaCopied", a_Player, World, SrcCuboid)
+	
 	a_Player:SendMessage(cChatColor.LightPurple .. NumBlocks .. " block(s) copied.")
 	a_Player:SendMessage(cChatColor.LightPurple .. "Clipboard size: " .. State.Clipboard:GetSizeDesc())
 	return true
@@ -47,7 +51,7 @@ function HandleCutCommand(a_Split, a_Player)
 	-- Check with other plugins if the operation is okay:
 	local SrcCuboid = State.Selection:GetSortedCuboid()
 	local World = a_Player:GetWorld()
-	if not(CheckAreaCallbacks(SrcCuboid, a_Player, World, "copy")) then
+	if (CallHook("OnAreaChanging", SrcCuboid, a_Player, World, "cut")) then
 		return
 	end
 	
@@ -56,6 +60,10 @@ function HandleCutCommand(a_Split, a_Player)
 	
 	-- Cut into the clipboard:
 	local NumBlocks = State.Clipboard:Cut(World, SrcCuboid, SrcCuboid.p1 - Vector3i(a_Player:GetPosition()))
+	
+	-- Notify the plugins that the cut was succesfull.
+	CallHook("OnAreaChanged", SrcCuboid, a_Player, World, "cut")
+	
 	a_Player:SendMessage(cChatColor.LightPurple .. NumBlocks .. " block(s) cut.")
 	a_Player:SendMessage(cChatColor.LightPurple .. "Clipboard size: " .. State.Clipboard:GetSizeDesc())
 	return true
@@ -86,13 +94,17 @@ function HandlePasteCommand(a_Split, a_Player)
 	
 	-- Check with other plugins if the operation is okay:
 	local DstCuboid = State.Clipboard:GetPasteDestCuboid(a_Player, UseOffset)
-	if not(CheckAreaCallbacks(DstCuboid, a_Player, a_Player:GetWorld(), "paste")) then
+	if (CallHook("OnAreaChanging", DstCuboid, a_Player, a_Player:GetWorld(), "paste")) then
 		return
 	end
 	
 	-- Paste:
 	State.UndoStack:PushUndoFromCuboid(a_Player:GetWorld(), DstCuboid, "paste")
 	local NumBlocks = State.Clipboard:Paste(a_Player, DstCuboid.p1)
+	
+	-- Notify other plugins that the clipboard is pasted in the world
+	CallHook("OnAreaChanged", DstCuboid, a_Player, a_Player:GetWorld(), "paste")
+	
 	if (UseOffset) then
 		a_Player:SendMessage(cChatColor.LightPurple .. NumBlocks .. " block(s) pasted relative to you.")
 	else

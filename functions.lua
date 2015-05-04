@@ -7,19 +7,6 @@
 
 
 
--- Creates tables used to manage players actions or plugins
-function InitializeTables()
-	cRoot:Get():ForEachWorld(
-		function(World)
-			g_ExclusionAreaPlugins[World:GetName()] = {}
-		end
-	)
-end
-
-
-
-
-
 -- Returns the block type (and block meta) from a string. This can be something like "1", "1:0", "stone" and "stone:0"
 function GetBlockTypeMeta(a_BlockString)
 	local BlockID = tonumber(a_BlockString)
@@ -170,7 +157,7 @@ end
 -- The original contents are pushed onto PlayerState's Undo stack
 function FillWalls(a_PlayerState, a_Player, a_World, a_DstBlockTable)
 	-- Check with other plugins if the operation is okay:
-	if not(CheckAreaCallbacks(a_PlayerState.Selection:GetSortedCuboid(), a_Player, a_World, "walls")) then
+	if (CallHook("OnAreaChanging", a_PlayerState.Selection:GetSortedCuboid(), a_Player, a_World, "walls")) then
 		return
 	end
 	
@@ -214,6 +201,8 @@ function FillWalls(a_PlayerState, a_Player, a_World, a_DstBlockTable)
 	Area:Clear()
 	a_World:WakeUpSimulatorsInArea(MinX - 1, MaxX + 1, MinY - 1, MaxY + 1, MinZ - 1, MaxZ + 1)
 	
+	CallHook("OnAreaChanged", a_PlayerState.Selection:GetSortedCuboid(), a_Player, a_World, "walls")
+	
 	-- Calculate the number of changed blocks:
 	local VolumeIncluding = (XSize + 1) * (YSize + 1) * (ZSize + 1)  -- Volume of the cuboid INcluding the walls
 	local VolumeExcluding = (XSize - 1) * (YSize + 1) * (ZSize - 1)  -- Volume of the cuboid EXcluding the walls
@@ -232,7 +221,7 @@ end
 -- The original contents are pushed onto PlayerState's Undo stack
 function FillFaces(a_PlayerState, a_Player, a_World, a_DstBlockTable)
 	-- Check with other plugins if the operation is okay:
-	if not(CheckAreaCallbacks(a_PlayerState.Selection:GetSortedCuboid(), a_Player, a_World, "faces")) then
+	if (CallHook("OnAreaChanging", a_PlayerState.Selection:GetSortedCuboid(), a_Player, a_World, "faces")) then
 		return
 	end
 	
@@ -287,6 +276,8 @@ function FillFaces(a_PlayerState, a_Player, a_World, a_DstBlockTable)
 	Area:Clear()
 	a_World:WakeUpSimulatorsInArea(MinX - 1, MaxX + 1, MinY - 1, MaxY + 1, MinZ - 1, MaxZ + 1)
 	
+	CallHook("OnAreaChanged", a_PlayerState.Selection:GetSortedCuboid(), a_Player, a_World, "faces")
+	
 	-- Calculate the number of changed blocks:
 	local VolumeIncluding = (XSize + 1) * (YSize + 1) * (ZSize + 1)  -- Volume of the cuboid INcluding the faces
 	local VolumeExcluding = (XSize - 1) * (YSize - 1) * (ZSize - 1)  -- Volume of the cuboid EXcluding the faces
@@ -305,7 +296,7 @@ end
 -- The original contents are pushed onto PlayerState's Undo stack
 function FillSelection(a_PlayerState, a_Player, a_World, a_DstBlockTable)
 	-- Check with other plugins if the operation is okay:
-	if not(CheckAreaCallbacks(a_PlayerState.Selection:GetSortedCuboid(), a_Player, a_World, "fill")) then
+	if (CallHook("OnAreaChanging", a_PlayerState.Selection:GetSortedCuboid(), a_Player, a_World, "fill")) then
 		return
 	end
 	
@@ -343,6 +334,8 @@ function FillSelection(a_PlayerState, a_Player, a_World, a_DstBlockTable)
 	Area:Clear()
 	a_World:WakeUpSimulatorsInArea(MinX - 1, MaxX + 1, MinY - 1, MaxY + 1, MinZ - 1, MaxZ + 1)
 	
+	CallHook("OnAreaChanged", a_PlayerState.Selection:GetSortedCuboid(), a_Player, a_World, "fill")
+	
 	return (MaxX - MinX + 1) * (MaxY - MinY + 1) * (MaxZ - MinZ + 1)
 end
 
@@ -356,7 +349,7 @@ end
 -- If a_TypeOnly is set, the block meta is ignored will be replaced
 function ReplaceSelection(a_PlayerState, a_Player, a_World, a_SrcBlockTable, a_DstBlockTable)
 	-- Check with other plugins if the operation is okay:
-	if not(CheckAreaCallbacks(a_PlayerState.Selection:GetSortedCuboid(), a_Player, a_World, "replace")) then
+	if (CallHook("OnAreaChanging", a_PlayerState.Selection:GetSortedCuboid(), a_Player, a_World, "replace")) then
 		return
 	end
 	
@@ -409,6 +402,8 @@ function ReplaceSelection(a_PlayerState, a_Player, a_World, a_SrcBlockTable, a_D
 	
 	-- Write the area back to world:
 	Area:Write(a_World, MinX, MinY, MinZ)
+	
+	CallHook("OnAreaChanged", a_PlayerState.Selection:GetSortedCuboid(), a_Player, a_World, "replace")
 	a_World:WakeUpSimulatorsInArea(MinX - 1, MaxX + 1, MinY - 1, MaxY + 1, MinZ - 1, MaxZ + 1)
 	
 	return NumBlocks
@@ -522,7 +517,7 @@ function CreateSphereInCuboid(a_Player, a_Cuboid, a_BlockTable, a_IsHollow, a_Ma
 	local ActionName = (a_IsHollow and "hsphere") or "sphere"
 	
 	-- Check if other plugins agree with the operation:
-	if not(CheckAreaCallbacks(a_Cuboid, a_Player, World, ActionName)) then
+	if (CallHook("OnAreaChanging", a_Cuboid, a_Player, World, ActionName)) then
 		return 0
 	end
 	
@@ -551,6 +546,8 @@ function CreateSphereInCuboid(a_Player, a_Cuboid, a_BlockTable, a_IsHollow, a_Ma
 			BlockArea:Write(World, a_Cuboid.p1)
 		end
 	)
+	
+	CallHook("OnAreaChanged", a_Cuboid, a_Player, World, ActionName)
 	return NumAffectedBlocks
 end
 
@@ -566,10 +563,10 @@ end
 -- a_Mask is either nil or a table containing the masked blocks
 function CreateCylinderInCuboid(a_Player, a_Cuboid, a_BlockTable, a_IsHollow, a_Mask)
 	local World = a_Player:GetWorld()
-	
 	local ActionName = (a_IsHollow and "hcyl") or "cyl"
+	
 	-- Check if other plugins agree with the operation:
-	if not(CheckAreaCallbacks(a_Cuboid, a_Player, World, ActionName)) then
+	if (CallHook("OnAreaChanging", a_Cuboid, a_Player, World, ActionName)) then
 		return 0
 	end
 	
@@ -598,6 +595,8 @@ function CreateCylinderInCuboid(a_Player, a_Cuboid, a_BlockTable, a_IsHollow, a_
 			BlockArea:Write(World, a_Cuboid.p1)
 		end
 	)
+	
+	CallHook("OnAreaChanged", a_Cuboid, a_Player, World, ActionName)
 	return NumAffectedBlocks
 end
 

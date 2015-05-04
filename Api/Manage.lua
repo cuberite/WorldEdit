@@ -7,39 +7,46 @@
 
 
 
--- Table containing all the plugins who want to check if they allow WorldEdit to change the world
-g_ExclusionAreaPlugins = {}
+g_Hooks = {
+	["OnAreaChanging"]            = {}, -- Signature: function(a_AffectedAreaCuboid, a_Player, a_World, a_Operation)
+	["OnAreaChanged"]             = {}, -- Signature: function(a_AffectedAreaCuboid, a_Player, a_World, a_Operation)
+	["OnPlayerSelectionChanging"] = {}, -- Signature: function(a_Player, a_PosX, a_PosY, a_PosZ, a_PointNr)
+	["OnPlayerSelectionChanged"]  = {}, -- Signature: function(a_Player, a_PosX, a_PosY, a_PosZ, a_PointNr)
+	["OnAreaCopying"]             = {}, -- Signature: function(a_Player, a_World, a_CopiedAreaCuboid) 
+	["OnAreaCopied"]              = {}, -- Signature: function(a_Player, a_World, a_CopiedAreaCuboid)
+}
 
--- Table containing all the plugins who want to check if they allow a player to change his selection.
-g_PlayerSelectPointHooks = {}
 
 
 
 
-
---- Registers a function from an external plugin that will be called for each operation in the specified world
--- Returns true to signalize call success to the caller
--- Callbacks should have the following signature:
---   function(a_MinX, a_MaxX, a_MinY, a_MaxY, a_MinZ, a_MaxZ, a_Player, a_World, a_Operation)
--- The callback should return true to abort the operation, false to continue.
-function RegisterAreaCallback(a_PluginName, a_FunctionName, a_WorldName)
-	-- Check the parameters for validity:
+-- Registers a WorldEdit hook.
+-- All arguments are strings.
+-- a_HookName is the name of the hook. (List can be seen above)
+-- a_PluginName is the name of the plugin that wants to register a callback
+-- a_CallbackName is the name of the function the plugin wants to use as the callback.
+function AddHook(a_HookName, a_PluginName, a_CallbackName)
 	if (
-		(type(a_PluginName)   ~= "string") or (a_PluginName   == "") or
-		(type(a_FunctionName) ~= "string") or (a_FunctionName == "") or
-		(type(a_WorldName)    ~= "string") or (a_WorldName    == "")
+		(type(a_HookName) ~= "string") or
+		(type(a_PluginName)   ~= "string") or (a_PluginName   == "") or not cPluginManager:Get():IsPluginLoaded(a_PluginName) or
+		(type(a_CallbackName) ~= "string") or (a_CallbackName == "")
 	) then
 		LOGWARNING("[WorldEdit] Invalid callback registration parameters.")
-		LOGWARNING("  RegisterAreaCallback() was called with params " ..
+		LOGWARNING("  AddHook() was called with params " ..
+			tostring(a_HookName     or "<nil>") .. ", " ..
 			tostring(a_PluginName   or "<nil>") .. ", " ..
-			tostring(a_FunctionName or "<nil>") .. ", " ..
-			tostring(a_WorldName    or "<nil>")
+			tostring(a_CallbackName or "<nil>")
 		)
+		
 		return false
 	end
 	
-	-- Insert the callback into the callback table:
-	table.insert(g_ExclusionAreaPlugins[a_WorldName], {PluginName = a_PluginName, FunctionName = a_FunctionName})
+	if (not g_Hooks[a_HookName]) then
+		LOGWARNING("[WorldEdit] Plugin \"" .. a_PluginName .. "\" tried to register an unexisting hook called \"" .. a_HookName .. "\"")
+		return false
+	end
+	
+	table.insert(g_Hooks[a_HookName], {PluginName = a_PluginName, CallbackName = a_CallbackName})
 	return true
 end
 
@@ -47,29 +54,31 @@ end
 
 
 
---- Registers a function from an external plugin that will be called for each time a player tries to select an new selection point.
+--- (OBSOLETE) Registers a function from an external plugin that will be called for each operation in the specified world
+-- Returns true to signalize call success to the caller
+-- Callbacks should have the following signature:
+--   function(a_AffectedAreaCuboid, a_Player, a_World, a_Operation)
+-- The callback should return true to abort the operation, false to continue.
+function RegisterAreaCallback(a_PluginName, a_FunctionName, a_WorldName)
+	LOGWARNING("[WorldEdit] RegisterAreaCallback is obsolete. Please use AddHook(\"OnAreaChanging\", ...)")
+	LOGWARNING(" The callback signature changed as well. All individual coordinates are now a single cCuboid")
+	return AddHook("OnAreaChanging", a_PluginName, a_FunctionName)
+end
+
+
+
+
+
+--- (OBSOLETE) Registers a function from an external plugin that will be called for each time a player tries to select an new selection point.
 -- It returns true to signalize call success to the caller
 -- Callbacks should have the following signature:
 --   function(a_Player, a_PosX, a_PosY, a_PosZ, a_PointNr)
 -- a_PointNr can be 0 for Left click or 1 for right click.
 -- The callback should return true to abort the operation, or false to continue.
 function RegisterPlayerSelectingPoint(a_PluginName, a_FunctionName)
-	-- Check the parameters.
-	if (
-		(type(a_PluginName)   ~= "string") or (a_PluginName   == "") or
-		(type(a_FunctionName) ~= "string") or (a_FunctionName == "")
-	) then
-		LOGWARNING("[WorldEdit] Invalid callback registration parameters.")
-		LOGWARNING("  RegisterPlayerSelectingPoint() was called with params " ..
-			tostring(a_PluginName   or "<nil>") .. ", " ..
-			tostring(a_FunctionName or "<nil>")
-		)
-		return false
-	end
-	
-	-- Insert the callback into the table.
-	table.insert(g_PlayerSelectPointHooks, {PluginName = a_PluginName, FunctionName = a_FunctionName})
-	return true
+	LOGWARNING("[WorldEdit] RegisterPlayerSelectingPoint is obsolete. Please use AddHook(\"OnPlayerSelectionChanging\", ...)")
+	LOGWARNING(" The callback signature changed as well. All individual coordinates are now a single cCuboid")
+	return AddHook("OnPlayerSelectionChanging", a_PluginName, a_FunctionName)
 end
 
 

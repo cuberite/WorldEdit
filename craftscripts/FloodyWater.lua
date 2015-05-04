@@ -26,7 +26,7 @@ local SrcCuboid = PlayerState.Selection:GetSortedCuboid()
 local World = a_Player:GetWorld()
 
 -- Check if other plugins might want to block this action.
-if not(CheckAreaCallbacks(SrcCuboid, a_Player, World, "craftscript.FloodyWater")) then
+if (CallHook("OnAreaChanging", SrcCuboid, a_Player, World, "craftscript.FloodyWater")) then
 	return true
 end
 
@@ -136,4 +136,7 @@ while (WaterBlocks[1]) do
 end
 
 BlockArea:Write(World, SrcCuboid.p1.x, SrcCuboid.p1.y, SrcCuboid.p1.z, cBlockArea.baTypes + cBlockArea.baMetas)
+CallHook("OnAreaChanged", SrcCuboid, a_Player, World, "craftscript.FloodyWater")
+
 return true
+

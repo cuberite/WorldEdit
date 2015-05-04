@@ -30,11 +30,13 @@ function HandleReplCommand(a_Split, a_Player)
 			return true
 		end
 		
-		if CheckIfInsideAreas(a_BlockX, a_BlockX, a_BlockY, a_BlockY, a_BlockZ, a_BlockZ, a_Player, a_Player:GetWorld(), "replacetool") then
+		local AffectedBlock = cCuboid(a_BlockX, a_BlockY, a_BlockZ)
+		if (CallHook("OnAreaChanging", AffectedBlock, a_Player, a_Player:GetWorld(), "replacetool")) then
 			return true
 		end
 		
 		a_Player:GetWorld():SetBlock(a_BlockX, a_BlockY, a_BlockZ, BlockType, BlockMeta)
+		CallHook("OnAreaChanged", AffectedBlock, a_Player, a_Player:GetWorld(), "replacetool")
 		return false
 	end
 	
@@ -119,13 +121,17 @@ function HandleSuperPickCommand(a_Split, a_Player)
 	
 	-- The handler that breaks the block of the superpickaxe.
 	local function SuperPickaxe(a_Player, a_BlockX, a_BlockY, a_BlockZ, a_BlockFace)
-		if CheckIfInsideAreas(a_BlockX, a_BlockX, a_BlockY, a_BlockY, a_BlockZ, a_BlockZ, a_Player, a_Player:GetWorld(), "superpickaxe") then
+		local AffectedArea = cCuboid(a_BlockX, a_BlockY, a_BlockZ)
+		if (CallHook("OnAreaChanging", AffectedArea, a_Player, a_Player:GetWorld(), "superpickaxe")) then
 			return true
 		end
 		
 		local World = a_Player:GetWorld()
 		World:BroadcastSoundParticleEffect(2001, a_BlockX, a_BlockY, a_BlockZ, World:GetBlock(a_BlockX, a_BlockY, a_BlockZ))
 		World:DigBlock(a_BlockX, a_BlockY, a_BlockZ)
+		
+		-- Notify other plugins of the change
+		CallHook("OnAreaChanged", AffectedArea, a_Player, a_Player:GetWorld(), "superpickaxe")
 	end
 	
 	local State = GetPlayerState(a_Player)

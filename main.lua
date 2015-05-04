@@ -73,7 +73,6 @@ function Initialize(a_Plugin)
 	--Bind all the commands:
 	RegisterPluginInfoCommands();
 	
-	InitializeTables() -- create all the tables
 	InitializeConfiguration(a_Plugin:GetLocalFolder() .. "/config.cfg")
 	
 	cFile:CreateFolder("schematics")
