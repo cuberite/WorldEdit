@@ -299,7 +299,9 @@ end
 
 
 local function LeftClickToolsAnimationHook(a_Player, a_Animation)
-	if (a_Animation ~= 0) then
+	-- In 1.8.x the left click has a value of 0, while in 1.7.x it's 1
+	local LeftClickAnimation = (a_Player:GetClientHandle():GetProtocolVersion() > 5) and 0 or 1
+	if (a_Animation ~= LeftClickAnimation) then
 		return false
 	end
 	
