@@ -336,7 +336,7 @@ function HandleStackCommand(a_Split, a_Player)
 	BA:Read(World, SelectionCuboid, cBlockArea.baTypes + cBlockArea.baMetas)
 	
 	local VectorDirection = Vector3i()
-	local LookDirection = Round((a_Player:GetYaw() + 180) / 90)
+	local LookDirection = math.round((a_Player:GetYaw() + 180) / 90)
 	
 	-- Find the proper direction and set the VectorDirection using it.
 	if (Direction == "up") then
