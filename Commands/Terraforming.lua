@@ -343,7 +343,7 @@ function HandleRemoveColumnCommand(a_Split, a_Player)
 	end
 	
 	local Cuboid = cCuboid(Pos, Pos)
-	Cuboid.p1.y = a_Split[1] == "/removeabove" and WorldHeight or 0
+	Cuboid.p1.y = a_Split[1] == "/removeabove" and (WorldHeight + 1) or 1
 	Cuboid:Sort()
 	
 	-- Check if other plugins allow the operation:
