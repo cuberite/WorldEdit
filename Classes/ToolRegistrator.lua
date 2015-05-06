@@ -49,6 +49,7 @@ function cToolRegistrator:BindAbsoluteTools()
 		return true
 	end
 	
+	local LastLeftClick = -math.huge
 	local function LeftClickCompassCallback(a_Player, _, _, _, a_BlockFace)
 		-- The player can't use the navigation tool because he doesn't have permission use it.
 		if (not a_Player:HasPermission("worldedit.navigation.jumpto.tool")) then
@@ -59,6 +60,11 @@ function cToolRegistrator:BindAbsoluteTools()
 			return true
 		end
 		
+		if ((os.clock() - LastLeftClick) < 0.20) then
+			return true
+		end
+		
+		LastLeftClick = os.clock()
 		LeftClickCompass(a_Player)
 		return true
 	end
@@ -200,7 +206,7 @@ function cToolRegistrator:BindLeftClickTool(a_ItemType, a_UsageCallback, a_ToolN
 		return false, "Can't bind tool to \"" .. ItemTypeToString(a_ItemType) .. "\": Already used for the " .. self.LeftClickTools[a_ItemType].ToolName
 	end
 	
-	self.LeftClickTools[a_ItemType] = {Callback = a_UsageCallback, ToolName = a_ToolName}
+	self.LeftClickTools[a_ItemType] = {Callback = a_UsageCallback, ToolName = a_ToolName, IsAbsolute = a_IsAbsolute}
 	return true
 end
 
