@@ -453,6 +453,14 @@ g_PluginInfo =
 			Category = "Navigation",
 		},
 		
+		["/farwand"] =
+		{
+			Permission = "worldedit.tool.farwand",
+			Handler = HandleFarwandCommand,
+			HelpString = "Use the wand from a distance",
+			Category = "Tool",
+		},
+		
 		["/jumpto"] =
 		{
 			Permission = "worldedit.navigation.jumpto.command",

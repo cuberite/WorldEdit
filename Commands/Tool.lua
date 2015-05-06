@@ -160,3 +160,54 @@ end
 
 
 
+
+function HandleFarwandCommand(a_Split, a_Player)
+	-- /farwand
+	
+	local State = GetPlayerState(a_Player)
+	
+	-- Common code for both left and right
+	local FarWand = function(a_Player, a_BlockFace, a_Point)
+		if (a_BlockFace ~= BLOCK_FACE_NONE) then
+			return true
+		end
+		
+		-- Get the block the player is looking at
+		local TargetBlock, BlockFace = GetTargetBlock(a_Player)
+		if (not TargetBlock) then
+			return true
+		end
+		
+		local Succes, Msg = State.Selection:SetPos(TargetBlock.x, TargetBlock.y, TargetBlock.z, BlockFace, a_Point)
+		a_Player:SendMessage(Msg)
+		return true
+	end
+	
+	local LeftClick = function(a_Player, a_BlockX, a_BlockY, a_BlockZ, a_BlockFace)
+		return FarWand(a_Player, a_BlockFace, "First")
+	end
+	
+	local RightClick = function(a_Player, a_BlockX, a_BlockY, a_BlockZ, a_BlockFace)
+		return FarWand(a_Player, a_BlockFace, "Second")
+	end
+	
+	local EquippedItemType = a_Player:GetInventory():GetEquippedItem().m_ItemType
+	local Succes, Err = State.ToolRegistrator:BindRightClickTool(EquippedItemType, RightClick, "farwand")
+	if (not Succes) then
+		a_Player:SendMessage(cChatColor.Rose .. Err)
+		return true
+	end
+	
+	Succes, Err = State.ToolRegistrator:BindLeftClickTool(EquippedItemType, LeftClick, "farwand")
+	if (not Succes) then
+		a_Player:SendMessage(cChatColor.Rose .. Err)
+		return true
+	end
+	
+	a_Player:SendMessage(cChatColor.LightPurple .. "Far wand tool bound to " .. ItemTypeToString(EquippedItemType))
+	return true
+end
+
+
+
+

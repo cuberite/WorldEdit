@@ -477,10 +477,12 @@ function GetTargetBlock(a_Player)
 	local MaxDistance = 150  -- A max distance of 150 blocks
 
 	local FoundBlock = nil
+	local BlockFace = BLOCK_FACE_NONE
 	local Callbacks = {
-		OnNextBlock = function(a_BlockX, a_BlockY, a_BlockZ, a_BlockType, a_BlockMeta)
+		OnNextBlock = function(a_BlockX, a_BlockY, a_BlockZ, a_BlockType, a_BlockMeta, a_BlockFace)
 			if (a_BlockType ~= E_BLOCK_AIR) then
 				FoundBlock = { x = a_BlockX, y = a_BlockY, z = a_BlockZ }
+				BlockFace = a_BlockFace
 				return true
 			end
 		end
@@ -499,7 +501,7 @@ function GetTargetBlock(a_Player)
 		return nil
 	end
 
-	return Vector3i(FoundBlock.x, FoundBlock.y, FoundBlock.z)
+	return Vector3i(FoundBlock.x, FoundBlock.y, FoundBlock.z), BlockFace
 end
 
 
