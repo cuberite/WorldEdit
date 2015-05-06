@@ -26,24 +26,28 @@ function HandleUpCommand(a_Split, a_Player)
 		return true
 	end
 	
-	local Y = math.floor(a_Player:GetPosY())
-	local y = math.floor(a_Player:GetPosY()) + Height
-	local X = math.floor(a_Player:GetPosX())
-	local Z = math.floor(a_Player:GetPosZ())
+	local P1 = a_Player:GetPosition():Floor()
+	local P2 = a_Player:GetPosition():Floor()
+	P2.y = P2.y + Height
+	
 	local World = a_Player:GetWorld()
-	for Y = Y, y + 1 do
-		if World:GetBlock(X, Y, Z) ~= E_BLOCK_AIR then
+	for Y = P1.y, P2.y + 1 do
+		if (World:GetBlock(P1.x, Y, P1.z) ~= E_BLOCK_AIR) then
 			a_Player:SendMessage(cChatColor.Rose .. "You would hit something above you.")
 			return true
 		end
 	end
 	
-	if not CheckIfInsideAreas(X, X, y - 1, y - 1, Z, Z, a_Player, World, "up") then
-		World:SetBlock(X, y - 1, Z, 20, 0)
+	local ChangeCuboid = cCuboid(P2, P2)
+	if (CallHook("OnAreaChanging", ChangeCuboid, a_Player, World, "up")) then
+		return true
 	end
 	
-	a_Player:TeleportToCoords(X + 0.5, y, Z + 0.5)
+	World:SetBlock(P1.x, P2.y - 1, P1.z, E_BLOCK_GLASS, 0)
+	a_Player:TeleportToCoords(P1.x + 0.5, P2.y, P1.z + 0.5)
 	a_Player:SendMessage(cChatColor.LightPurple .. "Whoosh!")
+	
+	CallHook("OnAreaChanged", ChangeCuboid, a_Player, World, "up")
 	return true
 end
 
@@ -221,8 +225,9 @@ function HandleCeilCommand(a_Split, a_Player)
 	
 	for y=Y, WorldHeight do
 		if World:GetBlock(X, y, Z) ~= E_BLOCK_AIR then
-			if not CheckIfInsideAreas(X, X, y - BlockFromCeil - 3, y - BlockFromCeil - 3, Z, Z, a_Player, PlayerWorld, "ceil") then
+			if (CallHook("OnAreaChanging", cCuboid(X, y - BlockFromCeil - 3, Z), a_Player, PlayerWorld, "ceil")) then
 				World:SetBlock(X, y - BlockFromCeil - 3, Z, E_BLOCK_GLASS, 0)
+				CallHook("OnAreaChanged", cCuboid(X, y - BlockFromCeil - 3, Z), a_Player, PlayerWorld, "ceil")
 			end
 			local I = y - BlockFromCeil - 2
 			if I == Y then

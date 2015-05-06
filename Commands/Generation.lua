@@ -111,7 +111,7 @@ function HandleGenerationShapeCommand(a_Split, a_Player)
 	end
 	
 	-- Check if other plugins want to block this action
-	if not(CheckAreaCallbacks(SrcCuboid, a_Player, World, "generate")) then
+	if (CallHook("OnAreaChanging", SrcCuboid, a_Player, World, "generate")) then
 		return true
 	end
 	
@@ -129,6 +129,9 @@ function HandleGenerationShapeCommand(a_Split, a_Player)
 	
 	-- Write the blockarea in the world
 	BA:Write(World, SrcCuboid.p1)
+	
+	-- Notify other plugins that the shape is in the world
+	CallHook("OnAreaChanged", SrcCuboid, a_Player, World, "generate")
 	return true
 end
 
@@ -261,7 +264,7 @@ function HandlePyramidCommand(a_Split, a_Player)
 	local World = a_Player:GetWorld()
 	
 	-- Check other plugins
-	if not(CheckAreaCallbacks(Cuboid, a_Player, World, a_Split[1]:sub(3, -1))) then
+	if (CallHook("OnAreaChanging", Cuboid, a_Player, World, a_Split[1]:sub(3, -1))) then
 		return true
 	end
 	
@@ -282,6 +285,9 @@ function HandlePyramidCommand(a_Split, a_Player)
 	
 	-- Write the changes into the world
 	BlockArea:Write(World, Cuboid.p1)
+	
+	-- Notify other plugins of the (h)pyramid
+	CallHook("OnAreaChanged", Cuboid, a_Player, World, a_Split[1]:sub(3, -1))
 	
 	-- Send a message to the player with the amount of changed blocks
 	a_Player:SendMessage(cChatColor.LightPurple .. AffectedBlocks .. " block(s) have been created.")
