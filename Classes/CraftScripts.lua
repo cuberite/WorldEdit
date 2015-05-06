@@ -30,7 +30,7 @@ end
 
 
 function cCraftScript:SelectScript(a_ScriptName)
-	local Path = cPluginManager:GetCurrentPlugin():GetLocalDirectory() .. "/craftscripts/" .. a_ScriptName .. ".lua"
+	local Path = cPluginManager:GetCurrentPlugin():GetLocalFolder() .. "/craftscripts/" .. a_ScriptName .. ".lua"
 	if (not cFile:Exists(Path)) then
 		return false, "The script does not exist."
 	end
