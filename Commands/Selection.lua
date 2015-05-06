@@ -59,6 +59,7 @@ function HandleExpandCommand(a_Split, a_Player)
 	if (a_Split[2] == "vert") then
 		State.Selection.Cuboid.p1.y = 0
 		State.Selection.Cuboid.p2.y = 255
+		State.Selection:NotifySelectionChanged()
 
 		a_Player:SendMessage(cChatColor.LightPurple .. "Expanded the selection from top to bottom.")
 		a_Player:SendMessage(cChatColor.LightPurple .. "Selection is now " .. State.Selection:GetSizeDesc())
