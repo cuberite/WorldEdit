@@ -33,6 +33,12 @@ NavigationWand =
 	MaxDistance = 120,
 	TeleportNoHit = true,
 },
+
+Scripting =
+{
+	-- If true it logs an error when a craftscript failed
+	Debug = false,
+},
 ]]
 
 

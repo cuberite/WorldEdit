@@ -7,6 +7,18 @@
 
 
 
+local function LOGSCRIPTERROR(a_Msg)
+	if (not g_Config.Scripting.Debug) then
+		return
+	end
+	
+	LOGERROR(a_Msg)
+end
+
+
+
+
+
 --- Class for storing a players selected script
 cCraftScript = {}
 
@@ -37,6 +49,7 @@ function cCraftScript:SelectScript(a_ScriptName)
 	
 	local Function, Err = loadfile(Path)
 	if (not Function) then
+		LOGSCRIPTERROR(Err)
 		return false, "There is an issue in the scripts code."
 	end
 	
@@ -53,8 +66,9 @@ function cCraftScript:Execute(a_Player, a_Split)
 		return false, "There is no script selected."
 	end
 	
-	local Succes = pcall(self.SelectedScript, a_Player, a_Split)
+	local Succes, Err = pcall(self.SelectedScript, a_Player, a_Split)
 	if (not Succes) then
+		LOGSCRIPTERROR(Err)
 		return false, "Something went wrong while running the script."
 	end
 	
