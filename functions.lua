@@ -606,105 +606,119 @@ end
 
 
 
--------------------------------------------
-------------RIGHTCLICKCOMPASS--------------
--------------------------------------------
-function RightClickCompass(Player)
-	local World = Player:GetWorld()
-	local Teleported = false
+-- Teleports a player in the direction he's looking to the first non-solid block it finds IF it went through at least one solid block.
+-- returns true if teleported, otherwise it returns false.
+function RightClickCompass(a_Player)
+	local World = a_Player:GetWorld()
+	local FreeSpot = nil
 	local WentThroughBlock = false
 	
 	local Callbacks = {
-		OnNextBlock = function(X, Y, Z, BlockType, BlockMeta)
-			if (not cBlockInfo:IsTransparent(BlockType)) then
+		OnNextBlock = function(a_X, a_Y, a_Z, a_BlockType, a_BlockMeta)
+			if (cBlockInfo:IsSolid(a_BlockType)) then
+				-- The trace went through a solid block. We have to remember it, because we only teleport if the trace went through at least one solid block.
 				WentThroughBlock = true
-			else
-				if (WentThroughBlock) then
-					if (
-						(BlockType == E_BLOCK_AIR) and
-						(World:GetBlock(X, Y + 1, Z) == E_BLOCK_AIR) and
-						(cBlockInfo:IsSolid(World:GetBlock(X, Y - 1, Z)) or Player:IsFlying())
-					) then
-						Player:TeleportToCoords(X + 0.5, Y, Z + 0.5)
-						Teleported = true
-						return true
-					else
-						for y = Y, 1, -1 do
-							if cBlockInfo:IsSolid(World:GetBlock(X, y, Z)) then
-								Player:TeleportToCoords(X + 0.5, y + 1, Z + 0.5)
-								Teleported = true
-								return true
-							end
-						end
-					end
-				end
+				return false
 			end
+			
+			if (not WentThroughBlock) then
+				-- The block isn't solid, but we didn't go through a solid block yet. Bail out.
+				return false
+			end
+			
+			-- Found a block that is not a solid block, but it already went through a solid block.
+			FreeSpot = Vector3i(a_X, a_Y, a_Z)
+			return true
 		end;
 	};
-	local EyePos = Player:GetEyePosition()
-	local LookVector = Player:GetLookVector()
+	
+	local EyePos = a_Player:GetEyePosition()
+	local LookVector = a_Player:GetLookVector()
 	LookVector:Normalize()	
-
+	
+	-- Start the trace at the position of the eyes
 	local Start = EyePos
 	local End = EyePos + LookVector * g_Config.NavigationWand.MaxDistance
 	
 	cLineBlockTracer.Trace(World, Callbacks, Start.x, Start.y, Start.z, End.x, End.y, End.z)
-	if not Teleported then
-		Player:SendMessage(cChatColor.Rose .. "Nothing to pass through!")
+	
+	if (not FreeSpot) then
+		a_Player:SendMessage(cChatColor.Rose .. "Nothing to pass through!")
+		return false
 	end
+	
+	-- Teleport the player to the first solid block below the found coordinates
+	for y = FreeSpot.y, 0, -1 do
+		if (cBlockInfo:IsSolid(World:GetBlock(FreeSpot.x, y, FreeSpot.z))) then
+			a_Player:TeleportToCoords(FreeSpot.x + 0.5, y + 1, FreeSpot.z + 0.5)
+			return true
+		end
+	end
+	
+	-- No solid block below the found coordinates was found. Don't teleport the player at all.
+	return false
 end
 
 
-------------------------------------------
-------------LEFTCLICKCOMPASS--------------
-------------------------------------------
-function LeftClickCompass(Player)
-	local World = Player:GetWorld()
-	local HasHit = false
+
+
+
+-- Teleports a player in the direction he's looking at, to the first solid block in the trace, and then the first non-solid block above that.
+-- returns true if the player is teleported, returns false otherwise.
+function LeftClickCompass(a_Player)
+	local World = a_Player:GetWorld()
 	
-	-- Remember the coords of the last checked block:
-	local LastX = Player:GetPosX()
-	local LastY = Player:GetPosY()
-	local LastZ = Player:GetPosZ()
+	-- The first solid block to be found in the trace
+	local BlockPos = false
 	
 	-- Callback that checks whether the block on the traced line is non-solid:
 	local Callbacks = {
-		OnNextBlock = function(X, Y, Z, BlockType, BlockMeta)
-			if BlockType ~= E_BLOCK_AIR and not cBlockInfo:IsOneHitDig(BlockType) then
-				local IsValid, WorldHeight = World:TryGetHeight(X, Z)
-				for y = Y, WorldHeight + 1 do
-					if not cBlockInfo:IsSolid(World:GetBlock(X, y, Z)) then
-						Y = y
-						break
-					end
-				end
-				Player:TeleportToCoords(X + 0.5, Y, Z + 0.5)
-				HasHit = true
-				return true
+		OnNextBlock = function(a_X, a_Y, a_Z, a_BlockType, a_BlockMeta)
+			if (not cBlockInfo:IsSolid(a_BlockType)) then
+				return false
 			end
-			LastX = X
-			LastY = Y
-			LastZ = Z
+			
+			BlockPos = Vector3i(a_X, a_Y, a_Z)
+			return true
 		end
 	};
 	
 	-- Trace the line from the player's eyes in their look direction:
-	local EyePos = Player:GetEyePosition()
-	local LookVector = Player:GetLookVector()
+	local EyePos = a_Player:GetEyePosition()
+	local LookVector = a_Player:GetLookVector()
 	LookVector:Normalize()
+	
 	local Start = EyePos
 	local End = EyePos + LookVector * g_Config.NavigationWand.MaxDistance
 	cLineBlockTracer.Trace(World, Callbacks, Start.x, Start.y, Start.z, End.x, End.y, End.z)
 	
 	-- If no block has been hit, teleport the player to the last checked block location (known non-solid):
-	if not(HasHit) then
+	if (not BlockPos) then
+		-- If configurated teleport the player to the last coordinates, otherwise send a message that it's too far.
 		if (g_Config.NavigationWand.TeleportNoHit) then
-			Player:TeleportToCoords(LastX + 0.5, LastY, LastZ + 0.5)
+			a_Player:TeleportToCoords(End.x + 0.5, End.y, End.z + 0.5)
 		else
-			Player:SendMessage(cChatColor.Rose .. "No block in sight (or too far)!")
+			a_Player:SendMessage(cChatColor.Rose .. "No block in sight (or too far)!")
+		end
+		
+		return g_Config.NavigationWand.TeleportNoHit
+	end
+	
+	local IsValid, Height = World:TryGetHeight(BlockPos.x, BlockPos.z)
+	if (not IsValid) then
+		return false
+	end
+	
+	-- Find a block that isn't solid. The first one we find we teleport the player to.
+	for Y = BlockPos.y, Height do
+		if (not cBlockInfo:IsSolid(World:GetBlock(BlockPos.x, Y, BlockPos.z))) then
+			a_Player:TeleportToCoords(BlockPos.x + 0.5, Y, BlockPos.z + 0.5)
+			return true
 		end
 	end
 	
+	-- No non-solid block was found. This can happen when for example the highest block is 255.
+	a_Player:TeleportToCoords(BlockPos.x + 0.5, Height + 1, BlockPos.z + 0.5)
 	return true
 end
 
