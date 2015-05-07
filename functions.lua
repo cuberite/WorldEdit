@@ -7,8 +7,18 @@
 
 
 
--- Returns the block type (and block meta) from a string. This can be something like "1", "1:0", "stone" and "stone:0"
+-- Returns the block type (and block meta) from a string. This can be something like "1", "1:0", "stone" and "stone:0".
+-- If a string with a percentage sign is given it will take the second half of the string (With "40%1:0" it uses only "1:0")
 function GetBlockTypeMeta(a_BlockString)
+	if (a_BlockString:find("%%")) then
+		local ItemInfo = StringSplit(a_BlockString, "%")
+		if (#ItemInfo ~= 2) then
+			return false
+		end
+		
+		a_BlockString = ItemInfo[2]
+	end
+	
 	local BlockID = tonumber(a_BlockString)
 	
 	-- Check if it was a normal number
@@ -375,7 +385,7 @@ function RetrieveBlockTypes(Input)
 	local BlockTable = {}
 	for Idx, Value in ipairs(RawDstBlockTable) do
 		-- Block chance
-		local Chance = 100
+		local Chance = 1
 		if (string.find(Value, "%", 1, true) ~= nil) then
 			local SplittedValues = StringSplit(Value, "%")
 			if (#SplittedValues ~= 2) then
