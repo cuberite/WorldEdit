@@ -414,12 +414,12 @@ end
 
 
 
--- Chooses the best block destination class from the string. If only one block is set it uses the cBlockDstConstant class, and if multiple are used it uses cBlockDstRandom.
--- If the string is #clipboard or #copy it returns cBlockDstClipboard.
+-- Chooses the best block destination class from the string. If only one block is set it uses the cConstantBlockTypeSource class, and if multiple are used it uses cRandomBlockTypeSource.
+-- If the string is #clipboard or #copy it returns cClipboardBlockTypeSource.
 function GetBlockDst(a_Blocks, a_Player)
 	if (a_Blocks:sub(1, 1) == "#") then
 		if ((a_Blocks == "#clipboard") or (a_Blocks == "#copy")) then
-			return cBlockDstClipboard:new(a_Player)
+			return cClipboardBlockTypeSource:new(a_Player)
 		else
 			return false, "#clipboard or #copy is acceptable for patterns starting with #"
 		end
@@ -427,10 +427,10 @@ function GetBlockDst(a_Blocks, a_Player)
 	
 	local NumBlocks = #StringSplit(a_Blocks, ",")
 	if (NumBlocks == 1) then
-		return cBlockDstConstant:new(a_Blocks)
+		return cConstantBlockTypeSource:new(a_Blocks)
 	end
 	
-	return cBlockDstRandom:new(a_Blocks)
+	return cRandomBlockTypeSource:new(a_Blocks)
 end
 
 
