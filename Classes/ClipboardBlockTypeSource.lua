@@ -1,20 +1,20 @@
 
 -- BlockDstClipboard.lua
 
--- Implements the cBlockDstClipboard class that allows doing actions using the player's clipboard
+-- Implements the cClipboardBlockTypeSource class that allows doing actions using the player's clipboard
 -- If used in for example //set you'll see the clipboard in a repeating pattern.
 
 
 
 
 
-cBlockDstClipboard = {}
+cClipboardBlockTypeSource = {}
 
 
 
 
 
-function cBlockDstClipboard:new(a_Player)
+function cClipboardBlockTypeSource:new(a_Player)
 	local State = GetPlayerState(a_Player)
 	if (not State.Clipboard:IsValid()) then
 		return false, "no clipboard data"
@@ -25,7 +25,7 @@ function cBlockDstClipboard:new(a_Player)
 	
 	local Obj = {}
 	
-	setmetatable(Obj, cBlockDstClipboard)
+	setmetatable(Obj, cClipboardBlockTypeSource)
 	self.__index = self
 	
 	Obj.m_Area = Area
@@ -39,7 +39,7 @@ end
 
 
 -- Returns a block from the clipboard.
-function cBlockDstClipboard:Get(a_X, a_Y, a_Z)
+function cClipboardBlockTypeSource:Get(a_X, a_Y, a_Z)
 	local PosX = math.floor(a_X % self.m_Size.x)
 	local PosY = math.floor(a_Y % self.m_Size.y)
 	local PosZ = math.floor(a_Z % self.m_Size.z)
