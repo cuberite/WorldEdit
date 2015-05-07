@@ -24,7 +24,6 @@ function cBlockDstConstant:new(a_BlockString)
 	setmetatable(Obj, cBlockDstConstant)
 	self.__index = self
 	
-	
 	Obj.m_BlockType = BlockType
 	Obj.m_BlockMeta = BlockMeta
 	
