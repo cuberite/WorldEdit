@@ -139,20 +139,14 @@ function HandleFacesCommand(a_Split, a_Player)
 		return true
 	end
 	
-	-- Retrieve the blocktypes from the params:
-	local RawDstBlockTable = StringSplit(a_Split[2], ",")
-	local DstBlockTable = {}
-	for Idx, Value in ipairs(RawDstBlockTable) do
-		local DstBlockType, DstBlockMeta = GetBlockTypeMeta(Value)
-		if not(DstBlockType) then
-			a_Player:SendMessage(cChatColor.Rose .. "Unknown dst block type: '" .. Value .. "'.")
-			return true
-		end
-		table.insert(DstBlockTable, {BlockType = DstBlockType, BlockMeta = DstBlockMeta})
+	local BlockTable, ErrBlock = GetBlockDst(a_Split[2], a_Player)
+	if (not BlockTable) then
+		a_Player:SendMessage(cChatColor.Rose .. "Unknown block: '" .. ErrBlock .. "'.")
+		return true
 	end
 	
 	-- Fill the selection:
-	local NumBlocks = FillFaces(State, a_Player, a_Player:GetWorld(), DstBlockTable)
+	local NumBlocks = FillFaces(State, a_Player, a_Player:GetWorld(), BlockTable)
 	if (NumBlocks) then
 		a_Player:SendMessage(cChatColor.LightPurple .. NumBlocks .. " block(s) have been changed.")
 	end
@@ -454,20 +448,15 @@ function HandleReplaceCommand(a_Split, a_Player)
 	end
 	
 	-- Retrieve the blocktypes from the params:
-	local RawSrcBlockTable = StringSplit(a_Split[2], ",")
-	local SrcBlockTable = {}
-	for Idx, Value in ipairs(RawSrcBlockTable) do
-		local SrcBlockType, SrcBlockMeta, TypeOnly = GetBlockTypeMeta(Value)
-		if not(SrcBlockType) then
-			a_Player:SendMessage(cChatColor.LightPurple .. "Unknown src block type: '" .. Value .. "'.")
-			return true
-		end
-		SrcBlockTable[SrcBlockType] = {SrcBlockMeta = SrcBlockMeta, TypeOnly = TypeOnly or false}
+	local SrcBlockTable, ErrBlock = cBlockSrc:new(a_Split[2])
+	if (not SrcBlockTable) then
+		a_Player:SendMessage(cChatColor.Rose .. "Unknown src block type: '" .. ErrBlock .. "'.")
+		return true
 	end
 	
-	local DstBlockTable = RetrieveBlockTypes(a_Split[3])
+	local DstBlockTable, ErrBlock = GetBlockDst(a_Split[3], a_Player)
 	if not(DstBlockTable) then
-		a_Player:SendMessage(cChatColor.Rose .. "Unknown dst block type: '" .. a_Split[3] .. "'.")
+		a_Player:SendMessage(cChatColor.Rose .. "Unknown dst block type: '" .. ErrBlock .. "'.")
 		return true
 	end
 	
@@ -501,9 +490,9 @@ function HandleSetCommand(a_Split, a_Player)
 	end
 	
 	-- Retrieve the blocktypes from the params:
-	local DstBlockTable = RetrieveBlockTypes(a_Split[2])
+	local DstBlockTable, ErrBlock = GetBlockDst(a_Split[2], a_Player)
 	if not(DstBlockTable) then
-		a_Player:SendMessage(cChatColor.Rose .. "Unknown dst block type: '" .. a_Split[2] .. "'.")
+		a_Player:SendMessage(cChatColor.Rose .. "Unknown dst block type: '" .. ErrBlock .. "'.")
 		return true
 	end
 	
@@ -578,9 +567,9 @@ function HandleWallsCommand(a_Split, a_Player)
 	end
 	
 	-- Retrieve the blocktypes from the params:
-	local DstBlockTable = RetrieveBlockTypes(a_Split[2])
+	local DstBlockTable, ErrBlock = GetBlockDst(a_Split[2], a_Player)
 	if not(DstBlockTable) then
-		a_Player:SendMessage(cChatColor.Rose .. "Unknown dst block type: '" .. a_Split[2] .. "'.")
+		a_Player:SendMessage(cChatColor.Rose .. "Unknown dst block type: '" .. ErrBlock .. "'.")
 		return true
 	end
 	

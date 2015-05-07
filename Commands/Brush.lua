@@ -24,20 +24,14 @@ function HandleMaskCommand(a_Split, a_Player)
 	end
 
 	-- Retrieve the blocktypes from the params:
-	local BlockTable = RetrieveBlockTypes(a_Split[2])
-	if not(BlockTable) then
-		a_Player:SendMessage(cChatColor.Rose .. "Unknown block type: '" .. a_Split[2] .. "'.")
+	local Mask, ErrBlock = cBlockSrc:new(a_Split[2])
+	if not(Mask) then
+		a_Player:SendMessage(cChatColor.Rose .. "Unknown block type: '" .. ErrBlock .. "'.")
 		return true
 	end
 
-	-- Convert the BlockTable to a mask table (It's better for the performance)
-	local MaskTable = {}
-	for Idx, Block in ipairs(BlockTable) do
-		MaskTable[Block.BlockType] = { BlockMeta = Block.BlockMeta, TypeOnly = Block.TypeOnly, Chance = Block.Chance }
-	end
-
 	local State = GetPlayerState(a_Player)
-	local Succes, error = State.ToolRegistrator:BindMask(a_Player:GetEquippedItem().m_ItemType, MaskTable)
+	local Succes, error = State.ToolRegistrator:BindMask(a_Player:GetEquippedItem().m_ItemType, Mask)
 	
 	if (not Succes) then
 		a_Player:SendMessage(cChatColor.Rose .. error)
@@ -66,9 +60,9 @@ function HandleSphereBrush(a_Split, a_Player)
 	end
 
 	-- Retrieve the blocktypes from the params:
-	local BlockTable = RetrieveBlockTypes(a_Split[3])
+	local BlockTable, ErrBlock = GetBlockDst(a_Split[3], a_Player)
 	if not(BlockTable) then
-		a_Player:SendMessage(cChatColor.LightPurple .. "Unknown block type: '" .. a_Split[3] .. "'.")
+		a_Player:SendMessage(cChatColor.LightPurple .. "Unknown block type: '" .. ErrBlock .. "'.")
 		return true
 	end
 
@@ -136,9 +130,9 @@ function HandleCylinderBrush(a_Split, a_Player)
 	end
 
 	-- Retrieve the blocktypes from the params:
-	local BlockTable = RetrieveBlockTypes(a_Split[3])
+	local BlockTable, ErrBlock = GetBlockDst(a_Split[3], a_Player)
 	if not(BlockTable) then
-		a_Player:SendMessage(cChatColor.LightPurple .. "Unknown block type: '" .. a_Split[3] .. "'.")
+		a_Player:SendMessage(cChatColor.LightPurple .. "Unknown block type: '" .. ErrBlock .. "'.")
 		return true
 	end
 
