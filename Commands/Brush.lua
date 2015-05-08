@@ -24,7 +24,7 @@ function HandleMaskCommand(a_Split, a_Player)
 	end
 
 	-- Retrieve the blocktypes from the params:
-	local Mask, ErrBlock = cBlockSrc:new(a_Split[2])
+	local Mask, ErrBlock = cMask:new(a_Split[2])
 	if not(Mask) then
 		a_Player:SendMessage(cChatColor.Rose .. "Unknown block type: '" .. ErrBlock .. "'.")
 		return true

@@ -1,19 +1,19 @@
 
--- BlockSrc.lua
+-- Mask.lua
 
--- Contains the BlockSrc class representing blocks that can be replaced. Used for example in masks and the replace command.
-
-
-
-
-
-cBlockSrc = {}
+-- Contains the cMask class representing blocks that can be replaced. Used for example in masks and the replace command.
 
 
 
 
 
-function cBlockSrc:new(a_Blocks)
+cMask = {}
+
+
+
+
+
+function cMask:new(a_Blocks)
 	-- Get all the different blocks from the string
 	local BlockArray, ErrorBlock = RetrieveBlockTypes(a_Blocks)
 	if (not BlockArray) then
@@ -37,7 +37,7 @@ function cBlockSrc:new(a_Blocks)
 	
 	local Obj = {}
 	
-	setmetatable(Obj, cBlockSrc)
+	setmetatable(Obj, cMask)
 	self.__index = self
 	
 	Obj.m_BlockTable = BlockTable
@@ -50,7 +50,7 @@ end
 
 
 -- Checks if the given blocktype exists in the blocktable.
-function cBlockSrc:Contains(a_BlockType, a_BlockMeta)
+function cMask:Contains(a_BlockType, a_BlockMeta)
 	local BlockInfo = self.m_BlockTable[a_BlockType]
 	if (not BlockInfo) then
 		return false

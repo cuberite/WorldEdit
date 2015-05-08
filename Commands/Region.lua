@@ -448,7 +448,7 @@ function HandleReplaceCommand(a_Split, a_Player)
 	end
 	
 	-- Retrieve the blocktypes from the params:
-	local SrcBlockTable, ErrBlock = cBlockSrc:new(a_Split[2])
+	local SrcBlockTable, ErrBlock = cMask:new(a_Split[2])
 	if (not SrcBlockTable) then
 		a_Player:SendMessage(cChatColor.Rose .. "Unknown src block type: '" .. ErrBlock .. "'.")
 		return true
