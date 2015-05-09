@@ -44,9 +44,9 @@ function HandleGenerationShapeCommand(a_Split, a_Player)
 		return true
 	end
 	
-	local BlockTable = RetrieveBlockTypes(a_Split[2 + NumFlags])
+	local BlockTable, ErrBlock = GetBlockDst(a_Split[2 + NumFlags], a_Player)
 	if not(BlockTable) then
-		a_Player:SendMessage(cChatColor.LightPurple .. "Unknown block type: '" .. a_Split[2 + NumFlags] .. "'.")
+		a_Player:SendMessage(cChatColor.LightPurple .. "Unknown block type: '" .. ErrBlock .. "'.")
 		return true
 	end
 	
@@ -99,7 +99,6 @@ function HandleGenerationShapeCommand(a_Split, a_Player)
 		unit = Max - zero
 	end
 	
-	local BlockTable = CalculateBlockChances(BlockTable)
 	local Expression = cExpression:new(FormulaString)
 	
 	-- Create the shape generator
@@ -150,13 +149,11 @@ function HandleCylCommand(a_Split, a_Player)
 	end
 
 	-- Retrieve the blocktypes from the params:
-	local BlockTable = RetrieveBlockTypes(a_Split[2])
+	local BlockTable, ErrBlock = GetBlockDst(a_Split[2], a_Player)
 	if not(BlockTable) then
-		a_Player:SendMessage(cChatColor.LightPurple .. "Unknown block type: '" .. a_Split[2] .. "'.")
+		a_Player:SendMessage(cChatColor.LightPurple .. "Unknown block type: '" .. ErrBlock .. "'.")
 		return true
 	end
-	
-	BlockTable = CalculateBlockChances(BlockTable)
 
 	local Radius = tonumber(a_Split[3])
 	if (not Radius) then
@@ -194,13 +191,11 @@ function HandleSphereCommand(a_Split, a_Player)
 	end
 
 	-- Retrieve the blocktypes from the params:
-	local BlockTable = RetrieveBlockTypes(a_Split[2])
+	local BlockTable, ErrBlock = GetBlockDst(a_Split[2], a_Player)
 	if not(BlockTable) then
-		a_Player:SendMessage(cChatColor.LightPurple .. "Unknown block type: '" .. a_Split[2] .. "'.")
+		a_Player:SendMessage(cChatColor.LightPurple .. "Unknown block type: '" .. ErrBlock .. "'.")
 		return true
 	end
-	
-	BlockTable = CalculateBlockChances(BlockTable)
 
 	local Radius = tonumber(a_Split[3])
 	if (not Radius) then
@@ -237,13 +232,11 @@ function HandlePyramidCommand(a_Split, a_Player)
 	end
 	
 	-- Retrieve the blocktypes from the params:
-	local BlockTable = RetrieveBlockTypes(a_Split[2])
+	local BlockTable, ErrBlock = GetBlockDst(a_Split[2], a_Player)
 	if not(BlockTable) then
-		a_Player:SendMessage(cChatColor.LightPurple .. "Unknown block type: '" .. a_Split[2] .. "'.")
+		a_Player:SendMessage(cChatColor.LightPurple .. "Unknown block type: '" .. ErrBlock .. "'.")
 		return true
 	end
-	
-	BlockTable = CalculateBlockChances(BlockTable)
 	
 	local Radius = tonumber(a_Split[3])
 	if (not Radius) then

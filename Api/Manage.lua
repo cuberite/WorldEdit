@@ -10,10 +10,10 @@
 g_Hooks = {
 	["OnAreaChanging"]            = {}, -- Signature: function(a_AffectedAreaCuboid, a_Player, a_World, a_Operation)
 	["OnAreaChanged"]             = {}, -- Signature: function(a_AffectedAreaCuboid, a_Player, a_World, a_Operation)
+	["OnAreaCopied"]              = {}, -- Signature: function(a_Player, a_World, a_CopiedAreaCuboid)
+	["OnAreaCopying"]             = {}, -- Signature: function(a_Player, a_World, a_CopiedAreaCuboid) 
 	["OnPlayerSelectionChanging"] = {}, -- Signature: function(a_Player, a_PosX, a_PosY, a_PosZ, a_PointNr)
 	["OnPlayerSelectionChanged"]  = {}, -- Signature: function(a_Player, a_PosX, a_PosY, a_PosZ, a_PointNr)
-	["OnAreaCopying"]             = {}, -- Signature: function(a_Player, a_World, a_CopiedAreaCuboid) 
-	["OnAreaCopied"]              = {}, -- Signature: function(a_Player, a_World, a_CopiedAreaCuboid)
 }
 
 

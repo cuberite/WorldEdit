@@ -67,13 +67,14 @@ function Initialize(a_Plugin)
 	PLUGIN:SetName(g_PluginInfo.Name)
 	PLUGIN:SetVersion(g_PluginInfo.Version)
 	
+	InitializeConfiguration(a_Plugin:GetLocalFolder() .. "/config.cfg")
+	
 	-- Load the InfoReg shared library:
 	dofile(cPluginManager:GetPluginsPath() .. "/InfoReg.lua")
 	
 	--Bind all the commands:
 	RegisterPluginInfoCommands();
 	
-	InitializeConfiguration(a_Plugin:GetLocalFolder() .. "/config.cfg")
 	
 	cFile:CreateFolder("schematics")
 	

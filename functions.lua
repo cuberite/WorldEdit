@@ -7,8 +7,18 @@
 
 
 
--- Returns the block type (and block meta) from a string. This can be something like "1", "1:0", "stone" and "stone:0"
+-- Returns the block type (and block meta) from a string. This can be something like "1", "1:0", "stone" and "stone:0".
+-- If a string with a percentage sign is given it will take the second half of the string (With "40%1:0" it uses only "1:0")
 function GetBlockTypeMeta(a_BlockString)
+	if (a_BlockString:find("%%")) then
+		local ItemInfo = StringSplit(a_BlockString, "%")
+		if (#ItemInfo ~= 2) then
+			return false
+		end
+		
+		a_BlockString = ItemInfo[2]
+	end
+	
 	local BlockID = tonumber(a_BlockString)
 	
 	-- Check if it was a normal number
@@ -165,47 +175,44 @@ function FillWalls(a_PlayerState, a_Player, a_World, a_DstBlockTable)
 	a_PlayerState:PushUndoInSelection(a_World, "walls")
 
 	local Area = cBlockArea()
-	local MinX, MaxX = a_PlayerState.Selection:GetXCoordsSorted()
-	local MinY, MaxY = a_PlayerState.Selection:GetYCoordsSorted()
-	local MinZ, MaxZ = a_PlayerState.Selection:GetZCoordsSorted()
-	local XSize = MaxX - MinX
-	local YSize = MaxY - MinY
-	local ZSize = MaxZ - MinZ
+	local SrcCuboid = a_PlayerState.Selection:GetSortedCuboid()
 	
 	-- Read the area into a cBlockArea
-	Area:Read(a_World, MinX, MaxX, MinY, MaxY, MinZ, MaxZ, cBlockArea.baTypes + cBlockArea.baMetas)
+	Area:Read(a_World, SrcCuboid, cBlockArea.baTypes + cBlockArea.baMetas)
+	local SizeX, SizeY, SizeZ = Area:GetCoordRange()
 	
-	local NumDstBlocks = #a_DstBlockTable
-	
+	local function GetRandomBlock()
+		local RandomNumber = math.random()
+		for Idx, Value in ipairs(a_BlockTable) do
+			if (RandomNumber <= Value.Chance) then
+				return Value.BlockType, Value.BlockMeta
+			end
+		end
+	end
+		
 	-- Place the walls
-	for Y = 0, YSize do
-		for X = 0, XSize do
-			local Block = a_DstBlockTable[math.random(1, NumDstBlocks)]
-			Area:SetRelBlockTypeMeta(X, Y, 0, Block.BlockType, Block.BlockMeta)
-			
-			Block = a_DstBlockTable[math.random(1, NumDstBlocks)]
-			Area:SetRelBlockTypeMeta(X, Y, ZSize, Block.BlockType, Block.BlockMeta)
+	for Y = 0, SizeY do
+		for X = 0, SizeX do
+			Area:SetRelBlockTypeMeta(X, Y, 0, a_DstBlockTable:Get(X, Y, 0))
+			Area:SetRelBlockTypeMeta(X, Y, SizeZ, a_DstBlockTable:Get(X, Y, SizeZ))
 		end
 		
 		-- The X for loop already did the 0 coordinate and ZSize so we don't have to do that here
-		for Z = 1, ZSize - 1 do
-			local Block = a_DstBlockTable[math.random(1, NumDstBlocks)]
-			Area:SetRelBlockTypeMeta(0, Y, Z, Block.BlockType, Block.BlockMeta)
-			
-			Block = a_DstBlockTable[math.random(1, NumDstBlocks)]
-			Area:SetRelBlockTypeMeta(XSize, Y, Z, Block.BlockType, Block.BlockMeta)
+		for Z = 1, SizeZ - 1 do
+			Area:SetRelBlockTypeMeta(0, Y, Z, a_DstBlockTable:Get(0, Y, Z))
+			Area:SetRelBlockTypeMeta(SizeX, Y, Z, a_DstBlockTable:Get(SizeX, Y, Z))
 		end
 	end
 
-	Area:Write(a_World, MinX, MinY, MinZ)
+	Area:Write(a_World, SrcCuboid.p1)
 	Area:Clear()
-	a_World:WakeUpSimulatorsInArea(MinX - 1, MaxX + 1, MinY - 1, MaxY + 1, MinZ - 1, MaxZ + 1)
+	a_World:WakeUpSimulatorsInArea(SrcCuboid.p1.x - 1, SrcCuboid.p2.x + 1, SrcCuboid.p1.y - 1, SrcCuboid.p2.y + 1, SrcCuboid.p1.z - 1, SrcCuboid.p2.z + 1)
 	
 	CallHook("OnAreaChanged", a_PlayerState.Selection:GetSortedCuboid(), a_Player, a_World, "walls")
 	
 	-- Calculate the number of changed blocks:
-	local VolumeIncluding = (XSize + 1) * (YSize + 1) * (ZSize + 1)  -- Volume of the cuboid INcluding the walls
-	local VolumeExcluding = (XSize - 1) * (YSize + 1) * (ZSize - 1)  -- Volume of the cuboid EXcluding the walls
+	local VolumeIncluding = (SizeX + 1) * (SizeY + 1) * (SizeZ + 1)  -- Volume of the cuboid INcluding the walls
+	local VolumeExcluding = (SizeX - 1) * (SizeY + 1) * (SizeZ - 1)  -- Volume of the cuboid EXcluding the walls
 	if (VolumeExcluding < 0) then
 		VolumeExcluding = 0
 	end
@@ -230,57 +237,44 @@ function FillFaces(a_PlayerState, a_Player, a_World, a_DstBlockTable)
 
 	-- Fill the faces:
 	local Area = cBlockArea()
-	local MinX, MaxX = a_PlayerState.Selection:GetXCoordsSorted()
-	local MinY, MaxY = a_PlayerState.Selection:GetYCoordsSorted()
-	local MinZ, MaxZ = a_PlayerState.Selection:GetZCoordsSorted()
-	local XSize = MaxX - MinX
-	local YSize = MaxY - MinY
-	local ZSize = MaxZ - MinZ
+	local SrcCuboid = a_PlayerState.Selection:GetSortedCuboid()
 	
 	-- Read the area into a cBlockArea
-	Area:Read(a_World, MinX, MaxX, MinY, MaxY, MinZ, MaxZ, cBlockArea.baTypes + cBlockArea.baMetas)
-	
-	local NumDstBlocks = #a_DstBlockTable
+	Area:Read(a_World, SrcCuboid, cBlockArea.baTypes + cBlockArea.baMetas)
+	local SizeX, SizeY, SizeZ = Area:GetCoordRange()
 	
 	-- Place the walls
-	for Y = 0, YSize do
-		for X = 0, XSize do
-			local Block = a_DstBlockTable[math.random(1, NumDstBlocks)]
-			Area:SetRelBlockTypeMeta(X, Y, 0, Block.BlockType, Block.BlockMeta)
-			
-			Block = a_DstBlockTable[math.random(1, NumDstBlocks)]
-			Area:SetRelBlockTypeMeta(X, Y, ZSize, Block.BlockType, Block.BlockMeta)
+	for Y = 0, SizeY do
+		for X = 0, SizeX do
+			Area:SetRelBlockTypeMeta(X, Y, 0, a_DstBlockTable:Get(X, Y, 0))
+			Area:SetRelBlockTypeMeta(X, Y, SizeZ, a_DstBlockTable:Get(X, Y, SizeZ))
 		end
 		
 		-- The X for loop already did the 0 coordinate and ZSize so we don't have to do that here
-		for Z = 1, ZSize - 1 do
-			local Block = a_DstBlockTable[math.random(1, NumDstBlocks)]
-			Area:SetRelBlockTypeMeta(0, Y, Z, Block.BlockType, Block.BlockMeta)
-			
-			Block = a_DstBlockTable[math.random(1, NumDstBlocks)]
-			Area:SetRelBlockTypeMeta(XSize, Y, Z, Block.BlockType, Block.BlockMeta)
+		for Z = 1, SizeZ - 1 do
+			Area:SetRelBlockTypeMeta(0, Y, Z, a_DstBlockTable:Get(0, Y, Z))
+			Area:SetRelBlockTypeMeta(SizeX, Y, Z, a_DstBlockTable:Get(SizeX, Y, Z))
 		end
 	end
 	
 	-- Place the ceiling and floor
-	for Y = 0, YSize, ((YSize == 0 and 1) or YSize) do
-		for X = 0, XSize do
-			for Z = 0, ZSize do
-				local Block = a_DstBlockTable[math.random(1, NumDstBlocks)]
-				Area:SetRelBlockTypeMeta(X, Y, Z, Block.BlockType, Block.BlockMeta)
+	for Y = 0, SizeY, ((SizeY == 0 and 1) or SizeY) do
+		for X = 0, SizeX do
+			for Z = 0, SizeZ do
+				Area:SetRelBlockTypeMeta(X, Y, Z, a_DstBlockTable:Get(X, Y, Z))
 			end
 		end
 	end
 	
-	Area:Write(a_World, MinX, MinY, MinZ)
+	Area:Write(a_World, SrcCuboid.p1)
 	Area:Clear()
-	a_World:WakeUpSimulatorsInArea(MinX - 1, MaxX + 1, MinY - 1, MaxY + 1, MinZ - 1, MaxZ + 1)
+	a_World:WakeUpSimulatorsInArea(SrcCuboid.p1.x - 1, SrcCuboid.p2.x + 1, SrcCuboid.p1.y - 1, SrcCuboid.p2.y + 1, SrcCuboid.p1.z - 1, SrcCuboid.p2.z + 1)
 	
 	CallHook("OnAreaChanged", a_PlayerState.Selection:GetSortedCuboid(), a_Player, a_World, "faces")
 	
 	-- Calculate the number of changed blocks:
-	local VolumeIncluding = (XSize + 1) * (YSize + 1) * (ZSize + 1)  -- Volume of the cuboid INcluding the faces
-	local VolumeExcluding = (XSize - 1) * (YSize - 1) * (ZSize - 1)  -- Volume of the cuboid EXcluding the faces
+	local VolumeIncluding = (SizeX + 1) * (SizeY + 1) * (SizeZ + 1)  -- Volume of the cuboid INcluding the faces
+	local VolumeExcluding = (SizeX - 1) * (SizeY - 1) * (SizeZ - 1)  -- Volume of the cuboid EXcluding the faces
 	if (VolumeExcluding < 0) then
 		VolumeExcluding = 0
 	end
@@ -310,22 +304,12 @@ function FillSelection(a_PlayerState, a_Player, a_World, a_DstBlockTable)
 	local MinZ, MaxZ = a_PlayerState.Selection:GetZCoordsSorted()
 	
 	Area:Create(MaxX - MinX + 1, MaxY - MinY + 1, MaxZ - MinZ + 1)
-	
-	local SizeX, SizeY, SizeZ = Area:GetSize()
-	SizeX, SizeY, SizeZ = SizeX - 1, SizeY - 1, SizeZ - 1
-
-	local BlockTable = CalculateBlockChances(a_DstBlockTable)
+	local SizeX, SizeY, SizeZ = Area:GetCoordRange()
 
 	for X = 0, SizeX do
 		for Y = 0, SizeY do
 			for Z = 0, SizeZ do
-				local RandomNumber = math.random()
-				for Idx, Value in ipairs(BlockTable) do
-					if (RandomNumber <= Value.Chance) then
-						Area:SetRelBlockTypeMeta(X, Y, Z, Value.BlockType, Value.BlockMeta)
-						break
-					end
-				end
+				Area:SetRelBlockTypeMeta(X, Y, Z, a_DstBlockTable:Get(X, Y, Z))
 			end
 		end
 	end
@@ -363,38 +347,16 @@ function ReplaceSelection(a_PlayerState, a_Player, a_World, a_SrcBlockTable, a_D
 	local MinZ, MaxZ = a_PlayerState.Selection:GetZCoordsSorted()
 	Area:Read(a_World, MinX, MaxX, MinY, MaxY, MinZ, MaxZ)
 	
-	-- Read percents from the DstBlock table
-	local MaxChance = 0
-	for Idx, Value in ipairs(a_DstBlockTable) do
-		MaxChance = MaxChance + Value.Chance
-	end
-	
-	local BlockTable = {}
-	local Temp = 0
-	for Idx, Value in ipairs(a_DstBlockTable) do
-		Temp = Temp + Value.Chance / MaxChance
-		table.insert(BlockTable, {BlockType = Value.BlockType, BlockMeta = Value.BlockMeta, Chance = Temp})
-	end
-	
 	-- Replace the blocks:
-	local XSize = MaxX - MinX
-	local YSize = MaxY - MinY
-	local ZSize = MaxZ - MinZ
+	local SizeX, SizeY, SizeZ = Area:GetCoordRange()
 	local NumBlocks = 0
 	
-	for X = 0, XSize do
-		for Y = 0, YSize do
-			for Z = 0, ZSize do
-				local BlockType, BlockMeta = Area:GetRelBlockTypeMeta(X, Y, Z)
-				if (a_SrcBlockTable[BlockType] and (a_SrcBlockTable[BlockType].TypeOnly or a_SrcBlockTable[BlockType].SrcBlockMeta == BlockMeta)) then
-					local RandomNumber = math.random()
-					for Idx, Value in ipairs(BlockTable) do
-						if (RandomNumber <= Value.Chance) then
-							Area:SetRelBlockTypeMeta(X, Y, Z, Value.BlockType, Value.BlockMeta)
-							NumBlocks = NumBlocks + 1
-							break
-						end
-					end
+	for X = 0, SizeX do
+		for Y = 0, SizeY do
+			for Z = 0, SizeZ do
+				if (a_SrcBlockTable:Contains(Area:GetRelBlockTypeMeta(X, Y, Z))) then
+					Area:SetRelBlockTypeMeta(X, Y, Z, a_DstBlockTable:Get(X, Y, Z))
+					NumBlocks = NumBlocks + 1
 				end
 			end
 		end
@@ -412,7 +374,8 @@ end
 
 
 
-RetrieveBlockTypesTemp = {}
+
+local RetrieveBlockTypesTemp = {}
 function RetrieveBlockTypes(Input)
 	if (RetrieveBlockTypesTemp[Input] ~= nil) then
 		return RetrieveBlockTypesTemp[Input]
@@ -422,7 +385,7 @@ function RetrieveBlockTypes(Input)
 	local BlockTable = {}
 	for Idx, Value in ipairs(RawDstBlockTable) do
 		-- Block chance
-		local Chance = 100
+		local Chance = 1
 		if (string.find(Value, "%", 1, true) ~= nil) then
 			local SplittedValues = StringSplit(Value, "%")
 			if (#SplittedValues ~= 2) then
@@ -432,13 +395,13 @@ function RetrieveBlockTypes(Input)
 			Value = SplittedValues[2]
 			
 			if (Chance == nil) then
-				return false
+				return false, Value
 			end
 		end
 		
 		local BlockType, BlockMeta, TypeOnly = GetBlockTypeMeta(Value)
 		if not(BlockType) then
-			return false
+			return false, Value
 		end
 		table.insert(BlockTable, {BlockType = BlockType, BlockMeta = BlockMeta, TypeOnly = TypeOnly or false, Chance = Chance})
 	end
@@ -451,21 +414,23 @@ end
 
 
 
--- Calculate the chances for a block and returns the changed table. It is used for % params.
-function CalculateBlockChances(BlockTable)
-	local MaxChance = 0
-	for Idx, Value in ipairs(BlockTable) do
-		MaxChance = MaxChance + Value.Chance
+-- Chooses the best block destination class from the string. If only one block is set it uses the cConstantBlockTypeSource class, and if multiple are used it uses cRandomBlockTypeSource.
+-- If the string is #clipboard or #copy it returns cClipboardBlockTypeSource.
+function GetBlockDst(a_Blocks, a_Player)
+	if (a_Blocks:sub(1, 1) == "#") then
+		if ((a_Blocks == "#clipboard") or (a_Blocks == "#copy")) then
+			return cClipboardBlockTypeSource:new(a_Player)
+		else
+			return false, "#clipboard or #copy is acceptable for patterns starting with #"
+		end
 	end
 	
-	local NewBlockTable = {}
-	local Temp = 0
-	for Idx, Value in ipairs(BlockTable) do
-		Temp = Temp + Value.Chance / MaxChance
-		table.insert(NewBlockTable, {BlockType = Value.BlockType, BlockMeta = Value.BlockMeta, Chance = Temp})
+	local NumBlocks = #StringSplit(a_Blocks, ",")
+	if (NumBlocks == 1) then
+		return cConstantBlockTypeSource:new(a_Blocks)
 	end
-
-	return NewBlockTable
+	
+	return cRandomBlockTypeSource:new(a_Blocks)
 end
 
 
@@ -531,7 +496,6 @@ function CreateSphereInCuboid(a_Player, a_Cuboid, a_BlockTable, a_IsHollow, a_Ma
 	State.UndoStack:PushUndoFromCuboid(World, a_Cuboid)
 
 	-- Calculate the chances for all the blocks
-	local BlockTable = CalculateBlockChances(a_BlockTable)
 	local NumAffectedBlocks = 0
 	
 	local BlockArea = cBlockArea()
@@ -542,7 +506,7 @@ function CreateSphereInCuboid(a_Player, a_Cuboid, a_BlockTable, a_IsHollow, a_Ma
 			
 			local Radius = BlockArea:GetSizeX() / 2
 			
-			NumAffectedBlocks = cShapeGenerator.MakeSphere(BlockArea, BlockTable, Radius, a_IsHollow, a_Mask)
+			NumAffectedBlocks = cShapeGenerator.MakeSphere(BlockArea, a_BlockTable, Radius, a_IsHollow, a_Mask)
 
 			-- Write the area back to world:
 			BlockArea:Write(World, a_Cuboid.p1)
@@ -580,7 +544,6 @@ function CreateCylinderInCuboid(a_Player, a_Cuboid, a_BlockTable, a_IsHollow, a_
 	State.UndoStack:PushUndoFromCuboid(World, a_Cuboid)
 
 	-- Calculate the chances for all the blocks
-	local BlockTable = CalculateBlockChances(a_BlockTable)
 	local NumAffectedBlocks = 0
 	
 	local BlockArea = cBlockArea()
@@ -591,7 +554,7 @@ function CreateCylinderInCuboid(a_Player, a_Cuboid, a_BlockTable, a_IsHollow, a_
 			
 			local Radius = BlockArea:GetSizeX() / 2
 			
-			NumAffectedBlocks = cShapeGenerator.MakeCylinder(BlockArea, BlockTable, Radius, a_IsHollow, a_Mask)
+			NumAffectedBlocks = cShapeGenerator.MakeCylinder(BlockArea, a_BlockTable, Radius, a_IsHollow, a_Mask)
 
 			-- Write the area back to world:
 			BlockArea:Write(World, a_Cuboid.p1)
