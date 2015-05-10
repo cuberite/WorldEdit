@@ -52,12 +52,10 @@ end
 
 
 -- Rounds the number.
-function math.round(a_GivenNumber)
-	assert(type(a_GivenNumber) == 'number')
-	
+function math.round(a_GivenNumber)	
 	local Number, Decimal = math.modf(a_GivenNumber)
-	if Decimal >= 0.5 then
-		return math.ceil(a_GivenNumber)
+	if (Decimal >= 0.5) then
+		return Number + 1
 	else
 		return Number
 	end
