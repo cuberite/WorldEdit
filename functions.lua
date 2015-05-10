@@ -181,15 +181,6 @@ function FillWalls(a_PlayerState, a_Player, a_World, a_DstBlockTable)
 	Area:Read(a_World, SrcCuboid, cBlockArea.baTypes + cBlockArea.baMetas)
 	local SizeX, SizeY, SizeZ = Area:GetCoordRange()
 	
-	local function GetRandomBlock()
-		local RandomNumber = math.random()
-		for Idx, Value in ipairs(a_BlockTable) do
-			if (RandomNumber <= Value.Chance) then
-				return Value.BlockType, Value.BlockMeta
-			end
-		end
-	end
-		
 	-- Place the walls
 	for Y = 0, SizeY do
 		for X = 0, SizeX do
