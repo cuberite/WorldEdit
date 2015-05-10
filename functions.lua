@@ -101,6 +101,17 @@ end
 
 
 
+-- Makes the first character of a string uppercase, and lowercases the rest.
+function string.ucfirst(a_String)
+	local firstChar = a_String:sub(1, 1):upper()
+	local Rest = a_String:sub(2):lower()
+	
+	return firstChar .. Rest
+end
+
+
+
+
 --- Returns a table of chunk coords for all chunks that insersect the given cuboid
 -- The table is formatted for cWorld:ChunkStay():
 -- { {Chunk1X, Chunk1z}, {Chunk2x, Chunk2z}, ... }

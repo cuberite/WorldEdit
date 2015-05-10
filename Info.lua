@@ -41,6 +41,14 @@ g_PluginInfo =
 			Category = "Selection",
 		},
 		
+		["//contract"] =
+		{
+			Permission = "worldedit.selection.contract",
+			Handler = HandleExpandContractCommand,
+			HelpString = " Contract the selection area",
+			Category = "Selection",
+		},
+		
 		["//copy"] =
 		{
 			Permission = "worldedit.clipboard.copy",
@@ -76,7 +84,7 @@ g_PluginInfo =
 		["//expand"] =
 		{
 			Permission = "worldedit.selection.expand",
-			Handler = HandleExpandCommand,
+			Handler = HandleExpandContractCommand,
 			HelpString = " Expand the selection area",
 			Category = "Selection",
 		},

@@ -46,8 +46,9 @@ end
 
 
 
-function HandleExpandCommand(a_Split, a_Player)
+function HandleExpandContractCommand(a_Split, a_Player)
 	-- //expand [Amount] [Direction]
+	-- //contract [Amount] [Direction]
 	
 	-- Check the selection:
 	local State = GetPlayerState(a_Player)
@@ -56,7 +57,7 @@ function HandleExpandCommand(a_Split, a_Player)
 		return true
 	end
 
-	if (a_Split[2] == "vert") then
+	if ((a_Split[1] == "//expand") and (a_Split[2] == "vert")) then
 		State.Selection.Cuboid.p1.y = 0
 		State.Selection.Cuboid.p2.y = 255
 		State.Selection:NotifySelectionChanged()
@@ -67,7 +68,7 @@ function HandleExpandCommand(a_Split, a_Player)
 	end
 	
 	if (a_Split[2] ~= nil) and (tonumber(a_Split[2]) == nil) then
-		a_Player:SendMessage(cChatColor.Rose .. "Usage: //expand [Blocks] [Direction]")
+		a_Player:SendMessage(cChatColor.Rose .. "Usage: " .. a_Split[1] .. " [Blocks] [Direction]")
 		return true
 	end
 	
@@ -144,10 +145,16 @@ function HandleExpandCommand(a_Split, a_Player)
 		a_Player:SendMessage(cChatColor.Rose .. "Unknown direction \"" .. Direction .. "\".")
 		return true
 	end
+	
+	if (a_Split[1] == "//contract") then
+		SubMinX, AddMaxX = -AddMaxX, -SubMinX
+		SubMinY, AddMaxY = -AddMaxY, -SubMinY
+		SubMinZ, AddMaxZ = -AddMaxZ, -SubMinZ
+	end
 
-	-- Expand the region
+	-- Expand or contract the region
 	State.Selection:Expand(SubMinX, SubMinY, SubMinZ, AddMaxX, AddMaxY, AddMaxZ)
-	a_Player:SendMessage(cChatColor.LightPurple .. "Expanded the selection.")
+	a_Player:SendMessage(cChatColor.LightPurple .. a_Split[1]:sub(3, -1):ucfirst() .. "ed the selection.")
 	a_Player:SendMessage(cChatColor.LightPurple .. "Selection is now " .. State.Selection:GetSizeDesc())
 	return true
 end
