@@ -135,7 +135,7 @@ g_PluginInfo =
 		["//hpos1"] =
 		{
 			Permission = "worldedit.selection.pos",
-			Handler = HandleHPos1Command,
+			Handler = HandleHPosCommand,
 			HelpString = " Set position 1 to the position you are looking at.",
 			Category = "Selection",
 		},
@@ -143,7 +143,7 @@ g_PluginInfo =
 		["//hpos2"] =
 		{
 			Permission = "worldedit.selection.pos",
-			Handler = HandleHPos2Command,
+			Handler = HandleHPosCommand,
 			HelpString = " Set position 2 to the position you are looking at.",
 			Category = "Selection",
 		},
@@ -198,7 +198,7 @@ g_PluginInfo =
 		["//pos1"] =
 		{
 			Permission = "worldedit.selection.pos",
-			Handler = HandlePos1Command,
+			Handler = HandlePosCommand,
 			HelpString = " Set position 1",
 			Category = "Selection",
 		},
@@ -206,7 +206,7 @@ g_PluginInfo =
 		["//pos2"] =
 		{
 			Permission = "worldedit.selection.pos",
-			Handler = HandlePos2Command,
+			Handler = HandlePosCommand,
 			HelpString = " Set position 2",
 			Category = "Selection",
 		},

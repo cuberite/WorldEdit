@@ -163,42 +163,24 @@ end
 
 
 
--- TODO: Make the HPos and Pos command use 2 handlers (HandleHPosCommand and HandlePosCommand)
-function HandleHPos1Command(a_Split, a_Player)
+function HandleHPosCommand(a_Split, a_Player)
 	-- //hpos1
-	
-	-- Trace the blocks along the player's look vector until a hit is found:
-	local Target = HPosSelect(a_Player)
-	if not(Target) then
-		a_Player:SendMessage(cChatColor.Rose .. "You were not looking at a block.")
-		return true
-	end
-	
-	-- Select the block:
-	local State = GetPlayerState(a_Player)
-	State.Selection:SetFirstPoint(Target.x, Target.y, Target.z)
-	a_Player:SendMessage("First position set to {" .. Target.x .. ", " .. Target.y .. ", " .. Target.z .. "}.")
-	return true
-end
-
-
-
-
-
-function HandleHPos2Command(a_Split, a_Player)
 	-- //hpos2
 	
-	-- Trace the blocks along the player's look vector until a hit is found:
-	local Target = HPosSelect(a_Player)
-	if not(Target) then
-		a_Player:SendMessage(cChatColor.Rose .. "You were not looking at a block.")
+	-- Get the block the player is looking at
+	local TargetBlock, BlockFace = GetTargetBlock(a_Player)
+	if (not TargetBlock) then
 		return true
 	end
 	
+	-- Determine the name of the point. If the command is //pos1 then "First", otherwise it's the second point
+	local PointName = (a_Split[1] == "//hpos1") and "First" or "Second"
+	
+	local State = GetPlayerState(a_Player)
+	
 	-- Select the block:
-	local State = GetPlayerState(a_Player)
-	State.Selection:SetSecondPoint(Target.x, Target.y, Target.z)
-	a_Player:SendMessage("Second position set to {" .. Target.x .. ", " .. Target.y .. ", " .. Target.z .. "}.")
+	local Succes, Msg = State.Selection:SetPos(TargetBlock.x, TargetBlock.y, TargetBlock.z, BlockFace, PointName)
+	a_Player:SendMessage(Msg)
 	return true
 end
 
@@ -206,29 +188,18 @@ end
 
 
 
-function HandlePos1Command(a_Split, a_Player)
+function HandlePosCommand(a_Split, a_Player)
 	-- //pos1
-	local State = GetPlayerState(a_Player)
-	local BlockX = math.floor(a_Player:GetPosX())
-	local BlockY = math.floor(a_Player:GetPosY())
-	local BlockZ = math.floor(a_Player:GetPosZ())
-	State.Selection:SetFirstPoint(BlockX, BlockY, BlockZ)
-	a_Player:SendMessage(cChatColor.LightPurple .. "First position set to {" .. BlockX .. ", " .. BlockY .. ", " .. BlockZ .. "}.")
-	return true
-end
-
-
-
-
-
-function HandlePos2Command(a_Split, a_Player)
 	-- //pos2
+	
+	-- Determine the name of the point. If the command is //pos1 then "First", otherwise it's the second point
+	local PointName = (a_Split[1] == "//pos1") and "First" or "Second"
 	local State = GetPlayerState(a_Player)
-	local BlockX = math.floor(a_Player:GetPosX())
-	local BlockY = math.floor(a_Player:GetPosY())
-	local BlockZ = math.floor(a_Player:GetPosZ())
-	State.Selection:SetSecondPoint(BlockX, BlockY, BlockZ)
-	a_Player:SendMessage(cChatColor.LightPurple .. "Second position set to {" .. BlockX .. ", " .. BlockY .. ", " .. BlockZ .. "}.")
+	local Pos = a_Player:GetPosition():Floor()
+	local Succes, Msg = State.Selection:SetPos(Pos.x, Pos.y, Pos.z, BLOCK_FACE_TOP, PointName)
+	
+	-- We can assume that the action was a succes, since all the given parameters are known to be valid.
+	a_Player:SendMessage(cChatColor.LightPurple .. Msg)
 	return true
 end
 
