@@ -186,7 +186,7 @@ function HandleSphereCommand(a_Split, a_Player)
 
 	if ((a_Split[2] == nil) or (a_Split[3] == nil)) then
 		a_Player:SendMessage(cChatColor.Rose .. "Too few arguments.")
-		a_Player:SendMessage(cChatColor.Rose .. a_Split[1] .. " <block> <radius> [height]")
+		a_Player:SendMessage(cChatColor.Rose .. a_Split[1] .. " <block> <radius>")
 		return true
 	end
 
