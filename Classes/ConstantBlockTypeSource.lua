@@ -16,7 +16,7 @@ cConstantBlockTypeSource = {}
 function cConstantBlockTypeSource:new(a_BlockString)
 	local BlockType, BlockMeta = GetBlockTypeMeta(a_BlockString)
 	if (not BlockType) then
-		return false, BlockMeta -- On error the blockmeta is the block that isn't valid
+		return false, a_BlockString -- On error the blockmeta is the block that isn't valid
 	end
 	
 	local Obj = {}
