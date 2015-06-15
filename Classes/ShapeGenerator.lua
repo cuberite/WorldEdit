@@ -244,54 +244,26 @@ end
 -- (STATIC) Creates a sphere in the given blockarea.
 -- a_BlockArea is the cBlockArea to build the sphere in
 -- a_BlockTable are the blocks to make the sphere out of
--- a_Radius is the radius to make the sphere out of. This will be removed later when malformed spheres are supported.
 -- a_IsHollow is a boolean value. If true the sphere will be made hollow.
 -- a_Mask is a table or nil. If it's a table it will only change blocks if the block that is going to change is in the table.
-function cShapeGenerator.MakeSphere(a_BlockArea, a_BlockTable, a_Radius, a_IsHollow, a_Mask)
-	local DoCheckMask = a_Mask ~= nil
+function cShapeGenerator.MakeSphere(a_BlockArea, a_BlockTable, a_IsHollow, a_Mask)
 	local SizeX, SizeY, SizeZ = a_BlockArea:GetCoordRange()
-	local MiddleVector = Vector3f(SizeX / 2, SizeY / 2, SizeZ / 2)
-	local NumAffectedBlocks = 0
-	local CurrentBlock = Vector3f(0, 0, 0)
+	local HalfX, HalfY, HalfZ = SizeX / 2, SizeY / 2, SizeZ / 2
+	local SqHalfX, SqHalfY, SqHalfZ = HalfX ^ 2, HalfY ^ 2, HalfZ ^ 2
+		
+	local Expression = cExpression:new("x -= HalfX; y -= HalfY; z -= HalfZ; ((x * x) / SqHalfX) + ((y * y) / SqHalfY) + ((z * z) / SqHalfZ) <= 1")
+	:PredefineConstant("SqHalfX", SqHalfX)
+	:PredefineConstant("SqHalfY", SqHalfY)
+	:PredefineConstant("SqHalfZ", SqHalfZ)
+	:PredefineConstant("HalfX", HalfX)
+	:PredefineConstant("HalfY", HalfY)
+	:PredefineConstant("HalfZ", HalfZ)
 	
-	-- TODO: change this to not take a radius parameter, but rather make it support malformed sphere (for example SizeX = 5 while SizeZ = 8)
-	local Radius = (a_IsHollow and math.floor(a_Radius)) or a_Radius
+	-- Create the shape generator
+	local ShapeGenerator, Error = cShapeGenerator:new(Vector3f(0, 0, 0), Vector3f(1, 1, 1), a_BlockTable, Expression)
 	
-	for X = 0, SizeX do
-		CurrentBlock.x = X
-		for Y = 0, SizeY do
-			CurrentBlock.y = Y
-			for Z = 0, SizeZ do
-				CurrentBlock.z = Z
-				
-				local PlaceBlock = false
-				local Distance = math.floor(((MiddleVector - CurrentBlock):Length()))
-				if (
-					((Distance <= Radius) and (not a_IsHollow)) or
-					((Distance == Radius) and a_IsHollow)
-				) then
-					PlaceBlock = true
-				end
-				
-				-- Check for the mask. 
-				if (PlaceBlock and DoCheckMask) then
-					local CurrentBlock, CurrentMeta = a_BlockArea:GetRelBlockTypeMeta(X, Y, Z)
-					
-					if (not a_Mask:Contains(CurrentBlock, CurrentMeta)) then
-						PlaceBlock = false
-					end
-				end
-			
-				if (PlaceBlock) then
-					-- We want to place the block. Choose a blocktype and set it in the blockarea
-					NumAffectedBlocks = NumAffectedBlocks + 1
-					a_BlockArea:SetRelBlockTypeMeta(X, Y, Z, a_BlockTable:Get(X, Y, Z))
-				end
-			end -- /for Z
-		end -- /for Y
-	end -- /for X
-	
-	return NumAffectedBlocks
+	-- Write the shape in the block area
+	return ShapeGenerator:MakeShape(a_BlockArea, Vector3d(0, 0, 0), Vector3d(SizeX, SizeY, SizeZ), a_IsHollow, a_Mask)
 end
 
 

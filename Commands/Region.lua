@@ -122,6 +122,50 @@ end
 
 
 
+function HandleEllipsoidCommand(a_Split, a_Player)
+	-- //ellipsoid [-h] <block>
+	
+	local State = GetPlayerState(a_Player)
+
+	-- Check the selection:
+	if not(State.Selection:IsValid()) then
+		a_Player:SendMessage(cChatColor.Rose .. "No region set")
+		return true
+	end
+	
+	local BlockTypeIndex = 2
+	local Hollow = false
+	
+	-- Check for hollow flag
+	if (a_Split[2] == "-h") then
+		Hollow = true
+		BlockTypeIndex = 3
+	end
+	
+	-- Check the params:
+	if (a_Split[BlockTypeIndex] == nil) then
+		a_Player:SendMessage(cChatColor.Rose .. "Usage: //ellipsoid [-h] <BlockType>")
+		return true
+	end
+	
+	-- Retrieve the blocktypes from the params:
+	local DstBlockTable, ErrBlock = GetBlockDst(a_Split[BlockTypeIndex], a_Player)
+	if not(DstBlockTable) then
+		a_Player:SendMessage(cChatColor.Rose .. "Unknown dst block type: '" .. ErrBlock .. "'.")
+		return true
+	end
+	
+	local Cuboid = State.Selection:GetSortedCuboid()
+	local NumAffectedBlocks = CreateSphereInCuboid(a_Player, Cuboid, DstBlockTable, Hollow)
+	
+	a_Player:SendMessage(cChatColor.LightPurple .. NumAffectedBlocks .. " block(s) have been created")
+	return true
+end
+
+
+
+
+
 function HandleFacesCommand(a_Split, a_Player)
 	-- //faces <blocktype>
 	

@@ -186,7 +186,7 @@ function HandleSphereCommand(a_Split, a_Player)
 
 	if ((a_Split[2] == nil) or (a_Split[3] == nil)) then
 		a_Player:SendMessage(cChatColor.Rose .. "Too few arguments.")
-		a_Player:SendMessage(cChatColor.Rose .. a_Split[1] .. " <block> <radius>")
+		a_Player:SendMessage(cChatColor.Rose .. a_Split[1] .. " <block> <radius>[,<radius>,<radius>]")
 		return true
 	end
 
@@ -196,17 +196,40 @@ function HandleSphereCommand(a_Split, a_Player)
 		a_Player:SendMessage(cChatColor.LightPurple .. "Unknown block type: '" .. ErrBlock .. "'.")
 		return true
 	end
-
+	
+	local RadiusX, RadiusY, RadiusZ
 	local Radius = tonumber(a_Split[3])
-	if (not Radius) then
-		a_Player:SendMessage(cChatColor.Rose .. "Number expected; string \"" .. a_Split[3] .. "\" given.")
-		return true
+	if (Radius) then
+		-- Same radius for all axis
+		RadiusX, RadiusY, RadiusZ = Radius, Radius, Radius
+	else
+		-- The player might want to specify the radius for each axis.
+		local Radius = StringSplit(a_Split[3], ",")
+		if (#Radius == 1) then
+			a_Player:SendMessage(cChatColor.Rose .. "Number expected; string \"" .. a_Split[3] .. "\" given.")
+			return true
+		end
+			
+		if (#Radius ~= 3) then
+			a_Player:SendMessage(cChatColor.Rose .. "You must specify 1 or 3 radius values")
+			return true
+		end
+		
+		-- Check if the radius for all axis are numbers
+		for Idx = 1, 3 do
+			if (not tonumber(Radius[Idx])) then
+				a_Player:SendMessage(cChatColor.Rose .. "Number expected; string \"" .. Radius[Idx] .. "\" given.")
+				return true
+			end
+		end
+		
+		RadiusX, RadiusY, RadiusZ = tonumber(Radius[1]) + 1, tonumber(Radius[2]) + 1, tonumber(Radius[3]) + 1
 	end
 	
-	local Pos    = a_Player:GetPosition():Floor()
+	local Pos = a_Player:GetPosition():Floor()
 	
 	local Cuboid = cCuboid(Pos, Pos)
-	Cuboid:Expand(Radius, Radius, Radius, Radius, Radius, Radius)
+	Cuboid:Expand(RadiusX, RadiusX, RadiusY, RadiusY, RadiusZ, RadiusZ)
 	Cuboid:Sort()
 	
 	-- Create the sphere in the world

@@ -504,9 +504,7 @@ function CreateSphereInCuboid(a_Player, a_Cuboid, a_BlockTable, a_IsHollow, a_Ma
 			-- Read the area
 			BlockArea:Read(World, a_Cuboid, cBlockArea.baTypes + cBlockArea.baMetas)
 			
-			local Radius = BlockArea:GetSizeX() / 2
-			
-			NumAffectedBlocks = cShapeGenerator.MakeSphere(BlockArea, a_BlockTable, Radius, a_IsHollow, a_Mask)
+			NumAffectedBlocks = cShapeGenerator.MakeSphere(BlockArea, a_BlockTable, a_IsHollow, a_Mask)
 
 			-- Write the area back to world:
 			BlockArea:Write(World, a_Cuboid.p1)

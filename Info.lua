@@ -81,6 +81,14 @@ g_PluginInfo =
 			Category = "Terraforming",
 		},
 		
+		["//ellipsoid"] =
+		{
+			Permission = "worldedit.region.ellipsoid",
+			Handler = HandleEllipsoidCommand,
+			HelpString = " Creates an ellipsoid in the selected region",
+			Category = "Region",
+		},
+		
 		["//expand"] =
 		{
 			Permission = "worldedit.selection.expand",
