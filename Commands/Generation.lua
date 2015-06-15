@@ -144,7 +144,7 @@ function HandleCylCommand(a_Split, a_Player)
 
 	if ((a_Split[2] == nil) or (a_Split[3] == nil)) then
 		a_Player:SendMessage(cChatColor.Rose .. "Too few arguments.")
-		a_Player:SendMessage(cChatColor.Rose .. a_Split[1] .. " <block> <radius> [height]")
+		a_Player:SendMessage(cChatColor.Rose .. a_Split[1] .. " <block> <radius>[,<radius>] [height]")
 		return true
 	end
 
@@ -155,17 +155,40 @@ function HandleCylCommand(a_Split, a_Player)
 		return true
 	end
 
+	local RadiusX, RadiusZ
 	local Radius = tonumber(a_Split[3])
-	if (not Radius) then
-		a_Player:SendMessage(cChatColor.Rose .. "Number expected; string \"" .. a_Split[3] .. "\" given.")
-		return true
+	if (Radius) then
+		-- Same radius for all axis
+		RadiusX, RadiusZ = Radius, Radius, Radius
+	else
+		-- The player might want to specify the radius for each axis.
+		local Radius = StringSplit(a_Split[3], ",")
+		if (#Radius == 1) then
+			a_Player:SendMessage(cChatColor.Rose .. "Number expected; string \"" .. a_Split[3] .. "\" given.")
+			return true
+		end
+			
+		if (#Radius ~= 2) then
+			a_Player:SendMessage(cChatColor.Rose .. "You must specify 1 or 2 radius values")
+			return true
+		end
+		
+		-- Check if the radius for all axis are numbers
+		for Idx = 1, 2 do
+			if (not tonumber(Radius[Idx])) then
+				a_Player:SendMessage(cChatColor.Rose .. "Number expected; string \"" .. Radius[Idx] .. "\" given.")
+				return true
+			end
+		end
+		
+		RadiusX, RadiusZ = tonumber(Radius[1]) + 1, tonumber(Radius[2]) + 1
 	end
 	
 	local Height = tonumber(a_Split[4] or 1) - 1
 	local Pos = a_Player:GetPosition():Floor()
 	
 	local Cuboid = cCuboid(Pos, Pos)
-	Cuboid:Expand(Radius, Radius, 0, Height, Radius, Radius)
+	Cuboid:Expand(RadiusX, RadiusX, 0, Height, RadiusZ, RadiusZ)
 	Cuboid:Sort()
 	
 	-- Create the sphere in the world

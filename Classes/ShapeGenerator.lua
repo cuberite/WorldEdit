@@ -182,57 +182,61 @@ end
 -- (STATIC) Creates a cylinder in the given blockarea
 -- a_BlockArea is the cBlockArea to build the cylinder in
 -- a_BlockTable are the blocks to make the cylinder out of
--- a_Radius is the radius to make the cylinder out of. This will be removed later when malformed cylinders are supported.
 -- a_IsHollow is a boolean value. If true the cylinder will be made hollow.
 -- a_Mask is a table or nil. If it's a table it will only change blocks if the block that is going to change is in the table.
-function cShapeGenerator.MakeCylinder(a_BlockArea, a_BlockTable, a_Radius, a_IsHollow, a_Mask)
+function cShapeGenerator.MakeCylinder(a_BlockArea, a_BlockTable, a_IsHollow, a_Mask)
 	local DoCheckMask = a_Mask ~= nil
 	local SizeX, SizeY, SizeZ = a_BlockArea:GetCoordRange()
-	local MiddleVector = Vector3f(SizeX / 2, 0, SizeZ / 2)
+	local HalfX, HalfZ = SizeX / 2, SizeZ / 2
+	local SqHalfX, SqHalfZ = HalfX ^ 2, HalfZ ^ 2
+		
+	local Expression = cExpression:new("x -= HalfX; z -= HalfZ; ((x * x) / SqHalfX) + ((z * z) / SqHalfZ) <= 1")
+	:AddReturnValue("Comp1")
+	:AddParameter("x")
+	:AddParameter("z")
+	:PredefineConstant("SqHalfX", SqHalfX)
+	:PredefineConstant("SqHalfZ", SqHalfZ)
+	:PredefineConstant("HalfX", HalfX)
+	:PredefineConstant("HalfZ", HalfZ)
+	
 	local NumAffectedBlocks = 0
-	local CurrentBlock = Vector3f(0, 0, 0)
+	local Formula = Expression:Compile()
 	
-	-- TODO: change this to not take a radius parameter, but rather make it support malformed cylinders (for example SizeX = 5 while SizeZ = 8)
-	local Radius = (a_IsHollow and math.floor(a_Radius)) or a_Radius
+	-- Sets the block in the blockarea. If the mask was not nil it checks the mask first.
+	local function SetBlock(a_RelX, a_RelY, a_RelZ)
+		if (DoCheckMask) then
+			local CurrentBlock, CurrentMeta = a_BlockArea:GetRelBlockTypeMeta(a_RelX, a_RelY, a_RelZ)
+			if (not a_Mask:Contains(CurrentBlock, CurrentMeta)) then
+				-- The block does not exist in the mask, or the meta isn't set/is different.
+				-- Don't change the block.
+				return
+			end
+		end
+		
+		a_BlockArea:SetRelBlockTypeMeta(a_RelX, a_RelY, a_RelZ, a_BlockTable:Get(a_RelX, a_RelY, a_RelZ))
+		NumAffectedBlocks = NumAffectedBlocks + 1
+	end
 	
-	for X = 0, SizeX do
-		CurrentBlock.x = X
-		for Z = 0, SizeZ do
-			CurrentBlock.z = Z
-			
-			local PlaceColumn = false
-			local Distance = math.floor(((MiddleVector - CurrentBlock):Length()))
-			if (
-				((Distance <= Radius) and (not a_IsHollow)) or
-				((Distance == Radius) and a_IsHollow)
-			) then
-				PlaceColumn = true
+	for X = 0, HalfX, 1 do
+		for Z = 0, HalfZ, 1 do
+			local PlaceColumn = Formula(X, Z)
+			if (a_IsHollow and PlaceColumn) then
+				-- Check if there is at least one empty space around the current block.
+				if (Formula(X - 1, Z) and Formula(X, Z - 1) and Formula(X + 1, Z) and Formula(X, Z + 1)) then
+					PlaceColumn = false
+				end
 			end
 			
 			if (PlaceColumn) then
-				for Y = 0, SizeY do
-					local PlaceBlock = true
-					
-					-- Check for the mask. 
-					if (PlaceColumn and DoCheckMask) then
-						local CurrentBlock, CurrentMeta = a_BlockArea:GetRelBlockTypeMeta(X, Y, Z)
-						
-						if (not a_Mask:Contains(CurrentBlock, CurrentMeta)) then
-							-- The block does not exist in the mask, or the meta isn't set/is different.
-							-- Don't change the block.
-							PlaceBlock = false
-						end
-					end
-					
-					if (PlaceBlock) then
-						-- We want to place the block. Choose a blocktype and set it in the blockarea
-						NumAffectedBlocks = NumAffectedBlocks + 1
-						a_BlockArea:SetRelBlockTypeMeta(X, Y, Z, a_BlockTable:Get(X, Y, Z))
-					end
-				end -- /for Y
+				for Y = 0, SizeY, 1 do
+					SetBlock(X,         Y,         Z)
+					SetBlock(SizeX - X, Y,         Z)
+					SetBlock(X,         Y, SizeZ - Z)
+					SetBlock(SizeX - X, Y, SizeZ - Z)
+				end
 			end
-		end -- /for Z
-	end -- /for X
+		end
+	end
 	
 	return NumAffectedBlocks
 end
