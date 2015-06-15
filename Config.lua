@@ -13,6 +13,18 @@ g_Config = {}
 
 
 
+-- Create an environment for the config loader where the admin can use item names directly without quotes.
+local g_LoaderEnv = {}
+for Key, Value in pairs(_G) do
+	if (Key:match("E_.*")) then
+		g_LoaderEnv[ItemTypeToString(Value)] = Value
+	end
+end
+
+
+
+
+
 local g_ConfigDefault =
 [[
 WandItem = woodenaxe,
@@ -59,7 +71,13 @@ end
 
 -- Returns the default configuration table. This can be directly used in g_Config
 local function GetDefaultConfigurationTable()
-	return loadstring("return {" .. g_ConfigDefault .. "}")()
+	-- Load the default config
+	local Loader = loadstring("return {" .. g_ConfigDefault .. "}")
+	
+	-- Apply the environment to the configloader.
+	setfenv(Loader, g_LoaderEnv)
+	
+	return Loader()
 end
 
 
@@ -107,16 +125,8 @@ function InitializeConfiguration(a_Path)
 		return
 	end
 	
-	-- Create an environment for the loader where the admin can use item names directly without quotes.
-	local LoaderEnv = {}
-	for Key, Value in pairs(_G) do
-		if (Key:match("E_.*")) then
-			LoaderEnv[ItemTypeToString(Value)] = Value
-		end
-	end
-	
 	-- Apply the environment to the configloader.
-	setfenv(ConfigLoader, LoaderEnv)
+	setfenv(ConfigLoader, g_LoaderEnv)
 	
 	-- Execute the loader. It returns true + the configuration if it executed properly. Else it returns false with the error message.
 	local Succes, Result = pcall(ConfigLoader)
