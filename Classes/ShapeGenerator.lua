@@ -252,6 +252,10 @@ function cShapeGenerator.MakeSphere(a_BlockArea, a_BlockTable, a_IsHollow, a_Mas
 	local SqHalfX, SqHalfY, SqHalfZ = HalfX ^ 2, HalfY ^ 2, HalfZ ^ 2
 		
 	local Expression = cExpression:new("x -= HalfX; y -= HalfY; z -= HalfZ; ((x * x) / SqHalfX) + ((y * y) / SqHalfY) + ((z * z) / SqHalfZ) <= 1")
+	:AddReturnValue("Comp1")
+	:AddParameter("x")
+	:AddParameter("y")
+	:AddParameter("z")
 	:PredefineConstant("SqHalfX", SqHalfX)
 	:PredefineConstant("SqHalfY", SqHalfY)
 	:PredefineConstant("SqHalfZ", SqHalfZ)
@@ -259,11 +263,41 @@ function cShapeGenerator.MakeSphere(a_BlockArea, a_BlockTable, a_IsHollow, a_Mas
 	:PredefineConstant("HalfY", HalfY)
 	:PredefineConstant("HalfZ", HalfZ)
 	
-	-- Create the shape generator
-	local ShapeGenerator, Error = cShapeGenerator:new(Vector3f(0, 0, 0), Vector3f(1, 1, 1), a_BlockTable, Expression)
+	local Formula = Expression:Compile()
+	local NumAffectedBlocks = 0
 	
-	-- Write the shape in the block area
-	return ShapeGenerator:MakeShape(a_BlockArea, Vector3d(0, 0, 0), Vector3d(SizeX, SizeY, SizeZ), a_IsHollow, a_Mask)
+	for X = 0, HalfX, 1 do
+		for Y = 0, HalfY, 1 do
+			for Z = 0, HalfZ do
+				local PlaceBlocks = Formula(X, Y, Z)
+				if (a_IsHollow and PlaceBlocks) then
+					-- Check if there is at least one empty space around the current block.
+					if (Formula(X - 1, Y, Z) and Formula(X, Y - 1, Z) and Formula(X, Y, Z - 1) and Formula(X + 1, Y, Z) and Formula(X, Y + 1, Z) and Formula(X, Y, Z + 1)) then
+						PlaceBlocks = false
+					end
+				end
+				
+				if (PlaceBlocks) then
+					-- Lower half of the sphere
+					a_BlockArea:SetRelBlockTypeMeta(X,         Y,         Z, a_BlockTable:Get(X, Y, Z))
+					a_BlockArea:SetRelBlockTypeMeta(SizeX - X, Y,         Z, a_BlockTable:Get(SizeX - X, Y, Z))
+					a_BlockArea:SetRelBlockTypeMeta(X,         Y, SizeZ - Z, a_BlockTable:Get(X, Y, SizeZ - Z))
+					a_BlockArea:SetRelBlockTypeMeta(SizeX - X, Y, SizeZ - Z, a_BlockTable:Get(SizeX - X, Y, SizeZ - Z))
+					
+					-- topper part of the sphere
+					a_BlockArea:SetRelBlockTypeMeta(X,         SizeY - Y,         Z, a_BlockTable:Get(X, SizeY - Y, Z))
+					a_BlockArea:SetRelBlockTypeMeta(SizeX - X, SizeY - Y,         Z, a_BlockTable:Get(SizeX - X, SizeY - Y, Z))
+					a_BlockArea:SetRelBlockTypeMeta(X,         SizeY - Y, SizeZ - Z, a_BlockTable:Get(X, SizeY - Y, SizeZ - Z))
+					a_BlockArea:SetRelBlockTypeMeta(SizeX - X, SizeY - Y, SizeZ - Z, a_BlockTable:Get(SizeX - X, SizeY - Y, SizeZ - Z))
+					
+					-- 8 blocks were placed
+					NumAffectedBlocks = NumAffectedBlocks + 8
+				end
+			end
+		end
+	end
+	
+	return NumAffectedBlocks
 end
 
 
