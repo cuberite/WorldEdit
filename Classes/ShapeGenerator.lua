@@ -247,6 +247,7 @@ end
 -- a_IsHollow is a boolean value. If true the sphere will be made hollow.
 -- a_Mask is a table or nil. If it's a table it will only change blocks if the block that is going to change is in the table.
 function cShapeGenerator.MakeSphere(a_BlockArea, a_BlockTable, a_IsHollow, a_Mask)
+	local DoCheckMask = a_Mask ~= nil
 	local SizeX, SizeY, SizeZ = a_BlockArea:GetCoordRange()
 	local HalfX, HalfY, HalfZ = SizeX / 2, SizeY / 2, SizeZ / 2
 	local SqHalfX, SqHalfY, SqHalfZ = HalfX ^ 2, HalfY ^ 2, HalfZ ^ 2
@@ -263,8 +264,23 @@ function cShapeGenerator.MakeSphere(a_BlockArea, a_BlockTable, a_IsHollow, a_Mas
 	:PredefineConstant("HalfY", HalfY)
 	:PredefineConstant("HalfZ", HalfZ)
 	
-	local Formula = Expression:Compile()
 	local NumAffectedBlocks = 0
+	local Formula = Expression:Compile()
+	
+	-- Sets the block in the blockarea. If the mask was not nil it checks the mask first.
+	local function SetBlock(a_RelX, a_RelY, a_RelZ)
+		if (DoCheckMask) then
+			local CurrentBlock, CurrentMeta = a_BlockArea:GetRelBlockTypeMeta(a_RelX, a_RelY, a_RelZ)
+			if (not a_Mask:Contains(CurrentBlock, CurrentMeta)) then
+				-- The block does not exist in the mask, or the meta isn't set/is different.
+				-- Don't change the block.
+				return
+			end
+		end
+		
+		a_BlockArea:SetRelBlockTypeMeta(a_RelX, a_RelY, a_RelZ, a_BlockTable:Get(a_RelX, a_RelY, a_RelZ))
+		NumAffectedBlocks = NumAffectedBlocks + 1
+	end
 	
 	for X = 0, HalfX, 1 do
 		for Y = 0, HalfY, 1 do
@@ -279,19 +295,16 @@ function cShapeGenerator.MakeSphere(a_BlockArea, a_BlockTable, a_IsHollow, a_Mas
 				
 				if (PlaceBlocks) then
 					-- Lower half of the sphere
-					a_BlockArea:SetRelBlockTypeMeta(X,         Y,         Z, a_BlockTable:Get(X, Y, Z))
-					a_BlockArea:SetRelBlockTypeMeta(SizeX - X, Y,         Z, a_BlockTable:Get(SizeX - X, Y, Z))
-					a_BlockArea:SetRelBlockTypeMeta(X,         Y, SizeZ - Z, a_BlockTable:Get(X, Y, SizeZ - Z))
-					a_BlockArea:SetRelBlockTypeMeta(SizeX - X, Y, SizeZ - Z, a_BlockTable:Get(SizeX - X, Y, SizeZ - Z))
+					SetBlock(X,         Y,         Z)
+					SetBlock(SizeX - X, Y,         Z)
+					SetBlock(X,         Y, SizeZ - Z)
+					SetBlock(SizeX - X, Y, SizeZ - Z)
 					
 					-- topper part of the sphere
-					a_BlockArea:SetRelBlockTypeMeta(X,         SizeY - Y,         Z, a_BlockTable:Get(X, SizeY - Y, Z))
-					a_BlockArea:SetRelBlockTypeMeta(SizeX - X, SizeY - Y,         Z, a_BlockTable:Get(SizeX - X, SizeY - Y, Z))
-					a_BlockArea:SetRelBlockTypeMeta(X,         SizeY - Y, SizeZ - Z, a_BlockTable:Get(X, SizeY - Y, SizeZ - Z))
-					a_BlockArea:SetRelBlockTypeMeta(SizeX - X, SizeY - Y, SizeZ - Z, a_BlockTable:Get(SizeX - X, SizeY - Y, SizeZ - Z))
-					
-					-- 8 blocks were placed
-					NumAffectedBlocks = NumAffectedBlocks + 8
+					SetBlock(X,         SizeY - Y,         Z)
+					SetBlock(SizeX - X, SizeY - Y,         Z)
+					SetBlock(X,         SizeY - Y, SizeZ - Z)
+					SetBlock(SizeX - X, SizeY - Y, SizeZ - Z)
 				end
 			end
 		end
