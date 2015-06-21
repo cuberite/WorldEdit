@@ -94,13 +94,15 @@ cExpression.m_Assignments =
 -- For example if "x=5;y<z" was given as input then the first action is an assignment, while the second action is a comparison.
 cExpression.m_Comparisons =
 {
-	"<",
-	">",
-	"<=",
-	">=",
-	"==",
-	"!=",
-	"~=",
+	{Usage = "if%s%((.*)%)%s(.*)%selse%s(.*)", Result = "%s and %s or %s"},
+	{Usage = "if%s%((.*)%)%s(.*)", Result = "%s and %s"},
+	{Usage = "(.*)<(.*)", Result = "%s<%s"},
+	{Usage = "(.*)>(.*)", Result = "%s>%s"},
+	{Usage = "(.*)<=(.*)", Result = "%s<=%s"},
+	{Usage = "(.*)>=(.*)", Result = "%s>=%s"},
+	{Usage = "(.*)==(.*)", Result = "%s==%s"},
+	{Usage = "(.*)!=(.*)", Result = "%s~=%s"},
+	{Usage = "(.*)~=(.*)", Result = "%s~=%s"}, -- TODO: Make this use a near function when implemented
 }
 
 
@@ -111,7 +113,6 @@ function cExpression:new(a_Formula)
 	local Obj = {}
 	
 	a_Formula = a_Formula
-	:gsub("!=", "~=") -- Lua operator for not equal is ~=
 	:gsub("&&", " and ")
 	:gsub("||", " or ")
 	
@@ -203,7 +204,10 @@ function cExpression:Compile()
 		
 		-- Check if one of the comparison operators is found. If none are found it's certain that the action is an assignment
 		for _, Comparison in ipairs(cExpression.m_Comparisons) do
-			IsAssignment = IsAssignment and not Action:match(Comparison)
+			if (Action:match(Comparison.Usage)) then
+				Action = Comparison.Result:format(Action:match(Comparison.Usage))
+				IsAssignment = false
+			end
 		end
 		
 		if (IsAssignment) then
