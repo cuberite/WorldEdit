@@ -74,10 +74,10 @@ cExpression.m_LoaderEnv =
 
 
 -- All the assignment operator
--- Since Lua only supports the simple = assignments we need to give the others special handling
+-- Since Lua only supports the simple = assignments we need to give the others special handling. 
+-- The = assignment is special because it can also be used in comparisons >=, == etc
 cExpression.m_Assignments =
 {
-	"=",
 	"%+=",
 	"%-=",
 	"%*=",
@@ -200,13 +200,20 @@ function cExpression:Compile()
 	-- If an action is an assignment in a format unsupported by Lua (a += 1), convert it into a supported format (a = a + 1). 
 	-- If an action is a comparison then give it the name "Comp<id>"
 	for Idx, Action in ipairs(Actions) do
-		local IsAssignment = true
+		-- Check if the = operator is found
+		local IsAssignment = Action:match("[%a%d%s]=[%a%d%s]") ~= nil
 		
-		-- Check if one of the comparison operators is found. If none are found it's certain that the action is an assignment
+		-- Check if one of the assignment operators is found. If one is found it's certain that the action is an assignment.
+		for Idx, Assignment in pairs(cExpression.m_Assignments) do
+			if (Action:match(Assignment)) then
+				IsAssignment = true
+			end
+		end
+		
+		-- Make all the comparisons work properly. For example != is used instead of ~=, while ~= is used to see if 2 numbers are near each other.
 		for _, Comparison in ipairs(cExpression.m_Comparisons) do
 			if (Action:match(Comparison.Usage)) then
 				Action = Comparison.Result:format(Action:match(Comparison.Usage))
-				IsAssignment = false
 			end
 		end
 		
