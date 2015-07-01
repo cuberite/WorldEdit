@@ -273,3 +273,20 @@ end
 
 
 
+
+--- Loads and executes a string
+-- a_String is the function to load. This can be a normal string that is manualy composed, or a dumped string using string.dump
+-- All other arguments are passed to the function when called.
+-- Returns false + error when failed, and returns true + all return values when succesfull.
+function ExecuteString(a_String, ...)
+	local Function, Error = loadstring(a_String)
+	if (not Function) then
+		return false, Error
+	end
+	
+	return pcall(Function, ...)
+end
+
+
+
+
