@@ -219,7 +219,6 @@ function cExpression:Compile()
 		
 		if (IsAssignment) then
 			-- The action is an assignment. Since Lua only supports the simple = assignments we got to do some special handling for the <action>assign assignments like += and *=.
-			-- m_Assignments[1] is an =, and that doesn't need any special handeling
 			for Idx, Assignment in pairs(cExpression.m_Assignments) do
 				-- Get what type of assignment it is (multiply, divide etc)
 				local Operator = Assignment:match(".="):sub(1, 1)
