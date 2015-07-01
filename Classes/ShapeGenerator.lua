@@ -331,60 +331,50 @@ function cShapeGenerator.MakePyramid(a_BlockArea, a_BlockTable, a_IsHollow, a_Ma
 	local SizeX, SizeY, SizeZ = a_BlockArea:GetCoordRange()
 	local NumAffectedBlocks = 0
 	
-	-- Function that checks in the mask if a block can be placed. 
-	local function CheckMask(a_X, a_Y, a_Z)
-		if (not DoCheckMask) then
-			-- We don't have to check the mask, because a_Mask is nil
-			return true
+	-- Sets the block in the blockarea. If the mask was not nil it checks the mask first.
+	local function SetBlock(a_RelX, a_RelY, a_RelZ)
+		if (DoCheckMask) then
+			local CurrentBlock, CurrentMeta = a_BlockArea:GetRelBlockTypeMeta(a_RelX, a_RelY, a_RelZ)
+			if (not a_Mask:Contains(CurrentBlock, CurrentMeta)) then
+				-- The block does not exist in the mask, or the meta isn't set/is different.
+				-- Don't change the block.
+				return
+			end
 		end
 		
-		local CurrentBlock, CurrentMeta = a_BlockArea:GetRelBlockTypeMeta(a_X, a_Y, a_Z)
-		return not a_Mask:Contains(CurrentBlock, CurrentMeta)
+		a_BlockArea:SetRelBlockTypeMeta(a_RelX, a_RelY, a_RelZ, a_BlockTable:Get(a_RelX, a_RelY, a_RelZ))
+		NumAffectedBlocks = NumAffectedBlocks + 1
 	end
+	
+	local StepSizeX = SizeX / SizeY / 2
+	local StepSizeZ = SizeZ / SizeY / 2
 	
 	-- Makes a hollow layer
 	local HollowLayer = function(a_Y)
-		local MinX = a_Y
-		local MaxX = SizeX - a_Y
-		local MinZ = a_Y
-		local MaxZ = SizeZ - a_Y
+		local MinX = math.floor(a_Y * StepSizeX)
+		local MaxX = math.ceil(SizeX - MinX)
+		local MinZ = math.floor(a_Y * StepSizeZ)
+		local MaxZ = math.ceil(SizeZ - MinZ)
 		for X = MinX, MaxX do
-			if (CheckMask(X, a_Y, MinZ)) then
-				NumAffectedBlocks = NumAffectedBlocks + 1
-				a_BlockArea:SetRelBlockTypeMeta(X, a_Y, MinZ, a_BlockTable:Get(X, a_Y, MinZ))
-			end
-			
-			if (CheckMask(X, a_Y, MaxZ)) then
-				NumAffectedBlocks = NumAffectedBlocks + 1
-				a_BlockArea:SetRelBlockTypeMeta(X, a_Y, MaxZ, a_BlockTable:Get(X, a_Y, MaxZ))
-			end
+			SetBlock(X, a_Y, MinZ)
+			SetBlock(X, a_Y, MaxZ)
 		end
 		
 		for Z = MinZ + 1, MaxZ - 1 do
-			if (CheckMask(MinX, a_Y, Z)) then
-				NumAffectedBlocks = NumAffectedBlocks + 1
-				a_BlockArea:SetRelBlockTypeMeta(MinX, a_Y, Z, a_BlockTable:Get(MinX, a_Y, Z))
-			end
-			
-			if (CheckMask(MaxX, a_Y, Z)) then
-				NumAffectedBlocks = NumAffectedBlocks + 1
-				a_BlockArea:SetRelBlockTypeMeta(MaxX, a_Y, Z, a_BlockTable:Get(MaxX, a_Y, Z))
-			end
+			SetBlock(MinX, a_Y, Z)
+			SetBlock(MaxX, a_Y, Z)
 		end
 	end
 	
 	-- Makes a solid layer
 	local SolidLayer = function(a_Y)
-		local MinX = a_Y
-		local MaxX = SizeX - a_Y
-		local MinZ = a_Y
-		local MaxZ = SizeZ - a_Y
+		local MinX = math.floor(a_Y * StepSizeX)
+		local MaxX = math.ceil(SizeX - MinX)
+		local MinZ = math.floor(a_Y * StepSizeZ)
+		local MaxZ = math.ceil(SizeZ - MinZ)
 		for X = MinX, MaxX do
 			for Z = MinZ, MaxZ do
-				if (CheckMask(X, a_Y, Z)) then
-					NumAffectedBlocks = NumAffectedBlocks + 1
-					a_BlockArea:SetRelBlockTypeMeta(X, a_Y, Z, a_BlockTable:Get(X, a_Y, Z))
-				end
+				SetBlock(X, a_Y, Z)
 			end
 		end
 	end
