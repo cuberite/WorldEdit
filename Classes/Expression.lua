@@ -201,7 +201,7 @@ function cExpression:Compile()
 	-- If an action is a comparison then give it the name "Comp<id>"
 	for Idx, Action in ipairs(Actions) do
 		-- Check if the = operator is found
-		local IsAssignment = Action:match("[%a%d%s]=[%a%d%s]") ~= nil
+		local IsAssignment = Action:match("[%a%d%s]=[%(%a%d%s]") ~= nil
 		
 		-- Check if one of the assignment operators is found. If one is found it's certain that the action is an assignment.
 		for Idx, Assignment in pairs(cExpression.m_Assignments) do
