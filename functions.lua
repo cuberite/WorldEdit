@@ -479,6 +479,7 @@ end
 -- a_BlockTable is a table containing all the blocks types/(metas) to place
 -- a_IsHollow is a bool value if the sphere has to be hollow
 -- a_Mask is either nil or a table containing the masked blocks
+-- TODO: When generating above or under the chunks the affected blocks aren't right.
 function CreateSphereInCuboid(a_Player, a_Cuboid, a_BlockTable, a_IsHollow, a_Mask)
 	local World = a_Player:GetWorld()
 	local ActionName = (a_IsHollow and "hsphere") or "sphere"
@@ -488,15 +489,23 @@ function CreateSphereInCuboid(a_Player, a_Cuboid, a_BlockTable, a_IsHollow, a_Ma
 		return 0
 	end
 	
+	if (not a_Cuboid:IsSorted()) then
+		a_Cuboid:Sort()
+	end
+	
 	-- Create a table with all the chunks that will be affected
 	local AffectedChunks = ListChunksForCuboid(a_Cuboid)
-
+	
+	-- Variable that contains the ammount of blocks that have changed.
+	local NumAffectedBlocks = 0
+	
+	-- If the Y values are below 0 or above 255 we have to cut it off.
+	local CutBottom, CutTop = (a_Cuboid.p1.y > 0) and 0 or -a_Cuboid.p1.y, (a_Cuboid.p2.y < 255) and 0 or (a_Cuboid.p2.y - 255)
+	a_Cuboid:ClampY(0, 255)
+	
 	-- Push the area into an undo stack:
 	local State = GetPlayerState(a_Player)
 	State.UndoStack:PushUndoFromCuboid(World, a_Cuboid)
-
-	-- Calculate the chances for all the blocks
-	local NumAffectedBlocks = 0
 	
 	local BlockArea = cBlockArea()
 	World:ChunkStay(AffectedChunks, nil,
@@ -504,8 +513,14 @@ function CreateSphereInCuboid(a_Player, a_Cuboid, a_BlockTable, a_IsHollow, a_Ma
 			-- Read the area
 			BlockArea:Read(World, a_Cuboid, cBlockArea.baTypes + cBlockArea.baMetas)
 			
+			-- Add the missing layers so that the sphere generator generates a proper sphere.
+			BlockArea:Expand(0, 0, CutBottom, CutTop, 0, 0)
+			
 			-- Create the sphere in the blockarea
 			NumAffectedBlocks = cShapeGenerator.MakeSphere(BlockArea, a_BlockTable, a_IsHollow, a_Mask)
+			
+			-- Remove the layers that are above or under the minimum or maximum Y coordinates.
+			BlockArea:Crop(0, 0, CutBottom, CutTop, 0, 0)
 
 			-- Write the area back to world:
 			BlockArea:Write(World, a_Cuboid.p1)
@@ -526,6 +541,7 @@ end
 -- a_BlockTable is a table containing all the blocks types/(metas) to place
 -- a_IsHollow is a bool value if the cylinder has to be hollow
 -- a_Mask is either nil or a table containing the masked blocks
+-- TODO: When generating above or under the chunks the affected blocks aren't right.
 function CreateCylinderInCuboid(a_Player, a_Cuboid, a_BlockTable, a_IsHollow, a_Mask)
 	local World = a_Player:GetWorld()
 	local ActionName = (a_IsHollow and "hcyl") or "cyl"
@@ -535,14 +551,22 @@ function CreateCylinderInCuboid(a_Player, a_Cuboid, a_BlockTable, a_IsHollow, a_
 		return 0
 	end
 	
+	if (not a_Cuboid:IsSorted()) then
+		a_Cuboid:Sort()
+	end
+	
 	-- Create a table with all the chunks that will be affected
 	local AffectedChunks = ListChunksForCuboid(a_Cuboid)
 
+	-- If the Y values are below 0 or above 255 we have to cut it off.
+	local CutBottom, CutTop = (a_Cuboid.p1.y > 0) and 0 or -a_Cuboid.p1.y, (a_Cuboid.p2.y < 255) and 0 or (a_Cuboid.p2.y - 255)
+	a_Cuboid:ClampY(0, 255)
+	
 	-- Push the area into an undo stack:
 	local State = GetPlayerState(a_Player)
 	State.UndoStack:PushUndoFromCuboid(World, a_Cuboid)
 
-	-- Calculate the chances for all the blocks
+	-- Variable that contains the ammount of blocks that have changed.
 	local NumAffectedBlocks = 0
 	
 	local BlockArea = cBlockArea()
@@ -551,9 +575,15 @@ function CreateCylinderInCuboid(a_Player, a_Cuboid, a_BlockTable, a_IsHollow, a_
 			-- Read the area
 			BlockArea:Read(World, a_Cuboid, cBlockArea.baTypes + cBlockArea.baMetas)
 			
+			-- Add the missing layers so that the sphere generator generates a proper sphere.
+			BlockArea:Expand(0, 0, CutBottom, CutTop, 0, 0)
+			
 			-- Create the cylinder in the blockarea
 			NumAffectedBlocks = cShapeGenerator.MakeCylinder(BlockArea, a_BlockTable, a_IsHollow, a_Mask)
 
+			-- Remove the layers that are above or under the minimum or maximum Y coordinates.
+			BlockArea:Crop(0, 0, CutBottom, CutTop, 0, 0)
+			
 			-- Write the area back to world:
 			BlockArea:Write(World, a_Cuboid.p1)
 		end
