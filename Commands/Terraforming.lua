@@ -95,37 +95,8 @@ function HandleExtinguishCommand(a_Split, a_Player)
 	Cuboid:ClampY(0, 255)
 	Cuboid:Sort()
 	
-	local World = a_Player:GetWorld()
-	
-	-- Check for other plugins if they want to block the action
-	if (CallHook("OnAreaChanging", Cuboid, a_Player, World, "extinguish")) then
-		return true
-	end
-	
-	-- Read the area into a cBlockArea
-	local BlockArea = cBlockArea()
-	BlockArea:Read(World, Cuboid)
-	local SizeX, SizeY, SizeZ = BlockArea:GetCoordRange()
-	
-	-- The number of affected blocks
-	local NumAffectedBlocks = 0
-	
-	for X = 0, SizeX do
-		for Y = 0, SizeY do
-			for Z = 0, SizeZ do
-				if (BlockArea:GetRelBlockType(X, Y, Z) == E_BLOCK_FIRE) then
-					BlockArea:SetRelBlockType(X, Y, Z, E_BLOCK_AIR)
-					NumAffectedBlocks = NumAffectedBlocks + 1
-				end
-			end
-		end
-	end
-	
-	-- Write the area in the world
-	BlockArea:Write(World, Cuboid.p1)
-	
-	-- Notify other plugins of the change
-	CallHook("OnAreaChanged", Cuboid, a_Player, World, "extinguish")
+	-- Remove all the fire in the area
+	local NumAffectedBlocks = ReplaceBlocksInCuboid(a_Player, Cuboid, cMask:new("51"), GetBlockDst("0"), "extinguish")
 	
 	-- Send a message to the player
 	a_Player:SendMessage(cChatColor.LightPurple .. NumAffectedBlocks .. " fire(s) put out")
@@ -170,6 +141,53 @@ function HandleGreenCommand(a_Split, a_Player)
 		end
 		a_Player:SendMessage(cChatColor.LightPurple .. #PossibleBlockChanges .. " surfaces greened.")
 	end
+	return true
+end
+
+
+
+
+
+function HandleReplaceNearCommand(a_Split, a_Player)
+	-- //replacenear <size> <from> <to>
+	
+	if (#a_Split < 4) then
+		a_Player:SendMessage(cChatColor.Rose .. "Too few parameters!")
+		a_Player:SendMessage(cChatColor.Rose .. "Usage: //replacenear <size> <from> <to>")
+		return true
+	elseif (#a_Split > 4) then
+		a_Player:SendMessage(cChatColor.Rose .. "Too many parameters! Unused parameters: " .. table.concat(a_Split, " ", 5))
+		a_Player:SendMessage(cChatColor.Rose .. "Usage: //replacenear <size> <from> <to>")
+		return true
+	end
+	
+	local Radius = tonumber(a_Split[2])
+	if (not Radius) then
+		a_Player:SendMessage(cChatColor.Rose .. "Number expected; string \"" .. a_Split[2] .. "\" given.")
+		return true
+	end
+	
+	-- Retrieve the blocktypes from the params:
+	local SrcBlockTable, ErrBlock = cMask:new(a_Split[3])
+	if (not SrcBlockTable) then
+		a_Player:SendMessage(cChatColor.Rose .. "Unknown src block type: '" .. ErrBlock .. "'.")
+		return true
+	end
+	
+	local DstBlockTable, ErrBlock = GetBlockDst(a_Split[4], a_Player)
+	if (not DstBlockTable) then
+		a_Player:SendMessage(cChatColor.Rose .. "Unknown dst block type: '" .. ErrBlock .. "'.")
+		return true
+	end
+	
+	local Cuboid = cCuboid(a_Player:GetPosition():Floor(), a_Player:GetPosition():Floor())
+	Cuboid:Expand(Radius, Radius, Radius, Radius, Radius, Radius)
+	Cuboid:ClampY(0, 255)
+	Cuboid:Sort()
+	
+	local NumBlocks = ReplaceBlocksInCuboid(a_Player, Cuboid, SrcBlockTable, DstBlockTable, "replacenear")
+	a_Player:SendMessage(cChatColor.LightPurple .. NumBlocks .. " block(s) have been changed.")
+	
 	return true
 end
 

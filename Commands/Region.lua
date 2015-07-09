@@ -505,7 +505,7 @@ function HandleReplaceCommand(a_Split, a_Player)
 	end
 	
 	-- Replace the blocks:
-	local NumBlocks = ReplaceSelection(State, a_Player, a_Player:GetWorld(), SrcBlockTable, DstBlockTable)
+	local NumBlocks = ReplaceBlocksInCuboid(a_Player, State.Selection:GetSortedCuboid(), SrcBlockTable, DstBlockTable, "replace")
 	if (NumBlocks) then
 		a_Player:SendMessage(cChatColor.LightPurple .. NumBlocks .. " block(s) have been changed.")
 	end

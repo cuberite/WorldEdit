@@ -243,6 +243,14 @@ g_PluginInfo =
 			Category = "Region",
 		},
 		
+		["//replacenear"] =
+		{
+			Permission = "worldedit.replacenear",
+			Handler = HandleReplaceNearCommand,
+			HelpString = " Replace nearby blocks",
+			Category = "Terraforming",
+		},
+		
 		["//rotate"] =
 		{
 			Permission = "worldedit.clipboard.rotate",

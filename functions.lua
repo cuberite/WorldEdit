@@ -330,22 +330,21 @@ end
 --- Replaces the specified blocks in the selection stored in the specified cPlayerState
 -- Returns the number of blocks changed, or no value if disallowed
 -- The original contents are pushed onto PlayerState's Undo stack
--- If a_TypeOnly is set, the block meta is ignored will be replaced
-function ReplaceSelection(a_PlayerState, a_Player, a_World, a_SrcBlockTable, a_DstBlockTable)
+function ReplaceBlocksInCuboid(a_Player, a_Cuboid, a_Mask, a_DstBlockTable, a_Action)
+	local State = GetPlayerState(a_Player)
+	local World = a_Player:GetWorld()
+	
 	-- Check with other plugins if the operation is okay:
-	if (CallHook("OnAreaChanging", a_PlayerState.Selection:GetSortedCuboid(), a_Player, a_World, "replace")) then
+	if (CallHook("OnAreaChanging", a_Cuboid, a_Player, World, a_Action)) then
 		return
 	end
 	
 	-- Push an Undo onto the stack:
-	a_PlayerState:PushUndoInSelection(a_World, "replace")
+	State.UndoStack:PushUndoFromCuboid(World, a_Cuboid)
 
 	-- Read the area to be replaced:
 	local Area = cBlockArea()
-	local MinX, MaxX = a_PlayerState.Selection:GetXCoordsSorted()
-	local MinY, MaxY = a_PlayerState.Selection:GetYCoordsSorted()
-	local MinZ, MaxZ = a_PlayerState.Selection:GetZCoordsSorted()
-	Area:Read(a_World, MinX, MaxX, MinY, MaxY, MinZ, MaxZ)
+	Area:Read(World, a_Cuboid)
 	
 	-- Replace the blocks:
 	local SizeX, SizeY, SizeZ = Area:GetCoordRange()
@@ -354,7 +353,7 @@ function ReplaceSelection(a_PlayerState, a_Player, a_World, a_SrcBlockTable, a_D
 	for X = 0, SizeX do
 		for Y = 0, SizeY do
 			for Z = 0, SizeZ do
-				if (a_SrcBlockTable:Contains(Area:GetRelBlockTypeMeta(X, Y, Z))) then
+				if (a_Mask:Contains(Area:GetRelBlockTypeMeta(X, Y, Z))) then
 					Area:SetRelBlockTypeMeta(X, Y, Z, a_DstBlockTable:Get(X, Y, Z))
 					NumBlocks = NumBlocks + 1
 				end
@@ -363,10 +362,10 @@ function ReplaceSelection(a_PlayerState, a_Player, a_World, a_SrcBlockTable, a_D
 	end
 	
 	-- Write the area back to world:
-	Area:Write(a_World, MinX, MinY, MinZ)
+	Area:Write(World, a_Cuboid.p1)
 	
-	CallHook("OnAreaChanged", a_PlayerState.Selection:GetSortedCuboid(), a_Player, a_World, "replace")
-	a_World:WakeUpSimulatorsInArea(MinX - 1, MaxX + 1, MinY - 1, MaxY + 1, MinZ - 1, MaxZ + 1)
+	CallHook("OnAreaChanged", a_Cuboid, a_Player, World, a_Action)
+	World:WakeUpSimulatorsInArea(a_Cuboid.p1.x, a_Cuboid.p2.x, a_Cuboid.p1.y, a_Cuboid.p2.y, a_Cuboid.p1.z, a_Cuboid.p2.z)
 	
 	return NumBlocks
 end
