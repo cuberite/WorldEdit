@@ -73,3 +73,17 @@ end
 
 
 
+
+-- Returns if one of the blocktypes in the given table is in the block table as a key.
+function cRandomBlockTypeSource:Contains(a_BlockTypeList)
+	for Idx, BlockInfo in ipairs(self.m_BlockTable) do
+		if (a_BlockTypeList[BlockInfo.BlockType]) then
+			return true, BlockInfo.BlockType
+		end
+	end
+	return false
+end
+
+
+
+

@@ -42,3 +42,15 @@ end
 
 
 
+
+-- Returns true + blocktype if the block is in the given table as a key. Returns false otherwise.
+function cConstantBlockTypeSource:Contains(a_BlockTypeList)
+	if (a_BlockTypeList[self.m_BlockType]) then
+		return true, self.m_BlockType
+	end
+	return false
+end
+
+
+
+

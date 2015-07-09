@@ -32,6 +32,7 @@ Limits =
 {
 	ButcherRadius = -1,
 	MaxBrushRadius = 5,
+	DisallowedBlocks = {6, 7, 14, 15, 16, 26, 27, 28, 29, 39, 31, 32, 33, 34, 36, 37, 38, 39, 40, 46, 50, 51, 56, 59, 69, 73, 74, 75, 76, 77, 81, 83},
 },
 
 Defaults =
@@ -141,6 +142,16 @@ function InitializeConfiguration(a_Path)
 	-- When the admin missed something in the configuration it will be set to the default value.
 	local DefaultConfig = GetDefaultConfigurationTable()
 	table.merge(Result, DefaultConfig)
+	
+	-- Make a dictionary out of the array of disallowed blocks.
+	if (Result.Limits and (type(Result.Limits.DisallowedBlocks) == "table")) then
+		local DisallowedBlocks = {}
+		for Idx, BlockType in ipairs(Result.Limits.DisallowedBlocks) do
+			DisallowedBlocks[BlockType] = true
+		end
+		
+		Result.Limits.DisallowedBlocks = DisallowedBlocks
+	end
 	
 	-- Set the g_Config table.
 	g_Config = Result

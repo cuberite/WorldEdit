@@ -416,20 +416,37 @@ end
 -- Chooses the best block destination class from the string. If only one block is set it uses the cConstantBlockTypeSource class, and if multiple are used it uses cRandomBlockTypeSource.
 -- If the string is #clipboard or #copy it returns cClipboardBlockTypeSource.
 function GetBlockDst(a_Blocks, a_Player)
+	local Handler, Error
+	
 	if (a_Blocks:sub(1, 1) == "#") then
-		if ((a_Blocks == "#clipboard") or (a_Blocks == "#copy")) then
-			return cClipboardBlockTypeSource:new(a_Player)
-		else
+		if ((a_Blocks ~= "#clipboard") and (a_Blocks ~= "#copy")) then
 			return false, "#clipboard or #copy is acceptable for patterns starting with #"
+		end
+		
+		Handler, Error = cClipboardBlockTypeSource:new(a_Player)
+	end
+	
+	if (not Handler and not Error) then
+		local NumBlocks = #StringSplit(a_Blocks, ",")
+		if (NumBlocks == 1) then
+			Handler, Error = cConstantBlockTypeSource:new(a_Blocks)
+		else
+			Handler, Error = cRandomBlockTypeSource:new(a_Blocks)
 		end
 	end
 	
-	local NumBlocks = #StringSplit(a_Blocks, ",")
-	if (NumBlocks == 1) then
-		return cConstantBlockTypeSource:new(a_Blocks)
+	if (Error) then
+		return false, Error
 	end
 	
-	return cRandomBlockTypeSource:new(a_Blocks)
+	if (a_Player and not a_Player:HasPermission("worldedit.anyblock")) then
+		local DoesContain, DisallowedBlock = Handler:Contains(g_Config.Limits.DisallowedBlocks)
+		if (DoesContain) then
+			return false, DisallowedBlock .. " isn't allowed"
+		end
+	end
+	
+	return Handler
 end
 
 

@@ -49,3 +49,26 @@ end
 
 
 
+
+
+-- Returns true if one of the blocks in the given table is in the clipboard.
+function cClipboardBlockTypeSource:Contains(a_BlockTypeList)
+	local SizeX, SizeY, SizeZ = self.m_Area:GetCoordRange()
+	
+	for X = 0, SizeX do
+		for Y = 0, SizeY do
+			for Z = 0, SizeZ do
+				local BlockType = self.m_Area:GetRelBlockType(X, Y, Z)
+				if (a_BlockTypeList[BlockType]) then
+					return true, BlockType
+				end
+			end
+		end
+	end
+	
+	return false
+end
+
+
+
+
