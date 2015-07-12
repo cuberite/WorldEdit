@@ -49,7 +49,7 @@ math.sinh, math.sqrt, math.tan, math.tanh, math.random, math.pi, math.exp(1)
 -- These functions are not build into Lua:
 local cbrt = function(x) return sqrt(x^(1/3)) end
 local randint = function(max) return random(0, max) end
--- TODO: rint function
+local rint = function(num) local Number, Decimal = math.modf(num); return (Decimal <= 0.5) and Number or (Number + 1) end
 
 %s
 
