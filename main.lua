@@ -1,49 +1,38 @@
 
-local g_ExcludedFolders =
+-- main.lua
+
+-- Contains the Initialize and OnDisable functions
+
+
+
+
+
+--- All the folders that shouldn't be loaded by 
+-- We can't use table.todictionary, because that function isn't loaded here yet.
+g_ExcludedFolders = 
 {
-	"craftscripts",
+	craftscripts = true,
+	["."] = true,
+	[".."] = true,
 }
 
--- Include all the lua files in the folders
-local g_WorldEditPath = cPluginManager:GetCurrentPlugin():GetLocalFolder()
-local Folders = cFile:GetFolderContents(g_WorldEditPath)
-for _, Folder in ipairs(Folders) do repeat
-	if ((Folder == ".") or (Folder == "..")) then
-		break -- Is a continue due to a do-while directly after the for
-	end
-	
-	local Path = g_WorldEditPath .. "/" .. Folder
+
+
+
+
+-- Load all the folders 
+local WorldEditPath = cPluginManager:GetCurrentPlugin():GetLocalFolder()
+for _, Folder in ipairs(cFile:GetFolderContents(WorldEditPath)) do repeat
+	local Path = WorldEditPath .. "/" .. Folder
 	if (not cFile:IsFolder(Path)) then
 		break -- Is a continue due to a do-while directly after the for
 	end
 	
-	local IsExcludedFolder = false
-	for _, ExcludedFolder in ipairs(g_ExcludedFolders) do
-		if (Folder == ExcludedFolder) then
-			IsExcludedFolder = true
-			break
-		end
-	end
-	
-	if (IsExcludedFolder) then
+	if (g_ExcludedFolders[Folder]) then
 		break -- Is a continue due to a do-while directly after the for
 	end
 	
-	local FolderContents= cFile:GetFolderContents(Path)
-	for _, FileName in ipairs(FolderContents) do repeat
-		if (not cFile:IsFile(Path .. "/" .. FileName)) then
-			break -- Is a continue due to a do-while directly after the for
-		end
-		
-		local FileExtension = StringSplit(FileName, ".")
-		FileExtension = FileExtension[#FileExtension]
-		
-		if (FileExtension ~= "lua") then
-			break -- Is a continue due to a do-while directly after the for
-		end
-		
-		dofile(Path .. "/" .. FileName)
-	until true end
+	dofolder(Path)
 until true end
 
 
@@ -74,7 +63,6 @@ function Initialize(a_Plugin)
 	
 	--Bind all the commands:
 	RegisterPluginInfoCommands();
-	
 	
 	cFile:CreateFolder("schematics")
 	

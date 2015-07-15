@@ -145,12 +145,7 @@ function InitializeConfiguration(a_Path)
 	
 	-- Make a dictionary out of the array of disallowed blocks.
 	if (Result.Limits and (type(Result.Limits.DisallowedBlocks) == "table")) then
-		local DisallowedBlocks = {}
-		for Idx, BlockType in ipairs(Result.Limits.DisallowedBlocks) do
-			DisallowedBlocks[BlockType] = true
-		end
-		
-		Result.Limits.DisallowedBlocks = DisallowedBlocks
+		Result.Limits.DisallowedBlocks = table.todictionary(Result.Limits.DisallowedBlocks)
 	end
 	
 	-- Set the g_Config table.

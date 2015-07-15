@@ -51,61 +51,16 @@ end
 
 
 
--- Rounds the number.
-function math.round(a_GivenNumber)	
-	local Number, Decimal = math.modf(a_GivenNumber)
-	if (Decimal >= 0.5) then
-		return Number + 1
-	else
-		return Number
-	end
-end
-
-
-
-
-
--- Returns true if the given table is an array, otherwise it returns false
-function table.isarray(a_Table)
-	local i = 0
-	for _, t in pairs(a_Table) do
-		i = i + 1
-		if (not rawget(a_Table, i)) then
-			return false
-		end
-	end
-	
-	return true
-end
-
-
-
-
-
--- Merges all values (except arrays) from a_DstTable into a_SrcTable if the key doesn't exist in a_SrcTable
-function table.merge(a_SrcTable, a_DstTable)
-	for Key, Value in pairs(a_DstTable) do
-		if (not a_SrcTable[Key]) then
-			a_SrcTable[Key] = Value
-		elseif ((type(Value) == "table") and (type(a_SrcTable[Key]) == "table")) then
-			if (not table.isarray(a_SrcTable[Key])) then
-				table.merge(a_SrcTable[Key], Value)
-			end
+-- Loads all the files in a folder with the lua or luac extension
+function dofolder(a_Path)
+	for Idx, FileName in ipairs(cFile:GetFolderContents(a_Path)) do
+		local FilePath = a_Path .. "/" .. FileName
+		if (cFile:IsFile(FilePath) and FileName:match("%.lua[c]?$")) then
+			dofile(FilePath)
 		end
 	end
 end
 
-
-
-
-
--- Makes the first character of a string uppercase, and lowercases the rest.
-function string.ucfirst(a_String)
-	local firstChar = a_String:sub(1, 1):upper()
-	local Rest = a_String:sub(2):lower()
-	
-	return firstChar .. Rest
-end
 
 
 
