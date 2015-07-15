@@ -622,13 +622,6 @@ g_PluginInfo =
 					Handler = HandleWorldEditVersionCommand,
 					Category = "Special",
 				},
-				reload =
-				{
-					HelpString = "Reloads the WorldEdit plugin.",
-					Permission = "",
-					Handler = HandleWorldEditReloadCommand,
-					Category = "Special",
-				},
 				help =
 				{
 					HelpString = "Sends all the available commands to the player.",

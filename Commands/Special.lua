@@ -33,41 +33,24 @@ end
 
 
 
--- Reloads the WorldEdit plugin.
-function HandleWorldEditReloadCommand(Split, Player)
-	-- /we reload
-	
-	if (not Player:HasPermission("worldedit.reload")) then
-		Player:SendMessage(cChatColor.Rose .. "You do not have permission to reload WorldEdit.")
-		return true
-	end
-	
-	Player:SendMessage(cChatColor.LightPurple .. "Worldedit is reloading")
-	cRoot:Get():GetPluginManager():DisablePlugin(PLUGIN:GetName()) -- disable the plugin
-	DisablePlugin = true -- make sure the plugin loads again ;)
-	return true
-end
-
-
-
-
-
 -- Sends all the available commands to the player.
-function HandleWorldEditHelpCommand(Split, Player)
+function HandleWorldEditHelpCommand(a_Split, a_Player)
 	-- /we help
 	
-	if (Player:HasPermission("worldedit.help")) then
-		Player:SendMessage(cChatColor.Rose .. "You do not have permission for this command.")
+	if (not a_Player:HasPermission("worldedit.help")) then
+		a_Player:SendMessage(cChatColor.Rose .. "You do not have permission for this command.")
 		return true
 	end
 	
 	local Commands = ""
-	for Command, Information in pairs(g_PluginInfo.Commands) do
-		Commands = Commands .. cChatColor.LightPurple .. Command .. ", "
+	for Command, CommandInfo in pairs(g_PluginInfo.Commands) do
+		if (a_Player:HasPermission(CommandInfo.Permission)) then
+			Commands = Commands .. cChatColor.LightPurple .. Command .. ", "
+		end
 	end
 	
-	Player:SendMessage(cChatColor.LightPurple .. "Available commands:")
-	Player:SendMessage(string.sub(Commands, 1, string.len(Commands) - 2)) -- Remove the last ", "
+	a_Player:SendMessage(cChatColor.LightPurple .. "Available commands:")
+	a_Player:SendMessage(string.sub(Commands, 1, string.len(Commands) - 2)) -- Remove the last ", "
 	return true
 end
 
@@ -76,14 +59,14 @@ end
 
 
 -- Gives the player the wand item.
-function HandleWandCommand(Split, Player)
+function HandleWandCommand(a_Split, a_Player)
 	-- //wand
 	
 	local Item = cItem(g_Config.WandItem) -- create the cItem object
-	if (Player:GetInventory():AddItem(Item)) then -- check if the player got the item
-		Player:SendMessage(cChatColor.Green .. "You have received the wand.")
+	if (a_Player:GetInventory():AddItem(Item)) then -- check if the player got the item
+		a_Player:SendMessage(cChatColor.Green .. "You have received the wand.")
 	else
-		Player:SendMessage(cChatColor.Green .. "Not enough inventory space.")
+		a_Player:SendMessage(cChatColor.Green .. "Not enough inventory space.")
 	end
 	return true
 end

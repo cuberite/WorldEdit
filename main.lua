@@ -75,12 +75,7 @@ end
 
 
 function OnDisable()
-	if (DisablePlugin) then -- if the plugin has to be reloaded then load the plugin again ;)
-		LOGINFO("Worldedit is reloading")
-		PluginManager:LoadPlugin(PLUGIN:GetName())
-	else
-		LOG("[WorldEdit] Disabling WorldEdit v" .. PLUGIN:GetVersion())
-	end
+	LOG("[WorldEdit] Disabling WorldEdit v" .. PLUGIN:GetVersion())
 end
 
 
