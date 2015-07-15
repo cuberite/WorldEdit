@@ -196,7 +196,7 @@ function HandlePosCommand(a_Split, a_Player)
 	local PointName = (a_Split[1] == "//pos1") and "First" or "Second"
 	local State = GetPlayerState(a_Player)
 	local Pos = a_Player:GetPosition():Floor()
-	local Succes, Msg = State.Selection:SetPos(Pos.x, Pos.y, Pos.z, BLOCK_FACE_TOP, PointName)
+	local Succes, Msg = State.Selection:SetPos(Pos.x, Pos.y, Pos.z, BLOCK_FACE_TOP, PointName, true)
 	
 	-- We can assume that the action was a succes, since all the given parameters are known to be valid.
 	a_Player:SendMessage(cChatColor.LightPurple .. Msg)

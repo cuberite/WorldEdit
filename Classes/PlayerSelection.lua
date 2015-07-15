@@ -339,14 +339,14 @@ end
 
 
 --- Common code to set selection position based on player clicking somewhere
-function cPlayerSelection:SetPos(a_BlockX, a_BlockY, a_BlockZ, a_BlockFace, a_PosName)
+function cPlayerSelection:SetPos(a_BlockX, a_BlockY, a_BlockZ, a_BlockFace, a_PosName, a_ForceSet)
 	-- Check if a valid click:
 	if (a_BlockFace == BLOCK_FACE_NONE) then
 		return false
 	end
 	
 	-- Check the wand activation state:
-	if (not self.PlayerState.WandActivated) then
+	if (not self.PlayerState.WandActivated and not a_ForceSet) then
 		return false
 	end
 	
