@@ -83,25 +83,24 @@ end
 
 
 --- Gets the number of blocks in that region.
-function CountBlocks(a_PlayerState, a_Player, a_World, a_BlockTable)
+function CountBlocksInCuboid(a_World, a_Cuboid, a_Mask)
+	-- Make sure the cuboid is sorted
+	if (not a_Cuboid:IsSorted()) then
+		a_Cuboid:Sort()
+	end
+	
 	-- Read the area:
 	local Area = cBlockArea()
-	local MinX, MaxX = a_PlayerState.Selection:GetXCoordsSorted()
-	local MinY, MaxY = a_PlayerState.Selection:GetYCoordsSorted()
-	local MinZ, MaxZ = a_PlayerState.Selection:GetZCoordsSorted()
-	Area:Read(a_World, MinX, MaxX, MinY, MaxY, MinZ, MaxZ)
+	Area:Read(a_World, a_Cuboid)
 	
 	-- Replace the blocks:
-	local XSize = MaxX - MinX
-	local YSize = MaxY - MinY
-	local ZSize = MaxZ - MinZ
+	local SizeX, SizeY, SizeZ = Area:GetCoordRange()
 	local NumBlocks = 0
 	
-	for X = 0, XSize do
-		for Y = 0, YSize do
-			for Z = 0, ZSize do
-				local BlockType, BlockMeta = Area:GetRelBlockTypeMeta(X, Y, Z)
-				if (a_BlockTable[BlockType] and (a_BlockTable[BlockType].TypeOnly or a_BlockTable[BlockType].BlockMeta == BlockMeta)) then
+	for X = 0, SizeX do
+		for Y = 0, SizeY do
+			for Z = 0, SizeZ do
+				if (a_Mask:Contains(Area:GetRelBlockTypeMeta(X, Y, Z))) then
 					NumBlocks = NumBlocks + 1
 				end
 			end
