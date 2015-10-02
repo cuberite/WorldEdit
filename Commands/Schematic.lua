@@ -60,7 +60,7 @@ function HandleSchematicLoadCommand(a_Split, a_Player)
 	
 	-- Check if the file exists:
 	local Path = "schematics/" .. FileName .. ".schematic"
-	if not(cFile:Exists(Path)) then
+	if not(cFile:IsFile(Path)) then
 		a_Player:SendMessage(cChatColor.Rose .. FileName .. " schematic does not exist.")
 		return true
 	end

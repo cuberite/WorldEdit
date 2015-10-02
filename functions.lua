@@ -227,27 +227,37 @@ end
 
 
 
---- Fills the selection stored in the specified cPlayerState with the specified block type
+--- Fills the cuboid with the specified blocks
 -- Returns the number of blocks changed, or no value if disallowed
 -- The original contents are pushed onto PlayerState's Undo stack
-function FillSelection(a_PlayerState, a_Player, a_World, a_DstBlockTable)
+function SetBlocksInCuboid(a_Player, a_Cuboid, a_DstBlockTable, a_Action)
+	-- If no action was given we use "fill" as a default.
+	a_Action = a_Action or "fill"
+	
+	-- Make sure the cuboid is sorted
+	if (not a_Cuboid:IsSorted()) then
+		a_Cuboid:Sort()
+	end
+	
+	local World = a_Player:GetWorld()
+	
 	-- Check with other plugins if the operation is okay:
-	if (CallHook("OnAreaChanging", a_PlayerState.Selection:GetSortedCuboid(), a_Player, a_World, "fill")) then
+	if (CallHook("OnAreaChanging", a_Cuboid, a_Player, World, a_Action)) then
 		return
 	end
 	
-	-- Push an Undo onto the stack:
-	a_PlayerState:PushUndoInSelection(a_World, "fill")
-
-	-- Fill the selection:
-	local Area = cBlockArea()
-	local MinX, MaxX = a_PlayerState.Selection:GetXCoordsSorted()
-	local MinY, MaxY = a_PlayerState.Selection:GetYCoordsSorted()
-	local MinZ, MaxZ = a_PlayerState.Selection:GetZCoordsSorted()
+	-- Get the player state of the player
+	local State = GetPlayerState(a_Player)
 	
-	Area:Create(MaxX - MinX + 1, MaxY - MinY + 1, MaxZ - MinZ + 1)
+	-- Push an Undo onto the stack:
+	State:PushUndoInSelection(World, a_Cuboid)
+	
+	-- Create a cBlockArea using the sizes of the cuboid
+	local Area = cBlockArea()
+	Area:Create(a_Cuboid:DifX() + 1, a_Cuboid:DifY() + 1, a_Cuboid:DifZ() + 1)
 	local SizeX, SizeY, SizeZ = Area:GetCoordRange()
 
+	-- Fill the selection:
 	for X = 0, SizeX do
 		for Y = 0, SizeY do
 			for Z = 0, SizeZ do
@@ -256,13 +266,17 @@ function FillSelection(a_PlayerState, a_Player, a_World, a_DstBlockTable)
 		end
 	end
 	
-	Area:Write(a_World, MinX, MinY, MinZ)
+	-- Write the area in the world
+	Area:Write(World, a_Cuboid.p1)
 	Area:Clear()
-	a_World:WakeUpSimulatorsInArea(MinX - 1, MaxX + 1, MinY - 1, MaxY + 1, MinZ - 1, MaxZ + 1)
 	
-	CallHook("OnAreaChanged", a_PlayerState.Selection:GetSortedCuboid(), a_Player, a_World, "fill")
+	-- Notify the simulators
+	World:WakeUpSimulatorsInArea(a_Cuboid.p1.x, a_Cuboid.p2.x, a_Cuboid.p1.y, a_Cuboid.p2.y, a_Cuboid.p1.z, a_Cuboid.p2.z)
 	
-	return (MaxX - MinX + 1) * (MaxY - MinY + 1) * (MaxZ - MinZ + 1)
+	-- Notify the plugins
+	CallHook("OnAreaChanged", a_Cuboid, a_Player, World, a_Action)
+	
+	return a_Cuboid:GetVolume()
 end
 
 

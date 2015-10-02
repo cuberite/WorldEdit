@@ -540,8 +540,11 @@ function HandleSetCommand(a_Split, a_Player)
 		return true
 	end
 	
+	-- Get the selected region of the player
+	local Selection = State.Selection:GetSortedCuboid()
+	
 	-- Fill the selection:
-	local NumBlocks = FillSelection(State, a_Player, a_Player:GetWorld(), DstBlockTable)
+	local NumBlocks = SetBlocksInCuboid(a_Player, Selection, DstBlockTable, "fill")
 	if (NumBlocks) then
 		a_Player:SendMessage(cChatColor.LightPurple .. NumBlocks .. " block(s) have been changed.")
 	end
