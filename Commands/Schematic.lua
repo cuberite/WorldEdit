@@ -95,7 +95,7 @@ function HandleSchematicSaveCommand(a_Split, a_Player)
 	end
 	
 	-- Check if there already is a schematic with that name, and if so if we are allowed to override it.
-	if (not g_Config.Schematics.OverideExistingFiles and cFile:IsFile("schematics/" .. FileName .. ".schematic")) then
+	if (not g_Config.Schematics.OverrideExistingFiles and cFile:IsFile("schematics/" .. FileName .. ".schematic")) then
 		a_Player:SendMessage(cChatColor.Rose .. "There already is a schematic with that name.")
 		return true
 	end

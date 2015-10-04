@@ -55,7 +55,7 @@ Scripting =
 
 Schematics =
 {
-	OverideExistingFiles = true,
+	OverrideExistingFiles = true,
 },
 ]]
 
