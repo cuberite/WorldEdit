@@ -27,7 +27,7 @@ end
 -- Merges all values (except arrays) from a_DstTable into a_SrcTable if the key doesn't exist in a_SrcTable
 function table.merge(a_SrcTable, a_DstTable)
 	for Key, Value in pairs(a_DstTable) do
-		if (not a_SrcTable[Key]) then
+		if (a_SrcTable[Key] == nil) then
 			a_SrcTable[Key] = Value
 		elseif ((type(Value) == "table") and (type(a_SrcTable[Key]) == "table")) then
 			if (not table.isarray(a_SrcTable[Key])) then
