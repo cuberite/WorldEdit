@@ -52,6 +52,11 @@ Scripting =
 	-- If true it logs an error when a craftscript failed
 	Debug = false,
 },
+
+Schematics =
+{
+	OverideExistingFiles = true,
+},
 ]]
 
 
