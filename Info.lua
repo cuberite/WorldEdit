@@ -406,7 +406,7 @@ g_PluginInfo =
 			Alias = "/asc",
 			Permission = "worldedit.navigation.ascend", 
 			Handler = HandleAscendCommand, 
-			HelpString = " go down a floor",
+			HelpString = " go up a floor",
 			Category = "Navigation",
 		},
 		
