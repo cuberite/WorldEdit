@@ -25,7 +25,11 @@ function HandleCountCommand(a_Split, a_Player)
 	end
 	
 	-- Retrieve the blocktypes from the params:
-	local Mask = cMask:new(a_Split[2])
+	local Mask, ErrBlock = cMask:new(a_Split[2])
+	if not(Mask) then
+		a_Player:SendMessage(cChatColor.Rose .. "Unknown block type: '" .. ErrBlock .. "'.")
+		return true
+	end
 	
 	-- Count the blocks:
 	local NumBlocks = CountBlocksInCuboid(a_Player:GetWorld(), State.Selection:GetSortedCuboid(), Mask)
