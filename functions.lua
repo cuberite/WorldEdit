@@ -26,12 +26,19 @@ function GetBlockTypeMeta(a_BlockString)
 		return BlockID, 0, true
 	end
 	
+	-- Check for block meta
+	local HasMeta = string.find(a_BlockString, ":")
+
 	-- Check if it was a name.
 	local Item = cItem()
 	if (not StringToItem(a_BlockString, Item)) then
 		return false
 	else
-		return Item.m_ItemType, Item.m_ItemDamage
+		if (HasMeta) then
+			return Item.m_ItemType, Item.m_ItemDamage
+		else
+			return Item.m_ItemType, 0, true
+		end
 	end
 end
 
