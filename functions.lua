@@ -34,7 +34,7 @@ function GetBlockTypeMeta(a_BlockString)
 	if (not StringToItem(a_BlockString, Item)) then
 		return false
 	else
-		if (HasMeta) then
+		if (HasMeta or (Item.m_ItemDamage ~= 0)) then
 			return Item.m_ItemType, Item.m_ItemDamage
 		else
 			return Item.m_ItemType, 0, true
