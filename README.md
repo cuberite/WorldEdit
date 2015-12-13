@@ -124,6 +124,7 @@ Commands that give info/help setting the region you have selected.
 | Command | Permission | Description |
 | ------- | ---------- | ----------- |
 |//count | worldedit.selection.count |  Count the number of blocks in the region.|
+|//chunk | worldedit.selection.chunk |  Select the chunk you are currently in.|
 |//expand | worldedit.selection.expand |  Expand the selection area|
 |//hpos1 | worldedit.selection.pos |  Set position 1 to the position you are looking at.|
 |//hpos2 | worldedit.selection.pos |  Set position 2 to the position you are looking at.|
