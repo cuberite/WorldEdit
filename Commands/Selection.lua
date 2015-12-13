@@ -10,24 +10,22 @@
 function HandleChunkCommand(a_Split, a_Player)
 	-- //chunk
 	
-	local State = GetPlayerState(a_Player)
-	local p_x = a_Player:GetPosX()
-	local p_z = a_Player:GetPosZ()
-	
 	-- Find the chunk boundaries.
-	local c_x  = math.floor(p_x / 16)
-	local c_z  = math.floor(p_z / 16)
-	local c_x0 = p_x - (p_x % 16)
-	local c_z0 = p_z - (p_z % 16)
-	local c_x1 = c_x0 + 15
-	local c_z1 = c_z0 + 15
-	
-	State.Selection:SetFirstPoint(c_x0, 0, c_z0)
-	State.Selection:SetSecondPoint(c_x1, 255, c_z1)
+	local ChunkX = a_Player:GetChunkX()
+	local ChunkZ = a_Player:GetChunkZ()
+	local MinX = ChunkX * 16
+	local MinZ = ChunkZ * 16
+	local MaxX = MinX + 15
+	local MaxZ = MinZ + 15
+
+	-- Update selection.
+	local State = GetPlayerState(a_Player)
+	State.Selection:SetFirstPoint(MinX, 0, MinZ)
+	State.Selection:SetSecondPoint(MaxX, 255, MaxZ)
 	
 	-- Notify the player about the selection.
 	State.Selection:NotifySelectionChanged()
-	a_Player:SendMessage(cChatColor.LightPurple .. "Chunk selected: " .. c_x .. ", " .. c_z)
+	a_Player:SendMessage(cChatColor.LightPurple .. "Chunk selected: " .. ChunkX .. ", " .. ChunkZ)
 	
 	return true
 end
