@@ -33,6 +33,14 @@ g_PluginInfo =
 			Category = "Region",
 		},
 		
+		["//chunk"] =
+		{
+			Permission = "worldedit.selection.chunk",
+			Handler = HandleChunkCommand,
+			HelpString = " Select the chunk you are currently in.",
+			Category = "Selection",
+		},
+		
 		["//count"] =
 		{
 			Permission = "worldedit.selection.count",
