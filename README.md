@@ -123,8 +123,9 @@ Commands that give info/help setting the region you have selected.
 
 | Command | Permission | Description |
 | ------- | ---------- | ----------- |
-|//count | worldedit.selection.count |  Count the number of blocks in the region.|
 |//chunk | worldedit.selection.chunk |  Select the chunk you are currently in.|
+|//count | worldedit.selection.count |  Count the number of blocks in the region.|
+|//distr | worldedit.selection.distr |  Inspect the block distribution of the current selection.|
 |//expand | worldedit.selection.expand |  Expand the selection area|
 |//hpos1 | worldedit.selection.pos |  Set position 1 to the position you are looking at.|
 |//hpos2 | worldedit.selection.pos |  Set position 2 to the position you are looking at.|
@@ -224,7 +225,9 @@ Commands that activate a tool. If a tool is activated you can use it by right or
 | worldedit.schematic.load |  | `//schematic load` |  |
 | worldedit.schematic.save |  | `//schematic save` |  |
 | worldedit.scripting.execute |  | `/cs`, `/.s` |  |
+| worldedit.selection.chunk |  | `//chunk` |  |
 | worldedit.selection.count |  | `//count` |  |
+| worldedit.selection.distr |  | `//distr` |  |
 | worldedit.selection.cylinder |  | `//hcyl` |  |
 | worldedit.selection.expand |  | `//expand` |  |
 | worldedit.selection.pos |  | `//hpos2`, `//hpos1`, `//pos1`, `//pos2` |  |
