@@ -81,6 +81,14 @@ g_PluginInfo =
 			Category = "Generation",
 		},
 		
+		["//distr"] =
+		{
+			Permission = "worldedit.selection.distr",
+			Handler = HandleDistrCommand,
+			HelpString = " Inspect the block distribution of the current selection.",
+			Category = "Selection",
+		},
+		
 		["//drain"] =
 		{
 			Permission = "worldedit.drain",

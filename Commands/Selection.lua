@@ -69,6 +69,62 @@ end
 
 
 
+function HandleDistrCommand(a_Split, a_Player)
+	-- //distr
+	
+	-- TODO: -d option that separates data values.
+	
+	-- Check the selection:
+	local State = GetPlayerState(a_Player)
+	if not(State.Selection:IsValid()) then
+		a_Player:SendMessage(cChatColor.Rose .. "No selection set")
+		return true
+	end
+	
+	-- Get selection information.
+	local World = a_Player:GetWorld()
+	local Area = cBlockArea()
+	Area:Read(World, State.Selection:GetSortedCuboid())
+	local SizeX, SizeY, SizeZ = Area:GetCoordRange()
+	
+	-- Count the blocks.
+	local TotalCount = Area:GetVolume()
+	local BlockCounts = {}
+	
+	for X = 0, SizeX do
+		for Y = 0, SizeY do
+			for Z = 0, SizeZ do
+				local BlockType = Area:GetRelBlockType(X, Y, Z)
+				BlockCounts[BlockType] = (BlockCounts[BlockType] or 0) + 1
+			end
+		end
+	end
+	
+	-- Generate the output.
+	-- Sort records by count.
+	local SortedBlockCounts, Index = {}, 1
+	for BlockType, BlockCount in pairs(BlockCounts) do
+		SortedBlockCounts[Index] = {Type = BlockType, Count = BlockCount}
+		Index = Index + 1
+	end
+	table.sort(SortedBlockCounts, function(Block1, Block2) return Block1.Count < Block2.Count end)
+	
+	-- Display them.
+	a_Player:SendMessage(cChatColor.LightPurple .. "# total blocks: " .. TotalCount)
+	for _, Block in ipairs(SortedBlockCounts) do
+		local BlockName = ItemTypeToString(Block.Type)
+		local Perc = 100 * Block.Count / TotalCount
+		local Line = string.format("% 7d (%.3f%%) %s #%d", Block.Count, Perc, BlockName, Block.Type)
+		a_Player:SendMessage(cChatColor.LightPurple .. Line)
+	end
+	
+	return true
+end
+
+
+
+
+
 function HandleExpandContractCommand(a_Split, a_Player)
 	-- //expand [Amount] [Direction]
 	-- //contract [Amount] [Direction]
