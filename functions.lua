@@ -619,8 +619,9 @@ function RightClickCompass(a_Player)
 	
 	-- Teleport the player to the first solid block below the found coordinates
 	for y = FreeSpot.y, 0, -1 do
-		if (cBlockInfo:IsSolid(World:GetBlock(FreeSpot.x, y, FreeSpot.z))) then
-			a_Player:TeleportToCoords(FreeSpot.x + 0.5, y + 1, FreeSpot.z + 0.5)
+		local BlockType = World:GetBlock(FreeSpot.x, y, FreeSpot.z)
+		if (cBlockInfo:IsSolid(BlockType)) then
+			a_Player:TeleportToCoords(FreeSpot.x + 0.5, cBlockInfo:GetBlockHeight(BlockType) + y, FreeSpot.z + 0.5)
 			return true
 		end
 	end
@@ -680,15 +681,18 @@ function LeftClickCompass(a_Player)
 	end
 	
 	-- Find a block that isn't solid. The first one we find we teleport the player to.
+	local LastBlock;
 	for Y = BlockPos.y, Height do
-		if (not cBlockInfo:IsSolid(World:GetBlock(BlockPos.x, Y, BlockPos.z))) then
-			a_Player:TeleportToCoords(BlockPos.x + 0.5, Y, BlockPos.z + 0.5)
+		local BlockType = World:GetBlock(BlockPos.x, Y, BlockPos.z)
+		if (not cBlockInfo:IsSolid(BlockType)) then
+			a_Player:TeleportToCoords(BlockPos.x + 0.5, Y + cBlockInfo:GetBlockHeight(LastBlock) - 1, BlockPos.z + 0.5)
 			return true
 		end
+		LastBlock = BlockType
 	end
 	
 	-- No non-solid block was found. This can happen when for example the highest block is 255.
-	a_Player:TeleportToCoords(BlockPos.x + 0.5, Height + 1, BlockPos.z + 0.5)
+	a_Player:TeleportToCoords(BlockPos.x + 0.5, Height + cBlockInfo:GetBlockHeight(World:GetBlock(BlockPos.x, Height, BlockPos.z)), BlockPos.z + 0.5)
 	return true
 end
 
