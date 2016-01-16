@@ -7,6 +7,7 @@
 
 
 
+-- Only logs when debugging for craftscripts is enabled
 local function LOGSCRIPTERROR(a_Msg)
 	if (not g_Config.Scripting.Debug) then
 		return
@@ -14,6 +15,33 @@ local function LOGSCRIPTERROR(a_Msg)
 	
 	LOGERROR(a_Msg)
 end
+
+
+
+
+
+-- All the functions that a craftscript isn't allowed to use.
+local g_BlockedFunctions = table.todictionary{
+	"rawset",
+	"setfenv",
+	"io",
+	"os",
+}
+
+
+
+
+
+local g_CraftScriptEnvironment = setmetatable({}, {
+		__index = function(_, a_Key)
+			if (g_BlockedFunctions[a_Key]) then
+				error("CraftScript tried to use blocked function: " .. a_Key)
+				return nil
+			end
+			return _G[a_Key]
+		end
+	}
+)
 
 
 
@@ -52,6 +80,9 @@ function cCraftScript:SelectScript(a_ScriptName)
 		LOGSCRIPTERROR(Err)
 		return false, "There is an issue in the scripts code."
 	end
+	
+	-- Make sure the craftscript can't break code by overlapping our global variables and functions
+	setfenv(Function, g_CraftScriptEnvironment)
 	
 	self.SelectedScript = Function
 	return true
