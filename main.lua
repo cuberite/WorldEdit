@@ -1,19 +1,25 @@
 
 -- main.lua
 
--- Contains the Initialize and OnDisable functions
+-- Contains the Initialize and OnDisable functions. It also loads all the necessary files.
+
+
+
+
+
+-- First of all load all the library expansions
+dofolder(cPluginManager:GetCurrentPlugin():GetLocalFolder() .. "/LibrariesExpansion")
 
 
 
 
 
 --- All the folders that shouldn't be loaded by 
--- We can't use table.todictionary, because that function isn't loaded here yet.
-g_ExcludedFolders = 
-{
-	craftscripts = true,
-	["."] = true,
-	[".."] = true,
+g_ExcludedFolders = table.todictionary{
+	"craftscripts",
+	"LibrariesExpansion",
+	".",
+	"..",
 }
 
 
@@ -66,7 +72,7 @@ function Initialize(a_Plugin)
 	
 	cFile:CreateFolder("schematics")
 	
-	LOG("[WorldEdit] Enabling WorldEdit v" .. a_Plugin:GetVersion())
+	LOG("[WorldEdit] Enabling WorldEdit v" .. g_PluginInfo.DisplayVersion)
 	return true
 end
 
@@ -75,7 +81,9 @@ end
 
 
 function OnDisable()
-	LOG("[WorldEdit] Disabling WorldEdit v" .. PLUGIN:GetVersion())
+	LOG("[WorldEdit] Disabling WorldEdit v" .. g_PluginInfo.DisplayVersion)
 end
+
+
 
 
