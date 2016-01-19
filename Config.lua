@@ -57,6 +57,14 @@ Schematics =
 {
 	OverrideExistingFiles = true,
 },
+
+Updates =
+{
+	CheckForUpdates = true,
+	NumAttempts = 3,
+	ShowMessageWhenUpToDate = true,
+	DownloadNewerVersion = true,
+},
 ]]
 
 
