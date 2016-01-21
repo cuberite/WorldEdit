@@ -169,7 +169,7 @@ function cToolRegistrator:UseRightClickTool(a_Player, a_BlockX, a_BlockY, a_Bloc
 		return false
 	end
 	
-	-- Let the handler decide if the callback from MCServer should return true or false.
+	-- Let the handler decide if the callback from Cuberite should return true or false.
 	return self.RightClickTools[a_ItemType].Callback(a_Player, a_BlockX, a_BlockY, a_BlockZ, a_BlockFace)
 end
 
