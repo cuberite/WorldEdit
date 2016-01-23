@@ -447,6 +447,7 @@ function HandleStackCommand(a_Split, a_Player)
 	-- Create a cuboid that contains the complete area that is going to change
 	local UndoStackCuboid = cCuboid(SelectionCuboid)
 	UndoStackCuboid.p2 = UndoStackCuboid.p2 + (VectorDirection * NumStacks)
+	UndoStackCuboid:Sort()
 	
 	-- Check other plugins if they agree
 	if (CallHook("OnAreaChanging", UndoStackCuboid, a_Player, World, "stack")) then
