@@ -51,6 +51,10 @@ Scripting =
 {
 	-- If true it logs an error when a craftscript failed
 	Debug = false,
+	
+	-- The amount of seconds that a script may be active. Any longer and the script will be aborted.
+	-- If negative the time a script can run is unlimited.
+	MaxExecutionTime = 5,
 },
 
 Schematics =
