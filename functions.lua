@@ -23,7 +23,7 @@ function GetBlockTypeMeta(a_BlockString)
 	
 	-- Check if it was a normal number
 	if (BlockID) then
-		return BlockID, 0, true
+		return BlockID, g_DefaultMetas[BlockID] or 0, true
 	end
 	
 	-- Check for block meta
@@ -37,7 +37,7 @@ function GetBlockTypeMeta(a_BlockString)
 		if (HasMeta or (Item.m_ItemDamage ~= 0)) then
 			return Item.m_ItemType, Item.m_ItemDamage
 		else
-			return Item.m_ItemType, 0, true
+			return Item.m_ItemType, g_DefaultMetas[Item.m_ItemType] or 0, true
 		end
 	end
 end

@@ -41,19 +41,6 @@ for _, Folder in ipairs(cFile:GetFolderContents(WorldEditPath)) do repeat
 	dofolder(Path)
 until true end
 
-
-
-
-
-E_SELECTIONPOINT_LEFT  = 0
-E_SELECTIONPOINT_RIGHT = 1
-
-E_DIRECTION_NORTH1 = 0
-E_DIRECTION_NORTH2 = 4
-E_DIRECTION_EAST = 1
-E_DIRECTION_SOUTH = 2
-E_DIRECTION_WEST = 3
-
 PLUGIN = nil
 
 
