@@ -20,12 +20,22 @@ end
 
 
 
--- All the functions that a craftscript isn't allowed to use.
+-- All the variables in _G that a craftscript isn't allowed to use.
 local g_BlockedFunctions = table.todictionary{
 	"rawset",
+	"rawget",
 	"setfenv",
 	"io",
 	"os",
+	"debug",
+	"cFile",
+	"loadstring",
+	"loadfile",
+	"load",
+	"dofile",
+	"ExecuteString",
+	"_G",
+	"cPluginManager",
 }
 
 
@@ -35,7 +45,8 @@ local g_BlockedFunctions = table.todictionary{
 local g_CraftScriptEnvironment = setmetatable({}, {
 		__index = function(_, a_Key)
 			if (g_BlockedFunctions[a_Key]) then
-				error("CraftScript tried to use blocked function: " .. a_Key)
+				local ScriptInfo = debug.getinfo(2)
+				error("Craftscript tried to use blocked variable at line " .. ScriptInfo.currentline .. " in file " .. ScriptInfo.short_src)
 				return nil
 			end
 			return _G[a_Key]
@@ -97,7 +108,23 @@ function cCraftScript:Execute(a_Player, a_Split)
 		return false, "There is no script selected."
 	end
 	
+	-- Limit the execution time of the script if configured
+	if (g_Config.Scripting.MaxExecutionTime > 0) then
+		local TimeLimit = os.clock() + g_Config.Scripting.MaxExecutionTime
+		debug.sethook(function()
+			if (TimeLimit < os.clock()) then
+				debug.sethook()
+				error("Time limit exceeded. Max time is: " .. g_Config.Scripting.MaxExecutionTime .. " seconds")
+			end
+		end, "", 100000)
+	end
+	
+	-- Execute the craftscript
 	local Succes, Err = pcall(self.SelectedScript, a_Player, a_Split)
+	
+	-- Remove the timelimit.
+	debug.sethook()
+	
 	if (not Succes) then
 		LOGSCRIPTERROR(Err)
 		return false, "Something went wrong while running the script."
