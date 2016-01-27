@@ -57,6 +57,10 @@ function Initialize(a_Plugin)
 	--Bind all the commands:
 	RegisterPluginInfoCommands();
 	
+	if (g_Config.Updates.CheckForUpdates) then
+		cUpdater:CheckForNewerVersion()
+	end
+	
 	cFile:CreateFolder("schematics")
 	
 	LOG("[WorldEdit] Enabling WorldEdit v" .. g_PluginInfo.DisplayVersion)
