@@ -69,6 +69,11 @@ Updates =
 	ShowMessageWhenUpToDate = true,
 	DownloadNewerVersion = true,
 },
+
+Storage =
+{
+	RememberPlayerSelection = true,
+}
 ]]
 
 

@@ -77,9 +77,27 @@ end
 
 
 
+function cPlayerState:GetUUID()
+	local UUID = nil
+	self:DoWithPlayer(
+		function(a_Player)
+			UUID = a_Player:GetUUID()
+		end
+	)
+	return UUID
+end
+
+
+
+
+
 --- Loads the state from persistent storage (if so configured)
 function cPlayerState:Load()
-	-- TODO
+	local UUID = self:GetUUID()
+	
+	if (g_Config.Storage.RememberPlayerSelection) then
+		self.Selection:Load(UUID)
+	end
 end
 
 
@@ -105,8 +123,10 @@ end
 
 
 --- Saves the state to persistent storage (if so configured)
-function cPlayerState:Save()
-	-- TODO
+function cPlayerState:Save(a_PlayerUUID)
+	if (g_Config.Storage.RememberPlayerSelection) then
+		self.Selection:Save(a_PlayerUUID)
+	end
 end
 
 
@@ -142,7 +162,7 @@ local function OnPlayerDestroyed(a_Player)
 	if (State == nil) then
 		return false
 	end
-	State:Save()
+	State:Save(a_Player:GetUUID())
 
 	-- Remove the player state altogether:
 	g_PlayerStates[a_Player:GetName()] = nil

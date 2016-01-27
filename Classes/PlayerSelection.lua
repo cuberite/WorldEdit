@@ -384,3 +384,48 @@ end
 
 
 
+
+-- Loads the player selection from the database
+function cPlayerSelection:Load(a_PlayerUUID)
+	local DB = cSQLStorage:Get()
+	DB:ExecuteCommand("get_playerselection", 
+		{
+			playeruuid = a_PlayerUUID
+		},
+		function(a_Data)
+			self:SetFirstPoint(a_Data.MinX, a_Data.MinY, a_Data.MinZ)
+			self:SetSecondPoint(a_Data.MaxX, a_Data.MaxY, a_Data.MaxZ)
+		end
+	)
+	
+	self:NotifySelectionChanged()
+end
+
+
+
+
+
+-- Saves the player's selection points in the database
+function cPlayerSelection:Save(a_PlayerUUID)
+	if (not self:IsValid()) then
+		return
+	end
+	
+	local SrcCuboid = self:GetSortedCuboid()
+	local DB = cSQLStorage:Get()
+	DB:ExecuteCommand("set_playerselection", 
+		{
+			playeruuid = a_PlayerUUID,
+			MinX = SrcCuboid.p1.x,
+			MinY = SrcCuboid.p1.y,
+			MinZ = SrcCuboid.p1.z,
+			MaxX = SrcCuboid.p2.x,
+			MaxY = SrcCuboid.p2.y,
+			MaxZ = SrcCuboid.p2.z,
+		}
+	)
+end
+
+
+
+
