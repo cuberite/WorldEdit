@@ -1,3 +1,4 @@
 *.deuser
 Config.cfg
 @EnableMobDebug.lua
+Storage/storage.sqlite
