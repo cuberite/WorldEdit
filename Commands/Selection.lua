@@ -69,6 +69,20 @@ end
 
 
 
+function HandleDeselectCommand(a_Split, a_Player)
+	-- //desel
+	
+	local State = GetPlayerState(a_Player)
+	State.Selection:Deselect()
+	
+	a_Player:SendMessage(cChatColor.LightPurple .. "Selection cleared.")
+	return true
+end
+
+
+
+
+
 function HandleDistrCommand(a_Split, a_Player)
 	-- //distr
 	

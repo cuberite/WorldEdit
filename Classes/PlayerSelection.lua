@@ -34,6 +34,35 @@ end
 
 
 
+function cPlayerSelection:Deselect()
+	self.IsFirstPointSet = false
+	self.IsSecondPointSet = false
+	self.Cuboid = cCuboid()
+	
+	-- Remove the selection from the database
+	local DB = cSQLStorage:Get()
+	DB:ExecuteCommand("remove_playerselection", 
+		{
+			playeruuid = self.PlayerState:GetUUID()
+		}
+	)
+	
+	-- Set the player's WECUI, if present:
+	if (not self.PlayerState.IsWECUIActivated) then
+		return
+	end
+	
+	self.PlayerState:DoWithPlayer(
+		function(a_Player)
+			a_Player:GetClientHandle():SendPluginMessage("WECUI", "s|cuboid")
+		end
+	)
+end
+
+
+
+
+
 -- Expands the selection in each direction by the specified amount of blocks
 function cPlayerSelection:Expand(a_SubMinX, a_SubMinY, a_SubMinZ, a_AddMaxX, a_AddMaxY, a_AddMaxZ)
 	-- Check the params:
