@@ -172,6 +172,20 @@ end
 
 
 
+function ForEachPlayerState(a_Callback)
+	assert(type(a_Callback) == "function")
+	
+	for _, State in pairs(g_PlayerStates) do
+		if (a_Callback(State)) then
+			break
+		end
+	end
+end
+
+
+
+
+
 local function OnPluginMessage(a_Client, a_Channel, a_Message)
 	if (a_Channel ~= "REGISTER") then
 		return

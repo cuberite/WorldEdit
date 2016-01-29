@@ -73,6 +73,11 @@ end
 
 function OnDisable()
 	LOG("[WorldEdit] Disabling WorldEdit v" .. g_PluginInfo.DisplayVersion)
+	ForEachPlayerState(
+		function(a_State)
+			a_State:Save(a_State:GetUUID())
+		end
+	)
 end
 
 
