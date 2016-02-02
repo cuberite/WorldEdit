@@ -82,6 +82,15 @@ g_PluginInfo =
 			Category = "Generation",
 		},
 		
+		["//deselect"] =
+		{
+			Alias = {"//desel"},
+			Permission = "worldedit.selection.deselect",
+			Handler = HandleDeselectCommand,
+			HelpString = "Deselect the current selection",
+			Category = "Selection",
+		},
+		
 		["//distr"] =
 		{
 			Permission = "worldedit.selection.distr",
