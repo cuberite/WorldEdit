@@ -10,4 +10,16 @@ CREATE TABLE IF NOT EXISTS "PlayerSelection" (
 
 CREATE TABLE IF NOT EXISTS "DatabaseInfo" (
 	`DatabaseVersion` INTEGER NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS "NamedPlayerSelection" (
+	`uuid`     TEXT,
+	`selname`  TEXT,
+	`MinX`     INTEGER,
+	`MaxX`     INTEGER,
+	`MinY`     INTEGER,
+	`MaxY`     INTEGER,
+	`MinZ`     INTEGER,
+	`MaxZ`     INTEGER,
+	PRIMARY KEY(`uuid`, `selname`)
 )

@@ -300,6 +300,38 @@ end
 
 
 
+function HandleSaveLoadSelectionCommand(a_Split, a_Player)
+	-- //savesel <name>
+	-- //loadsel <name>
+	
+	if (not a_Split[2]) then
+		a_Player:SendMessage(cChatColor.Rose .. "Usage: " .. a_Split[1] .. " <name>")
+		return true
+	end
+	
+	local State = GetPlayerState(a_Player)
+	local SelectionName = table.concat(a_Split, " ", 2)
+	
+	local Success, ErrMsg
+	if (a_Split[1] == "//savesel") then
+		Success, ErrMsg = State.Selection:SaveSelection(SelectionName)
+	else
+		Success, ErrMsg = State.Selection:LoadSelection(SelectionName)
+	end
+	
+	if (not Success) then
+		a_Player:SendMessage(cChatColor.Rose .. ErrMsg)
+		return true
+	end
+	
+	a_Player:SendMessage(cChatColor.LightPurple .. "Selection " .. ((a_Split[1] == "//loadsel") and "loaded" or "saved"))
+	return true
+end
+
+
+
+
+
 function HandleShiftCommand(a_Split, a_Player)
 	-- //shift [Amount] [Direction]
 	

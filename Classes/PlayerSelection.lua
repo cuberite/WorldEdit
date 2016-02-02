@@ -63,6 +63,67 @@ end
 
 
 
+-- Saves or overwrites a selection to the database
+function cPlayerSelection:SaveSelection(a_SelectionName)
+	if (not self:IsValid()) then
+		return false, "No region selected"
+	end
+	
+	local Success = cSQLStorage:Get():ExecuteCommand("set_namedplayerselection", 
+		{
+			playeruuid = self.PlayerState:GetUUID(),
+			selname = a_SelectionName,
+			MinX = self.Cuboid.p1.x,
+			MinY = self.Cuboid.p1.y,
+			MinZ = self.Cuboid.p1.z,
+			MaxX = self.Cuboid.p2.x,
+			MaxY = self.Cuboid.p2.y,
+			MaxZ = self.Cuboid.p2.z,
+		}
+	)
+	
+	if (not Success) then
+		return false, "An error occurred while saving the selection"
+	end
+	
+	return true
+end
+
+
+
+
+
+-- Loads a player's selection from the database
+function cPlayerSelection:LoadSelection(a_SelectionName)
+	local FoundSelection = false
+	local DatabaseSuccess = cSQLStorage:Get():ExecuteCommand("get_namedplayerselection",
+		{
+			playeruuid = self.PlayerState:GetUUID(),
+			selname = a_SelectionName
+		},
+		function(a_Data)
+			self:SetFirstPoint(a_Data.MinX, a_Data.MinY, a_Data.MinZ)
+			self:SetSecondPoint(a_Data.MaxX, a_Data.MaxY, a_Data.MaxZ)
+			FoundSelection = true
+		end
+	)
+	
+	if (not DatabaseSuccess) then
+		return false, "An error occurred while saving the selection"
+	end
+	
+	if (not FoundSelection) then
+		return false, "The selection doesn't exist"
+	end
+	
+	self:NotifySelectionChanged()
+	return true
+end
+
+
+
+
+
 -- Expands the selection in each direction by the specified amount of blocks
 function cPlayerSelection:Expand(a_SubMinX, a_SubMinY, a_SubMinZ, a_AddMaxX, a_AddMaxY, a_AddMaxZ)
 	-- Check the params:

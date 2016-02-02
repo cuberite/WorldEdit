@@ -61,6 +61,9 @@ function Initialize(a_Plugin)
 		cUpdater:CheckForNewerVersion()
 	end
 	
+	-- Initialize SQL Storage
+	cSQLStorage:Get()
+	
 	cFile:CreateFolder("schematics")
 	
 	LOG("[WorldEdit] Enabling WorldEdit v" .. g_PluginInfo.DisplayVersion)
