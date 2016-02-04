@@ -6,9 +6,9 @@
 g_PluginInfo = 
 {
 	Name = "WorldEdit",
-	Version = 5,
-	DisplayVersion = "0.1.4",
-	Date = "2016-01-29", -- yyyy-mm-dd
+	Version = 6,
+	DisplayVersion = "0.1.5",
+	Date = "2016-02-02", -- yyyy-mm-dd
 	SourceLocation = "https://github.com/cuberite/WorldEdit",
 	Description = [[This plugin allows you to easily manage the world, edit the world, navigate around or get information. It bears similarity to the Bukkit's WorldEdit plugin and aims to have the same set of commands,however, it has no affiliation to that plugin.
 	]],
@@ -206,6 +206,14 @@ g_PluginInfo =
 			Category = "Region",
 		},
 		
+		["//loadsel"] =
+		{
+			Permission = "worldedit.selection.loadselection",
+			Handler = HandleSaveLoadSelectionCommand,
+			HelpString = "Loads a selection that was saved before",
+			Category = "Selection",
+		},
+		
 		["//mirror"] =
 		{
 			Permission = "worldedit.region.mirror",
@@ -283,6 +291,14 @@ g_PluginInfo =
 			Handler = HandleRotateCommand,
 			HelpString = " Rotates the contents of the clipboard",
 			Category = "Clipboard",
+		},
+		
+		["//savesel"] =
+		{
+			Permission = "worldedit.selection.saveselection",
+			Handler = HandleSaveLoadSelectionCommand,
+			HelpString = "Saves the current selection so it can be used later",
+			Category = "Selection",
 		},
 		
 		["//schematic"] =
