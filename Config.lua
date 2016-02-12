@@ -72,7 +72,12 @@ Updates =
 
 Storage =
 {
+	-- If set to true the selection of a player will be remembered once he leaves.
 	RememberPlayerSelection = true,
+	
+	-- If WorldEdit needs to change a format in the database the database will be backuped first before changing.
+	-- This doesn't mean when adding or removing data the database will be backed up. Only when the used database is outdated.
+	BackupDatabaseWhenUpdating = true,
 }
 ]]
 
