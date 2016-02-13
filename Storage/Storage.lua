@@ -51,26 +51,41 @@ local function cSQLStorage_new()
 	setmetatable(Obj, cSQLStorage)
 	cSQLStorage.__index = cSQLStorage
 	
+	local PluginRoot = cPluginManager:Get():GetCurrentPlugin():GetLocalFolder()
 	local ErrorCode, ErrorMsg;
-	Obj.DB, ErrorCode, ErrorMsg = sqlite3.open(cPluginManager:Get():GetCurrentPlugin():GetLocalFolder() .. "/Storage/storage.sqlite")
+	Obj.DB, ErrorCode, ErrorMsg = sqlite3.open(PluginRoot .. "/Storage/storage.sqlite")
 	if (Obj.DB == nil) then
 		LOGWARNING("Database could not be opened. Aborting");
 		error(ErrMsg);  -- Abort the plugin
 	end
 	
-	-- Initialize the database
-	Obj:ExecuteCommand("initialize")
-	
 	-- Get the version of the database
 	local SavedDatabaseVersion = -1
-	Obj:ExecuteStatement("SELECT `DatabaseVersion` FROM DatabaseInfo", nil,
-		function(a_Data)
-			SavedDatabaseVersion = a_Data["DatabaseVersion"]
+	Obj:ExecuteStatement("SELECT * FROM sqlite_master WHERE name = 'DatabaseInfo' AND type='table'", nil,
+		function()
+			-- This function will be called if the "DatabaseInfo" table exists.
+			Obj:ExecuteStatement("SELECT `DatabaseVersion` FROM DatabaseInfo", nil,
+				function(a_Data)
+					SavedDatabaseVersion = a_Data["DatabaseVersion"]
+				end
+			)
 		end
 	)
 	
 	-- Check if the database version is valid or if we should update it.
 	if (SavedDatabaseVersion < g_CurrentDatabaseVersion) then
+		-- Check if we are allowed to update the database.
+		if (g_Config.BackupDatabaseWhenUpdating) then
+			-- Only back up the database if the database wasn't just created
+			if (SavedDatabaseVersion ~= -1) then
+				if (not cFile:IsFolder(PluginRoot .. "/Storage/Backups")) then
+					cFile:CreateDirectory(PluginRoot .. "/Storage/Backups")
+				end
+				
+				cFile:Copy(PluginRoot .. "/Storage/storage.sqlite", PluginRoot .. ("/Storage/Backups/storage %s.sqlite"):format(os.date("%Y-%m-%d")))
+			end
+		end
+		
 		for I = math.max(SavedDatabaseVersion, 1), g_CurrentDatabaseVersion do
 			Obj:ExecuteChangeScript(tostring(I))
 		end
