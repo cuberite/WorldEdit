@@ -11,129 +11,74 @@ cUpdater = {}
 
 
 
-local g_CheckAttempts = 0
-local g_DownloadAttempts = 0
-local g_ReceivedPluginInfo = ""
-local g_LatestVersion = nil
-local g_WorldEditZip = nil
-
-
-
-
-
-local VersionCheckForNewerVersionerCallbacks =
-{
-	OnConnected = function(a_TCPLink)
-		local res, msg = a_TCPLink:StartTLSClient()
-		a_TCPLink:Send("GET /cuberite/WorldEdit/master/Info.lua HTTP/1.0\r\nHost: raw.githubusercontent.com\r\n\r\n")
-	end,
-	
-	OnError = function(a_TCPLink, a_ErrorCode, a_ErrorMsg) 
-		LOGWARNING("Error while checking for newer WorldEdit version: " .. a_ErrorMsg)
-	end,
-	
-	OnReceivedData = function(a_TCPLink, a_Data)
-		g_ReceivedPluginInfo = g_ReceivedPluginInfo .. a_Data
-	end,
-	
-	OnRemoteClosed = function(a_TCPLink)
-		cUpdater:ParseResults()
-	end,
-}
-
-
-
-
-
-local NewVersionDownloaderCallbacks =
-{
-	OnConnected = function(a_TCPLink)
-		-- Start a secured connection
-		local res, msg = a_TCPLink:StartTLSClient("", "", "")
-		
-		-- Send Request Header
-		a_TCPLink:Send("GET /cuberite/WorldEdit/zip/master HTTP/1.0\r\nHost: codeload.github.com\r\nConnection: Keep-alive\r\n\r\n")
-		
-		-- Clear data we might have from previous attempts
-		g_WorldEditZip = ""
-	end,
-	
-	OnError = function(a_TCPLink, a_ErrorCode, a_ErrorMsg)
-		if (g_DownloadAttempts < g_Config.Updates.NumAttempts) then
-			g_DownloadAttempts = g_DownloadAttempts + 1
-			cUpdater:DownloadLatestVersion()
-		else
-			LOGWARNING("Error while downloading newer worldedit version: " .. a_ErrorCode)
-		end
-	end,
-	
-	OnReceivedData = function(a_TCPLink, a_Data)
-		-- Append the received Data to the saved data
-		g_WorldEditZip = g_WorldEditZip .. a_Data
-	end,
-	
-	OnRemoteClosed = function(a_TCPLink)
-		-- Split the data and the headers
-		local Header, Data = g_WorldEditZip:match("^(.-)\r\n\r\n(.*)")
-		
-		-- Parse the headers so we can actually use them to validate the data
-		Header = cUpdater:ParseHeaders(Header)
-		
-		-- Check if the received data size matches that that was expected
-		if (Data:len() ~= tonumber(Header["content-length"] or -1)) then
-			if (g_DownloadAttempts < g_Config.Updates.NumAttempts) then
-				g_DownloadAttempts = g_DownloadAttempts + 1
-				cUpdater:DownloadLatestVersion()
-			else
-				LOGWARNING("Error while downloading newer worldedit version")
-			end
-			return
-		end
-		
-		-- Write the ZIP data to the file. The filename looks like this: "WorldEdit v<DisplayVersion>.zip"
-		local ZipFile = assert(io.open("Plugins/WorldEdit v" .. (g_LatestVersion or "_Unknown") .. ".zip", "wb"), "Failed to open \"Plugins/WorldEdit v" .. (g_LatestVersion or "_Unknown") .. ".zip\"")
-		ZipFile:write(Data)
-		ZipFile:close()
-		
-		LOGINFO(string.format("New WorldEdit version downloaded to %q", "Plugins/WorldEdit v" .. (g_LatestVersion or "_Unknown") .. ".zip"))
-	end,	
-}
-
+cUpdater.s_CheckAttempts = 0
+cUpdater.s_DownloadAttempts = 0
 
 
 
 
 function cUpdater:CheckForNewerVersion()
-	cNetwork:Connect("raw.githubusercontent.com", 443, VersionCheckForNewerVersionerCallbacks)
-end
-
-
-
-
-
-function cUpdater:DownloadLatestVersion()
-	cNetwork:Connect("codeload.github.com", 443, NewVersionDownloaderCallbacks)
-end
-
-
-
-
-
-function cUpdater:ParseResults()
-	if (g_ReceivedPluginInfo == "") then
-		-- Version info download failed, retry
-		if (g_CheckAttempts < g_Config.Updates.NumAttempts) then
-			g_CheckAttempts = g_CheckAttempts + 1
-			cUpdater:CheckForNewerVersion()
-		else
-			LOGWARNING("Could not connect to Github to check for a newer version for WorldEdit")
+	if (cUpdater.s_CheckAttempts > g_Config.Updates.NumAttempts) then
+		LOGWARNING("Could not connect to Github to check for a newer version for WorldEdit")
+		return;
+	end
+	cUpdater.s_CheckAttempts = cUpdater.s_CheckAttempts + 1;
+	
+	cUrlClient:Get("https://raw.githubusercontent.com/cuberite/WorldEdit/master/Info.lua",
+		function(a_Body, a_Data)
+			if (a_Body) then
+				cUpdater:ParsePluginInfo(a_Body)
+			else
+				-- The request failed, schedule a retry
+				cRoot:Get():GetDefaultWorld():QueueTask(
+					function()
+						cUpdater:CheckForNewerVersion()
+					end
+				)
+			end
 		end
+	)
+end
+
+
+
+
+
+function cUpdater:DownloadLatestVersion(a_DisplayVersion)
+	if (cUpdater.s_DownloadAttempts > g_Config.Updates.NumAttempts) then
+		LOGWARNING("Error while downloading newer worldedit version")
 		return
 	end
+	cUpdater.s_DownloadAttempts = cUpdater.s_DownloadAttempts + 1;
 	
-	-- Remove the HTTP header
-	local Content = g_ReceivedPluginInfo:match("^.-\r\n\r\n(.*)") or ""
-	local Func, ErrMsg = loadstring(Content)
+	cUrlClient:Get("https://raw.githubusercontent.com/cuberite/WorldEdit/zip/master", 
+		function (a_Body, a_Data)
+			if (not a_Body or (a_Body:len() ~= tonumber(a_Data["Content-Length"]))) then
+				-- Downloading failed, schedule a retry
+				cRoot:Get():GetDefaultWorld():QueueTask(
+					function()
+						cUpdater:DownloadLatestVersion(a_DisplayVersion)
+					end
+				)
+				return
+			end
+			
+			-- Write the ZIP data to the file. The filename looks like this: "WorldEdit v<DisplayVersion>.zip"
+			local ZipFile = assert(io.open("Plugins/WorldEdit v" .. a_DisplayVersion .. ".zip", "wb"), "Failed to open \"Plugins/WorldEdit v" .. (g_LatestVersion or "_Unknown") .. ".zip\"")
+			ZipFile:write(a_Body)
+			ZipFile:close()
+			
+			LOGINFO(string.format("New WorldEdit version downloaded to %q", "Plugins/WorldEdit v" .. a_DisplayVersion .. ".zip"))
+		end
+	)
+end
+
+
+
+
+
+function cUpdater:ParsePluginInfo(a_PluginInfo)
+	local Func, ErrMsg = loadstring(a_PluginInfo)
 	if (not Func) then
 		LOGWARNING("Error while checking for newer WorldEdit version")
 		return
@@ -165,39 +110,12 @@ function cUpdater:ParseResults()
 		return
 	end
 	
-	g_LatestVersion = Env.g_PluginInfo.DisplayVersion
 	LOGINFO("There is a newer WorldEdit version available: v" .. Env.g_PluginInfo.DisplayVersion)
 	if (not g_Config.Updates.DownloadNewerVersion) then
 		return
 	end
 	
-	cUpdater:DownloadLatestVersion()
+	cUpdater:DownloadLatestVersion(Env.g_PluginInfo.DisplayVersion)
 end
-
-
-
-
-
---- Splits a HTTP header up and saves it in a table as a dictionary
--- The key is always lowercase
-function cUpdater:ParseHeaders(a_Headers)
-	local Res = {}
-	
-	-- Go through each line of the header except for the first one.
-	local SplittedHeaders = StringSplit(a_Headers, "\n")
-	for I = 2, #SplittedHeaders do
-		local Header = SplittedHeaders[I]
-		local HeaderInfo = StringSplitAndTrim(Header, ":")
-		local Name = HeaderInfo[1]:lower()
-		local Value = HeaderInfo[2]
-		
-		Res[Name] = Value
-	end
-	
-	return Res
-end
-
-
-
 
 
