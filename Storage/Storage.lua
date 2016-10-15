@@ -165,6 +165,7 @@ function cSQLStorage:ExecuteStatement(a_Sql, a_Parameters, a_Callback)
 	local Stmt, ErrCode, ErrMsg = self.DB:prepare(a_Sql)
 	if (not Stmt) then
 		LOGWARNING("Cannot prepare query >>" .. a_Sql .. "<<: " .. (ErrCode or "<unknown>") .. " (" .. (ErrMsg or "<no message>") .. ")")
+		LOGWARNING(debug.traceback())
 		return false, ErrorMsg or "<no message>"
 	end
 	

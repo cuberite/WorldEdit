@@ -16,7 +16,7 @@ g_Config = {}
 -- Create an environment for the config loader where the admin can use item names directly without quotes.
 local g_LoaderEnv = {}
 for Key, Value in pairs(_G) do
-	if (Key:match("E_.*")) then
+	if (Key:match("^E_.*")) then
 		g_LoaderEnv[ItemTypeToString(Value)] = Value
 	end
 end

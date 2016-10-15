@@ -209,8 +209,8 @@ end
 
 
 -- Register the hooks needed:
-cPluginManager.AddHook(cPluginManager.HOOK_PLAYER_DESTROYED,   OnPlayerDestroyed)
-cPluginManager.AddHook(cPluginManager.HOOK_PLUGIN_MESSAGE,     OnPluginMessage)
+cPluginManager:AddHook(cPluginManager.HOOK_PLAYER_DESTROYED,   OnPlayerDestroyed)
+cPluginManager:AddHook(cPluginManager.HOOK_PLUGIN_MESSAGE,     OnPluginMessage)
 
 
 
