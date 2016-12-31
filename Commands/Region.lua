@@ -487,26 +487,30 @@ function HandleReplaceCommand(a_Split, a_Player)
 	end
 	
 	-- Check the params:
-	if ((a_Split[2] == nil) or (a_Split[3] == nil)) then
+	local SrcBlockMask, SrcBlockErr, DstBlockSrc, DstBlockErr;
+	if (a_Split[2] and not a_Split[3]) then
+		SrcBlockMask, SrcBlockErr = cMask:new(nil, 0)
+		DstBlockSrc, DstBlockErr = GetBlockDst(a_Split[2], a_Player)
+	elseif (a_Split[2] and a_Split[3]) then
+		SrcBlockMask, SrcBlockErr = cMask:new(a_Split[2])
+		DstBlockSrc, DstBlockErr = GetBlockDst(a_Split[3], a_Player)
+	else
 		a_Player:SendMessage(cChatColor.Rose .. "Usage: //replace <SrcBlockType> <DstBlockType>")
 		return true
 	end
 	
-	-- Retrieve the blocktypes from the params:
-	local SrcBlockTable, ErrBlock = cMask:new(a_Split[2])
-	if (not SrcBlockTable) then
-		a_Player:SendMessage(cChatColor.Rose .. "Unknown src block type: '" .. ErrBlock .. "'.")
+	if (not SrcBlockMask) then
+		a_Player:SendMessage(cChatColor.Rose .. "Unknown src block type: '" .. SrcBlockErr .. "'.")
 		return true
 	end
 	
-	local DstBlockTable, ErrBlock = GetBlockDst(a_Split[3], a_Player)
-	if not(DstBlockTable) then
-		a_Player:SendMessage(cChatColor.Rose .. "Unknown dst block type: '" .. ErrBlock .. "'.")
+	if not(DstBlockSrc) then
+		a_Player:SendMessage(cChatColor.Rose .. "Unknown dst block type: '" .. DstBlockErr .. "'.")
 		return true
 	end
 	
 	-- Replace the blocks:
-	local NumBlocks = ReplaceBlocksInCuboid(a_Player, State.Selection:GetSortedCuboid(), SrcBlockTable, DstBlockTable, "replace")
+	local NumBlocks = ReplaceBlocksInCuboid(a_Player, State.Selection:GetSortedCuboid(), SrcBlockMask, DstBlockSrc, "replace")
 	if (NumBlocks) then
 		a_Player:SendMessage(cChatColor.LightPurple .. NumBlocks .. " block(s) have been changed.")
 	end

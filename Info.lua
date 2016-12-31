@@ -6,9 +6,9 @@
 g_PluginInfo = 
 {
 	Name = "WorldEdit",
-	Version = 9,
-	DisplayVersion = "0.1.8",
-	Date = "2016-12-31", -- yyyy-mm-dd
+	Version = 10,
+	DisplayVersion = "0.1.9",
+	Date = "2017-01-04", -- yyyy-mm-dd
 	SourceLocation = "https://github.com/cuberite/WorldEdit",
 	Description = [[This plugin allows you to easily manage the world, edit the world, navigate around or get information. It bears similarity to the Bukkit's WorldEdit plugin and aims to have the same set of commands,however, it has no affiliation to that plugin.
 	]],
