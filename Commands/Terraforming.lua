@@ -49,7 +49,7 @@ function HandleDrainCommand(a_Split, a_Player)
 		for Y = 0, SizeY do
 			for Z = 0, SizeZ do
 				local BlockType = BlockArea:GetRelBlockType(X, Y, Z)
-				if ((BlockType == E_BLOCK_WATER) or (BlockType == E_BLOCK_STATIONARY_WATER)) then
+				if ((BlockType == E_BLOCK_LAVA) or (BlockType == E_BLOCK_STATIONARY_LAVA) or (BlockType == E_BLOCK_WATER) or (BlockType == E_BLOCK_STATIONARY_WATER)) then
 					BlockArea:SetRelBlockType(X, Y, Z, E_BLOCK_AIR) -- set the block to air
 					NumBlocks = NumBlocks + 1
 				end
