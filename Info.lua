@@ -6,9 +6,9 @@
 g_PluginInfo = 
 {
 	Name = "WorldEdit",
-	Version = 8,
-	DisplayVersion = "0.1.7",
-	Date = "2016-02-02", -- yyyy-mm-dd
+	Version = 9,
+	DisplayVersion = "0.1.8",
+	Date = "2016-12-31", -- yyyy-mm-dd
 	SourceLocation = "https://github.com/cuberite/WorldEdit",
 	Description = [[This plugin allows you to easily manage the world, edit the world, navigate around or get information. It bears similarity to the Bukkit's WorldEdit plugin and aims to have the same set of commands,however, it has no affiliation to that plugin.
 	]],
@@ -19,18 +19,19 @@ g_PluginInfo =
 
 		["//"] =
 		{
-			Alias = {"/,"},
+			Alias = "/",
 			Permission = "worldedit.superpickaxe",
 			Handler = HandleSuperPickCommand,
-			HelpString = " Toggle the super pickaxe pickaxe function",
+			HelpString = "Toggle the super pickaxe pickaxe function",
 			Category = "Tool",
 		},
 		
 		["//addleaves"] =
 		{
+			Alias = "/addleaves",
 			Permission = "worldedit.region.addleaves",
 			Handler = HandleAddLeavesCommand,
-			HelpString = " Adds leaves next to log blocks",
+			HelpString = "Adds leaves next to log blocks",
 			Category = "Region",
 		},
 		
@@ -38,7 +39,7 @@ g_PluginInfo =
 		{
 			Permission = "worldedit.selection.chunk",
 			Handler = HandleChunkCommand,
-			HelpString = " Select the chunk you are currently in.",
+			HelpString = "Select the chunk you are currently in",
 			Category = "Selection",
 		},
 		
@@ -46,7 +47,7 @@ g_PluginInfo =
 		{
 			Permission = "worldedit.selection.count",
 			Handler = HandleCountCommand,
-			HelpString = " Count the number of blocks in the region.",
+			HelpString = "Count the number of blocks in the region",
 			Category = "Selection",
 		},
 		
@@ -54,7 +55,7 @@ g_PluginInfo =
 		{
 			Permission = "worldedit.selection.contract",
 			Handler = HandleExpandContractCommand,
-			HelpString = " Contract the selection area",
+			HelpString = "Contract the selection area",
 			Category = "Selection",
 		},
 		
@@ -62,7 +63,7 @@ g_PluginInfo =
 		{
 			Permission = "worldedit.clipboard.copy",
 			Handler = HandleCopyCommand,
-			HelpString = " Copy the selection to the clipboard",
+			HelpString = "Copy the selection to the clipboard",
 			Category = "Clipboard",
 		},
 		
@@ -70,7 +71,7 @@ g_PluginInfo =
 		{
 			Permission = "worldedit.clipboard.cut",
 			Handler = HandleCutCommand,
-			HelpString = " Cut the selection to the clipboard",
+			HelpString = "Cut the selection to the clipboard",
 			Category = "Clipboard",
 		},
 		
@@ -78,13 +79,13 @@ g_PluginInfo =
 		{
 			Permission = "worldedit.generation.cylinder",
 			Handler = HandleCylCommand,
-			HelpString = "Generates a cylinder.",
+			HelpString = "Generates a cylinder",
 			Category = "Generation",
 		},
 		
 		["//deselect"] =
 		{
-			Alias = {"//desel"},
+			Alias = "//desel",
 			Permission = "worldedit.selection.deselect",
 			Handler = HandleDeselectCommand,
 			HelpString = "Deselect the current selection",
@@ -95,7 +96,7 @@ g_PluginInfo =
 		{
 			Permission = "worldedit.selection.distr",
 			Handler = HandleDistrCommand,
-			HelpString = " Inspect the block distribution of the current selection.",
+			HelpString = "Inspect the block distribution of the current selection",
 			Category = "Selection",
 		},
 		
@@ -103,7 +104,7 @@ g_PluginInfo =
 		{
 			Permission = "worldedit.drain",
 			Handler = HandleDrainCommand,
-			HelpString = " Drains all water around you in the given radius.",
+			HelpString = "Drains all water around you in the given radius",
 			Category = "Terraforming",
 		},
 		
@@ -111,7 +112,7 @@ g_PluginInfo =
 		{
 			Permission = "worldedit.region.ellipsoid",
 			Handler = HandleEllipsoidCommand,
-			HelpString = " Creates an ellipsoid in the selected region",
+			HelpString = "Creates an ellipsoid in the selected region",
 			Category = "Region",
 		},
 		
@@ -119,7 +120,7 @@ g_PluginInfo =
 		{
 			Permission = "worldedit.selection.expand",
 			Handler = HandleExpandContractCommand,
-			HelpString = " Expand the selection area",
+			HelpString = "Expand the selection area",
 			Category = "Selection",
 		},
 		
@@ -128,13 +129,13 @@ g_PluginInfo =
 			Alias = { "//ex", "//ext", "/ex", "/ext", "/extinguish", },
 			Permission = "worldedit.extinguish",
 			Handler = HandleExtinguishCommand,
-			HelpString = " Removes all the fires around you in the given radius.",
+			HelpString = "Removes all the fires around you in the given radius",
 			Category = "Terraforming",
 		},
 		
 		["//faces"] =
 		{
-			Alias = {"//outline"},
+			Alias = "//outline",
 			Permission = "worldedit.region.faces",
 			Handler = HandleFacesCommand,
 			HelpString = " Build the walls, ceiling, and floor of a selection",
@@ -146,15 +147,16 @@ g_PluginInfo =
 			Alias = {"//g", "//gen"},
 			Permission = "worldedit.generation.shape",
 			Handler = HandleGenerationShapeCommand,
-			HelpString = " Generates a shape according to a formula",
+			HelpString = "Generates a shape according to a formula",
 			Category = "Generation",
 		},
 		
 		["//green"] =
 		{
+			Alias = "/green",
 			Permission = "worldedit.green",
 			Handler = HandleGreenCommand,
-			HelpString = " Changes all the dirt to grass.",
+			HelpString = " Changes all the dirt to grass",
 			Category = "Terraforming",
 		},
 		
@@ -166,11 +168,19 @@ g_PluginInfo =
 			Category = "Generation",
 		},
 		
+		["//help"] =
+		{
+			Permission = "worldedit.help",
+			Handler = HandleWorldEditHelpCommand,
+			HelpString = "Sends all the available commands to the player",
+			Category = "Special",
+		},
+		
 		["//hpos1"] =
 		{
 			Permission = "worldedit.selection.pos",
 			Handler = HandleHPosCommand,
-			HelpString = " Set position 1 to the position you are looking at.",
+			HelpString = "Set position 1 to the position you are looking at",
 			Category = "Selection",
 		},
 		
@@ -178,7 +188,7 @@ g_PluginInfo =
 		{
 			Permission = "worldedit.selection.pos",
 			Handler = HandleHPosCommand,
-			HelpString = " Set position 2 to the position you are looking at.",
+			HelpString = "Set position 2 to the position you are looking at",
 			Category = "Selection",
 		},
 		
@@ -194,7 +204,7 @@ g_PluginInfo =
 		{
 			Permission = "worldedit.generation.hsphere",
 			Handler = HandleSphereCommand,
-			HelpString = " Generates a hollow sphere.",
+			HelpString = "Generates a hollow sphere",
 			Category = "Generation",
 		},
 		
@@ -233,7 +243,7 @@ g_PluginInfo =
 		{
 			Permission = "worldedit.clipboard.paste",
 			Handler = HandlePasteCommand,
-			HelpString = " Pastes the clipboard's contents",
+			HelpString = "Pastes the clipboard's contents",
 			Category = "Clipboard",
 		},
 		
@@ -241,7 +251,7 @@ g_PluginInfo =
 		{
 			Permission = "worldedit.selection.pos",
 			Handler = HandlePosCommand,
-			HelpString = " Set position 1",
+			HelpString = "Set position 1",
 			Category = "Selection",
 		},
 		
@@ -249,7 +259,7 @@ g_PluginInfo =
 		{
 			Permission = "worldedit.selection.pos",
 			Handler = HandlePosCommand,
-			HelpString = " Set position 2",
+			HelpString = "Set position 2",
 			Category = "Selection",
 		},
 		
@@ -263,25 +273,28 @@ g_PluginInfo =
 		
 		["//redo"] =
 		{
+			Alias = "/redo",
 			Permission = "worldedit.history.redo",
 			Handler = HandleRedoCommand,
-			HelpString = " redoes the last action (from history)",
+			HelpString = "Redoes the last action (from history)",
 			Category = "History",
 		},
 		
 		["//replace"] =
 		{
+			Alias = { "//re", "//rep", },
 			Permission = "worldedit.region.replace",
 			Handler = HandleReplaceCommand,
-			HelpString = " Replace all the blocks in the selection with another",
+			HelpString = "Replace all the blocks in the selection with another",
 			Category = "Region",
 		},
 		
 		["//replacenear"] =
 		{
+			Alias = "/replacenear",
 			Permission = "worldedit.replacenear",
 			Handler = HandleReplaceNearCommand,
-			HelpString = " Replace nearby blocks",
+			HelpString = "Replace nearby blocks",
 			Category = "Terraforming",
 		},
 		
@@ -289,7 +302,7 @@ g_PluginInfo =
 		{
 			Permission = "worldedit.clipboard.rotate",
 			Handler = HandleRotateCommand,
-			HelpString = " Rotates the contents of the clipboard",
+			HelpString = "Rotates the contents of the clipboard",
 			Category = "Clipboard",
 		},
 		
@@ -303,6 +316,7 @@ g_PluginInfo =
 		
 		["//schematic"] =
 		{
+			Alias = "//schem",
 			Permission = "",  -- Multi-commands shouldn't specify a permission
 			Handler = nil,  -- Provide a standard multi-command handler
 			HelpString = "",  -- Don't show in help
@@ -311,7 +325,7 @@ g_PluginInfo =
 			{
 				save =
 				{
-					HelpString = "Saves the current clipboard to a file with the given filename.",
+					HelpString = "Saves the current clipboard to a file with the given filename",
 					Permission = "worldedit.schematic.save",
 					Handler = HandleSchematicSaveCommand,
 					Alias = "s",
@@ -319,7 +333,7 @@ g_PluginInfo =
 				},
 				load =
 				{
-					HelpString = "Loads the given schematic file.",
+					HelpString = "Loads the given schematic file",
 					Permission = "worldedit.schematic.load",
 					Handler = HandleSchematicLoadCommand,
 					Alias = "l",
@@ -348,7 +362,7 @@ g_PluginInfo =
 		{
 			Permission = "worldedit.region.set",
 			Handler = HandleSetCommand,
-			HelpString = " Set all the blocks inside the selection to a block",
+			HelpString = "Set all the blocks inside the selection to a block",
 			Category = "Region",
 		},
 		
@@ -356,7 +370,7 @@ g_PluginInfo =
 		{
 			Permission = "worldedit.biome.set",
 			Handler = HandleSetBiomeCommand,
-			HelpString = " Set the biome of the region.",
+			HelpString = "Set the biome of the region",
 			Category = "Biome",
 		},
 		
@@ -364,7 +378,7 @@ g_PluginInfo =
 		{
 			Permission = "worldedit.selection.size",
 			Handler = HandleShiftCommand,
-			HelpString = " Move the selection area",
+			HelpString = "Move the selection area",
 			Category = "Selection",
 		},
 		
@@ -372,7 +386,7 @@ g_PluginInfo =
 		{
 			Permission = "worldedit.selection.shrink",
 			Handler = HandleShrinkCommand,
-			HelpString = " shrink the current selection to exclude air-only layers of the selection",
+			HelpString = "Shrink the current selection to exclude air-only layers of the selection",
 			Category = "Selection"
 		},
 		
@@ -380,15 +394,24 @@ g_PluginInfo =
 		{
 			Permission = "worldedit.selection.size",
 			Handler = HandleSizeCommand,
-			HelpString = " Get the size of the selection",
+			HelpString = "Get the size of the selection",
 			Category = "Selection",
+		},
+		
+		["//snow"] =
+		{
+			Alias = "/snow",
+			Permission = "worldedit.snow",
+			Handler = HandleSnowCommand,
+			HelpString = "Makes it look like it has snown",
+			Category = "Terraforming",
 		},
 		
 		["//sphere"] =
 		{
 			Permission = "worldedit.generation.sphere",
 			Handler = HandleSphereCommand,
-			HelpString = " Generates a filled sphere.",
+			HelpString = "Generates a filled sphere",
 			Category = "Generation",
 		},
 		
@@ -396,15 +419,25 @@ g_PluginInfo =
 		{
 			Permission = "worldedit.region.stack",
 			Handler = HandleStackCommand,
-			HelpString = "Repeat the contents of the selection.",
+			HelpString = "Repeat the contents of the selection",
 			Category = "Region",
+		},
+		
+		["//thaw"] =
+		{
+			Alias = "/thaw",
+			Permission = "worldedit.thaw",
+			Handler = HandleThawCommand,
+			HelpString = "Removes all the snow around you in the given radius",
+			Category = "Terraforming",
 		},
 		
 		["//undo"] =
 		{
+			Alias = "/undo",
 			Permission = "worldedit.history.undo",
 			Handler = HandleUndoCommand,
-			HelpString = " Undoes the last action",
+			HelpString = "Undoes the last action",
 			Category = "History",
 		},
 		
@@ -420,7 +453,7 @@ g_PluginInfo =
 		{
 			Permission = "worldedit.region.walls",
 			Handler = HandleWallsCommand,
-			HelpString = " Build the four sides of the selection",
+			HelpString = "Build the four sides of the selection",
 			Category = "Region",
 		},
 		
@@ -428,7 +461,7 @@ g_PluginInfo =
 		{
 			Permission = "worldedit.wand",
 			Handler = HandleWandCommand,
-			HelpString = " Get the wand object",
+			HelpString = "Get the wand object",
 			Category = "Special",
 		},
 		
@@ -448,7 +481,7 @@ g_PluginInfo =
 			Alias = "/asc",
 			Permission = "worldedit.navigation.ascend", 
 			Handler = HandleAscendCommand, 
-			HelpString = " go up a floor",
+			HelpString = "Go up a floor",
 			Category = "Navigation",
 		},
 		
@@ -456,15 +489,16 @@ g_PluginInfo =
 		{
 			Permission = "worldedit.biome.info",
 			Handler = HandleBiomeInfoCommand,
-			HelpString = " Get the biome of the targeted block(s).",
+			HelpString = "Get the biome of the targeted block(s)",
 			Category = "Biome",
 		},
 		
 		["/biomelist"] =
 		{
+			Alias = "/biomels",
 			Permission = "worldedit.biomelist",
 			Handler = HandleBiomeListCommand,
-			HelpString = " Gets all biomes available",
+			HelpString = "Gets all biomes available",
 			Category = "Biome",
 		},
 		
@@ -473,22 +507,24 @@ g_PluginInfo =
 			Alias = { "//brush", "/br", "//br", },
 			Permission = "",
 			Handler = nil,
-			HelpString = " Brush commands",
+			HelpString = "Brush commands",
 			Category = "Brush",
 			Subcommands =
 			{
 				sphere =
 				{
-					HelpString = " Switch to the sphere brush tool.",
+					HelpString = "Switch to the sphere brush tool",
 					Permission = "worldedit.brush.sphere",
 					Handler = HandleSphereBrush,
+					Alias = "s",
 					Category = "Brush",
 				},
 				cylinder =
 				{
-					HelpString = " Switch to the cylinder brush tool.",
+					HelpString = "Switch to the cylinder brush tool",
 					Permission = "worldedit.brush.cylinder",
 					Handler = HandleCylinderBrush,
+					Alias = { "c", "cyl", },
 					Category = "Brush",
 				},
 			},
@@ -498,7 +534,7 @@ g_PluginInfo =
 		{
 			Permission = "worldedit.butcher",
 			Handler = HandleButcherCommand,
-			HelpString = " Kills nearby mobs based on the given radius, if no radius is given it uses the default in configuration.",
+			HelpString = "Kills nearby mobs based on the given radius, if no radius is given it uses the default in configuration",
 			Category = "Entities",
 		},
 			
@@ -506,7 +542,7 @@ g_PluginInfo =
 		{
 			Permission = "worldedit.scripting.execute",
 			Handler = HandleCraftScriptCommand,
-			HelpString = " Execute a CraftScript",
+			HelpString = "Execute a CraftScript",
 			Category = "Scripting",
 		},
 		
@@ -515,7 +551,7 @@ g_PluginInfo =
 			Alias = "/desc",
 			Permission = "worldedit.navigation.descend",
 			Handler = HandleDescendCommand, 
-			HelpString = "go down a floor",
+			HelpString = "Go down a floor",
 			Category = "Navigation",
 		},
 		
@@ -529,9 +565,10 @@ g_PluginInfo =
 		
 		["/jumpto"] =
 		{
+			Alias = "/j",
 			Permission = "worldedit.navigation.jumpto.command",
 			Handler = HandleJumpToCommand,
-			HelpString = " Teleport to a location",
+			HelpString = "Teleport to a location",
 			Category = "Navigation",
 		},
 		
@@ -539,14 +576,14 @@ g_PluginInfo =
 		{
 			Permission = "worldedit.brush.options.mask",
 			Handler = HandleMaskCommand,
-			HelpString = " Set the brush mask",
+			HelpString = "Set the brush mask",
 			Category = "Brush",
 		},
 		
 		["/none"] =
 		{
 			Handler = HandleNoneCommand,
-			HelpString = " Unbind a bound tool from your current item",
+			HelpString = "Unbind a bound tool from your current item",
 			Category = "Tool",
 		},
 		
@@ -554,7 +591,7 @@ g_PluginInfo =
 		{
 			Permission = "worldedit.generation.pumpkins",
 			Handler = HandlePumpkinsCommand,
-			HelpString = " Generates pumpkins at the surface.",
+			HelpString = "Generates pumpkins at the surface",
 			Category = "Terraforming",
 		},	
 		
@@ -563,7 +600,7 @@ g_PluginInfo =
 			Alias = { "/rem", "/rement", },
 			Permission = "worldedit.remove",
 			Handler = HandleRemoveCommand,
-			HelpString = " Removes all entities of a type",
+			HelpString = "Removes all entities of a type",
 			Category = "Entities",
 		},
 		
@@ -572,7 +609,7 @@ g_PluginInfo =
 			Alias = "//removeabove",
 			Permission = "worldedit.removeabove",
 			Handler = HandleRemoveColumnCommand,
-			HelpString = " Remove all the blocks above you.",
+			HelpString = "Remove all the blocks above you",
 			Category = "Terraforming",
 		},
 		
@@ -581,7 +618,7 @@ g_PluginInfo =
 			Alias = "//removebelow",
 			Permission = "worldedit.removebelow",
 			Handler = HandleRemoveColumnCommand,
-			HelpString = " Remove all the blocks below you.",
+			HelpString = "Remove all the blocks below you",
 			Category = "Terraforming",
 		},
 		
@@ -589,32 +626,15 @@ g_PluginInfo =
 		{
 			Permission = "worldedit.tool.replacer",
 			Handler = HandleReplCommand,
-			HelpString = " Block replace tool",
+			HelpString = "Block replace tool",
 			Category = "Tool",
-		},
-		
-		["/snow"] =
-		{
-			Command = "/snow",
-			Permission = "worldedit.snow",
-			Handler = HandleSnowCommand,
-			HelpString = " Makes it look like it has snown.",
-			Category = "Terraforming",
-		},
-		
-		["/thaw"] =
-		{
-			Permission = "worldedit.thaw",
-			Handler = HandleThawCommand,
-			HelpString = " Removes all the snow around you in the given radius.",
-			Category = "Terraforming",
 		},
 		
 		["/thru"] =
 		{
 			Permission = "worldedit.navigation.thru.command",
 			Handler = HandleThruCommand,
-			HelpString = " Passthrough walls",
+			HelpString = "Passthrough walls",
 			Category = "Navigation",
 		},
 		
@@ -622,15 +642,69 @@ g_PluginInfo =
 		{
 			Permission = "worldedit.wand.toggle",
 			Handler = HandleToggleEditWandCommand,
-			HelpString = " Toggle functionality of the edit wand",
+			HelpString = "Toggle functionality of the edit wand",
 			Category = "Special",
+		},
+		
+		["/tool"] =
+		{
+			Permission = "",
+			Handler = nil,
+			HelpString = "Select a tool to bind",
+			Category = "Tool",
+			Subcommands =
+			{
+				none =
+				{
+					HelpString = "Unbind a bound tool from your current item",
+					Handler = HandleNoneCommand,
+					Category = "Tool",
+				},
+				tree =
+				{
+					HelpString = "Tree generator tool",
+					Permission = "worldedit.tool.tree",
+					Handler = HandleTreeCommand,
+					Category = "Tool",
+				},
+				repl =
+				{
+					HelpString = "Block replace tool",
+					Permission = "worldedit.tool.replacer",
+					Handler = HandleReplCommand,
+					Category = "Tool",
+				},
+				sphere =
+				{
+					HelpString = "Switch to the sphere brush tool",
+					Permission = "worldedit.brush.sphere",
+					Handler = HandleSphereBrush,
+					Alias = "s",
+					Category = "Tool",
+				},
+				cylinder =
+				{
+					HelpString = "Switch to the cylinder brush tool",
+					Permission = "worldedit.brush.cylinder",
+					Handler = HandleCylinderBrush,
+					Alias = { "c", "cyl", },
+					Category = "Tool",
+				},
+				farwand =
+				{
+					HelpString = "Use the wand from a distance",
+					Permission = "worldedit.tool.farwand",
+					Handler = HandleFarwandCommand,
+					Category = "Tool",
+				},
+			},
 		},
 		
 		["/tree"] =
 		{
 			Permission = "worldedit.tool.tree",
 			Handler = HandleTreeCommand,
-			HelpString = " Tree generator tool",
+			HelpString = "Tree generator tool",
 			Category = "Tool",
 		},
 		
@@ -638,15 +712,16 @@ g_PluginInfo =
 		{
 			Permission = "worldedit.navigation.up",
 			Handler = HandleUpCommand,
-			HelpString = " go upwards some distance",
+			HelpString = "Go upwards some distance",
 			Category = "Navigation",
 		},
 		
 		["/we"] =
 		{
+			Alias = "/worldedit",
 			Permission = "",
 			Handler = nil,
-			HelpString = " World edit command",
+			HelpString = "WorldEdit command",
 			Category = "Special",
 			Subcommands =
 			{
@@ -659,15 +734,16 @@ g_PluginInfo =
 				},
 				version =
 				{
-					HelpString = "Sends the plugin version to the player.",
+					HelpString = "Sends the plugin version to the player",
 					Permission = "",
 					Handler = HandleWorldEditVersionCommand,
+					Alias = "ver",
 					Category = "Special",
 				},
 				help =
 				{
-					HelpString = "Sends all the available commands to the player.",
-					Permission = "",
+					HelpString = "Sends all the available commands to the player",
+					Permission = "worldedit.help",
 					Handler = HandleWorldEditHelpCommand,
 					Category = "Special",
 				},
