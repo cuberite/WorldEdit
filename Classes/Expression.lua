@@ -36,6 +36,7 @@ cExpression = {}
 
 cExpression.m_ExpressionTemplate = 
 [[
+local assert, pairs = assert, pairs
 local abs, acos, asin, atan, atan2,
 ceil, cos, cosh, exp, floor, ln, 
 log, log10, max, min, round, sin,
@@ -53,8 +54,13 @@ local rint = function(num) local Number, Decimal = math.modf(num); return (Decim
 
 %s
 
+local validators = {...}
+
 return function(%s)
 	%s
+	for _, validator in pairs(validators) do
+		assert(validator(%s))
+	end
 	return %s
 end]]
 
@@ -67,6 +73,8 @@ end]]
 cExpression.m_LoaderEnv =
 {
 	math = math,
+	assert = assert,
+	pairs = pairs,
 }
 
 
@@ -131,6 +139,9 @@ function cExpression:new(a_Formula)
 	-- A table containing predefined variables. A new one can be added using the PredefineVariable function
 	Obj.m_PredefinedConstants = {}
 	
+	-- A table containing functions used to validate the return values
+	Obj.m_ReturnValidators = {}
+	
 	return Obj
 end
 
@@ -155,6 +166,17 @@ end
 -- For example in the formula "x<z; y>z" x<z is Comp1, and y>z is Comp2
 function cExpression:AddReturnValue(a_Name)
 	table.insert(self.m_ReturnValues, a_Name)
+	return self
+end
+
+
+
+
+
+-- Adds a validator to check if the return value is allowed.
+-- a_Validator is a function. If it returns false the expression will assert
+function cExpression:AddReturnValidator(a_Validator)
+	table.insert(self.m_ReturnValidators, a_Validator)
 	return self
 end
 
@@ -241,7 +263,8 @@ function cExpression:Compile()
 		end
 	end
 	
-	local FormulaLoader = loadstring(cExpression.m_ExpressionTemplate:format(PredefinedVariables, Arguments, table.concat(Actions, "\n\t"), ReturnValues))
+	local formulaLoaderSrc = cExpression.m_ExpressionTemplate:format(PredefinedVariables, Arguments, table.concat(Actions, "\n\t"), ReturnValues, ReturnValues)
+	local FormulaLoader = loadstring(formulaLoaderSrc)
 	if (not FormulaLoader) then
 		return false, "Invalid formula"
 	end
@@ -250,7 +273,7 @@ function cExpression:Compile()
 	setfenv(FormulaLoader, cExpression.m_LoaderEnv)
 	
 	-- Try to get the formula checker
-	local Succes, Formula = pcall(FormulaLoader)
+	local Succes, Formula = pcall(FormulaLoader, unpack(self.m_ReturnValidators))
 	if (not Succes) then
 		return false, "Invalid formula"
 	end

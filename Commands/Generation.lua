@@ -102,7 +102,7 @@ function HandleGenerationShapeCommand(a_Split, a_Player)
 	local Expression = cExpression:new(FormulaString)
 	
 	-- Create the shape generator
-	local ShapeGenerator, Error = cShapeGenerator:new(zero, unit, BlockTable, Expression)
+	local ShapeGenerator, Error = cShapeGenerator:new(zero, unit, BlockTable, Expression, a_Player:HasPermission('worldedit.anyblock'))
 	if (not ShapeGenerator) then
 		-- Something went wrong while constructing the ShapeGenerator.
 		a_Player:SendMessage(cChatColor.Rose .. Error)
@@ -121,7 +121,11 @@ function HandleGenerationShapeCommand(a_Split, a_Player)
 	local Mask = State.ToolRegistrator:GetMask(a_Player:GetEquippedItem().m_ItemType)
 	
 	-- Write the shape in the block area
-	local NumAffectedBlocks = ShapeGenerator:MakeShape(BA, Vector3f(1, 1, 1), Vector3f(SizeX, SizeY, SizeZ), IsHollow, Mask)
+	local Success, NumAffectedBlocks = pcall(cShapeGenerator.MakeShape, ShapeGenerator, BA, Vector3f(1, 1, 1), Vector3f(SizeX, SizeY, SizeZ), IsHollow, Mask)
+	if (not Success) then
+		a_Player:SendMessage(cChatColor.Rose .. NumAffectedBlocks:match(":%d-: (.+)"))
+		return true;
+	end
 	
 	-- Send a message to the player with the number of changed blocks
 	a_Player:SendMessage(cChatColor.LightPurple .. NumAffectedBlocks .. " block(s) changed")
