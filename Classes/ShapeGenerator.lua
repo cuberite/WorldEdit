@@ -57,7 +57,7 @@ end
 -- a_Zero and a_Unit are Vector3f vectors used to calculate a scaled vector3f. The formula will use the scaled vector as x, y and z values.
 -- a_BlockTable are the blocks to make the shape out of.
 -- a_Expression is a cExpression object that ShapeGenerator will compile. The ShapeGenerator will bind all the parameters and return values in the constructor.
-function cShapeGenerator:new(a_Zero, a_Unit, a_BlockTable, a_Expression)
+function cShapeGenerator:new(a_Zero, a_Unit, a_BlockTable, a_Expression, a_CanUseAllBlocks)
 	local Obj = {}
 	
 	setmetatable(Obj, cShapeGenerator)
@@ -71,6 +71,18 @@ function cShapeGenerator:new(a_Zero, a_Unit, a_BlockTable, a_Expression)
 	:AddParameter("type"):AddReturnValue("type")
 	:AddParameter("data"):AddReturnValue("data")
 	
+	if (not a_CanUseAllBlocks) then
+		a_Expression:AddReturnValidator(
+			function(shouldPlace, blocktype, blockdata)
+				if (g_Config.Limits.DisallowedBlocks[math.floor(blocktype)]) then
+					return false, ItemTypeToString(blocktype) .. ' is not allowed'
+				else
+					return true
+				end
+			end
+		)
+	end
+	
 	local Formula, Error = a_Expression:Compile()
 	if (not Formula) then
 		return false, "Invalid formula"
@@ -79,6 +91,9 @@ function cShapeGenerator:new(a_Zero, a_Unit, a_BlockTable, a_Expression)
 	-- Test the formula to check if it is a comparison.
 	local Succes, TestResult = pcall(Formula, 1, 1, 1, 1, 1)
 	if (not Succes or (type(TestResult) ~= "boolean")) then
+		if ((type(TestResult) == 'string') and TestResult:match(" is not allowed$")) then
+			return false, TestResult:match(':%d-: (.+)')
+		end
 		return false, "The formula isn't a comparison"
 	end
 	
@@ -155,9 +170,9 @@ function cShapeGenerator:MakeShape(a_BlockArea, a_MinVector, a_MaxVector, a_IsHo
 				
 				-- Check for the mask. 
 				if (DoSet and DoCheckMask) then
-					local CurrentBlock, CurrentMeta = a_BlockArea:GetRelBlockTypeMeta(X, Y, Z)
+					local CurrentType, CurrentMeta = a_BlockArea:GetRelBlockTypeMeta(X, Y, Z)
 					
-					if (not a_Mask:Contains(CurrentBlock, CurrentMeta)) then
+					if (not a_Mask:Contains(CurrentType, CurrentMeta)) then
 						-- The block does not exist in the mask, or the meta isn't set/is different.
 						-- Don't change the block.
 						DoSet = false
