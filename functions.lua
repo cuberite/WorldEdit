@@ -576,6 +576,160 @@ end
 
 
 
+--- Fills a hole next to the player.
+-- a_Player is the player who does the action.
+-- a_Cuboid is the area that will be affected
+-- a_BlockDst is the BlockTypeSource used to fill the hole.
+-- a_AllowUp is a bool. If true the recursive function also may go upwards.
+function FillRecursively(a_Player, a_Cuboid, a_BlockDst, a_AllowUp)
+	local World = a_Player:GetWorld();
+	-- Check if other plugins agree with the operation:
+	if (CallHook("OnAreaChanging", a_Cuboid, a_Player, World, "fillr")) then
+		return 0
+	end
+	
+	-- Push the area into an undo stack:
+	local State = GetPlayerState(a_Player)
+	State.UndoStack:PushUndoFromCuboid(World, a_Cuboid)
+	
+	local blockArea = cBlockArea();
+	blockArea:Read(World, a_Cuboid, cBlockArea.baTypes + cBlockArea.baMetas);
+	local sizeX = a_Cuboid:DifX()
+	local sizeY = a_Cuboid:DifY()
+	local sizeZ = a_Cuboid:DifZ()
+	local numBlocks = 0
+	local cache = {}
+	
+	local function MakeIndex(a_RelX, a_RelY, a_RelZ)
+		return a_RelX + (a_RelZ * sizeX) + (a_RelY * sizeX * sizeZ);
+	end
+	
+	local function IsInside(a_RelX, a_RelY, a_RelZ)
+		return not (
+			(a_RelX < 0) or (a_RelX > sizeX) or
+			(a_RelY < 0) or (a_RelY > sizeY) or
+			(a_RelZ < 0) or (a_RelZ > sizeZ)
+		)
+	end
+	
+	local function Next(a_X, a_Y, a_Z, a_AllowSolid)
+		if (not IsInside(a_X, a_Y, a_Z)) then
+			return;
+		end
+		
+		local index = MakeIndex(a_X, a_Y, a_Z)
+		if (cache[index]) then
+			-- We already got to this block before.
+			return;
+		end
+		cache[index] = true
+		
+		local isSolid = cBlockInfo:IsSolid(blockArea:GetRelBlockType(a_X, a_Y, a_Z));
+		if (not isSolid) then
+			numBlocks = numBlocks + 1
+			blockArea:SetRelBlockTypeMeta(a_X, a_Y, a_Z, a_BlockDst:Get(a_X, a_Y, a_Z));
+		end
+		
+		if ((not isSolid) or a_AllowSolid) then
+			Next(a_X + 1, a_Y, a_Z) 
+			Next(a_X - 1, a_Y, a_Z)
+			Next(a_X, a_Y, a_Z - 1)
+			Next(a_X, a_Y, a_Z + 1)
+			Next(a_X, a_Y - 1, a_Z)
+			if (a_AllowUp) then
+				Next(a_X, a_Y + 1, a_Z)
+			end
+		end
+	end
+	
+	Next(math.floor(sizeX / 2), sizeY, math.floor(sizeZ / 2), true);
+	blockArea:Write(World, a_Cuboid.p1)
+	
+	CallHook("OnAreaChanged", a_Cuboid, a_Player, World, "fillr")
+	return numBlocks
+end
+
+
+
+
+
+--- Fills a hole next to the player. Unlike the recursive version this will not work good with overhangs
+-- a_Player is the player who does the action.
+-- a_Cuboid is the region to fill the hole.
+-- a_BlockDst is the BlockTypeSource used to fill the hole.
+function FillNormal(a_Player, a_Cuboid, a_BlockDst)
+	local World = a_Player:GetWorld();
+	-- Check if other plugins agree with the operation:
+	if (CallHook("OnAreaChanging", a_Cuboid, a_Player, World, "fill")) then
+		return 0
+	end
+	
+	-- Push the area into an undo stack:
+	local State = GetPlayerState(a_Player)
+	State.UndoStack:PushUndoFromCuboid(World, a_Cuboid)
+	
+	local blockArea = cBlockArea();
+	blockArea:Read(World, a_Cuboid, cBlockArea.baTypes + cBlockArea.baMetas);
+	local sizeX = a_Cuboid:DifX()
+	local sizeY = a_Cuboid:DifY()
+	local sizeZ = a_Cuboid:DifZ()
+	local numBlocks = 0
+	local cache = {}
+	
+	local function MakeIndex(a_RelX, a_RelZ)
+		return a_RelX + (a_RelZ * sizeX);
+	end
+	
+	local function IsInside(a_RelX, a_RelZ)
+		return not (
+			(a_RelX < 0) or (a_RelX > sizeX) or
+			(a_RelZ < 0) or (a_RelZ > sizeZ)
+		)
+	end
+	
+	local function Next(a_RelX, a_RelZ, a_AllowSolid)
+		if (not IsInside(a_RelX, a_RelZ)) then
+			return;
+		end
+		
+		local index = MakeIndex(a_RelX, a_RelZ);
+		if (cache[index]) then
+			-- We've already got to this block before.
+			return;
+		end
+		cache[index] = true;
+		
+		local didPlaceColumn = false;
+		for y = sizeY, 0, -1 do
+			local isSolid = cBlockInfo:IsSolid(blockArea:GetRelBlockType(a_RelX, y, a_RelZ));
+			if (not isSolid) then
+				didPlaceColumn = true;
+				numBlocks = numBlocks + 1
+				blockArea:SetRelBlockTypeMeta(a_RelX, y, a_RelZ, a_BlockDst:Get(a_RelX, y, a_RelZ));
+			else
+				break;
+			end
+		end
+		
+		if (didPlaceColumn or a_AllowSolid) then
+			Next(a_RelX + 1, a_RelZ);
+			Next(a_RelX - 1, a_RelZ);
+			Next(a_RelX, a_RelZ - 1);
+			Next(a_RelX, a_RelZ + 1);
+		end
+	end
+	
+	Next(math.floor(sizeX / 2), math.floor(sizeZ / 2), true);
+	blockArea:Write(World, a_Cuboid.p1);
+	
+	CallHook("OnAreaChanged", a_Cuboid, a_Player, World, "fill");
+	return numBlocks;
+end
+
+
+
+
+
 -- Teleports a player in the direction he's looking to the first non-solid block it finds IF it went through at least one solid block.
 -- returns true if teleported, otherwise it returns false.
 function RightClickCompass(a_Player)

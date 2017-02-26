@@ -6,9 +6,9 @@
 g_PluginInfo = 
 {
 	Name = "WorldEdit",
-	Version = 11,
-	DisplayVersion = "0.1.10",
-	Date = "2017-01-21", -- yyyy-mm-dd
+	Version = 12,
+	DisplayVersion = "0.1.11",
+	Date = "2017-02-26", -- yyyy-mm-dd
 	SourceLocation = "https://github.com/cuberite/WorldEdit",
 	Description = [[This plugin allows you to easily manage the world, edit the world, navigate around or get information. It bears similarity to the Bukkit's WorldEdit plugin and aims to have the same set of commands,however, it has no affiliation to that plugin.
 	]],
@@ -140,6 +140,22 @@ g_PluginInfo =
 			Handler = HandleFacesCommand,
 			HelpString = " Build the walls, ceiling, and floor of a selection",
 			Category = "Region",
+		},
+		
+		["//fillr"] = 
+		{
+			Permission = "worldedit.fill.recursive",
+			Handler = HandleFillrCommand,
+			HelpString = "Fill a hole recursively",
+			Category = "Terraforming"
+		},
+		
+		["//fill"] =
+		{
+			Permission = "worldedit.fill",
+			Handler = HandleFillCommand,
+			HelpString = "Fill a hole",
+			Category = "Terraforming",
 		},
 		
 		["//generate"] =

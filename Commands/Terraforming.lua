@@ -148,6 +148,118 @@ end
 
 
 
+function HandleFillrCommand(a_Split, a_Player)
+	-- //fillr <block> <radius> [depth] [allowUp]
+	
+	if (#a_Split < 3) then
+		a_Player:SendMessage(cChatColor.Rose .. "Too few parameters!");
+		a_Player:SendMessage(cChatColor.Rose .. "Usage: //fillr <block> <radius> [depth] [allowUp]");
+		return true;
+	elseif (#a_Split > 5) then
+		a_Player:SendMessage(cChatColor.Rose .. "Too many parameters! Unused parameters: " .. table.concat(a_Split, " ", 6));
+		a_Player:SendMessage(cChatColor.Rose .. "Usage: //fillr <block> <radius> [depth] [allowUp]");
+		return true;
+	end
+	
+	local blockDst, errorBlock = GetBlockDst(a_Split[2]);
+	if (not blockDst) then
+		a_Player:SendMessage(cChatColor.Rose .. "Unknown dst block type: '" .. errorBlock .. "'.");
+		return true;
+	end
+	
+	local radius = tonumber(a_Split[3]);
+	if (not radius) then
+		a_Player:SendMessage(cChatColor.Rose .. "Number expected; string \"" .. a_Split[3] .. "\" given.")
+		return true
+	end
+	radius = math.floor(radius)
+	
+	local depth = radius;
+	if (a_Split[4]) then
+		depth = tonumber(a_Split[4]);
+		if (not depth) then
+			a_Player:SendMessage(cChatColor.Rose .. "Number expected; string \"" .. a_Split[4] .. "\" given.")
+			return true
+		end
+	end
+	
+	local allowUp = true
+	if (a_Split[5]) then
+		if (a_Split[5]:lower() == "false") then
+			allowUp = false
+		elseif (a_Split[5]:lower() ~= "true") then
+			a_Player:SendMessage(cChatColor.Rose .. "Boolean expected; string \"" .. a_Split[5] .. "\" given.")
+			return true
+		end
+	end
+	
+	local playerPos = a_Player:GetPosition():Floor();
+	playerPos.y = playerPos.y - 1
+	local region = cCuboid(playerPos, playerPos)
+	region:Expand(radius, radius, depth, 0, radius, radius)
+	region:Sort();
+	
+	local numBlocks = FillRecursively(a_Player, region, blockDst, allowUp)
+	
+	a_Player:SendMessage(cChatColor.LightPurple .. numBlocks .. " blocks have changed")
+	return true;
+end
+
+
+
+
+
+function HandleFillCommand(a_Split, a_Player)
+	-- //fill <block> <radius> [depth]
+	
+	if (#a_Split < 3) then
+		a_Player:SendMessage(cChatColor.Rose .. "Too few parameters!");
+		a_Player:SendMessage(cChatColor.Rose .. "Usage: //fill <block> <radius> [depth]");
+		return true;
+	elseif (#a_Split > 4) then
+		a_Player:SendMessage(cChatColor.Rose .. "Too many parameters! Unused parameters: " .. table.concat(a_Split, " ", 5));
+		a_Player:SendMessage(cChatColor.Rose .. "Usage: //fill <block> <radius> [depth]");
+		return true;
+	end
+	
+	local blockDst, errorBlock = GetBlockDst(a_Split[2]);
+	if (not blockDst) then
+		a_Player:SendMessage(cChatColor.Rose .. "Unknown dst block type: '" .. errorBlock .. "'.");
+		return true;
+	end
+	
+	local radius = tonumber(a_Split[3]);
+	if (not radius) then
+		a_Player:SendMessage(cChatColor.Rose .. "Number expected; string \"" .. a_Split[3] .. "\" given.")
+		return true
+	end
+	radius = math.floor(radius)
+	
+	local depth = radius;
+	if (a_Split[4]) then
+		depth = tonumber(a_Split[4]);
+		if (not depth) then
+			a_Player:SendMessage(cChatColor.Rose .. "Number expected; string \"" .. a_Split[4] .. "\" given.")
+			return true
+		end
+	end
+	
+	local playerPos = a_Player:GetPosition():Floor();
+	playerPos.y = playerPos.y - 1
+	local region = cCuboid(playerPos, playerPos)
+	region:Expand(radius, radius, depth, 0, radius, radius)
+	region:Sort();
+	
+	local numBlocks = FillNormal(a_Player, region, blockDst)
+	
+	a_Player:SendMessage(cChatColor.LightPurple .. numBlocks .. " blocks have changed")
+	return true;
+end
+
+
+
+
+
 function HandleReplaceNearCommand(a_Split, a_Player)
 	-- //replacenear <size> <from> <to>
 	
