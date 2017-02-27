@@ -133,30 +133,22 @@ function HandleEllipsoidCommand(a_Split, a_Player)
 		return true
 	end
 	
-	local BlockTypeIndex = 2
-	local Hollow = false
-	
-	-- Check for hollow flag
-	if (a_Split[2] == "-h") then
-		Hollow = true
-		BlockTypeIndex = 3
-	end
-	
-	-- Check the params:
-	if (a_Split[BlockTypeIndex] == nil) then
-		a_Player:SendMessage(cChatColor.Rose .. "Usage: //ellipsoid [-h] <BlockType>")
-		return true
-	end
-	
-	-- Retrieve the blocktypes from the params:
-	local DstBlockTable, ErrBlock = GetBlockDst(a_Split[BlockTypeIndex], a_Player)
-	if not(DstBlockTable) then
-		a_Player:SendMessage(cChatColor.Rose .. "Unknown dst block type: '" .. ErrBlock .. "'.")
+	local success, parser = cCommandParser:new(2)
+		:Arguments({
+			{ name = "block", extractor = Extractors.Block, extractorparameters = { 0 } }
+		})
+		:Flags({
+			{ name = "hollow", character = "h" }
+		})
+		:Parse(a_Split)
+		
+	if (not success) then
+		a_Player:SendMessage(cChatColor.Rose .. parser);
 		return true
 	end
 	
 	local Cuboid = State.Selection:GetSortedCuboid()
-	local NumAffectedBlocks = CreateSphereInCuboid(a_Player, Cuboid, DstBlockTable, Hollow)
+	local NumAffectedBlocks = CreateSphereInCuboid(a_Player, Cuboid, parser.Arguments.block, parser.Flags.hollow)
 	
 	a_Player:SendMessage(cChatColor.LightPurple .. NumAffectedBlocks .. " block(s) have been created")
 	return true
@@ -178,19 +170,19 @@ function HandleFacesCommand(a_Split, a_Player)
 	end
 	
 	-- Check the params:
-	if (a_Split[2] == nil) then
-		a_Player:SendMessage(cChatColor.Rose .. "Usage: //faces <BlockType>")
-		return true
-	end
-	
-	local BlockTable, ErrBlock = GetBlockDst(a_Split[2], a_Player)
-	if (not BlockTable) then
-		a_Player:SendMessage(cChatColor.Rose .. "Unknown block: '" .. ErrBlock .. "'.")
-		return true
+	local success, parser = cCommandParser:new(2)
+		:Arguments({
+			{ name = "block", extractor = Extractors.Block, extractorparameters = { 0 } }
+		})
+		:Parse(a_Split)
+		
+	if (not success) then
+		a_Player:SendMessage(cChatColor.Rose .. parser);
+		return true;
 	end
 	
 	-- Fill the selection:
-	local NumBlocks = FillFaces(State, a_Player, a_Player:GetWorld(), BlockTable)
+	local NumBlocks = FillFaces(State, a_Player, a_Player:GetWorld(), parser.Arguments.block)
 	if (NumBlocks) then
 		a_Player:SendMessage(cChatColor.LightPurple .. NumBlocks .. " block(s) have been changed.")
 	end
@@ -486,31 +478,26 @@ function HandleReplaceCommand(a_Split, a_Player)
 		return true
 	end
 	
-	-- Check the params:
-	local SrcBlockMask, SrcBlockErr, DstBlockSrc, DstBlockErr;
-	if (a_Split[2] and not a_Split[3]) then
-		SrcBlockMask, SrcBlockErr = cMask:new(nil, 0)
-		DstBlockSrc, DstBlockErr = GetBlockDst(a_Split[2], a_Player)
-	elseif (a_Split[2] and a_Split[3]) then
-		SrcBlockMask, SrcBlockErr = cMask:new(a_Split[2])
-		DstBlockSrc, DstBlockErr = GetBlockDst(a_Split[3], a_Player)
-	else
-		a_Player:SendMessage(cChatColor.Rose .. "Usage: //replace <SrcBlockType> <DstBlockType>")
-		return true
+	local success, parser = cCommandParser:new(2)
+		:Arguments({
+			{ name = "SrcBlock", extractor = Extractors.PositiveMask },
+			{ name = "DstBlock", extractor = Extractors.Block }
+		})
+		:Arguments({
+			{ name = "DstBlock", extractor = Extractors.Block }
+		})
+		:Parse(a_Split)
+	
+	if (not success) then
+		a_Player:SendMessage(cChatColor.Rose .. parser);
+		return true;
 	end
 	
-	if (not SrcBlockMask) then
-		a_Player:SendMessage(cChatColor.Rose .. "Unknown src block type: '" .. SrcBlockErr .. "'.")
-		return true
-	end
-	
-	if not(DstBlockSrc) then
-		a_Player:SendMessage(cChatColor.Rose .. "Unknown dst block type: '" .. DstBlockErr .. "'.")
-		return true
-	end
+	-- If not provided give a default value to the srcblock parameter.
+	parser.Arguments.SrcBlock = parser.Arguments.SrcBlock or cMask:new(nil, 0);
 	
 	-- Replace the blocks:
-	local NumBlocks = ReplaceBlocksInCuboid(a_Player, State.Selection:GetSortedCuboid(), SrcBlockMask, DstBlockSrc, "replace")
+	local NumBlocks = ReplaceBlocksInCuboid(a_Player, State.Selection:GetSortedCuboid(), parser.Arguments.SrcBlock, parser.Arguments.DstBlock, "replace")
 	if (NumBlocks) then
 		a_Player:SendMessage(cChatColor.LightPurple .. NumBlocks .. " block(s) have been changed.")
 	end
@@ -532,16 +519,14 @@ function HandleSetCommand(a_Split, a_Player)
 		return true
 	end
 	
-	-- Check the params:
-	if (a_Split[2] == nil) then
-		a_Player:SendMessage(cChatColor.Rose .. "Usage: //set <BlockType>")
-		return true
-	end
+	local success, parser = cCommandParser:new(2)
+		:Arguments({
+			{ name = "block", extractor = Extractors.Block }
+		})
+		:Parse(a_Split)
 	
-	-- Retrieve the blocktypes from the params:
-	local DstBlockTable, ErrBlock = GetBlockDst(a_Split[2], a_Player)
-	if not(DstBlockTable) then
-		a_Player:SendMessage(cChatColor.Rose .. "Unknown dst block type: '" .. ErrBlock .. "'.")
+	if (not success) then
+		a_Player:SendMessage(cChatColor.Rose .. parser);
 		return true
 	end
 	
@@ -549,7 +534,7 @@ function HandleSetCommand(a_Split, a_Player)
 	local Selection = State.Selection:GetSortedCuboid()
 	
 	-- Fill the selection:
-	local NumBlocks = SetBlocksInCuboid(a_Player, Selection, DstBlockTable, "fill")
+	local NumBlocks = SetBlocksInCuboid(a_Player, Selection, parser.Arguments.block, "fill")
 	if (NumBlocks) then
 		a_Player:SendMessage(cChatColor.LightPurple .. NumBlocks .. " block(s) have been changed.")
 	end
