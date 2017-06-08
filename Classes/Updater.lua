@@ -64,7 +64,7 @@ function cUpdater:DownloadLatestVersion(a_DisplayVersion)
 			end
 
 			-- Write the ZIP data to the file. The filename looks like this: "WorldEdit v<DisplayVersion>.zip"
-			local ZipFile = assert(io.open("Plugins/WorldEdit v" .. a_DisplayVersion .. ".zip", "wb"), "Failed to open \"Plugins/WorldEdit v" .. (g_LatestVersion or "_Unknown") .. ".zip\"")
+			local ZipFile = assert(io.open("Plugins/WorldEdit v" .. a_DisplayVersion .. ".zip", "wb"), "Failed to open \"Plugins/WorldEdit v" .. (a_DisplayVersion or "_Unknown") .. ".zip\"")
 			ZipFile:write(a_Body)
 			ZipFile:close()
 

@@ -225,9 +225,9 @@ function HandleCeilCommand(a_Split, a_Player)
 
 	for y=Y, WorldHeight do
 		if World:GetBlock(X, y, Z) ~= E_BLOCK_AIR then
-			if (CallHook("OnAreaChanging", cCuboid(X, y - BlockFromCeil - 3, Z), a_Player, PlayerWorld, "ceil")) then
+			if (CallHook("OnAreaChanging", cCuboid(X, y - BlockFromCeil - 3, Z), a_Player, a_Player:GetWorld(), "ceil")) then
 				World:SetBlock(X, y - BlockFromCeil - 3, Z, E_BLOCK_GLASS, 0)
-				CallHook("OnAreaChanged", cCuboid(X, y - BlockFromCeil - 3, Z), a_Player, PlayerWorld, "ceil")
+				CallHook("OnAreaChanged", cCuboid(X, y - BlockFromCeil - 3, Z), a_Player, a_Player:GetWorld(), "ceil")
 			end
 			local I = y - BlockFromCeil - 2
 			if I == Y then
