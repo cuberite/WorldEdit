@@ -18,14 +18,14 @@ function cRandomBlockTypeSource:new(a_BlockString)
 	if (not BlockTable) then
 		return false, ErrorBlock
 	end
-	
+
 	local Obj = {}
-	
+
 	setmetatable(Obj, cRandomBlockTypeSource)
 	self.__index = self
-	
+
 	Obj.m_BlockTable = BlockTable
-	
+
 	return Obj
 end
 
@@ -39,20 +39,20 @@ function cRandomBlockTypeSource.RetrieveBlockTypes(a_Input)
 	if (not BlockTable) then
 		return false, ErrBlock
 	end
-	
+
 	-- Count all the chances. This is used to calculate the chances off the blocks, since the chance from BlockTable are either raw from the player or 1.
 	local ChanceSum = 0
 	for Idx, BlockInfo in ipairs(BlockTable) do
 		ChanceSum = ChanceSum + BlockInfo.Chance
 	end
-	
+
 	local CalculatedBlockTable = {}
 	local Temp = 0
 	for Idx, BlockInfo in ipairs(BlockTable) do
 		Temp = Temp + BlockInfo.Chance / ChanceSum
 		table.insert(CalculatedBlockTable, {BlockType = BlockInfo.BlockType, BlockMeta = BlockInfo.BlockMeta, Chance = Temp})
 	end
-	
+
 	return CalculatedBlockTable
 end
 
@@ -83,7 +83,3 @@ function cRandomBlockTypeSource:Contains(a_BlockTypeList)
 	end
 	return false
 end
-
-
-
-

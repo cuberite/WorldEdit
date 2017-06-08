@@ -32,11 +32,11 @@ local cPlayerState = {}
 function cPlayerState:new(a_Obj, a_PlayerKey, a_Player)
 	assert(a_PlayerKey ~= nil)
 	assert(a_Player ~= nil)
-	
+
 	a_Obj = a_Obj or {}
 	setmetatable(a_Obj, cPlayerState)
 	self.__index = self
-	
+
 	-- Initialize the object members to their defaults:
 	local ClientHandle = a_Player:GetClientHandle()
 	a_Obj.Clipboard = cClipboard:new()
@@ -49,7 +49,7 @@ function cPlayerState:new(a_Obj, a_PlayerKey, a_Player)
 	a_Obj.WandActivated = true
 	a_Obj.ToolRegistrator = cToolRegistrator:new({})
 	a_Obj.CraftScript = cCraftScript:new({})
-	
+
 	return a_Obj
 end
 
@@ -94,7 +94,7 @@ end
 --- Loads the state from persistent storage (if so configured)
 function cPlayerState:Load()
 	local UUID = self:GetUUID()
-	
+
 	if (g_Config.Storage.RememberPlayerSelection) then
 		self.Selection:Load(UUID)
 	end
@@ -113,7 +113,7 @@ function cPlayerState:PushUndoInSelection(a_World, a_UndoName)
 	local MinY, MaxY = self.Selection:GetYCoordsSorted()
 	local MinZ, MaxZ = self.Selection:GetZCoordsSorted()
 	Area:Read(a_World, MinX, MaxX, MinY, MaxY, MinZ, MaxZ)
-	
+
 	-- Push the Undo onto the stack:
 	self.UndoStack:PushUndo(a_World, Area, a_UndoName)
 end
@@ -137,18 +137,18 @@ end
 -- Creates one if it doesn't exist yet
 function GetPlayerState(a_Player)
 	assert(tolua.type(a_Player) == "cPlayer")
-	
+
 	local Key = a_Player:GetName()
 	local res = g_PlayerStates[Key]
 	if (res ~= nil) then
 		return res
 	end
-	
+
 	-- The player state doesn't exist yet, create a new one:
 	res = cPlayerState:new({}, Key, a_Player)
 	g_PlayerStates[Key] = res
 	res:Load()
-	
+
 	return res
 end
 
@@ -174,7 +174,7 @@ end
 
 function ForEachPlayerState(a_Callback)
 	assert(type(a_Callback) == "function")
-	
+
 	for _, State in pairs(g_PlayerStates) do
 		if (a_Callback(State)) then
 			break
@@ -190,14 +190,14 @@ local function OnPluginMessage(a_Client, a_Channel, a_Message)
 	if (a_Channel ~= "REGISTER") then
 		return
 	end
-	
+
 	-- The client has registered for some channels, if they did register for WECUI, send the selection to them:
 	-- Find the cPlayer object for this client, if available:
 	local Player = a_Client:GetPlayer()
 	if (Player == nil) then
 		return
 	end
-	
+
 	-- Send the selection (if there is one):
 	local State = GetPlayerState(Player)
 	State.IsWECUIActivated = a_Client:HasPluginChannel("WECUI")
@@ -211,7 +211,3 @@ end
 -- Register the hooks needed:
 cPluginManager.AddHook(cPluginManager.HOOK_PLAYER_DESTROYED,   OnPlayerDestroyed)
 cPluginManager.AddHook(cPluginManager.HOOK_PLUGIN_MESSAGE,     OnPluginMessage)
-
-
-
-

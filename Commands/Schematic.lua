@@ -8,7 +8,7 @@
 
 function HandleSchematicFormatsCommand(a_Split, a_Player)
 	-- //schematic listformats
-	
+
 	-- We support only one format, MCEdit:
 	a_Player:SendMessage(cChatColor.LightPurple .. 'Available formats: "MCEdit"')
 	return true
@@ -20,10 +20,10 @@ end
 
 function HandleSchematicListCommand(a_Split, a_Player)
 	-- //schematic list
-	
+
 	-- Retrieve all the objects in the folder:
 	local FolderContents = cFile:GetFolderContents("schematics")
-	
+
 	-- Filter out non-files and non-".schematic" files:
 	local FileList = {}
 	for idx, fnam in ipairs(FolderContents) do
@@ -39,7 +39,7 @@ function HandleSchematicListCommand(a_Split, a_Player)
 			return (string.lower(f1) < string.lower(f2))
 		end
 	)
-	
+
 	a_Player:SendMessage(cChatColor.LightPurple .. "Available schematics: " .. table.concat(FileList, ", "))
 	return true
 end
@@ -50,21 +50,21 @@ end
 
 function HandleSchematicLoadCommand(a_Split, a_Player)
 	-- //schematic load <FileName>
-	
+
 	-- Check the FileName parameter:
 	if (#a_Split ~= 3) then
 		a_Player:SendMessage(cChatColor.Rose .. "Usage: /schematic load <FileName>")
 		return true
 	end
 	local FileName = a_Split[3]
-	
+
 	-- Check if the file exists:
 	local Path = "schematics/" .. FileName .. ".schematic"
 	if not(cFile:IsFile(Path)) then
 		a_Player:SendMessage(cChatColor.Rose .. FileName .. " schematic does not exist.")
 		return true
 	end
-	
+
 	-- Load the file into clipboard:
 	local State = GetPlayerState(a_Player)
 	if not(State.Clipboard:LoadFromSchematicFile(Path)) then
@@ -93,13 +93,13 @@ function HandleSchematicSaveCommand(a_Split, a_Player)
 		a_Player:SendMessage(cChatColor.Rose .. "Usage: //schematic save [<format>] <FileName>")
 		return true
 	end
-	
+
 	-- Check if there already is a schematic with that name, and if so if we are allowed to override it.
 	if (not g_Config.Schematics.OverrideExistingFiles and cFile:IsFile("schematics/" .. FileName .. ".schematic")) then
 		a_Player:SendMessage(cChatColor.Rose .. "There already is a schematic with that name.")
 		return true
 	end
-	
+
 	-- Check that there's data in the clipboard:
 	local State = GetPlayerState(a_Player)
 	if not(State.Clipboard:IsValid()) then
@@ -112,8 +112,3 @@ function HandleSchematicSaveCommand(a_Split, a_Player)
 	a_Player:SendMessage(cChatColor.LightPurple .. "Clipboard saved to " .. FileName .. ".")
 	return true
 end
-
-
-
-
-

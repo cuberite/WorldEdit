@@ -7,7 +7,7 @@
 
 
 
---- Some blocks won't render if the meta value is 0. 
+--- Some blocks won't render if the meta value is 0.
 -- Here we keep a list of all of them with the first allowed meta value.
 -- Please keep the list alphasorted.
 g_DefaultMetas = {
@@ -33,6 +33,3 @@ E_DIRECTION_NORTH2 = 4
 E_DIRECTION_EAST = 1
 E_DIRECTION_SOUTH = 2
 E_DIRECTION_WEST = 3
-
-
-
