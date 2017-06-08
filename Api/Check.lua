@@ -9,7 +9,7 @@
 -- a_HookName is the name of the hook to call. Everything after that are arguments for the hook.
 function CallHook(a_HookName, ...)
 	assert(g_Hooks[a_HookName] ~= nil)
-	
+
 	for idx, callback in ipairs(g_Hooks[a_HookName]) do
 		local res = cPluginManager:CallPlugin(callback.PluginName, callback.CallbackName, ...)
 		if (res) then
@@ -17,7 +17,7 @@ function CallHook(a_HookName, ...)
 			return true
 		end
 	end
-	
+
 	return false
 end
 
@@ -36,16 +36,11 @@ function GetMultipleBlockChanges(MinX, MaxX, MinZ, MaxZ, Player, World, Operatio
 			MaxY = Y
 		end
 	end
-	
+
 	function Object:Flush()
 		local FinalCuboid = cCuboid(MinX, MinY, MinZ, MaxX, MaxY, MaxZ)
 		return CallHook("OnAreaChanging", FinalCuboid, Player, World, Operation)
 	end
-	
+
 	return Object
 end
-
-
-
-
-

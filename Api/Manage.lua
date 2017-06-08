@@ -11,7 +11,7 @@ g_Hooks = {
 	["OnAreaChanging"]            = {}, -- Signature: function(a_AffectedAreaCuboid, a_Player, a_World, a_Operation)
 	["OnAreaChanged"]             = {}, -- Signature: function(a_AffectedAreaCuboid, a_Player, a_World, a_Operation)
 	["OnAreaCopied"]              = {}, -- Signature: function(a_Player, a_World, a_CopiedAreaCuboid)
-	["OnAreaCopying"]             = {}, -- Signature: function(a_Player, a_World, a_CopiedAreaCuboid) 
+	["OnAreaCopying"]             = {}, -- Signature: function(a_Player, a_World, a_CopiedAreaCuboid)
 	["OnPlayerSelectionChanging"] = {}, -- Signature: function(a_Player, a_PosX, a_PosY, a_PosZ, a_PointNr)
 	["OnPlayerSelectionChanged"]  = {}, -- Signature: function(a_Player, a_PosX, a_PosY, a_PosZ, a_PointNr)
 }
@@ -37,15 +37,15 @@ function AddHook(a_HookName, a_PluginName, a_CallbackName)
 			tostring(a_PluginName   or "<nil>") .. ", " ..
 			tostring(a_CallbackName or "<nil>")
 		)
-		
+
 		return false
 	end
-	
+
 	if (not g_Hooks[a_HookName]) then
 		LOGWARNING("[WorldEdit] Plugin \"" .. a_PluginName .. "\" tried to register an unexisting hook called \"" .. a_HookName .. "\"")
 		return false
 	end
-	
+
 	table.insert(g_Hooks[a_HookName], {PluginName = a_PluginName, CallbackName = a_CallbackName})
 	return true
 end
@@ -100,7 +100,7 @@ function SetPlayerCuboidSelection(a_Player, a_Cuboid)
 		)
 		return false
 	end
-	
+
 	-- Set the selection, both points:
 	local State = GetPlayerState(a_Player)
 	State.Selection:SetFirstPoint(a_Cuboid.p1.x, a_Cuboid.p1.y, a_Cuboid.p1.z)
@@ -129,7 +129,7 @@ function SetPlayerCuboidSelectionPoint(a_Player, a_PointNumber, a_CoordVector)
 		)
 		return false
 	end
-	
+
 	-- Set the specified selection point:
 	local State = GetPlayerState(a_Player)
 	if (tonumber(a_PointNumber) == 1) then
@@ -176,7 +176,7 @@ function GetPlayerCuboidSelection(a_Player, a_CuboidToSet)
 		)
 		return false
 	end
-	
+
 	-- Set the output cuboid to the selection:
 	local State = GetPlayerState(a_Player)
 	a_CuboidToSet:Assign(State.Selection.Cuboid)
@@ -209,7 +209,7 @@ function WEPushUndo(a_Player, a_World, a_Cuboid, a_Description)
 		LOGWARNING("    " .. type(a_Description)  .. " (string  wanted),")
 		return false, "bad params"
 	end
-	
+
 	-- Push the undo:
 	local State = GetPlayerState(a_Player)
 	return State.UndoStack:PushUndoFromCuboid(a_World, a_Cuboid, a_Description)
@@ -248,23 +248,23 @@ function WEPushUndoAsync(a_Player, a_World, a_Cuboid, a_Description, a_CallbackP
 		LOGWARNING("    " .. type(a_CallbackFunctionName) .. " (string  wanted),")
 		return false, "bad params"
 	end
-	
+
 	-- if the input cuboid isn't sorted, create a sorted copy:
 	if not(a_Cuboid:IsSorted()) then
 		a_Cuboid = cCuboid(a_Cuboid)
 		a_Cuboid:Sort()
 	end
-	
+
 	-- Create a callback for the ChunkStay:
 	local State = GetPlayerState(a_Player)  -- a_Player may be deleted in the meantime, but the State table won't
 	local OnAllChunksAvailable = function()
 		local IsSuccess, Msg = State.UndoStack:PushUndoFromCuboid(a_World, a_Cuboid, a_Description)
 		cPluginManager:CallPlugin(a_CallbackPluginName, a_CallbackFunctionName, IsSuccess, Msg)
 	end
-	
+
 	-- Get a list of chunks that need to be present:
 	local Chunks = ListChunksForCuboid(a_Cuboid)
-	
+
 	-- Initiate a ChunkStay operation, pushing the undo when all the chunks are available
 	a_World:ChunkStay(Chunks, nil, OnAllChunksAvailable)
 	return true
@@ -283,10 +283,6 @@ function ExecuteString(a_String, ...)
 	if (not Function) then
 		return false, Error
 	end
-	
+
 	return pcall(Function, ...)
 end
-
-
-
-

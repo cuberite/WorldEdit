@@ -3,7 +3,7 @@
 
 -- Implements the g_PluginInfo standard plugin description
 
-g_PluginInfo = 
+g_PluginInfo =
 {
 	Name = "WorldEdit",
 	Version = 12,
@@ -25,7 +25,7 @@ g_PluginInfo =
 			HelpString = "Toggle the super pickaxe pickaxe function",
 			Category = "Tool",
 		},
-		
+
 		["//addleaves"] =
 		{
 			Alias = "/addleaves",
@@ -34,7 +34,7 @@ g_PluginInfo =
 			HelpString = "Adds leaves next to log blocks",
 			Category = "Region",
 		},
-		
+
 		["//chunk"] =
 		{
 			Permission = "worldedit.selection.chunk",
@@ -42,7 +42,7 @@ g_PluginInfo =
 			HelpString = "Select the chunk you are currently in",
 			Category = "Selection",
 		},
-		
+
 		["//count"] =
 		{
 			Permission = "worldedit.selection.count",
@@ -50,7 +50,7 @@ g_PluginInfo =
 			HelpString = "Count the number of blocks in the region",
 			Category = "Selection",
 		},
-		
+
 		["//contract"] =
 		{
 			Permission = "worldedit.selection.contract",
@@ -58,7 +58,7 @@ g_PluginInfo =
 			HelpString = "Contract the selection area",
 			Category = "Selection",
 		},
-		
+
 		["//copy"] =
 		{
 			Permission = "worldedit.clipboard.copy",
@@ -66,7 +66,7 @@ g_PluginInfo =
 			HelpString = "Copy the selection to the clipboard",
 			Category = "Clipboard",
 		},
-		
+
 		["//cut"] =
 		{
 			Permission = "worldedit.clipboard.cut",
@@ -74,7 +74,7 @@ g_PluginInfo =
 			HelpString = "Cut the selection to the clipboard",
 			Category = "Clipboard",
 		},
-		
+
 		["//cyl"] =
 		{
 			Permission = "worldedit.generation.cylinder",
@@ -82,7 +82,7 @@ g_PluginInfo =
 			HelpString = "Generates a cylinder",
 			Category = "Generation",
 		},
-		
+
 		["//deselect"] =
 		{
 			Alias = "//desel",
@@ -91,7 +91,7 @@ g_PluginInfo =
 			HelpString = "Deselect the current selection",
 			Category = "Selection",
 		},
-		
+
 		["//distr"] =
 		{
 			Permission = "worldedit.selection.distr",
@@ -99,7 +99,7 @@ g_PluginInfo =
 			HelpString = "Inspect the block distribution of the current selection",
 			Category = "Selection",
 		},
-		
+
 		["//drain"] =
 		{
 			Permission = "worldedit.drain",
@@ -107,7 +107,7 @@ g_PluginInfo =
 			HelpString = "Drains all water around you in the given radius",
 			Category = "Terraforming",
 		},
-		
+
 		["//ellipsoid"] =
 		{
 			Permission = "worldedit.region.ellipsoid",
@@ -115,7 +115,7 @@ g_PluginInfo =
 			HelpString = "Creates an ellipsoid in the selected region",
 			Category = "Region",
 		},
-		
+
 		["//expand"] =
 		{
 			Permission = "worldedit.selection.expand",
@@ -123,7 +123,7 @@ g_PluginInfo =
 			HelpString = "Expand the selection area",
 			Category = "Selection",
 		},
-		
+
 		["//extinguish"] =
 		{
 			Alias = { "//ex", "//ext", "/ex", "/ext", "/extinguish", },
@@ -132,7 +132,7 @@ g_PluginInfo =
 			HelpString = "Removes all the fires around you in the given radius",
 			Category = "Terraforming",
 		},
-		
+
 		["//faces"] =
 		{
 			Alias = "//outline",
@@ -141,15 +141,15 @@ g_PluginInfo =
 			HelpString = " Build the walls, ceiling, and floor of a selection",
 			Category = "Region",
 		},
-		
-		["//fillr"] = 
+
+		["//fillr"] =
 		{
 			Permission = "worldedit.fill.recursive",
 			Handler = HandleFillrCommand,
 			HelpString = "Fill a hole recursively",
 			Category = "Terraforming"
 		},
-		
+
 		["//fill"] =
 		{
 			Permission = "worldedit.fill",
@@ -157,7 +157,7 @@ g_PluginInfo =
 			HelpString = "Fill a hole",
 			Category = "Terraforming",
 		},
-		
+
 		["//generate"] =
 		{
 			Alias = {"//g", "//gen"},
@@ -166,7 +166,7 @@ g_PluginInfo =
 			HelpString = "Generates a shape according to a formula",
 			Category = "Generation",
 		},
-		
+
 		["//green"] =
 		{
 			Alias = "/green",
@@ -175,7 +175,7 @@ g_PluginInfo =
 			HelpString = " Changes all the dirt to grass",
 			Category = "Terraforming",
 		},
-		
+
 		["//hcyl"] =
 		{
 			Permission = "worldedit.selection.cylinder",
@@ -183,7 +183,7 @@ g_PluginInfo =
 			HelpString = "Generates a hollow cylinder",
 			Category = "Generation",
 		},
-		
+
 		["//help"] =
 		{
 			Permission = "worldedit.help",
@@ -191,7 +191,7 @@ g_PluginInfo =
 			HelpString = "Sends all the available commands to the player",
 			Category = "Special",
 		},
-		
+
 		["//hpos1"] =
 		{
 			Permission = "worldedit.selection.pos",
@@ -199,7 +199,7 @@ g_PluginInfo =
 			HelpString = "Set position 1 to the position you are looking at",
 			Category = "Selection",
 		},
-		
+
 		["//hpos2"] =
 		{
 			Permission = "worldedit.selection.pos",
@@ -207,7 +207,7 @@ g_PluginInfo =
 			HelpString = "Set position 2 to the position you are looking at",
 			Category = "Selection",
 		},
-		
+
 		["//hpyramid"] =
 		{
 			Permission = "worldedit.generation.pyramid",
@@ -215,7 +215,7 @@ g_PluginInfo =
 			HelpString = "Generate a hollow pyramid",
 			Category = "Generation",
 		},
-		
+
 		["//hsphere"] =
 		{
 			Permission = "worldedit.generation.hsphere",
@@ -223,7 +223,7 @@ g_PluginInfo =
 			HelpString = "Generates a hollow sphere",
 			Category = "Generation",
 		},
-		
+
 		["//leafdecay"] =
 		{
 			Permission = "worldedit.region.leafdecay",
@@ -231,7 +231,7 @@ g_PluginInfo =
 			HelpString = "Removes all the leaves in the selection that would decay",
 			Category = "Region",
 		},
-		
+
 		["//loadsel"] =
 		{
 			Permission = "worldedit.selection.loadselection",
@@ -239,7 +239,7 @@ g_PluginInfo =
 			HelpString = "Loads a selection that was saved before",
 			Category = "Selection",
 		},
-		
+
 		["//mirror"] =
 		{
 			Permission = "worldedit.region.mirror",
@@ -254,7 +254,7 @@ g_PluginInfo =
 				},
 			},
 		},
-		
+
 		["//paste"] =
 		{
 			Permission = "worldedit.clipboard.paste",
@@ -262,7 +262,7 @@ g_PluginInfo =
 			HelpString = "Pastes the clipboard's contents",
 			Category = "Clipboard",
 		},
-		
+
 		["//pos1"] =
 		{
 			Permission = "worldedit.selection.pos",
@@ -270,7 +270,7 @@ g_PluginInfo =
 			HelpString = "Set position 1",
 			Category = "Selection",
 		},
-		
+
 		["//pos2"] =
 		{
 			Permission = "worldedit.selection.pos",
@@ -278,7 +278,7 @@ g_PluginInfo =
 			HelpString = "Set position 2",
 			Category = "Selection",
 		},
-		
+
 		["//pyramid"] =
 		{
 			Permission = "worldedit.generation.pyramid",
@@ -286,7 +286,7 @@ g_PluginInfo =
 			HelpString = "Generate a filled pyramid",
 			Category = "Generation",
 		},
-		
+
 		["//redo"] =
 		{
 			Alias = "/redo",
@@ -295,7 +295,7 @@ g_PluginInfo =
 			HelpString = "Redoes the last action (from history)",
 			Category = "History",
 		},
-		
+
 		["//replace"] =
 		{
 			Alias = { "//re", "//rep", },
@@ -304,7 +304,7 @@ g_PluginInfo =
 			HelpString = "Replace all the blocks in the selection with another",
 			Category = "Region",
 		},
-		
+
 		["//replacenear"] =
 		{
 			Alias = "/replacenear",
@@ -313,7 +313,7 @@ g_PluginInfo =
 			HelpString = "Replace nearby blocks",
 			Category = "Terraforming",
 		},
-		
+
 		["//rotate"] =
 		{
 			Permission = "worldedit.clipboard.rotate",
@@ -321,7 +321,7 @@ g_PluginInfo =
 			HelpString = "Rotates the contents of the clipboard",
 			Category = "Clipboard",
 		},
-		
+
 		["//savesel"] =
 		{
 			Permission = "worldedit.selection.saveselection",
@@ -329,7 +329,7 @@ g_PluginInfo =
 			HelpString = "Saves the current selection so it can be used later",
 			Category = "Selection",
 		},
-		
+
 		["//schematic"] =
 		{
 			Alias = "//schem",
@@ -373,7 +373,7 @@ g_PluginInfo =
 				},
 			},
 		},
-		
+
 		["//set"] =
 		{
 			Permission = "worldedit.region.set",
@@ -381,7 +381,7 @@ g_PluginInfo =
 			HelpString = "Set all the blocks inside the selection to a block",
 			Category = "Region",
 		},
-		
+
 		["//setbiome"] =
 		{
 			Permission = "worldedit.biome.set",
@@ -389,7 +389,7 @@ g_PluginInfo =
 			HelpString = "Set the biome of the region",
 			Category = "Biome",
 		},
-		
+
 		["//shift"] =
 		{
 			Permission = "worldedit.selection.size",
@@ -397,7 +397,7 @@ g_PluginInfo =
 			HelpString = "Move the selection area",
 			Category = "Selection",
 		},
-		
+
 		["//shrink"] =
 		{
 			Permission = "worldedit.selection.shrink",
@@ -405,7 +405,7 @@ g_PluginInfo =
 			HelpString = "Shrink the current selection to exclude air-only layers of the selection",
 			Category = "Selection"
 		},
-		
+
 		["//size"] =
 		{
 			Permission = "worldedit.selection.size",
@@ -413,7 +413,7 @@ g_PluginInfo =
 			HelpString = "Get the size of the selection",
 			Category = "Selection",
 		},
-		
+
 		["//snow"] =
 		{
 			Alias = "/snow",
@@ -422,7 +422,7 @@ g_PluginInfo =
 			HelpString = "Makes it look like it has snown",
 			Category = "Terraforming",
 		},
-		
+
 		["//sphere"] =
 		{
 			Permission = "worldedit.generation.sphere",
@@ -430,7 +430,7 @@ g_PluginInfo =
 			HelpString = "Generates a filled sphere",
 			Category = "Generation",
 		},
-		
+
 		["//stack"] =
 		{
 			Permission = "worldedit.region.stack",
@@ -438,7 +438,7 @@ g_PluginInfo =
 			HelpString = "Repeat the contents of the selection",
 			Category = "Region",
 		},
-		
+
 		["//thaw"] =
 		{
 			Alias = "/thaw",
@@ -447,7 +447,7 @@ g_PluginInfo =
 			HelpString = "Removes all the snow around you in the given radius",
 			Category = "Terraforming",
 		},
-		
+
 		["//undo"] =
 		{
 			Alias = "/undo",
@@ -456,7 +456,7 @@ g_PluginInfo =
 			HelpString = "Undoes the last action",
 			Category = "History",
 		},
-		
+
 		["//vmirror"] =
 		{
 			Permission = "worldedit.region.vmirror",
@@ -464,7 +464,7 @@ g_PluginInfo =
 			HelpString = "Mirrors the selection vertically",
 			Category = "Region",
 		},
-		
+
 		["//walls"] =
 		{
 			Permission = "worldedit.region.walls",
@@ -472,7 +472,7 @@ g_PluginInfo =
 			HelpString = "Build the four sides of the selection",
 			Category = "Region",
 		},
-		
+
 		["//wand"] =
 		{
 			Permission = "worldedit.wand",
@@ -480,10 +480,10 @@ g_PluginInfo =
 			HelpString = "Get the wand object",
 			Category = "Special",
 		},
-		
+
 ---------------------------------------------------------------------------------------------------
 -- Single-slash commands:
-		
+
 		["/.s"] =
 		{
 			Permission = "worldedit.scripting.execute",
@@ -491,16 +491,16 @@ g_PluginInfo =
 			HelpString = "Execute last CraftScript",
 			Category = "Scripting",
 		},
-		
+
 		["/ascend"] =
 		{
 			Alias = "/asc",
-			Permission = "worldedit.navigation.ascend", 
-			Handler = HandleAscendCommand, 
+			Permission = "worldedit.navigation.ascend",
+			Handler = HandleAscendCommand,
 			HelpString = "Go up a floor",
 			Category = "Navigation",
 		},
-		
+
 		["/biomeinfo"] =
 		{
 			Permission = "worldedit.biome.info",
@@ -508,7 +508,7 @@ g_PluginInfo =
 			HelpString = "Get the biome of the targeted block(s)",
 			Category = "Biome",
 		},
-		
+
 		["/biomelist"] =
 		{
 			Alias = "/biomels",
@@ -517,7 +517,7 @@ g_PluginInfo =
 			HelpString = "Gets all biomes available",
 			Category = "Biome",
 		},
-		
+
 		["/brush"] =
 		{
 			Alias = { "//brush", "/br", "//br", },
@@ -545,7 +545,7 @@ g_PluginInfo =
 				},
 			},
 		},
-		
+
 		["/butcher"] =
 		{
 			Permission = "worldedit.butcher",
@@ -553,7 +553,7 @@ g_PluginInfo =
 			HelpString = "Kills nearby mobs based on the given radius, if no radius is given it uses the default in configuration",
 			Category = "Entities",
 		},
-			
+
 		["/cs"] =
 		{
 			Permission = "worldedit.scripting.execute",
@@ -561,16 +561,16 @@ g_PluginInfo =
 			HelpString = "Execute a CraftScript",
 			Category = "Scripting",
 		},
-		
-		["/descend"] = 
+
+		["/descend"] =
 		{
 			Alias = "/desc",
 			Permission = "worldedit.navigation.descend",
-			Handler = HandleDescendCommand, 
+			Handler = HandleDescendCommand,
 			HelpString = "Go down a floor",
 			Category = "Navigation",
 		},
-		
+
 		["/farwand"] =
 		{
 			Permission = "worldedit.tool.farwand",
@@ -578,7 +578,7 @@ g_PluginInfo =
 			HelpString = "Use the wand from a distance",
 			Category = "Tool",
 		},
-		
+
 		["/jumpto"] =
 		{
 			Alias = "/j",
@@ -587,7 +587,7 @@ g_PluginInfo =
 			HelpString = "Teleport to a location",
 			Category = "Navigation",
 		},
-		
+
 		["/mask"] =
 		{
 			Permission = "worldedit.brush.options.mask",
@@ -595,22 +595,22 @@ g_PluginInfo =
 			HelpString = "Set the brush mask",
 			Category = "Brush",
 		},
-		
+
 		["/none"] =
 		{
 			Handler = HandleNoneCommand,
 			HelpString = "Unbind a bound tool from your current item",
 			Category = "Tool",
 		},
-		
+
 		["/pumpkins"] =
 		{
 			Permission = "worldedit.generation.pumpkins",
 			Handler = HandlePumpkinsCommand,
 			HelpString = "Generates pumpkins at the surface",
 			Category = "Terraforming",
-		},	
-		
+		},
+
 		["/remove"] =
 		{
 			Alias = { "/rem", "/rement", },
@@ -619,7 +619,7 @@ g_PluginInfo =
 			HelpString = "Removes all entities of a type",
 			Category = "Entities",
 		},
-		
+
 		["/removeabove"] =
 		{
 			Alias = "//removeabove",
@@ -628,7 +628,7 @@ g_PluginInfo =
 			HelpString = "Remove all the blocks above you",
 			Category = "Terraforming",
 		},
-		
+
 		["/removebelow"] =
 		{
 			Alias = "//removebelow",
@@ -637,7 +637,7 @@ g_PluginInfo =
 			HelpString = "Remove all the blocks below you",
 			Category = "Terraforming",
 		},
-		
+
 		["/repl"] =
 		{
 			Permission = "worldedit.tool.replacer",
@@ -645,7 +645,7 @@ g_PluginInfo =
 			HelpString = "Block replace tool",
 			Category = "Tool",
 		},
-		
+
 		["/thru"] =
 		{
 			Permission = "worldedit.navigation.thru.command",
@@ -653,7 +653,7 @@ g_PluginInfo =
 			HelpString = "Passthrough walls",
 			Category = "Navigation",
 		},
-		
+
 		["/toggleeditwand"] =
 		{
 			Permission = "worldedit.wand.toggle",
@@ -661,7 +661,7 @@ g_PluginInfo =
 			HelpString = "Toggle functionality of the edit wand",
 			Category = "Special",
 		},
-		
+
 		["/tool"] =
 		{
 			Permission = "",
@@ -715,7 +715,7 @@ g_PluginInfo =
 				},
 			},
 		},
-		
+
 		["/tree"] =
 		{
 			Permission = "worldedit.tool.tree",
@@ -723,7 +723,7 @@ g_PluginInfo =
 			HelpString = "Tree generator tool",
 			Category = "Tool",
 		},
-		
+
 		["/up"] =
 		{
 			Permission = "worldedit.navigation.up",
@@ -731,7 +731,7 @@ g_PluginInfo =
 			HelpString = "Go upwards some distance",
 			Category = "Navigation",
 		},
-		
+
 		["/we"] =
 		{
 			Alias = "/worldedit",
@@ -765,9 +765,9 @@ g_PluginInfo =
 				},
 			},
 		},
-		
+
 	},  -- Commands
-	
+
 	Categories =
 	{
 		Navigation =
@@ -815,7 +815,7 @@ g_PluginInfo =
 			Description = "Commands that don't realy fit in another category.",
 		},
 	},
-	
+
 	AdditionalInfo =
 	{
 		{
@@ -830,7 +830,3 @@ g_PluginInfo =
 		}
 	},  -- AdditionalInfo
 }
-
-
-
-

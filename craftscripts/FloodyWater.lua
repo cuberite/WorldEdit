@@ -1,6 +1,6 @@
 --[[
 	Floody simulator craftscript for WorldEdit (Cuberite)
-	
+
 	Permission needed for this script is "worldedit.scripting.execute" (By default) and "worldedit.craftscript.FloodyWater".
 	Usage: Select the region you want water to be simulated with the wand and then execute this script.
 ]]--
@@ -121,7 +121,7 @@ end
 while (WaterBlocks[1]) do
 	local OldWaterBlocks = WaterBlocks
 	WaterBlocks = {}
-	
+
 	for Idx, Coord in ipairs(OldWaterBlocks) do
 		if (Cuboid:IsInside(Coord.x, Coord.y - 1, Coord.z) and g_IsWashAble[BlockArea:GetRelBlockType(Coord.x, Coord.y - 1, Coord.z)] or IsWater(BlockArea:GetRelBlockType(Coord.x, Coord.y - 1, Coord.z))) then
 			BlockArea:SetRelBlockTypeMeta(Coord.x, Coord.y - 1, Coord.z, E_BLOCK_WATER, 8)
@@ -146,4 +146,3 @@ BlockArea:Write(World, SrcCuboid.p1.x, SrcCuboid.p1.y, SrcCuboid.p1.z, cBlockAre
 CallHook("OnAreaChanged", SrcCuboid, a_Player, World, "craftscript.FloodyWater")
 
 return true
-

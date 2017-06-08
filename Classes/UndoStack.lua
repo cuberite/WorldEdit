@@ -16,17 +16,17 @@ cUndoStack = {}
 function cUndoStack:new(a_Obj, a_MaxDepth, a_PlayerState)
 	assert(a_MaxDepth ~= nil)
 	assert(a_PlayerState ~= nil)
-	
+
 	-- Create the class instance:
 	a_Obj = a_Obj or {}
 	setmetatable(a_Obj, cUndoStack)
 	self.__index = self
-	
+
 	-- Initialize the object members:
 	a_Obj.MaxDepth = a_MaxDepth
 	a_Obj.UndoStack = {}
 	a_Obj.RedoStack = {}
-	
+
 	return a_Obj
 end
 
@@ -42,14 +42,14 @@ function cUndoStack:ApplySnapshot(a_SrcStack, a_DstStack, a_World)
 	assert(type(a_SrcStack) == "table")
 	assert(type(a_DstStack) == "table")
 	assert(a_World ~= nil)
-	
+
 	-- Find the src snapshot to apply:
 	local Src = self:PopLastSnapshotInWorld(a_SrcStack, a_World:GetName())
 	if (Src == nil) then
 		-- There's no snapshot to apply
 		return false, "No snapshot to apply"
 	end
-	
+
 	-- Save a snapshot to dst stack:
 	local MinX, MinY, MinZ = Src.Area:GetOrigin()
 	local MaxX = MinX + Src.Area:GetSizeX()
@@ -60,11 +60,11 @@ function cUndoStack:ApplySnapshot(a_SrcStack, a_DstStack, a_World)
 		return false, "Cannot backup the destination"
 	end
 	table.insert(a_DstStack, {WorldName = Src.WorldName, Area = BackupArea, Name = Src.Name})
-	
+
 	-- Write the src snapshot:
 	Src.Area:Write(a_World, MinX, MinY, MinZ)
 	a_World:WakeUpSimulatorsInArea(MinX - 1, MaxX + 1, MinY - 1, MaxY + 1, MinZ - 1, MaxZ + 1)
-	
+
 	-- Clean up memory used by the snapshot:
 	Src.Area:Clear()
 	return true
@@ -80,7 +80,7 @@ function cUndoStack:DropAllRedo()
 	for _, redo in ipairs(self.RedoStack) do
 		redo.Area:Clear()
 	end
-	
+
 	self.RedoStack = {}
 end
 
@@ -94,7 +94,7 @@ end
 function cUndoStack:PopLastSnapshotInWorld(a_Stack, a_WorldName)
 	assert(type(a_Stack) == "table")
 	assert(type(a_WorldName) == "string")
-	
+
 	-- Walk the snapshots most-recent-first, check worldname:
 	for idx = #a_Stack, 1, -1 do
 		if (a_Stack[idx].WorldName == a_WorldName) then
@@ -104,7 +104,7 @@ function cUndoStack:PopLastSnapshotInWorld(a_Stack, a_WorldName)
 			return res
 		end
 	end
-	
+
 	-- No matching snapshot found:
 	return nil
 end
@@ -121,13 +121,13 @@ end
 function cUndoStack:PushUndo(a_World, a_Area, a_Name)
 	assert(a_World ~= nil)
 	assert(a_Area ~= nil)
-	
+
 	-- Drop all Redo from the Redo stack (they have just been invalidated):
 	self:DropAllRedo()
-	
+
 	-- Push the new Undo onto the stack:
 	table.insert(self.UndoStack, {WorldName = a_World:GetName(), Area = a_Area, Name = a_Name})
-	
+
 	-- If the stack is too big, trim the oldest item:
 	if (#self.UndoStack > self.MaxDepth) then
 		-- Clear the area now so that it doesn't keep its blocktypes in memory until GC kicks in
@@ -147,7 +147,7 @@ end
 function cUndoStack:PushUndoFromCuboid(a_World, a_Cuboid, a_Name)
 	assert(tolua.type(a_World) == "cWorld")
 	assert(tolua.type(a_Cuboid) == "cCuboid")
-	
+
 	-- Read the area:
 	local Area = cBlockArea()
 	if not(Area:Read(
@@ -159,7 +159,7 @@ function cUndoStack:PushUndoFromCuboid(a_World, a_Cuboid, a_Name)
 	)) then
 		return false, "cannot read block area"
 	end
-	
+
 	-- Push the Undo:
 	self:PushUndo(a_World, Area, a_Name)
 	return true
@@ -186,7 +186,3 @@ function cUndoStack:Undo(a_World)
 	-- Apply one snapshot from UndoStack to RedoStack:
 	return self:ApplySnapshot(self.UndoStack, self.RedoStack, a_World)
 end
-
-
-
-

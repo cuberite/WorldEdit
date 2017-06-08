@@ -20,9 +20,5 @@ ignore =
 	"432",                               -- Shadowing upvalue argument
 	"531",                               -- Left-hand side of assignment is too short
 	"542",                               -- Empty if branch
-	"611",                               -- Line contains only whitespace
-	"612",                               -- Line contains trailing whitespace
-	"613",                               -- Trailing whitespace in a string
-	"614",                               -- Trailing whitespace in a comment
 	"631",                               -- Line too long
 }

@@ -15,17 +15,17 @@ function GetBlockTypeMeta(a_BlockString)
 		if (#ItemInfo ~= 2) then
 			return false
 		end
-		
+
 		a_BlockString = ItemInfo[2]
 	end
-	
+
 	local BlockID = tonumber(a_BlockString)
-	
+
 	-- Check if it was a normal number
 	if (BlockID) then
 		return BlockID, g_DefaultMetas[BlockID] or 0, true
 	end
-	
+
 	-- Check for block meta
 	local HasMeta = string.find(a_BlockString, ":")
 
@@ -67,13 +67,13 @@ end
 function ListChunksForCuboid(a_Cuboid)
 	-- Check the params:
 	assert(tolua.type(a_Cuboid) == "cCuboid")
-	
+
 	-- Get the min / max chunk coords:
 	local MinChunkX = math.floor(a_Cuboid.p1.x / 16)
 	local MinChunkZ = math.floor(a_Cuboid.p1.z / 16)
 	local MaxChunkX = math.floor((a_Cuboid.p2.x + 15.5) / 16)
 	local MaxChunkZ = math.floor((a_Cuboid.p2.z + 15.5) / 16)
-	
+
 	-- Create the coords table:
 	local res = {}
 	local idx = 1
@@ -81,7 +81,7 @@ function ListChunksForCuboid(a_Cuboid)
 		res[idx] = {x, z}
 		idx = idx + 1
 	end end
-	
+
 	return res
 end
 
@@ -95,15 +95,15 @@ function CountBlocksInCuboid(a_World, a_Cuboid, a_Mask)
 	if (not a_Cuboid:IsSorted()) then
 		a_Cuboid:Sort()
 	end
-	
+
 	-- Read the area:
 	local Area = cBlockArea()
 	Area:Read(a_World, a_Cuboid)
-	
+
 	-- Replace the blocks:
 	local SizeX, SizeY, SizeZ = Area:GetCoordRange()
 	local NumBlocks = 0
-	
+
 	for X = 0, SizeX do
 		for Y = 0, SizeY do
 			for Z = 0, SizeZ do
@@ -113,7 +113,7 @@ function CountBlocksInCuboid(a_World, a_Cuboid, a_Mask)
 			end
 		end
 	end
-	
+
 	return NumBlocks
 end
 
@@ -128,24 +128,24 @@ function FillWalls(a_PlayerState, a_Player, a_World, a_DstBlockTable)
 	if (CallHook("OnAreaChanging", a_PlayerState.Selection:GetSortedCuboid(), a_Player, a_World, "walls")) then
 		return
 	end
-	
+
 	-- Push an Undo onto the stack:
 	a_PlayerState:PushUndoInSelection(a_World, "walls")
 
 	local Area = cBlockArea()
 	local SrcCuboid = a_PlayerState.Selection:GetSortedCuboid()
-	
+
 	-- Read the area into a cBlockArea
 	Area:Read(a_World, SrcCuboid, cBlockArea.baTypes + cBlockArea.baMetas)
 	local SizeX, SizeY, SizeZ = Area:GetCoordRange()
-	
+
 	-- Place the walls
 	for Y = 0, SizeY do
 		for X = 0, SizeX do
 			Area:SetRelBlockTypeMeta(X, Y, 0, a_DstBlockTable:Get(X, Y, 0))
 			Area:SetRelBlockTypeMeta(X, Y, SizeZ, a_DstBlockTable:Get(X, Y, SizeZ))
 		end
-		
+
 		-- The X for loop already did the 0 coordinate and ZSize so we don't have to do that here
 		for Z = 1, SizeZ - 1 do
 			Area:SetRelBlockTypeMeta(0, Y, Z, a_DstBlockTable:Get(0, Y, Z))
@@ -156,9 +156,9 @@ function FillWalls(a_PlayerState, a_Player, a_World, a_DstBlockTable)
 	Area:Write(a_World, SrcCuboid.p1)
 	Area:Clear()
 	a_World:WakeUpSimulatorsInArea(SrcCuboid.p1.x - 1, SrcCuboid.p2.x + 1, SrcCuboid.p1.y - 1, SrcCuboid.p2.y + 1, SrcCuboid.p1.z - 1, SrcCuboid.p2.z + 1)
-	
+
 	CallHook("OnAreaChanged", a_PlayerState.Selection:GetSortedCuboid(), a_Player, a_World, "walls")
-	
+
 	-- Calculate the number of changed blocks:
 	local VolumeIncluding = (SizeX + 1) * (SizeY + 1) * (SizeZ + 1)  -- Volume of the cuboid INcluding the walls
 	local VolumeExcluding = (SizeX - 1) * (SizeY + 1) * (SizeZ - 1)  -- Volume of the cuboid EXcluding the walls
@@ -180,32 +180,32 @@ function FillFaces(a_PlayerState, a_Player, a_World, a_DstBlockTable)
 	if (CallHook("OnAreaChanging", a_PlayerState.Selection:GetSortedCuboid(), a_Player, a_World, "faces")) then
 		return
 	end
-	
+
 	-- Push an Undo onto the stack:
 	a_PlayerState:PushUndoInSelection(a_World, "faces")
 
 	-- Fill the faces:
 	local Area = cBlockArea()
 	local SrcCuboid = a_PlayerState.Selection:GetSortedCuboid()
-	
+
 	-- Read the area into a cBlockArea
 	Area:Read(a_World, SrcCuboid, cBlockArea.baTypes + cBlockArea.baMetas)
 	local SizeX, SizeY, SizeZ = Area:GetCoordRange()
-	
+
 	-- Place the walls
 	for Y = 0, SizeY do
 		for X = 0, SizeX do
 			Area:SetRelBlockTypeMeta(X, Y, 0, a_DstBlockTable:Get(X, Y, 0))
 			Area:SetRelBlockTypeMeta(X, Y, SizeZ, a_DstBlockTable:Get(X, Y, SizeZ))
 		end
-		
+
 		-- The X for loop already did the 0 coordinate and ZSize so we don't have to do that here
 		for Z = 1, SizeZ - 1 do
 			Area:SetRelBlockTypeMeta(0, Y, Z, a_DstBlockTable:Get(0, Y, Z))
 			Area:SetRelBlockTypeMeta(SizeX, Y, Z, a_DstBlockTable:Get(SizeX, Y, Z))
 		end
 	end
-	
+
 	-- Place the ceiling and floor
 	for Y = 0, SizeY, ((SizeY == 0 and 1) or SizeY) do
 		for X = 0, SizeX do
@@ -214,13 +214,13 @@ function FillFaces(a_PlayerState, a_Player, a_World, a_DstBlockTable)
 			end
 		end
 	end
-	
+
 	Area:Write(a_World, SrcCuboid.p1)
 	Area:Clear()
 	a_World:WakeUpSimulatorsInArea(SrcCuboid.p1.x - 1, SrcCuboid.p2.x + 1, SrcCuboid.p1.y - 1, SrcCuboid.p2.y + 1, SrcCuboid.p1.z - 1, SrcCuboid.p2.z + 1)
-	
+
 	CallHook("OnAreaChanged", a_PlayerState.Selection:GetSortedCuboid(), a_Player, a_World, "faces")
-	
+
 	-- Calculate the number of changed blocks:
 	local VolumeIncluding = (SizeX + 1) * (SizeY + 1) * (SizeZ + 1)  -- Volume of the cuboid INcluding the faces
 	local VolumeExcluding = (SizeX - 1) * (SizeY - 1) * (SizeZ - 1)  -- Volume of the cuboid EXcluding the faces
@@ -240,25 +240,25 @@ end
 function SetBlocksInCuboid(a_Player, a_Cuboid, a_DstBlockTable, a_Action)
 	-- If no action was given we use "fill" as a default.
 	a_Action = a_Action or "fill"
-	
+
 	-- Make sure the cuboid is sorted
 	if (not a_Cuboid:IsSorted()) then
 		a_Cuboid:Sort()
 	end
-	
+
 	local World = a_Player:GetWorld()
-	
+
 	-- Check with other plugins if the operation is okay:
 	if (CallHook("OnAreaChanging", a_Cuboid, a_Player, World, a_Action)) then
 		return
 	end
-	
+
 	-- Get the player state of the player
 	local State = GetPlayerState(a_Player)
-	
+
 	-- Push an Undo onto the stack:
 	State:PushUndoInSelection(World, a_Cuboid)
-	
+
 	-- Create a cBlockArea using the sizes of the cuboid
 	local Area = cBlockArea()
 	Area:Create(a_Cuboid:DifX() + 1, a_Cuboid:DifY() + 1, a_Cuboid:DifZ() + 1)
@@ -272,17 +272,17 @@ function SetBlocksInCuboid(a_Player, a_Cuboid, a_DstBlockTable, a_Action)
 			end
 		end
 	end
-	
+
 	-- Write the area in the world
 	Area:Write(World, a_Cuboid.p1)
 	Area:Clear()
-	
+
 	-- Notify the simulators
 	World:WakeUpSimulatorsInArea(a_Cuboid.p1.x, a_Cuboid.p2.x, a_Cuboid.p1.y, a_Cuboid.p2.y, a_Cuboid.p1.z, a_Cuboid.p2.z)
-	
+
 	-- Notify the plugins
 	CallHook("OnAreaChanged", a_Cuboid, a_Player, World, a_Action)
-	
+
 	return a_Cuboid:GetVolume()
 end
 
@@ -296,23 +296,23 @@ end
 function ReplaceBlocksInCuboid(a_Player, a_Cuboid, a_Mask, a_DstBlockTable, a_Action)
 	local State = GetPlayerState(a_Player)
 	local World = a_Player:GetWorld()
-	
+
 	-- Check with other plugins if the operation is okay:
 	if (CallHook("OnAreaChanging", a_Cuboid, a_Player, World, a_Action)) then
 		return
 	end
-	
+
 	-- Push an Undo onto the stack:
 	State.UndoStack:PushUndoFromCuboid(World, a_Cuboid)
 
 	-- Read the area to be replaced:
 	local Area = cBlockArea()
 	Area:Read(World, a_Cuboid)
-	
+
 	-- Replace the blocks:
 	local SizeX, SizeY, SizeZ = Area:GetCoordRange()
 	local NumBlocks = 0
-	
+
 	for X = 0, SizeX do
 		for Y = 0, SizeY do
 			for Z = 0, SizeZ do
@@ -323,13 +323,13 @@ function ReplaceBlocksInCuboid(a_Player, a_Cuboid, a_Mask, a_DstBlockTable, a_Ac
 			end
 		end
 	end
-	
+
 	-- Write the area back to world:
 	Area:Write(World, a_Cuboid.p1)
-	
+
 	CallHook("OnAreaChanged", a_Cuboid, a_Player, World, a_Action)
 	World:WakeUpSimulatorsInArea(a_Cuboid.p1.x, a_Cuboid.p2.x, a_Cuboid.p1.y, a_Cuboid.p2.y, a_Cuboid.p1.z, a_Cuboid.p2.z)
-	
+
 	return NumBlocks
 end
 
@@ -342,7 +342,7 @@ function RetrieveBlockTypes(Input)
 	if (RetrieveBlockTypesTemp[Input] ~= nil) then
 		return RetrieveBlockTypesTemp[Input]
 	end
-	
+
 	local RawDstBlockTable = StringSplit(Input, ",")
 	local BlockTable = {}
 	for Idx, Value in ipairs(RawDstBlockTable) do
@@ -355,19 +355,19 @@ function RetrieveBlockTypes(Input)
 			end
 			Chance = tonumber(SplittedValues[1])
 			Value = SplittedValues[2]
-			
+
 			if (Chance == nil) then
 				return false, Value
 			end
 		end
-		
+
 		local BlockType, BlockMeta, TypeOnly = GetBlockTypeMeta(Value)
 		if not(BlockType) then
 			return false, Value
 		end
 		table.insert(BlockTable, {BlockType = BlockType, BlockMeta = BlockMeta, TypeOnly = TypeOnly or false, Chance = Chance})
 	end
-	
+
 	RetrieveBlockTypesTemp[Input] = BlockTable
 	return BlockTable
 end
@@ -380,15 +380,15 @@ end
 -- If the string is #clipboard or #copy it returns cClipboardBlockTypeSource.
 function GetBlockDst(a_Blocks, a_Player)
 	local Handler, Error
-	
+
 	if (a_Blocks:sub(1, 1) == "#") then
 		if ((a_Blocks ~= "#clipboard") and (a_Blocks ~= "#copy")) then
 			return false, "#clipboard or #copy is acceptable for patterns starting with #"
 		end
-		
+
 		Handler, Error = cClipboardBlockTypeSource:new(a_Player)
 	end
-	
+
 	if (not Handler and not Error) then
 		local NumBlocks = #StringSplit(a_Blocks, ",")
 		if (NumBlocks == 1) then
@@ -397,18 +397,18 @@ function GetBlockDst(a_Blocks, a_Player)
 			Handler, Error = cRandomBlockTypeSource:new(a_Blocks)
 		end
 	end
-	
+
 	if (Error) then
 		return false, Error
 	end
-	
+
 	if (a_Player and not a_Player:HasPermission("worldedit.anyblock")) then
 		local DoesContain, DisallowedBlock = Handler:Contains(g_Config.Limits.DisallowedBlocks)
 		if (DoesContain) then
 			return false, DisallowedBlock .. " isn't allowed"
 		end
 	end
-	
+
 	return Handler
 end
 
@@ -462,42 +462,42 @@ end
 function CreateSphereInCuboid(a_Player, a_Cuboid, a_BlockTable, a_IsHollow, a_Mask)
 	local World = a_Player:GetWorld()
 	local ActionName = (a_IsHollow and "hsphere") or "sphere"
-	
+
 	-- Check if other plugins agree with the operation:
 	if (CallHook("OnAreaChanging", a_Cuboid, a_Player, World, ActionName)) then
 		return 0
 	end
-	
+
 	if (not a_Cuboid:IsSorted()) then
 		a_Cuboid:Sort()
 	end
-	
+
 	-- Create a table with all the chunks that will be affected
 	local AffectedChunks = ListChunksForCuboid(a_Cuboid)
-	
+
 	-- Variable that contains the ammount of blocks that have changed.
 	local NumAffectedBlocks = 0
-	
+
 	-- If the Y values are below 0 or above 255 we have to cut it off.
 	local CutBottom, CutTop = (a_Cuboid.p1.y > 0) and 0 or -a_Cuboid.p1.y, (a_Cuboid.p2.y < 255) and 0 or (a_Cuboid.p2.y - 255)
 	a_Cuboid:ClampY(0, 255)
-	
+
 	-- Push the area into an undo stack:
 	local State = GetPlayerState(a_Player)
 	State.UndoStack:PushUndoFromCuboid(World, a_Cuboid)
-	
+
 	local BlockArea = cBlockArea()
 	World:ChunkStay(AffectedChunks, nil,
 		function()
 			-- Read the area
 			BlockArea:Read(World, a_Cuboid, cBlockArea.baTypes + cBlockArea.baMetas)
-			
+
 			-- Add the missing layers so that the sphere generator generates a proper sphere.
 			BlockArea:Expand(0, 0, CutBottom, CutTop, 0, 0)
-			
+
 			-- Create the sphere in the blockarea
 			NumAffectedBlocks = cShapeGenerator.MakeSphere(BlockArea, a_BlockTable, a_IsHollow, a_Mask)
-			
+
 			-- Remove the layers that are above or under the minimum or maximum Y coordinates.
 			BlockArea:Crop(0, 0, CutBottom, CutTop, 0, 0)
 
@@ -505,7 +505,7 @@ function CreateSphereInCuboid(a_Player, a_Cuboid, a_BlockTable, a_IsHollow, a_Ma
 			BlockArea:Write(World, a_Cuboid.p1)
 		end
 	)
-	
+
 	CallHook("OnAreaChanged", a_Cuboid, a_Player, World, ActionName)
 	return NumAffectedBlocks
 end
@@ -524,50 +524,50 @@ end
 function CreateCylinderInCuboid(a_Player, a_Cuboid, a_BlockTable, a_IsHollow, a_Mask)
 	local World = a_Player:GetWorld()
 	local ActionName = (a_IsHollow and "hcyl") or "cyl"
-	
+
 	-- Check if other plugins agree with the operation:
 	if (CallHook("OnAreaChanging", a_Cuboid, a_Player, World, ActionName)) then
 		return 0
 	end
-	
+
 	if (not a_Cuboid:IsSorted()) then
 		a_Cuboid:Sort()
 	end
-	
+
 	-- Create a table with all the chunks that will be affected
 	local AffectedChunks = ListChunksForCuboid(a_Cuboid)
 
 	-- If the Y values are below 0 or above 255 we have to cut it off.
 	local CutBottom, CutTop = (a_Cuboid.p1.y > 0) and 0 or -a_Cuboid.p1.y, (a_Cuboid.p2.y < 255) and 0 or (a_Cuboid.p2.y - 255)
 	a_Cuboid:ClampY(0, 255)
-	
+
 	-- Push the area into an undo stack:
 	local State = GetPlayerState(a_Player)
 	State.UndoStack:PushUndoFromCuboid(World, a_Cuboid)
 
 	-- Variable that contains the ammount of blocks that have changed.
 	local NumAffectedBlocks = 0
-	
+
 	local BlockArea = cBlockArea()
 	World:ChunkStay(AffectedChunks, nil,
 		function()
 			-- Read the area
 			BlockArea:Read(World, a_Cuboid, cBlockArea.baTypes + cBlockArea.baMetas)
-			
+
 			-- Add the missing layers so that the sphere generator generates a proper sphere.
 			BlockArea:Expand(0, 0, CutBottom, CutTop, 0, 0)
-			
+
 			-- Create the cylinder in the blockarea
 			NumAffectedBlocks = cShapeGenerator.MakeCylinder(BlockArea, a_BlockTable, a_IsHollow, a_Mask)
 
 			-- Remove the layers that are above or under the minimum or maximum Y coordinates.
 			BlockArea:Crop(0, 0, CutBottom, CutTop, 0, 0)
-			
+
 			-- Write the area back to world:
 			BlockArea:Write(World, a_Cuboid.p1)
 		end
 	)
-	
+
 	CallHook("OnAreaChanged", a_Cuboid, a_Player, World, ActionName)
 	return NumAffectedBlocks
 end
@@ -587,11 +587,11 @@ function FillRecursively(a_Player, a_Cuboid, a_BlockDst, a_AllowUp)
 	if (CallHook("OnAreaChanging", a_Cuboid, a_Player, World, "fillr")) then
 		return 0
 	end
-	
+
 	-- Push the area into an undo stack:
 	local State = GetPlayerState(a_Player)
 	State.UndoStack:PushUndoFromCuboid(World, a_Cuboid)
-	
+
 	local blockArea = cBlockArea();
 	blockArea:Read(World, a_Cuboid, cBlockArea.baTypes + cBlockArea.baMetas);
 	local sizeX = a_Cuboid:DifX()
@@ -599,11 +599,11 @@ function FillRecursively(a_Player, a_Cuboid, a_BlockDst, a_AllowUp)
 	local sizeZ = a_Cuboid:DifZ()
 	local numBlocks = 0
 	local cache = {}
-	
+
 	local function MakeIndex(a_RelX, a_RelY, a_RelZ)
 		return a_RelX + (a_RelZ * sizeX) + (a_RelY * sizeX * sizeZ);
 	end
-	
+
 	local function IsInside(a_RelX, a_RelY, a_RelZ)
 		return not (
 			(a_RelX < 0) or (a_RelX > sizeX) or
@@ -611,27 +611,27 @@ function FillRecursively(a_Player, a_Cuboid, a_BlockDst, a_AllowUp)
 			(a_RelZ < 0) or (a_RelZ > sizeZ)
 		)
 	end
-	
+
 	local function Next(a_X, a_Y, a_Z, a_AllowSolid)
 		if (not IsInside(a_X, a_Y, a_Z)) then
 			return;
 		end
-		
+
 		local index = MakeIndex(a_X, a_Y, a_Z)
 		if (cache[index]) then
 			-- We already got to this block before.
 			return;
 		end
 		cache[index] = true
-		
+
 		local isSolid = cBlockInfo:IsSolid(blockArea:GetRelBlockType(a_X, a_Y, a_Z));
 		if (not isSolid) then
 			numBlocks = numBlocks + 1
 			blockArea:SetRelBlockTypeMeta(a_X, a_Y, a_Z, a_BlockDst:Get(a_X, a_Y, a_Z));
 		end
-		
+
 		if ((not isSolid) or a_AllowSolid) then
-			Next(a_X + 1, a_Y, a_Z) 
+			Next(a_X + 1, a_Y, a_Z)
 			Next(a_X - 1, a_Y, a_Z)
 			Next(a_X, a_Y, a_Z - 1)
 			Next(a_X, a_Y, a_Z + 1)
@@ -641,10 +641,10 @@ function FillRecursively(a_Player, a_Cuboid, a_BlockDst, a_AllowUp)
 			end
 		end
 	end
-	
+
 	Next(math.floor(sizeX / 2), sizeY, math.floor(sizeZ / 2), true);
 	blockArea:Write(World, a_Cuboid.p1)
-	
+
 	CallHook("OnAreaChanged", a_Cuboid, a_Player, World, "fillr")
 	return numBlocks
 end
@@ -663,11 +663,11 @@ function FillNormal(a_Player, a_Cuboid, a_BlockDst)
 	if (CallHook("OnAreaChanging", a_Cuboid, a_Player, World, "fill")) then
 		return 0
 	end
-	
+
 	-- Push the area into an undo stack:
 	local State = GetPlayerState(a_Player)
 	State.UndoStack:PushUndoFromCuboid(World, a_Cuboid)
-	
+
 	local blockArea = cBlockArea();
 	blockArea:Read(World, a_Cuboid, cBlockArea.baTypes + cBlockArea.baMetas);
 	local sizeX = a_Cuboid:DifX()
@@ -675,30 +675,30 @@ function FillNormal(a_Player, a_Cuboid, a_BlockDst)
 	local sizeZ = a_Cuboid:DifZ()
 	local numBlocks = 0
 	local cache = {}
-	
+
 	local function MakeIndex(a_RelX, a_RelZ)
 		return a_RelX + (a_RelZ * sizeX);
 	end
-	
+
 	local function IsInside(a_RelX, a_RelZ)
 		return not (
 			(a_RelX < 0) or (a_RelX > sizeX) or
 			(a_RelZ < 0) or (a_RelZ > sizeZ)
 		)
 	end
-	
+
 	local function Next(a_RelX, a_RelZ, a_AllowSolid)
 		if (not IsInside(a_RelX, a_RelZ)) then
 			return;
 		end
-		
+
 		local index = MakeIndex(a_RelX, a_RelZ);
 		if (cache[index]) then
 			-- We've already got to this block before.
 			return;
 		end
 		cache[index] = true;
-		
+
 		local didPlaceColumn = false;
 		for y = sizeY, 0, -1 do
 			local isSolid = cBlockInfo:IsSolid(blockArea:GetRelBlockType(a_RelX, y, a_RelZ));
@@ -710,7 +710,7 @@ function FillNormal(a_Player, a_Cuboid, a_BlockDst)
 				break;
 			end
 		end
-		
+
 		if (didPlaceColumn or a_AllowSolid) then
 			Next(a_RelX + 1, a_RelZ);
 			Next(a_RelX - 1, a_RelZ);
@@ -718,10 +718,10 @@ function FillNormal(a_Player, a_Cuboid, a_BlockDst)
 			Next(a_RelX, a_RelZ + 1);
 		end
 	end
-	
+
 	Next(math.floor(sizeX / 2), math.floor(sizeZ / 2), true);
 	blockArea:Write(World, a_Cuboid.p1);
-	
+
 	CallHook("OnAreaChanged", a_Cuboid, a_Player, World, "fill");
 	return numBlocks;
 end
@@ -736,7 +736,7 @@ function RightClickCompass(a_Player)
 	local World = a_Player:GetWorld()
 	local FreeSpot = nil
 	local WentThroughBlock = false
-	
+
 	local Callbacks = {
 		OnNextBlock = function(a_X, a_Y, a_Z, a_BlockType, a_BlockMeta)
 			if (cBlockInfo:IsSolid(a_BlockType)) then
@@ -744,33 +744,33 @@ function RightClickCompass(a_Player)
 				WentThroughBlock = true
 				return false
 			end
-			
+
 			if (not WentThroughBlock) then
 				-- The block isn't solid, but we didn't go through a solid block yet. Bail out.
 				return false
 			end
-			
+
 			-- Found a block that is not a solid block, but it already went through a solid block.
 			FreeSpot = Vector3i(a_X, a_Y, a_Z)
 			return true
 		end;
 	};
-	
+
 	local EyePos = a_Player:GetEyePosition()
 	local LookVector = a_Player:GetLookVector()
-	LookVector:Normalize()	
-	
+	LookVector:Normalize()
+
 	-- Start the trace at the position of the eyes
 	local Start = EyePos
 	local End = EyePos + LookVector * g_Config.NavigationWand.MaxDistance
-	
+
 	cLineBlockTracer.Trace(World, Callbacks, Start.x, Start.y, Start.z, End.x, End.y, End.z)
-	
+
 	if (not FreeSpot) then
 		a_Player:SendMessage(cChatColor.Rose .. "Nothing to pass through!")
 		return false
 	end
-	
+
 	-- Teleport the player to the first solid block below the found coordinates
 	for y = FreeSpot.y, 0, -1 do
 		local BlockType = World:GetBlock(FreeSpot.x, y, FreeSpot.z)
@@ -779,7 +779,7 @@ function RightClickCompass(a_Player)
 			return true
 		end
 	end
-	
+
 	-- No solid block below the found coordinates was found. Don't teleport the player at all.
 	return false
 end
@@ -792,31 +792,31 @@ end
 -- returns true if the player is teleported, returns false otherwise.
 function LeftClickCompass(a_Player)
 	local World = a_Player:GetWorld()
-	
+
 	-- The first solid block to be found in the trace
 	local BlockPos = false
-	
+
 	-- Callback that checks whether the block on the traced line is non-solid:
 	local Callbacks = {
 		OnNextBlock = function(a_X, a_Y, a_Z, a_BlockType, a_BlockMeta)
 			if (not cBlockInfo:IsSolid(a_BlockType)) then
 				return false
 			end
-			
+
 			BlockPos = Vector3i(a_X, a_Y, a_Z)
 			return true
 		end
 	};
-	
+
 	-- Trace the line from the player's eyes in their look direction:
 	local EyePos = a_Player:GetEyePosition()
 	local LookVector = a_Player:GetLookVector()
 	LookVector:Normalize()
-	
+
 	local Start = EyePos
 	local End = EyePos + LookVector * g_Config.NavigationWand.MaxDistance
 	cLineBlockTracer.Trace(World, Callbacks, Start.x, Start.y, Start.z, End.x, End.y, End.z)
-	
+
 	-- If no block has been hit, teleport the player to the last checked block location (known non-solid):
 	if (not BlockPos) then
 		-- If configurated teleport the player to the last coordinates, otherwise send a message that it's too far.
@@ -825,15 +825,15 @@ function LeftClickCompass(a_Player)
 		else
 			a_Player:SendMessage(cChatColor.Rose .. "No block in sight (or too far)!")
 		end
-		
+
 		return g_Config.NavigationWand.TeleportNoHit
 	end
-	
+
 	local IsValid, Height = World:TryGetHeight(BlockPos.x, BlockPos.z)
 	if (not IsValid) then
 		return false
 	end
-	
+
 	-- Find a block that isn't solid. The first one we find we teleport the player to.
 	local LastBlock;
 	for Y = BlockPos.y, Height do
@@ -844,7 +844,7 @@ function LeftClickCompass(a_Player)
 		end
 		LastBlock = BlockType
 	end
-	
+
 	-- No non-solid block was found. This can happen when for example the highest block is 255.
 	a_Player:TeleportToCoords(BlockPos.x + 0.5, Height + cBlockInfo:GetBlockHeight(World:GetBlock(BlockPos.x, Height, BlockPos.z)), BlockPos.z + 0.5)
 	return true
@@ -860,13 +860,13 @@ end
 function HPosSelect(a_Player, a_MaxDistance)
 	assert(tolua.type(a_Player) == "cPlayer")
 	a_MaxDistance = a_MaxDistance or 150
-	
+
 	-- Prepare the vectors to be used for the tracing:
 	local Start = a_Player:GetEyePosition()
 	local LookVector = a_Player:GetLookVector()
 	LookVector:Normalize()
 	local End = Start + LookVector * a_MaxDistance
-	
+
 	-- The callback checks the blocktype of the hit, saves coords if true hit and aborts:
 	local hpos = nil
 	local Callbacks =
@@ -878,7 +878,7 @@ function HPosSelect(a_Player, a_MaxDistance)
 			end
 		end
 	}
-	
+
 	-- Trace:
 	if (cLineBlockTracer.Trace(a_Player:GetWorld(), Callbacks, Start.x, Start.y, Start.z, End.x, End.y, End.z)) then
 		-- Nothing reached within the distance, return nil for failure
@@ -886,7 +886,3 @@ function HPosSelect(a_Player, a_MaxDistance)
 	end
 	return hpos
 end
-
-
-
-

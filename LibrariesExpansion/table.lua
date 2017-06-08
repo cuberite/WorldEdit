@@ -16,7 +16,7 @@ function table.isarray(a_Table)
 			return false
 		end
 	end
-	
+
 	return true
 end
 
@@ -49,7 +49,3 @@ function table.todictionary(a_Table)
 	end
 	return res
 end
-
-
-
-

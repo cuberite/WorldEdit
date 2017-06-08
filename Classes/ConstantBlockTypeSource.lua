@@ -18,15 +18,15 @@ function cConstantBlockTypeSource:new(a_BlockString)
 	if (not BlockType) then
 		return false, a_BlockString -- On error the blockmeta is the block that isn't valid
 	end
-	
+
 	local Obj = {}
-	
+
 	setmetatable(Obj, cConstantBlockTypeSource)
 	self.__index = self
-	
+
 	Obj.m_BlockType = BlockType
 	Obj.m_BlockMeta = BlockMeta
-	
+
 	return Obj
 end
 
@@ -50,7 +50,3 @@ function cConstantBlockTypeSource:Contains(a_BlockTypeList)
 	end
 	return false
 end
-
-
-
-
