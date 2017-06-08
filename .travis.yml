@@ -1,0 +1,15 @@
+sudo: false
+
+addons:
+  apt:
+    packages:
+    - lua5.1
+    - luarocks
+
+install:
+  - luarocks --local install luafilesystem
+  - luarocks --local install luacheck
+  - wget -O $TRAVIS_BUILD_DIR/.luacheckrc --no-check-certificate https://builds.cuberite.org/job/Cuberite%20Windows%20x64%20Master/lastSuccessfulBuild/artifact/Server/.luacheckrc
+
+script:
+  - cd $TRAVIS_BUILD_DIR && ~/.luarocks/bin/luacheck . --codes
