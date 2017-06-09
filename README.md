@@ -74,6 +74,7 @@ Commands that helps the player moving to locations.
 | Command | Permission | Description |
 | ------- | ---------- | ----------- |
 |/ascend | worldedit.navigation.ascend | Go up a floor|
+|/ceil | worldedit.navigation.ceiling | Go to the celing|
 |/descend | worldedit.navigation.descend | Go down a floor|
 |/jumpto | worldedit.navigation.jumpto.command | Teleport to a location|
 |/thru | worldedit.navigation.thru.command | Passthrough walls|
@@ -164,6 +165,8 @@ Commands that help you Modifying the terrain.
 | ------- | ---------- | ----------- |
 |//drain | worldedit.drain | Drains all water around you in the given radius|
 |//extinguish | worldedit.extinguish | Removes all the fires around you in the given radius|
+|//fill | worldedit.fill | Fill a hole|
+|//fillr | worldedit.fill.recursive | Fill a hole recursively|
 |//green | worldedit.green |  Changes all the dirt to grass|
 |//replacenear | worldedit.replacenear | Replace nearby blocks|
 |//snow | worldedit.snow | Makes it look like it has snown|
@@ -210,6 +213,8 @@ Commands that activate a tool. If a tool is activated you can use it by right or
 | worldedit.clipboard.rotate |  | `//rotate` |  |
 | worldedit.drain |  | `//drain` |  |
 | worldedit.extinguish |  | `//extinguish` |  |
+| worldedit.fill |  | `//fill` |  |
+| worldedit.fill.recursive |  | `//fillr` |  |
 | worldedit.generation.cylinder |  | `//cyl` |  |
 | worldedit.generation.hsphere |  | `//hsphere` |  |
 | worldedit.generation.pumpkins |  | `/pumpkins` |  |
@@ -221,6 +226,7 @@ Commands that activate a tool. If a tool is activated you can use it by right or
 | worldedit.history.redo |  | `//redo` |  |
 | worldedit.history.undo |  | `//undo` |  |
 | worldedit.navigation.ascend |  | `/ascend` |  |
+| worldedit.navigation.ceiling |  | `/ceil` |  |
 | worldedit.navigation.descend |  | `/descend` |  |
 | worldedit.navigation.jumpto.command |  | `/jumpto` |  |
 | worldedit.navigation.thru.command |  | `/thru` |  |
@@ -251,7 +257,7 @@ Commands that activate a tool. If a tool is activated you can use it by right or
 | worldedit.selection.distr |  | `//distr` |  |
 | worldedit.selection.expand |  | `//expand` |  |
 | worldedit.selection.loadselection |  | `//loadsel` |  |
-| worldedit.selection.pos |  | `//hpos1`, `//hpos2`, `//pos2`, `//pos1` |  |
+| worldedit.selection.pos |  | `//hpos1`, `//hpos2`, `//pos1`, `//pos2` |  |
 | worldedit.selection.saveselection |  | `//savesel` |  |
 | worldedit.selection.shrink |  | `//shrink` |  |
 | worldedit.selection.size |  | `//size`, `//shift` |  |
