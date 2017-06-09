@@ -5,7 +5,6 @@
 -- Doc: http://luacheck.readthedocs.io/en/stable/warnings.html
 ignore =
 {
-	"113",                               -- Accessing undefined variable
 	"122",                               -- Mutating read-only global variable
 	"131",                               -- Unused global variable
 	"142",                               -- Setting undefined field of global math, string, table

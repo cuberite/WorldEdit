@@ -56,7 +56,7 @@ local function cSQLStorage_new()
 	Obj.DB, ErrorCode, ErrorMsg = sqlite3.open(PluginRoot .. "/Storage/storage.sqlite")
 	if (Obj.DB == nil) then
 		LOGWARNING("Database could not be opened. Aborting");
-		error(ErrMsg);  -- Abort the plugin
+		error(ErrorMsg);  -- Abort the plugin
 	end
 
 	-- Get the version of the database
@@ -165,7 +165,7 @@ function cSQLStorage:ExecuteStatement(a_Sql, a_Parameters, a_Callback)
 	local Stmt, ErrCode, ErrMsg = self.DB:prepare(a_Sql)
 	if (not Stmt) then
 		LOGWARNING("Cannot prepare query >>" .. a_Sql .. "<<: " .. (ErrCode or "<unknown>") .. " (" .. (ErrMsg or "<no message>") .. ")")
-		return false, ErrorMsg or "<no message>"
+		return false, ErrMsg or "<no message>"
 	end
 
 	if (a_Parameters ~= nil) then
