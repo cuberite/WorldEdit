@@ -554,6 +554,14 @@ g_PluginInfo =
 			Category = "Entities",
 		},
 
+		["/ceil"] =
+		{
+			Permission = "worldedit.navigation.ceiling",
+			Handler = HandleCeilCommand,
+			HelpString = "Go to the celing",
+			Category = "Navigation",
+		},
+
 		["/cs"] =
 		{
 			Permission = "worldedit.scripting.execute",
