@@ -136,7 +136,7 @@ function FillWalls(a_PlayerState, a_Player, a_World, a_DstBlockTable)
 	local SrcCuboid = a_PlayerState.Selection:GetSortedCuboid()
 
 	-- Read the area into a cBlockArea
-	Area:Read(a_World, SrcCuboid, cBlockArea.baTypes + cBlockArea.baMetas)
+	Area:Read(a_World, SrcCuboid)
 	local SizeX, SizeY, SizeZ = Area:GetCoordRange()
 
 	-- Place the walls
@@ -189,7 +189,7 @@ function FillFaces(a_PlayerState, a_Player, a_World, a_DstBlockTable)
 	local SrcCuboid = a_PlayerState.Selection:GetSortedCuboid()
 
 	-- Read the area into a cBlockArea
-	Area:Read(a_World, SrcCuboid, cBlockArea.baTypes + cBlockArea.baMetas)
+	Area:Read(a_World, SrcCuboid)
 	local SizeX, SizeY, SizeZ = Area:GetCoordRange()
 
 	-- Place the walls
@@ -490,7 +490,7 @@ function CreateSphereInCuboid(a_Player, a_Cuboid, a_BlockTable, a_IsHollow, a_Ma
 	World:ChunkStay(AffectedChunks, nil,
 		function()
 			-- Read the area
-			BlockArea:Read(World, a_Cuboid, cBlockArea.baTypes + cBlockArea.baMetas)
+			BlockArea:Read(World, a_Cuboid)
 
 			-- Add the missing layers so that the sphere generator generates a proper sphere.
 			BlockArea:Expand(0, 0, CutBottom, CutTop, 0, 0)
@@ -552,7 +552,7 @@ function CreateCylinderInCuboid(a_Player, a_Cuboid, a_BlockTable, a_IsHollow, a_
 	World:ChunkStay(AffectedChunks, nil,
 		function()
 			-- Read the area
-			BlockArea:Read(World, a_Cuboid, cBlockArea.baTypes + cBlockArea.baMetas)
+			BlockArea:Read(World, a_Cuboid)
 
 			-- Add the missing layers so that the sphere generator generates a proper sphere.
 			BlockArea:Expand(0, 0, CutBottom, CutTop, 0, 0)
@@ -593,7 +593,7 @@ function FillRecursively(a_Player, a_Cuboid, a_BlockDst, a_AllowUp)
 	State.UndoStack:PushUndoFromCuboid(World, a_Cuboid)
 
 	local blockArea = cBlockArea();
-	blockArea:Read(World, a_Cuboid, cBlockArea.baTypes + cBlockArea.baMetas);
+	blockArea:Read(World, a_Cuboid);
 	local sizeX = a_Cuboid:DifX()
 	local sizeY = a_Cuboid:DifY()
 	local sizeZ = a_Cuboid:DifZ()
@@ -669,7 +669,7 @@ function FillNormal(a_Player, a_Cuboid, a_BlockDst)
 	State.UndoStack:PushUndoFromCuboid(World, a_Cuboid)
 
 	local blockArea = cBlockArea();
-	blockArea:Read(World, a_Cuboid, cBlockArea.baTypes + cBlockArea.baMetas);
+	blockArea:Read(World, a_Cuboid);
 	local sizeX = a_Cuboid:DifX()
 	local sizeY = a_Cuboid:DifY()
 	local sizeZ = a_Cuboid:DifZ()

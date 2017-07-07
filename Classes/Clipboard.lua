@@ -38,8 +38,7 @@ function cClipboard:Copy(a_World, a_Cuboid, a_Offset)
 	self.Area:Read(a_World,
 		a_Cuboid.p1.x, a_Cuboid.p2.x,
 		a_Cuboid.p1.y, a_Cuboid.p2.y,
-		a_Cuboid.p1.z, a_Cuboid.p2.z,
-		cBlockArea.baTypes + cBlockArea.baMetas
+		a_Cuboid.p1.z, a_Cuboid.p2.z
 	)
 	self.Area:SetWEOffset(Offset)
 
