@@ -488,7 +488,7 @@ function HandleRemoveColumnCommand(a_Split, a_Player)
 
 	-- Clear the blocks by writing an empty cBlockArea over them:
 	local Area = cBlockArea()
-	Area:Create(Cuboid:DifX() + 1, Cuboid:DifY() + 1, Cuboid:DifZ() + 1, cBlockArea.baTypes + cBlockArea.baMetas)
+	Area:Create(Cuboid:DifX() + 1, Cuboid:DifY() + 1, Cuboid:DifZ() + 1)
 	Area:Write(World, Cuboid.p1)
 	Area:Clear()
 
