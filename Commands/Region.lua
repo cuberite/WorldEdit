@@ -228,7 +228,7 @@ function HandleLeafDecayCommand(a_Split, a_Player)
 	)
 
 	local BA = cBlockArea()
-	BA:Read(World, SrcCuboid, cBlockArea.baTypes + cBlockArea.baMetas)
+	BA:Read(World, SrcCuboid)
 
 	local BA2 = cBlockArea()
 	BA2:CopyFrom(BA)
@@ -288,7 +288,7 @@ function HandleLeafDecayCommand(a_Split, a_Player)
 		end
 	end
 
-	BA2:Write(World, SrcCuboid.p1, cBlockArea.baTypes + cBlockArea.baMetas)
+	BA2:Write(World, SrcCuboid.p1)
 
 	-- Notify the changes to other plugins
 	CallHook("OnAreaChanged", SrcCuboid, a_Player, World, "leafdecay")
@@ -341,9 +341,9 @@ function HandleMirrorCommand(a_Split, a_Player)
 	local Area = cBlockArea()
 	local Selection = cCuboid(State.Selection.Cuboid)  -- Make a copy of the selection cuboid
 	Selection:Sort()
-	Area:Read(World, Selection, cBlockArea.baTypes + cBlockArea.baMetas)
+	Area:Read(World, Selection)
 	MirrorFn(Area)
-	Area:Write(World, Selection.p1, cBlockArea.baTypes + cBlockArea.baMetas)
+	Area:Write(World, Selection.p1)
 
 	-- Notify other plugins of the change in the world
 	CallHook("OnAreaChanged", SrcCuboid, a_Player, World, "mirror")
@@ -381,7 +381,7 @@ function HandleStackCommand(a_Split, a_Player)
 
 	-- Read the selection
 	local BA = cBlockArea()
-	BA:Read(World, SelectionCuboid, cBlockArea.baTypes + cBlockArea.baMetas)
+	BA:Read(World, SelectionCuboid)
 
 	local VectorDirection = Vector3i()
 	local LookDirection = math.round((a_Player:GetYaw() + 180) / 90)
@@ -460,7 +460,7 @@ function HandleStackCommand(a_Split, a_Player)
 	-- Stack the selection in the given Direction.
 	local Pos = SelectionCuboid.p1 + VectorDirection
 	for I=1, NumStacks do
-		BA:Write(World, Pos, cBlockArea.baTypes + cBlockArea.baMetas)
+		BA:Write(World, Pos)
 		Pos = Pos + VectorDirection
 	end
 
@@ -585,9 +585,9 @@ function HandleVMirrorCommand(a_Split, a_Player)
 	local Area = cBlockArea()
 	local Selection = cCuboid(State.Selection.Cuboid)  -- Make a copy of the selection cuboid
 	Selection:Sort()
-	Area:Read(World, Selection, cBlockArea.baTypes + cBlockArea.baMetas)
+	Area:Read(World, Selection)
 	Area:MirrorXZ()
-	Area:Write(World, Selection.p1, cBlockArea.baTypes + cBlockArea.baMetas)
+	Area:Write(World, Selection.p1)
 
 	-- Notify the plugins of the succes
 	CallHook("OnAreaChanged", SrcCuboid, a_Player, World, "vmirror")

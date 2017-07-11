@@ -56,7 +56,7 @@ function cUndoStack:ApplySnapshot(a_SrcStack, a_DstStack, a_World)
 	local MaxY = MinY + Src.Area:GetSizeY()
 	local MaxZ = MinZ + Src.Area:GetSizeZ()
 	local BackupArea = cBlockArea()
-	if not(BackupArea:Read(a_World, MinX, MaxX, MinY, MaxY, MinZ, MaxZ, cBlockArea.baTypes + cBlockArea.baMetas)) then
+	if not(BackupArea:Read(a_World, MinX, MaxX, MinY, MaxY, MinZ, MaxZ)) then
 		return false, "Cannot backup the destination"
 	end
 	table.insert(a_DstStack, {WorldName = Src.WorldName, Area = BackupArea, Name = Src.Name})
@@ -154,8 +154,7 @@ function cUndoStack:PushUndoFromCuboid(a_World, a_Cuboid, a_Name)
 		a_World,
 		a_Cuboid.p1.x, a_Cuboid.p2.x,
 		a_Cuboid.p1.y, a_Cuboid.p2.y,
-		a_Cuboid.p1.z, a_Cuboid.p2.z,
-		cBlockArea.baTypes + cBlockArea.baMetas
+		a_Cuboid.p1.z, a_Cuboid.p2.z
 	)) then
 		return false, "cannot read block area"
 	end

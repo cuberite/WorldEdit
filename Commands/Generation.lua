@@ -340,7 +340,7 @@ function HandlePyramidCommand(a_Split, a_Player)
 	local BlockArea = cBlockArea()
 
 	-- Read the affected area from the world.
-	BlockArea:Read(World, Cuboid, cBlockArea.baTypes + cBlockArea.baMetas)
+	BlockArea:Read(World, Cuboid)
 
 	-- Get the mask for the equipped item
 	local Mask = State.ToolRegistrator:GetMask(a_Player:GetEquippedItem().m_ItemType)

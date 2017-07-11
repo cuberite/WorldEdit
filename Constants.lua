@@ -16,6 +16,7 @@ g_DefaultMetas = {
 	[E_BLOCK_FURNACE]            = 2,
 	[E_BLOCK_LADDER]             = 2,
 	[E_BLOCK_LIT_FURNACE]        = 2,
+	[E_BLOCK_NETHER_PORTAL]      = 1,
 	[E_BLOCK_TORCH]              = 1,
 	[E_BLOCK_TRAPPED_CHEST]      = 2,
 	[E_BLOCK_REDSTONE_TORCH_ON]  = 1,

@@ -56,7 +56,7 @@ function cClipboard:Cut(a_World, a_Cuboid, a_Offset)
 
 	-- Replace everything with air:
 	local Area = cBlockArea()
-	Area:Create(a_Cuboid:DifX() + 1, a_Cuboid:DifY() + 1, a_Cuboid:DifZ() + 1, cBlockArea.baTypes + cBlockArea.baMetas)
+	Area:Create(a_Cuboid:DifX() + 1, a_Cuboid:DifY() + 1, a_Cuboid:DifZ() + 1)
 	Area:Write(a_World, a_Cuboid.p1.x, a_Cuboid.p1.y, a_Cuboid.p1.z)
 
 	-- Wake up the simulators in the area:
