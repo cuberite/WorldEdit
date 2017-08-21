@@ -250,9 +250,9 @@ end
 function cPlayerSelection:GetSortedCuboid()
 	assert(self:IsValid())
 
-	local SCuboid = cCuboid(self.Cuboid)
+	local SCuboid = self.Cuboid
 	SCuboid:Sort()
-	return SCuboid;
+	return SCuboid
 end
 
 
