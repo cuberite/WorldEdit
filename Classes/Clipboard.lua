@@ -60,11 +60,10 @@ function cClipboard:Cut(a_World, a_Cuboid, a_Offset)
 	Area:Write(a_World, a_Cuboid.p1.x, a_Cuboid.p1.y, a_Cuboid.p1.z)
 
 	-- Wake up the simulators in the area:
-	a_World:WakeUpSimulatorsInArea(
-		a_Cuboid.p1.x - 1, a_Cuboid.p2.x + 1,
-		a_Cuboid.p1.y - 1, a_Cuboid.p2.y + 1,
-		a_Cuboid.p1.z - 1, a_Cuboid.p2.z + 1
-	)
+	a_World:WakeUpSimulatorsInArea(cCuboid(
+		Vector3i(a_Cuboid.p1.x - 1, a_Cuboid.p1.y - 1, a_Cuboid.p1.z - 1),
+		Vector3i(a_Cuboid.p2.x + 1, a_Cuboid.p2.y + 1, a_Cuboid.p2.z + 1)
+	))
 
 	return self.Area:GetVolume()
 end
@@ -87,7 +86,7 @@ function cClipboard:GetPasteDestCuboid(a_Player, a_UseOffset)
 	end
 
 	local XSize, YSize, ZSize = self.Area:GetSize()
-	return cCuboid(MinX, MinY, MinZ, MinX + XSize, MinY + YSize, MinZ + ZSize)
+	return cCuboid(Vector3i(MinX, MinY, MinZ), Vector3i(MinX + XSize, MinY + YSize, MinZ + ZSize))
 end
 
 
@@ -146,11 +145,10 @@ function cClipboard:Paste(a_Player, a_DstPoint)
 
 	-- Wake up simulators in the area:
 	local XSize, YSize, ZSize = self.Area:GetSize()
-	World:WakeUpSimulatorsInArea(
-		a_DstPoint.x - 1, a_DstPoint.x + XSize + 1,
-		a_DstPoint.y - 1, a_DstPoint.y + YSize + 1,
-		a_DstPoint.z - 1, a_DstPoint.z + ZSize + 1
-	)
+	World:WakeUpSimulatorsInArea(cCuboid(
+		Vector3i(a_DstPoint.x - 1, a_DstPoint.y, a_DstPoint.z - 1),
+		Vector3i(a_DstPoint.x + XSize + 1, a_DstPoint.y + YSize + 1, a_DstPoint.z + ZSize + 1)
+	))
 
 	return XSize * YSize * ZSize
 end
