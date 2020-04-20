@@ -69,12 +69,18 @@ function cToolRegistrator:BindAbsoluteTools()
 		return true
 	end
 
+	local LastRightClick = -math.huge
 	local function OnPlayerRightClick(a_Player, a_BlockX, a_BlockY, a_BlockZ, a_BlockFace)
 		local Succ, Message = GetPlayerState(a_Player).Selection:SetPos(a_BlockX, a_BlockY, a_BlockZ, a_BlockFace, "Second")
 		if (not Succ) then
 			return false
 		end
 
+		if ((os.clock() - LastRightClick) < 0.005) then
+			return true
+		end
+		LastRightClick = os.clock()
+		
 		a_Player:SendMessage(Message)
 		return true
 	end
@@ -297,7 +303,17 @@ local function LeftClickToolsHook(a_Player, a_BlockX, a_BlockY, a_BlockZ, a_Bloc
 	end
 
 	local State = GetPlayerState(a_Player)
-	return State.ToolRegistrator:UseLeftClickTool(a_Player, a_BlockX, a_BlockY, a_BlockZ, a_BlockFace, a_Player:GetEquippedItem().m_ItemType)
+	State.ToolRegistrator:UseLeftClickTool(a_Player, a_BlockX, a_BlockY, a_BlockZ, a_BlockFace, a_Player:GetEquippedItem().m_ItemType)
+end
+
+
+
+
+
+local function PlayerBrokeBlockHook(a_Player, a_BlockX, a_BlockY, a_BlockZ, a_BlockFace, a_BlockType, a_BlockMeta)
+	if a_Player:GetEquippedItem().m_ItemType == E_ITEM_WOODEN_AXE then
+		a_Player:GetWorld():SetBlock(a_BlockX, a_BlockY, a_BlockZ, a_BlockType, a_BlockMeta)
+	end
 end
 
 
@@ -320,6 +336,7 @@ end
 
 
 -- Register the hooks needed:
-cPluginManager.AddHook(cPluginManager.HOOK_PLAYER_RIGHT_CLICK, RightClickToolsHook);
-cPluginManager.AddHook(cPluginManager.HOOK_PLAYER_LEFT_CLICK,  LeftClickToolsHook);
-cPluginManager.AddHook(cPluginManager.HOOK_PLAYER_ANIMATION,   LeftClickToolsAnimationHook);
+cPluginManager.AddHook(cPluginManager.HOOK_PLAYER_RIGHT_CLICK,  RightClickToolsHook);
+cPluginManager.AddHook(cPluginManager.HOOK_PLAYER_LEFT_CLICK,   LeftClickToolsHook);
+cPluginManager.AddHook(cPluginManager.HOOK_PLAYER_BROKEN_BLOCK, PlayerBrokeBlockHook);
+cPluginManager.AddHook(cPluginManager.HOOK_PLAYER_ANIMATION,    LeftClickToolsAnimationHook);
