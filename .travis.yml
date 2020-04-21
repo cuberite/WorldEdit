@@ -9,7 +9,7 @@ addons:
 install:
   - luarocks --local install luafilesystem
   - luarocks --local install luacheck
-  - wget -O $TRAVIS_BUILD_DIR/.luacheckrc https://ci.appveyor.com/api/projects/cuberite/cuberite/artifacts/.luacheckrc
+  - wget -O $TRAVIS_BUILD_DIR/.luacheckrc https://ci.appveyor.com/api/projects/cuberite/cuberite/artifacts/.luacheckrc?job=Windows-x64&pr=false&branch=master
 
 script:
   - cd $TRAVIS_BUILD_DIR && ~/.luarocks/bin/luacheck . --codes
