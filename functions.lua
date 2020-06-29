@@ -423,9 +423,9 @@ function GetTargetBlock(a_Player)
 	local FoundBlock = nil
 	local BlockFace = BLOCK_FACE_NONE
 	local Callbacks = {
-		OnNextBlock = function(a_BlockX, a_BlockY, a_BlockZ, a_BlockType, a_BlockMeta, a_BlockFace)
+		OnNextBlock = function(a_BlockPos, a_BlockType, a_BlockMeta, a_BlockFace)
 			if (a_BlockType ~= E_BLOCK_AIR) then
-				FoundBlock = { x = a_BlockX, y = a_BlockY, z = a_BlockZ }
+				FoundBlock = a_BlockPos
 				BlockFace = a_BlockFace
 				return true
 			end
@@ -439,13 +439,13 @@ function GetTargetBlock(a_Player)
 	local Start = EyePos + LookVector + LookVector
 	local End = EyePos + LookVector * MaxDistance
 
-	local HitNothing = cLineBlockTracer.Trace(a_Player:GetWorld(), Callbacks, Start.x, Start.y, Start.z, End.x, End.y, End.z)
+	local HitNothing = cLineBlockTracer.Trace(a_Player:GetWorld(), Callbacks, Start, End)
 	if (HitNothing) then
 		-- No block found
 		return nil
 	end
 
-	return Vector3i(FoundBlock.x, FoundBlock.y, FoundBlock.z), BlockFace
+	return FoundBlock, BlockFace
 end
 
 
@@ -738,7 +738,7 @@ function RightClickCompass(a_Player)
 	local WentThroughBlock = false
 
 	local Callbacks = {
-		OnNextBlock = function(a_X, a_Y, a_Z, a_BlockType, a_BlockMeta)
+		OnNextBlock = function(a_BlockPos, a_BlockType, a_BlockMeta)
 			if (cBlockInfo:IsSolid(a_BlockType)) then
 				-- The trace went through a solid block. We have to remember it, because we only teleport if the trace went through at least one solid block.
 				WentThroughBlock = true
@@ -751,7 +751,7 @@ function RightClickCompass(a_Player)
 			end
 
 			-- Found a block that is not a solid block, but it already went through a solid block.
-			FreeSpot = Vector3i(a_X, a_Y, a_Z)
+			FreeSpot = a_BlockPos
 			return true
 		end;
 	};
@@ -764,7 +764,7 @@ function RightClickCompass(a_Player)
 	local Start = EyePos
 	local End = EyePos + LookVector * g_Config.NavigationWand.MaxDistance
 
-	cLineBlockTracer.Trace(World, Callbacks, Start.x, Start.y, Start.z, End.x, End.y, End.z)
+	cLineBlockTracer.Trace(World, Callbacks, Start, End)
 
 	if (not FreeSpot) then
 		a_Player:SendMessage(cChatColor.Rose .. "Nothing to pass through!")
@@ -798,12 +798,12 @@ function LeftClickCompass(a_Player)
 
 	-- Callback that checks whether the block on the traced line is non-solid:
 	local Callbacks = {
-		OnNextBlock = function(a_X, a_Y, a_Z, a_BlockType, a_BlockMeta)
+		OnNextBlock = function(a_BlockPos, a_BlockType, a_BlockMeta)
 			if (not cBlockInfo:IsSolid(a_BlockType)) then
 				return false
 			end
 
-			BlockPos = Vector3i(a_X, a_Y, a_Z)
+			BlockPos = a_BlockPos
 			return true
 		end
 	};
@@ -815,7 +815,7 @@ function LeftClickCompass(a_Player)
 
 	local Start = EyePos
 	local End = EyePos + LookVector * g_Config.NavigationWand.MaxDistance
-	cLineBlockTracer.Trace(World, Callbacks, Start.x, Start.y, Start.z, End.x, End.y, End.z)
+	cLineBlockTracer.Trace(World, Callbacks, Start, End)
 
 	-- If no block has been hit, teleport the player to the last checked block location (known non-solid):
 	if (not BlockPos) then
@@ -871,16 +871,16 @@ function HPosSelect(a_Player, a_MaxDistance)
 	local hpos = nil
 	local Callbacks =
 	{
-		OnNextBlock = function(a_X, a_Y, a_Z, a_BlockType, a_BlockMeta)
+		OnNextBlock = function(a_BlockPos, a_BlockType, a_BlockMeta)
 			if ((a_BlockType ~= E_BLOCK_AIR) and not(cBlockInfo:IsOneHitDig(a_BlockType))) then
-				hpos = {x = a_X, y = a_Y, z = a_Z }
+				hpos = a_BlockPos
 				return true
 			end
 		end
 	}
 
 	-- Trace:
-	if (cLineBlockTracer.Trace(a_Player:GetWorld(), Callbacks, Start.x, Start.y, Start.z, End.x, End.y, End.z)) then
+	if (cLineBlockTracer.Trace(a_Player:GetWorld(), Callbacks, Start, End)) then
 		-- Nothing reached within the distance, return nil for failure
 		return nil
 	end

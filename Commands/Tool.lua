@@ -127,7 +127,7 @@ function HandleSuperPickCommand(a_Split, a_Player)
 		end
 
 		local World = a_Player:GetWorld()
-		World:BroadcastSoundParticleEffect(2001, a_BlockX, a_BlockY, a_BlockZ, World:GetBlock(a_BlockX, a_BlockY, a_BlockZ))
+		World:BroadcastSoundParticleEffect(2001, Vector3i(a_BlockX, a_BlockY, a_BlockZ), World:GetBlock(a_BlockX, a_BlockY, a_BlockZ))
 		World:DigBlock(a_BlockX, a_BlockY, a_BlockZ)
 
 		-- Notify other plugins of the change

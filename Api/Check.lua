@@ -38,7 +38,10 @@ function GetMultipleBlockChanges(MinX, MaxX, MinZ, MaxZ, Player, World, Operatio
 	end
 
 	function Object:Flush()
-		local FinalCuboid = cCuboid(MinX, MinY, MinZ, MaxX, MaxY, MaxZ)
+		local FinalCuboid = cCuboid(
+			Vector3i(MinX, MinY, MinZ),
+			Vector3i(MaxX, MaxY, MaxZ)
+		)
 		return CallHook("OnAreaChanging", FinalCuboid, Player, World, Operation)
 	end
 

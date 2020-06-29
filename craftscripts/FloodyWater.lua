@@ -102,7 +102,10 @@ BlockArea:Read(World, SrcCuboid, cBlockArea.baTypes + cBlockArea.baMetas)
 PlayerState.UndoStack:PushUndoFromCuboid(World, SrcCuboid, "craftscript.FloodyWater")
 
 local SizeX, SizeY, SizeZ = BlockArea:GetCoordRange()
-local Cuboid = cCuboid(0, 0, 0, SizeX, SizeY, SizeZ)
+local Cuboid = cCuboid(
+	Vector3i(0, 0, 0),
+	Vector3i(SizeX, SizeY, SizeZ)
+)
 local ins = table.insert
 
 -- Find all the waterblocks that are currently in the area.
