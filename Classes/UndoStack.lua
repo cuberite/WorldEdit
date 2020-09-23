@@ -63,7 +63,10 @@ function cUndoStack:ApplySnapshot(a_SrcStack, a_DstStack, a_World)
 
 	-- Write the src snapshot:
 	Src.Area:Write(a_World, MinX, MinY, MinZ)
-	a_World:WakeUpSimulatorsInArea(MinX - 1, MaxX + 1, MinY - 1, MaxY + 1, MinZ - 1, MaxZ + 1)
+	a_World:WakeUpSimulatorsInArea(cCuboid(
+		Vector3i(MinX - 1, MinY - 1, MinZ - 1),
+		Vector3i(MaxX + 1, MaxY + 1, MaxZ + 1)
+    ))
 
 	-- Clean up memory used by the snapshot:
 	Src.Area:Clear()

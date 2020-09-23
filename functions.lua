@@ -155,7 +155,10 @@ function FillWalls(a_PlayerState, a_Player, a_World, a_DstBlockTable)
 
 	Area:Write(a_World, SrcCuboid.p1)
 	Area:Clear()
-	a_World:WakeUpSimulatorsInArea(SrcCuboid.p1.x - 1, SrcCuboid.p2.x + 1, SrcCuboid.p1.y - 1, SrcCuboid.p2.y + 1, SrcCuboid.p1.z - 1, SrcCuboid.p2.z + 1)
+	a_World:WakeUpSimulatorsInArea(cCuboid(
+		Vector3i(SrcCuboid.p1.x - 1, SrcCuboid.p1.y - 1, SrcCuboid.p1.z - 1),
+		Vector3i(SrcCuboid.p2.x + 1, SrcCuboid.p2.y + 1, SrcCuboid.p2.z + 1)
+	))
 
 	CallHook("OnAreaChanged", a_PlayerState.Selection:GetSortedCuboid(), a_Player, a_World, "walls")
 
@@ -217,7 +220,10 @@ function FillFaces(a_PlayerState, a_Player, a_World, a_DstBlockTable)
 
 	Area:Write(a_World, SrcCuboid.p1)
 	Area:Clear()
-	a_World:WakeUpSimulatorsInArea(SrcCuboid.p1.x - 1, SrcCuboid.p2.x + 1, SrcCuboid.p1.y - 1, SrcCuboid.p2.y + 1, SrcCuboid.p1.z - 1, SrcCuboid.p2.z + 1)
+	a_World:WakeUpSimulatorsInArea(cCuboid(
+		Vector3i(SrcCuboid.p1.x - 1, SrcCuboid.p1.y - 1, SrcCuboid.p1.z - 1),
+		Vector3i(SrcCuboid.p2.x + 1, SrcCuboid.p2.y + 1, SrcCuboid.p2.z + 1)
+	))
 
 	CallHook("OnAreaChanged", a_PlayerState.Selection:GetSortedCuboid(), a_Player, a_World, "faces")
 
@@ -278,7 +284,7 @@ function SetBlocksInCuboid(a_Player, a_Cuboid, a_DstBlockTable, a_Action)
 	Area:Clear()
 
 	-- Notify the simulators
-	World:WakeUpSimulatorsInArea(a_Cuboid.p1.x, a_Cuboid.p2.x, a_Cuboid.p1.y, a_Cuboid.p2.y, a_Cuboid.p1.z, a_Cuboid.p2.z)
+	World:WakeUpSimulatorsInArea(a_Cuboid)
 
 	-- Notify the plugins
 	CallHook("OnAreaChanged", a_Cuboid, a_Player, World, a_Action)
@@ -328,7 +334,7 @@ function ReplaceBlocksInCuboid(a_Player, a_Cuboid, a_Mask, a_DstBlockTable, a_Ac
 	Area:Write(World, a_Cuboid.p1)
 
 	CallHook("OnAreaChanged", a_Cuboid, a_Player, World, a_Action)
-	World:WakeUpSimulatorsInArea(a_Cuboid.p1.x, a_Cuboid.p2.x, a_Cuboid.p1.y, a_Cuboid.p2.y, a_Cuboid.p1.z, a_Cuboid.p2.z)
+	a_World:WakeUpSimulatorsInArea(a_Cuboid)
 
 	return NumBlocks
 end
