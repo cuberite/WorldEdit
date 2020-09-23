@@ -334,7 +334,7 @@ function ReplaceBlocksInCuboid(a_Player, a_Cuboid, a_Mask, a_DstBlockTable, a_Ac
 	Area:Write(World, a_Cuboid.p1)
 
 	CallHook("OnAreaChanged", a_Cuboid, a_Player, World, a_Action)
-	a_World:WakeUpSimulatorsInArea(a_Cuboid)
+	World:WakeUpSimulatorsInArea(a_Cuboid)
 
 	return NumBlocks
 end
