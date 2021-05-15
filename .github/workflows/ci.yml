@@ -1,0 +1,29 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      # Sets up lua
+      - name: Install Lua
+        run: |
+          sudo apt install lua5.1 luarocks
+          sudo luarocks install luafilesystem
+          sudo luarocks install luacheck
+
+      # Sets up the environment
+      - name: Set up environment
+        run: |
+          wget -O .luacheckrc 'https://ci.appveyor.com/api/projects/cuberite/cuberite/artifacts/.luacheckrc?job=Windows-x64&pr=false&branch=master'
+
+      # Runs the test
+      - name: Run tests
+        run: |
+          luacheck . --codes
