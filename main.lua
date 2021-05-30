@@ -66,7 +66,7 @@ function Initialize(a_Plugin)
 
 	cFile:CreateFolder("schematics")
 
-	LOG("[WorldEdit] Enabling WorldEdit v" .. g_PluginInfo.DisplayVersion)
+	LOG("Enabling v" .. g_PluginInfo.DisplayVersion)
 	return true
 end
 
@@ -75,7 +75,7 @@ end
 
 
 function OnDisable()
-	LOG("[WorldEdit] Disabling WorldEdit v" .. g_PluginInfo.DisplayVersion)
+	LOG("Disabling v" .. g_PluginInfo.DisplayVersion)
 	ForEachPlayerState(
 		function(a_State)
 			a_State:Save(a_State:GetUUID())

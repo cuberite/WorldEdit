@@ -87,7 +87,7 @@ Storage =
 
 -- Writes the default configuration to a_Path
 local function WriteDefaultConfiguration(a_Path)
-	LOGWARNING("[WorldEdit] Default configuration written to \"" .. a_Path .. "\"")
+	LOGWARNING("Default configuration written to \"" .. a_Path .. "\"")
 	local File = io.open(a_Path, "w")
 	File:write(g_ConfigDefault)
 	File:close()
@@ -114,7 +114,7 @@ end
 
 -- Sets g_Config to the default configuration
 local function LoadDefaultConfiguration()
-	LOGWARNING("[WorldEdit] The default configuration will be used.")
+	LOGWARNING("The default configuration will be used.")
 	g_Config = GetDefaultConfigurationTable()
 end
 
@@ -148,7 +148,7 @@ function InitializeConfiguration(a_Path)
 	local ConfigLoader, Error = loadstring("return {" .. ConfigContent .. "}")
 	if (not ConfigLoader) then
 		local ErrorPosition = FindErrorPosition(Error)
-		LOGWARNING("[WorldEdit] Error in the configuration file near line " .. ErrorPosition)
+		LOGWARNING("Error in the configuration file near line " .. ErrorPosition)
 		LoadDefaultConfiguration()
 		return
 	end
@@ -160,7 +160,7 @@ function InitializeConfiguration(a_Path)
 	local Succes, Result = pcall(ConfigLoader)
 	if (not Succes) then
 		local ErrorPosition = FindErrorPosition(Result)
-		LOGWARNING("[WorldEdit] Error in the configuration file at line " .. ErrorPosition)
+		LOGWARNING("Error in the configuration file at line " .. ErrorPosition)
 		LoadDefaultConfiguration()
 		return
 	end
