@@ -32,7 +32,7 @@ function HandleUpCommand(a_Split, a_Player)
 
 	local World = a_Player:GetWorld()
 	for Y = P1.y, P2.y + 1 do
-		if (World:GetBlock(P1.x, Y, P1.z) ~= E_BLOCK_AIR) then
+		if (World:GetBlock(Vector3i(P1.x, Y, P1.z)) ~= E_BLOCK_AIR) then
 			a_Player:SendMessage(cChatColor.Rose .. "You would hit something above you.")
 			return true
 		end
@@ -43,7 +43,7 @@ function HandleUpCommand(a_Split, a_Player)
 		return true
 	end
 
-	World:SetBlock(P1.x, P2.y - 1, P1.z, E_BLOCK_GLASS, 0)
+	World:SetBlock(Vector3i(P1.x, P2.y - 1, P1.z), E_BLOCK_GLASS, 0)
 	a_Player:TeleportToCoords(P1.x + 0.5, P2.y, P1.z + 0.5)
 	a_Player:SendMessage(cChatColor.LightPurple .. "Whoosh!")
 
@@ -109,12 +109,12 @@ function HandleDescendCommand(a_Split, a_Player)
 	local ZPos = math.floor(a_Player:GetPosZ())
 
 	for Y = math.floor(YPos), 1, -1 do
-		if World:GetBlock(XPos, Y, ZPos) ~= E_BLOCK_AIR then
+		if (World:GetBlock(Vector3i(XPos, Y, ZPos)) ~= E_BLOCK_AIR) then
 			WentThroughBlock = true
 		else
 			if WentThroughBlock then
 				for y = Y, 1, -1 do
-					if cBlockInfo:IsSolid(World:GetBlock(XPos, y, ZPos)) then
+					if cBlockInfo:IsSolid(World:GetBlock(Vector3i(XPos, y, ZPos))) then
 						YPos = y
 						FoundYCoordinate = true
 						break
@@ -165,7 +165,7 @@ function HandleAscendCommand(a_Split, a_Player)
 	local WentThroughBlock = false
 
 	for Y = math.floor(a_Player:GetPosY()), WorldHeight + 1 do
-		if World:GetBlock(XPos, Y, ZPos) == E_BLOCK_AIR then
+		if (World:GetBlock(Vector3i(XPos, Y, ZPos)) == E_BLOCK_AIR) then
 			if WentThroughBlock then
 				YPos = Y
 				break
@@ -224,10 +224,10 @@ function HandleCeilCommand(a_Split, a_Player)
 	end
 
 	for y = Y, WorldHeight do
-		if World:GetBlock(X, y, Z) ~= E_BLOCK_AIR then
+		if (World:GetBlock(Vector3i(X, y, Z)) ~= E_BLOCK_AIR) then
 			-- Check with other plugins if the operation is okay:
 			if not(CallHook("OnAreaChanging", cCuboid(X, y - BlockFromCeil - 3, Z), a_Player, a_Player:GetWorld(), "ceil")) then
-				World:SetBlock(X, y - BlockFromCeil - 3, Z, E_BLOCK_GLASS, 0)
+				World:SetBlock(Vector3i(X, y - BlockFromCeil - 3, Z), E_BLOCK_GLASS, 0)
 				CallHook("OnAreaChanged", cCuboid(X, y - BlockFromCeil - 3, Z), a_Player, a_Player:GetWorld(), "ceil")
 			end
 			local I = y - BlockFromCeil - 2

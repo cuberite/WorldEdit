@@ -378,7 +378,7 @@ function cPlayerSelection:Move(a_OffsetX, a_OffsetY, a_OffsetZ)
 	assert(a_OffsetZ ~= nil)
 
 	-- Move the cuboid
-	self.Cuboid:Move(a_OffsetX, a_OffsetY, a_OffsetZ)
+	self.Cuboid:Move(Vector3i(a_OffsetX, a_OffsetY, a_OffsetZ))
 
 	-- Notify the client
 	self:NotifySelectionChanged()

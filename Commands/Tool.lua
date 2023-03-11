@@ -35,7 +35,7 @@ function HandleReplCommand(a_Split, a_Player)
 			return true
 		end
 
-		a_Player:GetWorld():SetBlock(a_BlockX, a_BlockY, a_BlockZ, BlockType, BlockMeta)
+		a_Player:GetWorld():SetBlock(Vector3i(a_BlockX, a_BlockY, a_BlockZ), BlockType, BlockMeta)
 		CallHook("OnAreaChanged", AffectedBlock, a_Player, a_Player:GetWorld(), "replacetool")
 		return false
 	end
@@ -82,8 +82,8 @@ function HandleTreeCommand(a_Split, a_Player)
 		end
 
 		local World = a_Player:GetWorld()
-		if (World:GetBlock(a_BlockX, a_BlockY, a_BlockZ) == E_BLOCK_GRASS) or (World:GetBlock(a_BlockX, a_BlockY, a_BlockZ) == E_BLOCK_DIRT) then
-			World:GrowTree(a_BlockX, a_BlockY + 1, a_BlockZ)
+		if (World:GetBlock(Vector3i(a_BlockX, a_BlockY, a_BlockZ)) == E_BLOCK_GRASS) or (World:GetBlock(Vector3i(a_BlockX, a_BlockY, a_BlockZ)) == E_BLOCK_DIRT) then
+			World:GrowTree(Vector3i(a_BlockX, a_BlockY + 1, a_BlockZ))
 		else
 			a_Player:SendMessage(cChatColor.Rose .. "A tree can't go there.")
 		end
@@ -127,7 +127,7 @@ function HandleSuperPickCommand(a_Split, a_Player)
 		end
 
 		local World = a_Player:GetWorld()
-		World:BroadcastSoundParticleEffect(2001, Vector3i(a_BlockX, a_BlockY, a_BlockZ), World:GetBlock(a_BlockX, a_BlockY, a_BlockZ))
+		World:BroadcastSoundParticleEffect(2001, Vector3i(a_BlockX, a_BlockY, a_BlockZ), World:GetBlock(Vector3i(a_BlockX, a_BlockY, a_BlockZ)))
 		World:DigBlock(a_BlockX, a_BlockY, a_BlockZ)
 
 		-- Notify other plugins of the change
