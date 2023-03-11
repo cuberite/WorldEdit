@@ -128,7 +128,7 @@ function HandleGreenCommand(a_Split, a_Player)
 			local IsValid, y = World:TryGetHeight(x, z)
 			if IsValid then
 				YCheck:SetY(y)
-				if World:GetBlock(x, y, z) == E_BLOCK_DIRT then -- if the block is dirt
+				if (World:GetBlock(Vector3i(x, y, z)) == E_BLOCK_DIRT) then -- if the block is dirt
 					table.insert(PossibleBlockChanges, {X = x, Y = y, Z = z, BlockType = E_BLOCK_GRASS})
 				end
 			end
@@ -137,7 +137,7 @@ function HandleGreenCommand(a_Split, a_Player)
 
 	if not YCheck:Flush() then
 		for idx, value in ipairs(PossibleBlockChanges) do
-			World:SetBlock(value.X, value.Y, value.Z, value.BlockType, 0)
+			World:SetBlock(Vector3i(value.X, value.Y, value.Z), value.BlockType, 0)
 		end
 		a_Player:SendMessage(cChatColor.LightPurple .. #PossibleBlockChanges .. " surfaces greened.")
 	end
@@ -328,12 +328,12 @@ function HandleSnowCommand(a_Split, a_Player)
 			local IsValid, y = World:TryGetHeight(x, z)
 			if IsValid then
 				YCheck:SetY(y)
-				if World:GetBlock(x, y , z) == E_BLOCK_STATIONARY_WATER then -- check if the block is water
+				if (World:GetBlock(Vector3i(x, y , z)) == E_BLOCK_STATIONARY_WATER) then -- check if the block is water
 					table.insert(PossibleBlockChanges, {X = x, Y = y, Z = z, BlockType = E_BLOCK_ICE})
-				elseif World:GetBlock(x, y , z) == E_BLOCK_LAVA then -- check if the block is lava
+				elseif (World:GetBlock(Vector3i(x, y , z)) == E_BLOCK_LAVA) then -- check if the block is lava
 					table.insert(PossibleBlockChanges, {X = x, Y = y, Z = z, BlockType = E_BLOCK_OBSIDIAN})
 				else
-					if cBlockInfo:IsSnowable(World:GetBlock(x, y, z)) then
+					if cBlockInfo:IsSnowable(World:GetBlock(Vector3i(x, y, z))) then
 						table.insert(PossibleBlockChanges, {X = x, Y = y + 1, Z = z, BlockType = E_BLOCK_SNOW})
 					end
 				end
@@ -343,7 +343,7 @@ function HandleSnowCommand(a_Split, a_Player)
 
 	if not YCheck:Flush() then
 		for idx, value in ipairs(PossibleBlockChanges) do
-			World:SetBlock(value.X, value.Y, value.Z, value.BlockType, 0)
+			World:SetBlock(Vector3i(value.X, value.Y, value.Z), value.BlockType, 0)
 		end
 		a_Player:SendMessage(cChatColor.LightPurple .. #PossibleBlockChanges .. " surfaces covered. Let is snow~")
 	end
@@ -375,9 +375,9 @@ function HandleThawCommand(a_Split, a_Player)
 			local IsValid, y = World:TryGetHeight(x, z)
 			if IsValid then
 				YCheck:SetY(y)
-				if World:GetBlock(x, y, z) == E_BLOCK_SNOW then -- check if the block is snow
+				if (World:GetBlock(Vector3i(x, y, z)) == E_BLOCK_SNOW) then -- check if the block is snow
 					table.insert(PossibleBlockChanges, {X = x, Y = y, Z = z, BlockType = E_BLOCK_AIR})
-				elseif World:GetBlock(x, y, z) == E_BLOCK_ICE then -- check if the block is ice
+				elseif (World:GetBlock(Vector3i(x, y, z)) == E_BLOCK_ICE) then -- check if the block is ice
 					table.insert(PossibleBlockChanges, {X = x, Y = y, Z = z, BlockType = E_BLOCK_WATER})
 				end
 			end
@@ -386,7 +386,7 @@ function HandleThawCommand(a_Split, a_Player)
 
 	if not YCheck:Flush() then
 		for idx, value in ipairs(PossibleBlockChanges) do
-			World:SetBlock(value.X, value.Y, value.Z, value.BlockType, 0)
+			World:SetBlock(Vector3i(value.X, value.Y, value.Z), value.BlockType, 0)
 		end
 		a_Player:SendMessage(cChatColor.LightPurple .. #PossibleBlockChanges .. "  surfaces thawed")
 	end
@@ -421,7 +421,7 @@ function HandlePumpkinsCommand(a_Split, a_Player)
 		local IsValid, Y = World:TryGetHeight(X, Z)
 		if IsValid then
 			Y = Y + 1
-			if World:GetBlock(X, Y - 1, Z) == E_BLOCK_GRASS or World:GetBlock(X, Y, Z) - 1 == E_BLOCK_DIRT then
+			if (World:GetBlock(Vector3i(X, Y - 1, Z)) == E_BLOCK_GRASS) or (World:GetBlock(Vector3i(X, Y, Z)) - 1 == E_BLOCK_DIRT) then
 				YCheck:SetY(Y)
 				table.insert(PossibleBlockChanges, {X = X, Y = Y, Z = Z, BlockType = E_BLOCK_LOG, BlockMeta = 0})
 				for i=1, math.random(1, 6) do
@@ -430,7 +430,7 @@ function HandlePumpkinsCommand(a_Split, a_Player)
 					Y = World:GetHeight(X, Z) + 1
 					YCheck:SetY(Y)
 
-					local Block = World:GetBlock(X, Y - 1, Z)
+					local Block = World:GetBlock(Vector3i(X, Y - 1, Z))
 					if (Block == E_BLOCK_GRASS) or Block == E_BLOCK_DIRT then
 						table.insert(PossibleBlockChanges, {X = X, Y = Y, Z = Z, BlockType = E_BLOCK_LEAVES, BlockMeta = 0})
 					end
@@ -438,7 +438,7 @@ function HandlePumpkinsCommand(a_Split, a_Player)
 				for i=1, math.random(1, 4) do
 					X = X + math.random(-2, 2)
 					Z = Z + math.random(-2, 2)
-					if World:GetBlock(X, Y - 1, Z) == E_BLOCK_GRASS or World:GetBlock(X, Y, Z) - 1 == E_BLOCK_DIRT then
+					if (World:GetBlock(Vector3i(X, Y - 1, Z)) == E_BLOCK_GRASS) or (World:GetBlock(Vector3i(X, Y, Z)) - 1 == E_BLOCK_DIRT) then
 						table.insert(PossibleBlockChanges, {X = X, Y = Y, Z = Z, BlockType = E_BLOCK_PUMPKIN, BlockMeta = math.random(0, 3)})
 					end
 				end
@@ -448,7 +448,7 @@ function HandlePumpkinsCommand(a_Split, a_Player)
 
 	if not YCheck:Flush() then
 		for idx, value in ipairs(PossibleBlockChanges) do
-			World:SetBlock(value.X, value.Y, value.Z, value.BlockType, value.BlockMeta)
+			World:SetBlock(Vector3i(value.X, value.Y, value.Z), value.BlockType, value.BlockMeta)
 		end
 		a_Player:SendMessage(cChatColor.LightPurple .. #PossibleBlockChanges .. " pumpkin patches created")
 	end
