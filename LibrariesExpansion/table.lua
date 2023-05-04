@@ -35,6 +35,7 @@ function table.merge(a_SrcTable, a_DstTable)
 			end
 		end
 	end
+	return a_SrcTable
 end
 
 

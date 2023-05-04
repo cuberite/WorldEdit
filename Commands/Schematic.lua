@@ -10,7 +10,7 @@ function HandleSchematicFormatsCommand(a_Split, a_Player)
 	-- //schematic listformats
 
 	-- We support only one format, MCEdit:
-	a_Player:SendMessage(cChatColor.LightPurple .. 'Available formats: "MCEdit"')
+	a_Player:SendMessage(cChatColor.LightPurple .. 'Available formats: "MCEdit", "Cubeset"')
 	return true
 end
 
@@ -49,30 +49,25 @@ end
 
 
 function HandleSchematicLoadCommand(a_Split, a_Player)
-	-- //schematic load <FileName>
+	-- //schematic load <FileName> [options]
 
 	-- Check the FileName parameter:
-	if (#a_Split ~= 3) then
-		a_Player:SendMessage(cChatColor.Rose .. "Usage: /schematic load <FileName>")
+	if (#a_Split < 3) then
+		a_Player:SendMessage(cChatColor.Rose .. "Usage: /schematic load <FileName> [options]")
 		return true
 	end
 	local FileName = a_Split[3]
-
-	-- Check if the file exists:
-	local Path = "schematics/" .. FileName .. ".schematic"
-	if not(cFile:IsFile(Path)) then
-		a_Player:SendMessage(cChatColor.Rose .. FileName .. " schematic does not exist.")
-		return true
-	end
+	local Options = {unpack(a_Split, 4)}
 
 	-- Load the file into clipboard:
 	local State = GetPlayerState(a_Player)
-	if not(State.Clipboard:LoadFromSchematicFile(Path)) then
-		a_Player:SendMessage(cChatColor.Rose .. FileName .. " schematic does not exist.")
-		return true
+	local success, err = State.ClipboardStorage:Load(FileName, Options);
+	if (success) then
+		a_Player:SendMessage(cChatColor.LightPurple .. FileName .. " schematic was loaded into your clipboard.")
+		a_Player:SendMessage(cChatColor.LightPurple .. "Clipboard size: " .. State.Clipboard:GetSizeDesc())
+	else
+		a_Player:SendMessage(cChatColor.Rose .. err)
 	end
-	a_Player:SendMessage(cChatColor.LightPurple .. FileName .. " schematic was loaded into your clipboard.")
-	a_Player:SendMessage(cChatColor.LightPurple .. "Clipboard size: " .. State.Clipboard:GetSizeDesc())
 	return true
 end
 
@@ -85,18 +80,17 @@ function HandleSchematicSaveCommand(a_Split, a_Player)
 
 	-- Get the parameters from the command arguments:
 	local FileName
-	if (#a_Split == 4) then
+	local Format = "mcedit"
+	local Options = {}
+	-- ToDo: Currently it's not possible to have additional options for the mcedit format.
+	if (#a_Split >= 4) then
+		Format = a_Split[3]
 		FileName = a_Split[4]
+		Options = {unpack(a_Split, 5)}
 	elseif (#a_Split == 3) then
 		FileName = a_Split[3]
 	else
-		a_Player:SendMessage(cChatColor.Rose .. "Usage: //schematic save [<format>] <FileName>")
-		return true
-	end
-
-	-- Check if there already is a schematic with that name, and if so if we are allowed to override it.
-	if (not g_Config.Schematics.OverrideExistingFiles and cFile:IsFile("schematics/" .. FileName .. ".schematic")) then
-		a_Player:SendMessage(cChatColor.Rose .. "There already is a schematic with that name.")
+		a_Player:SendMessage(cChatColor.Rose .. "Usage: //schematic save [format] <FileName> [options]")
 		return true
 	end
 
@@ -108,7 +102,11 @@ function HandleSchematicSaveCommand(a_Split, a_Player)
 	end
 
 	-- Save the clipboard:
-	State.Clipboard:SaveToSchematicFile("schematics/" .. FileName .. ".schematic")
-	a_Player:SendMessage(cChatColor.LightPurple .. "Clipboard saved to " .. FileName .. ".")
+	local success, err = State.ClipboardStorage:Save(FileName, Format, Options);
+	if (success) then
+		a_Player:SendMessage(cChatColor.LightPurple .. "Clipboard saved to " .. FileName .. ".")
+	else
+		a_Player:SendMessage(cChatColor.Rose .. err)
+	end
 	return true
 end
