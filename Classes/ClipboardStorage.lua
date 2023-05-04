@@ -8,13 +8,13 @@
 
 
 --- Default values for cubeset metadata.
-local g_CubesetDefaultValues = 
+local g_CubesetDefaultValues =
 {
-	Metadata = 
+	Metadata =
 	{
 		CubesetFormatVersion = 1,
 		IntendedUse = "SinglePieceStructures",
-		["AllowedBiomes"] = "Plains",
+		["AllowedBiomes"] = "",
 		["GridSizeX"] = "750",
 		["GridSizeZ"] = "750",
 		["MaxOffsetX"] = "100",
@@ -50,12 +50,12 @@ cClipboardStorage = {}
 
 
 function cClipboardStorage:new(a_Obj, a_Clipboard)
-	local a_Obj = a_Obj or {}
-	setmetatable(a_Obj, cClipboardStorage)
+	local obj = a_Obj or {}
+	setmetatable(obj, cClipboardStorage)
 	self.__index = self
 
 	self.Clipboard = a_Clipboard;
-	return a_Obj
+	return obj
 end
 
 
@@ -96,7 +96,7 @@ function cClipboardStorage:Load(a_FileName, a_Options)
 			break;
 		end
 	end
-	
+
 	if (not foundPath) then
 		return false, "File not found.";
 	end
@@ -155,8 +155,8 @@ function cClipboardStorage:LoadCubesetV1(a_Env, a_Options)
 	if (not options) then
 		return false, err
 	end
-	local pieceNr = options.piecenr or 1;
-	local piece = a_Env.Cubeset.Pieces[pieceNr];
+	local pieceIdx = options.pieceIdx or 1;
+	local piece = a_Env.Cubeset.Pieces[pieceIdx];
 	if (not piece) then
 		return false, "The requested piece in the Cubeset file does not exist."
 	end
@@ -275,7 +275,7 @@ function cClipboardStorage:SaveCubesetV1(a_FileName, a_StructureName, a_Options)
 					y = area:GetSizeY(),
 					z = area:GetSizeZ(),
 				},
-				Hitbox = 
+				Hitbox =
 				{
 					MinX = 0,
 					MinY = 0,
@@ -284,7 +284,7 @@ function cClipboardStorage:SaveCubesetV1(a_FileName, a_StructureName, a_Options)
 					MaxY = area:GetSizeY() - 1,
 					MaxZ = area:GetSizeZ() - 1,
 				},
-				StructureBox = 
+				StructureBox =
 				{
 					MinX = 0,
 					MinY = 0,
@@ -294,12 +294,11 @@ function cClipboardStorage:SaveCubesetV1(a_FileName, a_StructureName, a_Options)
 					MaxZ = area:GetSizeZ() - 1,
 				},
 				Connectors = {},
-				
 				BlockDefinitions =
 				{
 					unpack(definitions)
 				},
-				BlockData = 
+				BlockData =
 				{
 					unpack(blockdata)
 				}
