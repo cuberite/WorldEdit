@@ -69,17 +69,23 @@ function cToolRegistrator:BindAbsoluteTools()
 		return true
 	end
 
-	local function OnPlayerRightClick(a_Player, a_BlockX, a_BlockY, a_BlockZ, a_BlockFace)
+	local timeSinceLastRightWand = -math.huge
+	local function RightClickWandItem(a_Player, a_BlockX, a_BlockY, a_BlockZ, a_BlockFace)
 		local Succ, Message = GetPlayerState(a_Player).Selection:SetPos(a_BlockX, a_BlockY, a_BlockZ, a_BlockFace, "Second")
 		if (not Succ) then
 			return false
 		end
 
+		if ((os.clock() - timeSinceLastRightWand) < 0.2) then
+			return;
+		end
+
+		timeSinceLastRightWand = os.clock()
 		a_Player:SendMessage(Message)
 		return true
 	end
 
-	local function OnPlayerLeftClick(a_Player, a_BlockX, a_BlockY, a_BlockZ, a_BlockFace)
+	local function LeftClickWandItem(a_Player, a_BlockX, a_BlockY, a_BlockZ, a_BlockFace)
 		local Succ, Message = GetPlayerState(a_Player).Selection:SetPos(a_BlockX, a_BlockY, a_BlockZ, a_BlockFace, "First")
 		if (not Succ) then
 			return false
@@ -90,9 +96,9 @@ function cToolRegistrator:BindAbsoluteTools()
 	end
 
 	self:BindRightClickTool(g_Config.NavigationWand.Item, RightClickCompassCallback, "thru tool", true)
-	self:BindRightClickTool(g_Config.WandItem,            OnPlayerRightClick, "selection", true)
+	self:BindRightClickTool(g_Config.WandItem,            RightClickWandItem, "selection", true)
 	self:BindLeftClickTool(g_Config.NavigationWand.Item,  LeftClickCompassCallback, "jumpto tool", true)
-	self:BindLeftClickTool(g_Config.WandItem,             OnPlayerLeftClick, "selection", true)
+	self:BindLeftClickTool(g_Config.WandItem,             LeftClickWandItem, "selection", true)
 end
 
 
