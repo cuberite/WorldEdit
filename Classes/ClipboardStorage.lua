@@ -73,9 +73,12 @@ end
 
 --- Returns a path for the provided file. The extension depends on the requested format.
 function cClipboardStorage:FormatPath(a_FileName, a_Format)
-	local Extension = cClipboardStorage:GetExtension(a_Format);
-	if (not Extension) then
-		return false, "Format not recognized."
+	local Extension = "";
+	if (a_Format) then
+		Extension = cClipboardStorage:GetExtension(a_Format);
+		if (not Extension) then
+			return false, "Format not recognized."
+		end
 	end
 	return "schematics/" .. a_FileName .. Extension
 end
@@ -87,9 +90,12 @@ end
 --- Searches for the requested file and loads it into the user's clipboard.
 -- Can load mcedit files and cubeset files.
 function cClipboardStorage:Load(a_FileName, a_Options)
+	if (not a_FileName:match("^([%w%.]+)$")) then
+		return false, "Filename must only contain letters with an extension being optional."
+	end
 	local foundPath, foundFormat;
 	for format, extension in pairs(g_FormatExtensionMap) do
-		local path = cClipboardStorage:FormatPath(a_FileName, format);
+		local path = cClipboardStorage:FormatPath(a_FileName, not a_FileName:endswith(extension) and format or nil);
 		if (cFile:IsFile(path)) then
 			foundPath = path;
 			foundFormat = format;
@@ -200,6 +206,10 @@ end
 
 
 function cClipboardStorage:Save(a_Name, a_Format, a_Options)
+	if (not a_Name:match("^(%w+)$")) then
+		return false, "Filename must only contain letters."
+	end
+
 	local Format = a_Format:lower();
 	local Path, Error = self:FormatPath(a_Name, Format);
 	if (not Path) then
