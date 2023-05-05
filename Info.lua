@@ -841,12 +841,12 @@ g_PluginInfo =
 			Contents =
 [[
 Cuberite can generate single structures using its SinglePieceStructures generator. This generator uses preset areas which are saved in the Prefab/SinglePieceStructures folder.
-The files in this folder are Cubeset files which is a custom file format made by Cuberite's developers which stores the blocks, but also additional information like how spread out each structure has to be and in which biome(s) they can spawn. 
-WorldEdit is able to generate these files though while Cubeset files can contain more than one structure WorldEdit only generates one per file. 
-If you want more advanced cubeset files or create multi-piece structures you will have to use the Gallery and GalExport plugin. 
+The files in this folder are Cubeset files which is a custom file format made by Cuberite's developers which stores the blocks, but also additional information like how spread out each structure has to be and in which biome(s) they can spawn.
+WorldEdit is able to generate these files though while Cubeset files can contain more than one structure WorldEdit only generates one per file.
+If you want more advanced cubeset files or create multi-piece structures you will have to use the Gallery and GalExport plugin.
 These plugins were used for example to create the cubeset files for villages and (nether) fortresses.
 
-WorldEdit generates schematic files using the '//schematic save [format] (filename) [options...]' command. This command takes your current clipboard and saves it as the requested format in the "schematics" folder. 
+WorldEdit generates schematic files using the '//schematic save [format] (filename) [options...]' command. This command takes your current clipboard and saves it as the requested format in the "schematics" folder.
 By default this command uses the mcedit format with the ".schematic" extension. This is the default because most external programs use this format.
 In order to generate cubeset files you have to explicitly specify that you want the cubeset format. A valid command would look like this: "//schematic save cubeset myfile".
 
@@ -892,7 +892,7 @@ If there are multiple structures in the cubeset file then it's possible to speci
 			Contents =
 [[
 After saving your clipboard to a cubeset file it's possible to load it in the world generator.
-First you have to copy the file from the "schematics" folder into "Prefabs/SinglePieceStructures" and then enabling it in your world's world.ini file. 
+First you have to copy the file from the "schematics" folder into "Prefabs/SinglePieceStructures" and then enabling it in your world's world.ini file.
 This is done by adding "SinglePieceStructures: (CubesetFilename)" into your world.ini's Finishers list.
 ]]
 		}
