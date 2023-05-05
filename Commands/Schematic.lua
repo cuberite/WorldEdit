@@ -21,24 +21,8 @@ end
 function HandleSchematicListCommand(a_Split, a_Player)
 	-- //schematic list
 
-	-- Retrieve all the objects in the folder:
-	local FolderContents = cFile:GetFolderContents("schematics")
-
-	-- Filter out non-files and non-".schematic" files:
-	local FileList = {}
-	for idx, fnam in ipairs(FolderContents) do
-		if (
-			cFile:IsFile("schematics/" .. fnam) and
-			fnam:match(".*%.schematic")
-		) then
-			table.insert(FileList, fnam:sub(1, fnam:len() - 10))  -- cut off the ".schematic" part of the name
-		end
-	end
-	table.sort(FileList,
-		function(f1, f2)
-			return (string.lower(f1) < string.lower(f2))
-		end
-	)
+	local State = GetPlayerState(a_Player);
+	local FileList = State.ClipboardStorage:ListFiles();
 
 	a_Player:SendMessage(cChatColor.LightPurple .. "Available schematics: " .. table.concat(FileList, ", "))
 	return true

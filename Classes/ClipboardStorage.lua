@@ -62,6 +62,42 @@ end
 
 
 
+-- Returns a sorted list containing all schematic and cubeset files in the schematics folder.
+-- If there are files with the same name, but different extensions then those are shown explicitly with their extensions.
+function cClipboardStorage:ListFiles()
+	local dict = {}
+	local files = cFile:GetFolderContents("schematics");
+
+	local validExtensions = table.todictionary({".schematic", ".cubeset"})
+	for _, file in ipairs(files) do
+		local filename, extension = file:match("^(%w+)(%.%w+)$");
+		if (validExtensions[extension]) then
+			dict[filename] = dict[filename] or {};
+			table.insert(dict[filename], {name = filename, fullname = file});
+		end
+	end
+	local output = {}
+	for fileWithoutExtension, variants in pairs(dict) do
+		if (#variants == 1) then
+			table.insert(output, fileWithoutExtension);
+		else
+			for _, variant in ipairs(variants) do
+				table.insert(output, variant.fullname);
+			end
+		end
+	end
+	table.sort(output,
+		function(f1, f2)
+			return (string.lower(f1) < string.lower(f2))
+		end
+	)
+	return output;
+end
+
+
+
+
+
 --- Maps the requested format to the right file extension.
 function cClipboardStorage:GetExtension(a_Format)
 	return g_FormatExtensionMap[a_Format] or false;
