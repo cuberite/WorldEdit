@@ -43,7 +43,7 @@ function cPlayerState:new(a_Obj, a_PlayerKey, a_Player)
 		a_Obj.IsWECUIActivated = ClientHandle:HasPluginChannel("WECUI")
 	end
 	a_Obj.Clipboard = cClipboard:new()
-	a_Obj.ClipboardStorage = cClipboardStorage:new({}, a_Obj.Clipboard);
+	a_Obj.ClipboardStorage = cClipboardStorage:new({}, a_Obj.Clipboard)
 	a_Obj.PlayerKey = a_PlayerKey
 	a_Obj.Selection = cPlayerSelection:new({}, a_Obj)
 	a_Obj.UndoStack = cUndoStack:new({}, 10, a_Obj)  -- TODO: Settable Undo depth (2nd param)

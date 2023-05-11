@@ -901,11 +901,11 @@ end
 function ParseOptionsToDictionary(a_Split)
 	local output = {}
 	for idx, value in ipairs(a_Split) do
-		local key, val = value:match("^(.-)%=(.-)$");
+		local key, val = value:match("^(.-)%=(.-)$")
 		if (not key) then
 			return false, '"' .. value .. '" could not be parsed.'
 		end
-		output[key] = tonumber(val) or val;
+		output[key] = tonumber(val) or val
 	end
 	return output
 end
