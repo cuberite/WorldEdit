@@ -892,3 +892,20 @@ function HPosSelect(a_Player, a_MaxDistance)
 	end
 	return hpos
 end
+
+
+
+
+
+--- Parses array of key=value strings to dictionary for easy access.
+function ParseOptionsToDictionary(a_Split)
+	local output = {}
+	for idx, value in ipairs(a_Split) do
+		local key, val = value:match("^(.-)%=(.-)$")
+		if (not key) then
+			return false, '"' .. value .. '" could not be parsed.'
+		end
+		output[key] = tonumber(val) or val
+	end
+	return output
+end

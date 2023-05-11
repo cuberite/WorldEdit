@@ -835,6 +835,66 @@ g_PluginInfo =
 			Header = "Config",
 			Contents = [[
 			]],
+		},
+		{
+			Title = "Saving to Cubeset files",
+			Contents =
+[[
+Cuberite can generate single structures using its SinglePieceStructures generator. This generator uses preset areas which are saved in the Prefab/SinglePieceStructures folder.
+The files in this folder are Cubeset files which is a custom file format made by Cuberite's developers which stores the blocks, but also additional information like how spread out each structure has to be and in which biome(s) they can spawn.
+WorldEdit is able to generate these files though while Cubeset files can contain more than one structure WorldEdit only generates one per file.
+If you want more advanced cubeset files or create multi-piece structures you will have to use the Gallery and GalExport plugin.
+These plugins were used for example to create the cubeset files for villages and (nether) fortresses.
+
+WorldEdit generates schematic files using the '//schematic save [format] (filename) [options...]' command. This command takes your current clipboard and saves it as the requested format in the "schematics" folder.
+By default this command uses the mcedit format with the ".schematic" extension. This is the default because most external programs use this format.
+In order to generate cubeset files you have to explicitly specify that you want the cubeset format. A valid command would look like this: "//schematic save cubeset myfile".
+
+There are numerous adittional options which can be changed to modify how Cuberite's SinglePieceStructures generator handles the structure. The most important of these are:
+{%list}
+{%li} {%b}AllowedBiomes{%/b} In which biomes can the structure generate. If not specified it can generate in every biome.{%/li}
+{%li} {%b}GridSize{%/b} What is the space between structures on the grid.{%/li}
+{%li} {%b}MaxOffset{%/b} Used to make the placement less predictable. What is the maximum distance a structure can deviate from the grid.{%/li}
+{%li} {%b}piece.VerticalStrategy{%/b} How should the generator determine the Y (vertical) coordinate. The choices for this option are listed below.{%/li}
+{%li} {%b}piece.ExpandFloorStrategy{%/b} What should the generator do with the lowest layer once the piece is placed. The choices for this option are listed below.{%/li}
+{%/list}
+
+{%b}piece.VerticalStrategy{%/b}
+
+How should the generator determine the Y (vertical) coordinate. Sometimes a the options require one or more extra parameters. These parameters are added and then separated using a pipe character "|"
+{%list}
+{%li}{%b}Range|{%i}Min{%/i}|{%i}Max{%/i}{%/b} Places the structure between the provided min and max parameters. Requires two parameters.{%/li}
+{%li}{%b}TerrainOrOceanTop|{%i}Offset{%/i}{%/b} Places the structure on the highest terrain or on ocean level. Requires one extra parameter with an offset.{%/li}
+{%li}{%b}TerrainTop|{%i}Offset{%/i}{%/b} Places the structure on the highest terrain. This can also be underwater. Requires one extra parameter with an offset.{%/li}
+{%li}{%b}Fixed|{%i}Height{%/i}{%/b} Always places the structure at the exact height.{%/li}
+{%/list}
+
+{%b}piece.ExpandFloorStrategy{%/b}
+
+What should the generator do with the lowest layer once the piece is placed.
+{%list}
+{%li}{%b}RepeatBottomTillNonAir{%/b} Repeats every block of the lowest layer downwards until a non-air block is reached.{%/li}
+{%li}{%b}RepeatBottomTillNonSolid{%/b} Repeats every block of the lowest layer downwards until a non-solid block is reached. This will make it go through water and foliage.{%/li}
+{%li}{%b}None{%/b} Don't repeat the lowest layer at all.{%/list}
+{%/list}
+]]
+		},
+		{
+			Title = "Loading Cubeset files to clipboard",
+			Contents =
+[[
+WorldEdit can also load cubeset files back into the users clipboard. This is done using the "//schematic load (filename) [options...]".
+If there are multiple structures in the cubeset file then it's possible to specify which one using "pieceIdx=(number)". Do note though that WorldEdit will only look in the "schematics" folder.
+]]
+		},
+		{
+			Title = "Loading Cubeset file in Cuberite's world generator",
+			Contents =
+[[
+After saving your clipboard to a cubeset file it's possible to load it in the world generator.
+First you have to copy the file from the "schematics" folder into "Prefabs/SinglePieceStructures" and then enabling it in your world's world.ini file.
+This is done by adding "SinglePieceStructures: (CubesetFilename)" into your world.ini's Finishers list.
+]]
 		}
 	},  -- AdditionalInfo
 }

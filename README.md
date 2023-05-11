@@ -1,5 +1,45 @@
 This plugin allows you to easily manage the world, edit the world, navigate around or get information. It bears similarity to the Bukkit's WorldEdit plugin and aims to have the same set of commands,however, it has no affiliation to that plugin.
 
+# Saving to Cubeset files
+Cuberite can generate single structures using its SinglePieceStructures generator. This generator uses preset areas which are saved in the Prefab/SinglePieceStructures folder. The files in this folder are Cubeset files which is a custom file format made by Cuberite's developers which stores the blocks, but also additional information like how spread out each structure has to be and in which biome(s) they can spawn.  WorldEdit is able to generate these files though while Cubeset files can contain more than one structure WorldEdit only generates one per file.  If you want more advanced cubeset files or create multi-piece structures you will have to use the Gallery and GalExport plugin.  These plugins were used for example to create the cubeset files for villages and (nether) fortresses.
+
+WorldEdit generates schematic files using the '//schematic save [format] <filename> [options...]' command. This command takes your current clipboard and saves it as the requested format in the "schematics" folder.  By default this command uses the mcedit format with the ".schematic" extension. This is the default because most external programs use this format. In order to generate cubeset files you have to explicitly specify that you want the cubeset format. A valid command would look like this: "//schematic save cubeset myfile".
+
+There are numerous adittional options which can be changed to modify how Cuberite's SinglePieceStructures generator handles the structure. The most important of these are: 
+ 
+ -  **AllowedBiomes** In which biomes can the structure generate. If not specified it can generate in every biome. 
+ -  **GridSize** What is the space between structures on the grid. 
+ -  **MaxOffset** Used to make the placement less predictable. What is the maximum distance a structure can deviate from the grid. 
+ -  **piece.VerticalStrategy** How should the generator determine the Y (vertical) coordinate. The choices for this option are listed below. 
+ -  **piece.ExpandFloorStrategy** What should the generator do with the lowest layer once the piece is placed. The choices for this option are listed below. 
+
+
+**piece.VerticalStrategy**
+
+How should the generator determine the Y (vertical) coordinate. Sometimes a the options require one or more extra parameters. These parameters are added and then separated using a pipe character "|" 
+ 
+ - **Range|*Min*|*Max*** Places the structure between the provided min and max parameters. Requires two parameters. 
+ - **TerrainOrOceanTop|*Offset*** Places the structure on the highest terrain or on ocean level. Requires one extra parameter with an offset. 
+ - **TerrainTop|*Offset*** Places the structure on the highest terrain. This can also be underwater. Requires one extra parameter with an offset. 
+ - **Fixed|*Height*** Always places the structure at the exact height. 
+
+
+**piece.ExpandFloorStrategy**
+
+What should the generator do with the lowest layer once the piece is placed. 
+ 
+ - **RepeatBottomTillNonAir** Repeats every block of the lowest layer downwards until a non-air block is reached. 
+ - **RepeatBottomTillNonSolid** Repeats every block of the lowest layer downwards until a non-solid block is reached. This will make it go through water and foliage. 
+ - **None** Don't repeat the lowest layer at all.
+ 
+ 
+
+# Loading Cubeset files to clipboard
+WorldEdit can also load cubeset files back into the users clipboard. This is done using the "//schematic load <filename> [options...]". If there are multiple structures in the cubeset file then it's possible to specify which one using "pieceIdx=<number>". Do note though that WorldEdit will only look in the "schematics" folder. 
+
+# Loading cubeset file in Cuberite's world generator
+After saving your clipboard to a cubeset file it's possible to load it in the world generator. First you have to copy your file from the "schematics" folder into "Prefabs/SinglePieceStructures" and then enabling it in your world's world.ini file.  This is done by adding SinglePieceStructures: <CubesetFilename> into your world.ini's Finishers list. 
+
 # Commands
 
 ### Biome
@@ -203,9 +243,9 @@ Commands that activate a tool. If a tool is activated you can use it by right or
 | worldedit.biome.info |  | `/biomeinfo` |  |
 | worldedit.biome.set |  | `//setbiome` |  |
 | worldedit.biomelist |  | `/biomelist` |  |
-| worldedit.brush.cylinder |  | `/tool cylinder`, `/brush cylinder` |  |
+| worldedit.brush.cylinder |  | `/brush cylinder`, `/tool cylinder` |  |
 | worldedit.brush.options.mask |  | `/mask` |  |
-| worldedit.brush.sphere |  | `/tool sphere`, `/brush sphere` |  |
+| worldedit.brush.sphere |  | `/brush sphere`, `/tool sphere` |  |
 | worldedit.butcher |  | `/butcher` |  |
 | worldedit.clipboard.copy |  | `//copy` |  |
 | worldedit.clipboard.cut |  | `//cut` |  |
@@ -222,7 +262,7 @@ Commands that activate a tool. If a tool is activated you can use it by right or
 | worldedit.generation.shape |  | `//generate` |  |
 | worldedit.generation.sphere |  | `//sphere` |  |
 | worldedit.green |  | `//green` |  |
-| worldedit.help |  | `//help`, `/we help` |  |
+| worldedit.help |  | `/we help`, `//help` |  |
 | worldedit.history.redo |  | `//redo` |  |
 | worldedit.history.undo |  | `//undo` |  |
 | worldedit.navigation.ascend |  | `/ascend` |  |
@@ -245,10 +285,10 @@ Commands that activate a tool. If a tool is activated you can use it by right or
 | worldedit.removeabove |  | `/removeabove` |  |
 | worldedit.removebelow |  | `/removebelow` |  |
 | worldedit.replacenear |  | `//replacenear` |  |
-| worldedit.schematic.list |  | `//schematic formats`, `//schematic list` |  |
+| worldedit.schematic.list |  | `//schematic list`, `//schematic formats` |  |
 | worldedit.schematic.load |  | `//schematic load` |  |
 | worldedit.schematic.save |  | `//schematic save` |  |
-| worldedit.scripting.execute |  | `/.s`, `/cs` |  |
+| worldedit.scripting.execute |  | `/cs`, `/.s` |  |
 | worldedit.selection.chunk |  | `//chunk` |  |
 | worldedit.selection.contract |  | `//contract` |  |
 | worldedit.selection.count |  | `//count` |  |
@@ -257,15 +297,15 @@ Commands that activate a tool. If a tool is activated you can use it by right or
 | worldedit.selection.distr |  | `//distr` |  |
 | worldedit.selection.expand |  | `//expand` |  |
 | worldedit.selection.loadselection |  | `//loadsel` |  |
-| worldedit.selection.pos |  | `//hpos1`, `//hpos2`, `//pos1`, `//pos2` |  |
+| worldedit.selection.pos |  | `//hpos2`, `//pos2`, `//pos1`, `//hpos1` |  |
 | worldedit.selection.saveselection |  | `//savesel` |  |
 | worldedit.selection.shrink |  | `//shrink` |  |
-| worldedit.selection.size |  | `//size`, `//shift` |  |
+| worldedit.selection.size |  | `//shift`, `//size` |  |
 | worldedit.snow |  | `//snow` |  |
 | worldedit.superpickaxe |  | `//` |  |
 | worldedit.thaw |  | `//thaw` |  |
-| worldedit.tool.farwand |  | `/tool farwand`, `/farwand` |  |
-| worldedit.tool.replacer |  | `/tool repl`, `/repl` |  |
-| worldedit.tool.tree |  | `/tool tree`, `/tree` |  |
+| worldedit.tool.farwand |  | `/farwand`, `/tool farwand` |  |
+| worldedit.tool.replacer |  | `/repl`, `/tool repl` |  |
+| worldedit.tool.tree |  | `/tree`, `/tool tree` |  |
 | worldedit.wand |  | `//wand` |  |
 | worldedit.wand.toggle |  | `/toggleeditwand` |  |

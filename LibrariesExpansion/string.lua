@@ -14,3 +14,11 @@ function string.ucfirst(a_String)
 
 	return firstChar .. Rest
 end
+
+
+
+
+-- Returns true if str ends with ending
+function string.endswith(str, ending)
+    return ending == "" or str:sub(-#ending) == ending
+end

@@ -39,10 +39,11 @@ function cPlayerState:new(a_Obj, a_PlayerKey, a_Player)
 
 	-- Initialize the object members to their defaults:
 	local ClientHandle = a_Player:GetClientHandle()
-	a_Obj.Clipboard = cClipboard:new()
 	if (ClientHandle ~= nil) then
 		a_Obj.IsWECUIActivated = ClientHandle:HasPluginChannel("WECUI")
 	end
+	a_Obj.Clipboard = cClipboard:new()
+	a_Obj.ClipboardStorage = cClipboardStorage:new({}, a_Obj.Clipboard)
 	a_Obj.PlayerKey = a_PlayerKey
 	a_Obj.Selection = cPlayerSelection:new({}, a_Obj)
 	a_Obj.UndoStack = cUndoStack:new({}, 10, a_Obj)  -- TODO: Settable Undo depth (2nd param)
@@ -209,5 +210,5 @@ end
 
 
 -- Register the hooks needed:
-cPluginManager.AddHook(cPluginManager.HOOK_PLAYER_DESTROYED,   OnPlayerDestroyed)
-cPluginManager.AddHook(cPluginManager.HOOK_PLUGIN_MESSAGE,     OnPluginMessage)
+cPluginManager:AddHook(cPluginManager.HOOK_PLAYER_DESTROYED,   OnPlayerDestroyed)
+cPluginManager:AddHook(cPluginManager.HOOK_PLUGIN_MESSAGE,     OnPluginMessage)
