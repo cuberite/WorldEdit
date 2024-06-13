@@ -334,8 +334,8 @@ end
 -- a_PointChanged is optional, assigned to the point that has just changed
 -- If nil, the entire selection is assumed changed
 function cPlayerSelection:NotifySelectionChanged(a_PointChanged)
-	-- TODO: Call the OnPlayerSelectionChangING callback to prevent selection changes. 
-	
+	-- TODO: Call the OnPlayerSelectionChangING callback to prevent selection changes.
+
 	-- Call the player selection changed callback to notify other plugins of the selection change.
 	self.PlayerState:DoWithPlayer(function(a_Player)
 		local cuboid = cCuboid()
