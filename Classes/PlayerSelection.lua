@@ -19,14 +19,14 @@ function cPlayerSelection:new(a_Obj, a_PlayerState)
 	a_Obj = a_Obj or {}
 	setmetatable(a_Obj, cPlayerSelection)
 	self.__index = self
-	
+
 	-- Initialize the object members:
 	a_Obj.Cuboid = cCuboid()
 	a_Obj.IsFirstPointSet = false
 	a_Obj.IsSecondPointSet = false
 	a_Obj.PlayerState = a_PlayerState
 	a_Obj.OnChangeCallbacks = {}
-	
+
 	return a_Obj
 end
 
@@ -38,20 +38,20 @@ function cPlayerSelection:Deselect()
 	self.IsFirstPointSet = false
 	self.IsSecondPointSet = false
 	self.Cuboid = cCuboid()
-	
+
 	-- Remove the selection from the database
 	local DB = cSQLStorage:Get()
-	DB:ExecuteCommand("remove_playerselection", 
+	DB:ExecuteCommand("remove_playerselection",
 		{
 			playeruuid = self.PlayerState:GetUUID()
 		}
 	)
-	
+
 	-- Set the player's WECUI, if present:
 	if (not self.PlayerState.IsWECUIActivated) then
 		return
 	end
-	
+
 	self.PlayerState:DoWithPlayer(
 		function(a_Player)
 			a_Player:GetClientHandle():SendPluginMessage("WECUI", "s|cuboid")
@@ -68,8 +68,8 @@ function cPlayerSelection:SaveSelection(a_SelectionName)
 	if (not self:IsValid()) then
 		return false, "No region selected"
 	end
-	
-	local Success = cSQLStorage:Get():ExecuteCommand("set_namedplayerselection", 
+
+	local Success = cSQLStorage:Get():ExecuteCommand("set_namedplayerselection",
 		{
 			playeruuid = self.PlayerState:GetUUID(),
 			selname = a_SelectionName,
@@ -81,11 +81,11 @@ function cPlayerSelection:SaveSelection(a_SelectionName)
 			MaxZ = self.Cuboid.p2.z,
 		}
 	)
-	
+
 	if (not Success) then
 		return false, "An error occurred while saving the selection"
 	end
-	
+
 	return true
 end
 
@@ -107,15 +107,15 @@ function cPlayerSelection:LoadSelection(a_SelectionName)
 			FoundSelection = true
 		end
 	)
-	
+
 	if (not DatabaseSuccess) then
 		return false, "An error occurred while saving the selection"
 	end
-	
+
 	if (not FoundSelection) then
 		return false, "The selection doesn't exist"
 	end
-	
+
 	self:NotifySelectionChanged()
 	return true
 end
@@ -133,37 +133,37 @@ function cPlayerSelection:Expand(a_SubMinX, a_SubMinY, a_SubMinZ, a_AddMaxX, a_A
 	assert(a_AddMaxX ~= nil)
 	assert(a_AddMaxY ~= nil)
 	assert(a_AddMaxZ ~= nil)
-	
+
 	if (self.Cuboid.p1.x < self.Cuboid.p2.x) then
 		self.Cuboid.p1.x = self.Cuboid.p1.x - a_SubMinX
 	else
 		self.Cuboid.p2.x = self.Cuboid.p2.x - a_SubMinX
 	end
-	
+
 	if (self.Cuboid.p1.y < self.Cuboid.p2.y) then
 		self.Cuboid.p1.y = self.Cuboid.p1.y - a_SubMinY
 	else
 		self.Cuboid.p2.y = self.Cuboid.p2.y - a_SubMinY
 	end
-	
+
 	if (self.Cuboid.p1.z < self.Cuboid.p2.z) then
 		self.Cuboid.p1.z = self.Cuboid.p1.z - a_SubMinZ
 	else
 		self.Cuboid.p2.z = self.Cuboid.p2.z - a_SubMinZ
 	end
-	
+
 	if (self.Cuboid.p1.x > self.Cuboid.p2.x) then
 		self.Cuboid.p1.x = self.Cuboid.p1.x + a_AddMaxX
 	else
 		self.Cuboid.p2.x = self.Cuboid.p2.x + a_AddMaxX
 	end
-	
+
 	if (self.Cuboid.p1.y > self.Cuboid.p2.y) then
 		self.Cuboid.p1.y = self.Cuboid.p1.y + a_AddMaxY
 	else
 		self.Cuboid.p2.y = self.Cuboid.p2.y + a_AddMaxY
 	end
-	
+
 	if (self.Cuboid.p1.z > self.Cuboid.p2.z) then
 		self.Cuboid.p1.z = self.Cuboid.p1.z + a_AddMaxZ
 	else
@@ -228,7 +228,7 @@ end
 --- Returns a string describing the selection size ("X * Y * Z, volume V blocks")
 function cPlayerSelection:GetSizeDesc()
 	assert(self:IsValid())
-	
+
 	local DifX, DifY, DifZ = self:GetCoordDiffs()
 	DifX = DifX + 1
 	DifY = DifY + 1
@@ -249,7 +249,7 @@ end
 --- Returns a new cuboid with the selection's bounds, sorted
 function cPlayerSelection:GetSortedCuboid()
 	assert(self:IsValid())
-	
+
 	local SCuboid = cCuboid(self.Cuboid)
 	SCuboid:Sort()
 	return SCuboid;
@@ -262,7 +262,7 @@ end
 --- Returns the 3D volume of the selection
 function cPlayerSelection:GetVolume()
 	assert(self:IsValid())
-	
+
 	local Volume = self.Cuboid.p2.x - self.Cuboid.p1.x
 	Volume = Volume * (self.Cuboid.p2.y - self.Cuboid.p1.y)
 	Volume = Volume * (self.Cuboid.p2.z - self.Cuboid.p1.z)
@@ -279,7 +279,7 @@ end
 --- Returns the two X coords, smaller first
 function cPlayerSelection:GetXCoordsSorted()
 	assert(self:IsValid())
-	
+
 	if (self.Cuboid.p1.x < self.Cuboid.p2.x) then
 		return self.Cuboid.p1.x, self.Cuboid.p2.x
 	else
@@ -294,7 +294,7 @@ end
 --- Returns the two Y coords, smaller first
 function cPlayerSelection:GetYCoordsSorted()
 	assert(self:IsValid())
-	
+
 	if (self.Cuboid.p1.y < self.Cuboid.p2.y) then
 		return self.Cuboid.p1.y, self.Cuboid.p2.y
 	else
@@ -309,7 +309,7 @@ end
 --- Returns the two Z coords, smaller first
 function cPlayerSelection:GetZCoordsSorted()
 	assert(self:IsValid())
-	
+
 	if (self.Cuboid.p1.z < self.Cuboid.p2.z) then
 		return self.Cuboid.p1.z, self.Cuboid.p2.z
 	else
@@ -335,7 +335,7 @@ end
 -- If nil, the entire selection is assumed changed
 function cPlayerSelection:NotifySelectionChanged(a_PointChanged)
 	-- TODO: Call the registered callbacks
-	
+
 	-- Set the player's WECUI, if present:
 	if (self.PlayerState.IsWECUIActivated) then
 		local Volume = -1
@@ -376,9 +376,9 @@ function cPlayerSelection:Move(a_OffsetX, a_OffsetY, a_OffsetZ)
 	assert(a_OffsetX ~= nil)
 	assert(a_OffsetY ~= nil)
 	assert(a_OffsetZ ~= nil)
-	
+
 	-- Move the cuboid
-	self.Cuboid:Move(a_OffsetX, a_OffsetY, a_OffsetZ)
+	self.Cuboid:Move(Vector3i(a_OffsetX, a_OffsetY, a_OffsetZ))
 
 	-- Notify the client
 	self:NotifySelectionChanged()
@@ -397,7 +397,7 @@ function cPlayerSelection:SetFirstPoint(a_BlockX, a_BlockY, a_BlockZ)
 	assert(BlockX ~= nil)
 	assert(BlockY ~= nil)
 	assert(BlockZ ~= nil)
-	
+
 	-- Set the point:
 	self.Cuboid.p1:Set(BlockX, BlockY, BlockZ)
 	self.IsFirstPointSet = true
@@ -417,7 +417,7 @@ function cPlayerSelection:SetSecondPoint(a_BlockX, a_BlockY, a_BlockZ)
 	assert(BlockX ~= nil)
 	assert(BlockY ~= nil)
 	assert(BlockZ ~= nil)
-	
+
 	-- Set the point:
 	self.Cuboid.p2:Set(BlockX, BlockY, BlockZ)
 	self.IsSecondPointSet = true
@@ -434,12 +434,12 @@ function cPlayerSelection:SetPos(a_BlockX, a_BlockY, a_BlockZ, a_BlockFace, a_Po
 	if (a_BlockFace == BLOCK_FACE_NONE) then
 		return false
 	end
-	
+
 	-- Check the wand activation state:
 	if (not self.PlayerState.WandActivated and not a_ForceSet) then
 		return false
 	end
-	
+
 	local Abort = false
 	self.PlayerState:DoWithPlayer(
 		function(a_Player)
@@ -448,25 +448,25 @@ function cPlayerSelection:SetPos(a_BlockX, a_BlockY, a_BlockZ, a_BlockFace, a_Po
 				Abort = true
 				return true
 			end
-			
+
 			-- When shift is pressed, use the air block instead of the clicked block:
 			if (a_Player:IsCrouched()) then
 				a_BlockX, a_BlockY, a_BlockZ = AddFaceDirection(a_BlockX, a_BlockY, a_BlockZ, a_BlockFace)
 			end
 		end
 	)
-	
+
 	-- The callback decided to abort.
 	if (Abort) then
 		return false
 	end
-	
+
 	-- Determine what point we're trying to set and get the proper set function for it.
 	local SetFunc = (a_PosName == "First") and cPlayerSelection.SetFirstPoint or cPlayerSelection.SetSecondPoint
-	
+
 	-- Set the position in the internal representation:
 	SetFunc(self, a_BlockX, a_BlockY, a_BlockZ)
-	
+
 	-- Return a success message:
 	return true, cChatColor.LightPurple .. a_PosName .. " position set to {" .. a_BlockX .. ", " .. a_BlockY .. ", " .. a_BlockZ .. "}."
 end
@@ -478,7 +478,7 @@ end
 -- Loads the player selection from the database
 function cPlayerSelection:Load(a_PlayerUUID)
 	local DB = cSQLStorage:Get()
-	DB:ExecuteCommand("get_playerselection", 
+	DB:ExecuteCommand("get_playerselection",
 		{
 			playeruuid = a_PlayerUUID
 		},
@@ -487,7 +487,7 @@ function cPlayerSelection:Load(a_PlayerUUID)
 			self:SetSecondPoint(a_Data.MaxX, a_Data.MaxY, a_Data.MaxZ)
 		end
 	)
-	
+
 	self:NotifySelectionChanged()
 end
 
@@ -500,10 +500,10 @@ function cPlayerSelection:Save(a_PlayerUUID)
 	if (not self:IsValid()) then
 		return
 	end
-	
+
 	local SrcCuboid = self:GetSortedCuboid()
 	local DB = cSQLStorage:Get()
-	DB:ExecuteCommand("set_playerselection", 
+	DB:ExecuteCommand("set_playerselection",
 		{
 			playeruuid = a_PlayerUUID,
 			MinX = SrcCuboid.p1.x,
@@ -515,7 +515,3 @@ function cPlayerSelection:Save(a_PlayerUUID)
 		}
 	)
 end
-
-
-
-

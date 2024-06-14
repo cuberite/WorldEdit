@@ -10,7 +10,7 @@
 -- Complete CUI handshake
 function HandleWorldEditCuiCommand(a_Split, a_Player)
 	-- /we cui
-	
+
 	local State = GetPlayerState(a_Player)
 	State.IsWECUIActivated = true
 	State.Selection:NotifySelectionChanged()
@@ -36,19 +36,19 @@ end
 -- Sends all the available commands to the player.
 function HandleWorldEditHelpCommand(a_Split, a_Player)
 	-- /we help
-	
+
 	if (not a_Player:HasPermission("worldedit.help")) then
 		a_Player:SendMessage(cChatColor.Rose .. "You do not have permission for this command.")
 		return true
 	end
-	
+
 	local Commands = ""
 	for Command, CommandInfo in pairs(g_PluginInfo.Commands) do
 		if (a_Player:HasPermission(CommandInfo.Permission)) then
 			Commands = Commands .. cChatColor.LightPurple .. Command .. ", "
 		end
 	end
-	
+
 	a_Player:SendMessage(cChatColor.LightPurple .. "Available commands:")
 	a_Player:SendMessage(string.sub(Commands, 1, string.len(Commands) - 2)) -- Remove the last ", "
 	return true
@@ -61,7 +61,7 @@ end
 -- Gives the player the wand item.
 function HandleWandCommand(a_Split, a_Player)
 	-- //wand
-	
+
 	local Item = cItem(g_Config.WandItem) -- create the cItem object
 	if (a_Player:GetInventory():AddItem(Item)) then -- check if the player got the item
 		a_Player:SendMessage(cChatColor.Green .. "You have received the wand.")
@@ -78,7 +78,7 @@ end
 -- Toggles if the wand is active or not.
 function HandleToggleEditWandCommand(a_Split, a_Player)
 	-- //togglewand
-	
+
 	local State = GetPlayerState(a_Player)
 	if not(State.WandActivated) then
 		State.WandActivated = true
@@ -89,7 +89,3 @@ function HandleToggleEditWandCommand(a_Split, a_Player)
 	end
 	return true
 end
-
-
-
-

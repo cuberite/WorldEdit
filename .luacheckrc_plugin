@@ -1,0 +1,23 @@
+-- This file contains plugin specific options or tables for luacheck
+-- It will be merged with cuberite's luacheck
+
+-- Ignore variables / warning codes
+-- Doc: http://luacheck.readthedocs.io/en/stable/warnings.html
+ignore =
+{
+	"122",                               -- Mutating read-only global variable
+	"131",                               -- Unused global variable
+	"142",                               -- Setting undefined field of global math, string, table
+	"143",                               -- Accessing undefined field of global math, table
+	"211",                               -- Unused variable
+	"221",                               -- Variable is never set
+	"231",                               -- Variable is never accessed
+	"311",                               -- Value assigned to variable is unused
+	"411",                               -- Variable was previously defined
+	"421",                               -- Shadowing definition of variable
+	"423",                               -- Shadowing definition of loop variable
+	"432",                               -- Shadowing upvalue argument
+	"531",                               -- Left-hand side of assignment is too short
+	"542",                               -- Empty if branch
+	"631",                               -- Line too long
+}

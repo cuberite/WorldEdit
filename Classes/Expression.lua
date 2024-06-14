@@ -34,10 +34,11 @@ cExpression = {}
 
 
 
-cExpression.m_ExpressionTemplate = 
+cExpression.m_ExpressionTemplate =
 [[
+local assert, pairs = assert, pairs
 local abs, acos, asin, atan, atan2,
-ceil, cos, cosh, exp, floor, ln, 
+ceil, cos, cosh, exp, floor, ln,
 log, log10, max, min, round, sin,
 sinh, sqrt, tan, tanh, random, pi, e
 =
@@ -53,8 +54,13 @@ local rint = function(num) local Number, Decimal = math.modf(num); return (Decim
 
 %s
 
+local validators = {...}
+
 return function(%s)
 	%s
+	for _, validator in pairs(validators) do
+		assert(validator(%s))
+	end
 	return %s
 end]]
 
@@ -62,11 +68,13 @@ end]]
 
 
 
--- The envoronment of the loader. 
+-- The envoronment of the loader.
 -- It can currently only use the functions from the math library.
 cExpression.m_LoaderEnv =
 {
 	math = math,
+	assert = assert,
+	pairs = pairs,
 }
 
 
@@ -74,7 +82,7 @@ cExpression.m_LoaderEnv =
 
 
 -- All the assignment operator
--- Since Lua only supports the simple = assignments we need to give the others special handling. 
+-- Since Lua only supports the simple = assignments we need to give the others special handling.
 -- The = assignment is special because it can also be used in comparisons >=, == etc
 cExpression.m_Assignments =
 {
@@ -111,26 +119,29 @@ cExpression.m_Comparisons =
 
 function cExpression:new(a_Formula)
 	local Obj = {}
-	
+
 	a_Formula = a_Formula
 	:gsub("&&", " and ")
 	:gsub("||", " or ")
-	
+
 	setmetatable(Obj, cExpression)
 	self.__index = self
-	
+
 	-- The string of the formula
 	Obj.m_Formula = a_Formula
-	
+
 	-- All the variables that that the formula can use. For example x, y and z
 	Obj.m_Parameters = {}
-	
+
 	-- All the variables the formula will return after executing
 	Obj.m_ReturnValues = {}
-	
+
 	-- A table containing predefined variables. A new one can be added using the PredefineVariable function
 	Obj.m_PredefinedConstants = {}
-	
+
+	-- A table containing functions used to validate the return values
+	Obj.m_ReturnValidators = {}
+
 	return Obj
 end
 
@@ -162,6 +173,17 @@ end
 
 
 
+-- Adds a validator to check if the return value is allowed.
+-- a_Validator is a function. If it returns false the expression will assert
+function cExpression:AddReturnValidator(a_Validator)
+	table.insert(self.m_ReturnValidators, a_Validator)
+	return self
+end
+
+
+
+
+
 -- Adds a new constant. The formula will be able to use this in it's calculation.
 -- a_VarName is a string that will be the name of the constant.
 -- a_Value can only be a string or a number, since the environment blocks all other functions and tables.
@@ -180,49 +202,49 @@ end
 function cExpression:Compile()
 	local Arguments    = table.concat(self.m_Parameters, ", ")
 	local ReturnValues = table.concat(self.m_ReturnValues, ", ")
-	
+
 	local PredefinedVariables = ""
 	for _, Variable in ipairs(self.m_PredefinedConstants) do
 		local Value = Variable.value
 		if (type(Value) == "string") then
 			Value = "\"" .. Value .. "\""
 		end
-		
+
 		PredefinedVariables = PredefinedVariables .. "local " .. Variable.name .. " = " .. Value .. "\n"
 	end
-	
+
 	-- The number of comparisons. This will be used to give each comparison a name (Comp<id>)
 	local NumComparison = 1
-	
+
 	-- Split the formula into actions (For example in "data=5; x<y" data=5 is an action, and x<y is an action.)
 	local Actions = StringSplitAndTrim(self.m_Formula, ";")
-	
-	-- If an action is an assignment in a format unsupported by Lua (a += 1), convert it into a supported format (a = a + 1). 
+
+	-- If an action is an assignment in a format unsupported by Lua (a += 1), convert it into a supported format (a = a + 1).
 	-- If an action is a comparison then give it the name "Comp<id>"
 	for Idx, Action in ipairs(Actions) do
 		-- Check if the = operator is found
 		local IsAssignment = Action:match("[%a%d%s]=[%(%a%d%s]") ~= nil
-		
+
 		-- Check if one of the assignment operators is found. If one is found it's certain that the action is an assignment.
 		for Idx, Assignment in pairs(cExpression.m_Assignments) do
 			if (Action:match(Assignment)) then
 				IsAssignment = true
 			end
 		end
-		
+
 		-- Make all the comparisons work properly. For example != is used instead of ~=, while ~= is used to see if 2 numbers are near each other.
 		for _, Comparison in ipairs(cExpression.m_Comparisons) do
 			if (Action:match(Comparison.Usage)) then
 				Action = Comparison.Result:format(Action:match(Comparison.Usage))
 			end
 		end
-		
+
 		if (IsAssignment) then
 			-- The action is an assignment. Since Lua only supports the simple = assignments we got to do some special handling for the <action>assign assignments like += and *=.
 			for Idx, Assignment in pairs(cExpression.m_Assignments) do
 				-- Get what type of assignment it is (multiply, divide etc)
 				local Operator = Assignment:match(".="):sub(1, 1)
-				
+
 				-- This pattern will get the name of the variable to assign, and everything to add/devide/multiply etc
 				local Pattern = "(.*)" .. Assignment .. "(.*)"
 				Action:gsub(Pattern,
@@ -231,7 +253,7 @@ function cExpression:Compile()
 					end
 				)
 			end
-			
+
 			-- Add the assignment in the formula function
 			Actions[Idx] = "local " .. Action
 		else
@@ -240,27 +262,24 @@ function cExpression:Compile()
 			NumComparison = NumComparison + 1
 		end
 	end
-	
-	local FormulaLoader = loadstring(cExpression.m_ExpressionTemplate:format(PredefinedVariables, Arguments, table.concat(Actions, "\n\t"), ReturnValues))
+
+	local formulaLoaderSrc = cExpression.m_ExpressionTemplate:format(PredefinedVariables, Arguments, table.concat(Actions, "\n\t"), ReturnValues, ReturnValues)
+	local FormulaLoader = loadstring(formulaLoaderSrc)
 	if (not FormulaLoader) then
 		return false, "Invalid formula"
 	end
-	
+
 	-- Only allow the FormulaLoader to use the math library and the Round function
 	setfenv(FormulaLoader, cExpression.m_LoaderEnv)
-	
+
 	-- Try to get the formula checker
-	local Succes, Formula = pcall(FormulaLoader)
+	local Succes, Formula = pcall(FormulaLoader, unpack(self.m_ReturnValidators))
 	if (not Succes) then
 		return false, "Invalid formula"
 	end
-	
+
 	-- Don't allow Formula to interact with the rest of the server except the local variables it already has.
 	setfenv(Formula, {})
-	
+
 	return Formula
 end
-
-
-
-

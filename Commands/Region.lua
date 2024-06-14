@@ -9,7 +9,7 @@
 
 function HandleAddLeavesCommand(a_Split, a_Player)
 	-- //addleaves <LeafType>
-	
+
 	-- Parse the LeafType:
 	local LeafType = a_Split[2]
 	local LeafBlockType = 0
@@ -43,17 +43,17 @@ function HandleAddLeavesCommand(a_Split, a_Player)
 		a_Player:SendMessage(cChatColor.Rose .. "No region set")
 		return true
 	end
-	
+
 	-- Check with other plugins if the operation is okay:
 	local SrcCuboid = State.Selection:GetSortedCuboid()
 	local World = a_Player:GetWorld()
 	if (CallHook("OnAreaChanging", SrcCuboid, a_Player, World, "addleaves")) then
 		return
 	end
-	
+
 	-- Push an undo snapshot:
 	State.UndoStack:PushUndoFromCuboid(World, SrcCuboid, "addleaves")
-	
+
 	-- Read the selected cuboid into a cBlockArea:
 	local BA = cBlockArea()
 	BA:Read(World, SrcCuboid)
@@ -61,7 +61,7 @@ function HandleAddLeavesCommand(a_Split, a_Player)
 	MaxX = MaxX - 1
 	MaxY = MaxY - 1
 	MaxZ = MaxZ - 1
-	
+
 	-- Create an image for the leaves to be added at each log:
 	--[[
 	The image is like this:
@@ -71,7 +71,7 @@ function HandleAddLeavesCommand(a_Split, a_Player)
 	xxxxx
 	xxxxx
 	.xxx.
-	
+
 	level 2:
 	.....
 	..x..
@@ -95,7 +95,7 @@ function HandleAddLeavesCommand(a_Split, a_Player)
 	LeavesImg:SetRelBlockTypeMeta(3, 2, 2, LeafBlockType, LeafBlockMeta)
 	LeavesImg:SetRelBlockTypeMeta(2, 2, 3, LeafBlockType, LeafBlockMeta)
 	LeavesImg:SetRelBlockTypeMeta(2, 2, 2, LeafBlockType, LeafBlockMeta)
-	
+
 	-- Process the block area - add leaves next to all log blocks:
 	local LogBlock = E_BLOCK_LOG
 	local NewLogBlock = E_BLOCK_NEW_LOG
@@ -109,10 +109,10 @@ function HandleAddLeavesCommand(a_Split, a_Player)
 			end
 		end
 	end
-	
+
 	-- Write the block area back to world:
 	BA:Write(World, BA:GetOrigin())
-	
+
 	-- Notify the other plugins of the change
 	CallHook("OnAreaChanged", SrcCuboid, a_Player, World, "addleaves")
 	return true
@@ -124,7 +124,7 @@ end
 
 function HandleEllipsoidCommand(a_Split, a_Player)
 	-- //ellipsoid [-h] <block>
-	
+
 	local State = GetPlayerState(a_Player)
 
 	-- Check the selection:
@@ -132,32 +132,32 @@ function HandleEllipsoidCommand(a_Split, a_Player)
 		a_Player:SendMessage(cChatColor.Rose .. "No region set")
 		return true
 	end
-	
+
 	local BlockTypeIndex = 2
 	local Hollow = false
-	
+
 	-- Check for hollow flag
 	if (a_Split[2] == "-h") then
 		Hollow = true
 		BlockTypeIndex = 3
 	end
-	
+
 	-- Check the params:
 	if (a_Split[BlockTypeIndex] == nil) then
 		a_Player:SendMessage(cChatColor.Rose .. "Usage: //ellipsoid [-h] <BlockType>")
 		return true
 	end
-	
+
 	-- Retrieve the blocktypes from the params:
 	local DstBlockTable, ErrBlock = GetBlockDst(a_Split[BlockTypeIndex], a_Player)
 	if not(DstBlockTable) then
 		a_Player:SendMessage(cChatColor.Rose .. "Unknown dst block type: '" .. ErrBlock .. "'.")
 		return true
 	end
-	
+
 	local Cuboid = State.Selection:GetSortedCuboid()
 	local NumAffectedBlocks = CreateSphereInCuboid(a_Player, Cuboid, DstBlockTable, Hollow)
-	
+
 	a_Player:SendMessage(cChatColor.LightPurple .. NumAffectedBlocks .. " block(s) have been created")
 	return true
 end
@@ -168,7 +168,7 @@ end
 
 function HandleFacesCommand(a_Split, a_Player)
 	-- //faces <blocktype>
-	
+
 	local State = GetPlayerState(a_Player)
 
 	-- Check the selection:
@@ -176,19 +176,19 @@ function HandleFacesCommand(a_Split, a_Player)
 		a_Player:SendMessage(cChatColor.Rose .. "No region set")
 		return true
 	end
-	
+
 	-- Check the params:
 	if (a_Split[2] == nil) then
 		a_Player:SendMessage(cChatColor.Rose .. "Usage: //faces <BlockType>")
 		return true
 	end
-	
+
 	local BlockTable, ErrBlock = GetBlockDst(a_Split[2], a_Player)
 	if (not BlockTable) then
 		a_Player:SendMessage(cChatColor.Rose .. "Unknown block: '" .. ErrBlock .. "'.")
 		return true
 	end
-	
+
 	-- Fill the selection:
 	local NumBlocks = FillFaces(State, a_Player, a_Player:GetWorld(), BlockTable)
 	if (NumBlocks) then
@@ -203,7 +203,7 @@ end
 
 function HandleLeafDecayCommand(a_Split, a_Player)
 	-- //leafdecay
-	
+
 	local LEAVES_CHECK_DISTANCE = 6
 	local PlayerState = GetPlayerState(a_Player)
 
@@ -228,7 +228,7 @@ function HandleLeafDecayCommand(a_Split, a_Player)
 	)
 
 	local BA = cBlockArea()
-	BA:Read(World, SrcCuboid, cBlockArea.baTypes + cBlockArea.baMetas)
+	BA:Read(World, SrcCuboid)
 
 	local BA2 = cBlockArea()
 	BA2:CopyFrom(BA)
@@ -243,12 +243,12 @@ function HandleLeafDecayCommand(a_Split, a_Player)
 		else
 			return
 		end
-		
+
 		local I = a_I - 1
 		if (I == 0) then
 			return
 		end
-		
+
 		ProcessLeaf(a_X - 1, a_Y, a_Z, I)
 		ProcessLeaf(a_X + 1, a_Y, a_Z, I)
 		ProcessLeaf(a_X, a_Y - 1, a_Z, I)
@@ -256,7 +256,7 @@ function HandleLeafDecayCommand(a_Split, a_Player)
 		ProcessLeaf(a_X, a_Y, a_Z - 1, I)
 		ProcessLeaf(a_X, a_Y, a_Z + 1, I)
 	end
-		
+
 
 	for X = 0, SizeX do
 		for Y = 0, SizeY do
@@ -287,12 +287,12 @@ function HandleLeafDecayCommand(a_Split, a_Player)
 			end
 		end
 	end
-	
-	BA2:Write(World, SrcCuboid.p1, cBlockArea.baTypes + cBlockArea.baMetas)
-	
+
+	BA2:Write(World, SrcCuboid.p1)
+
 	-- Notify the changes to other plugins
 	CallHook("OnAreaChanged", SrcCuboid, a_Player, World, "leafdecay")
-	
+
 	a_Player:SendMessage(cChatColor.LightPurple .. "Removed " .. NumChangedBlocks .. " leaf block(s)")
 	return true
 end
@@ -303,7 +303,7 @@ end
 
 function HandleMirrorCommand(a_Split, a_Player)
 	-- //mirror <plane>
-	
+
 	-- Check params:
 	local MirrorFn
 	local Plane = a_Split[2]
@@ -318,36 +318,36 @@ function HandleMirrorCommand(a_Split, a_Player)
 		a_Player:SendMessage(cChatColor.Rose .. "  plane can be one of: xy, xz, yx, yz, zx, zy")
 		return true
 	end
-	
+
 	local State = GetPlayerState(a_Player)
-	
+
 	-- Check the selection:
 	if not(State.Selection:IsValid()) then
 		a_Player:SendMessage(cChatColor.Rose .. "No region selected")
 		return true
 	end
-	
+
 	-- Check with other plugins if the operation is okay:
 	local SrcCuboid = State.Selection:GetSortedCuboid()
 	local World = a_Player:GetWorld()
 	if (CallHook("OnAreaChanging", SrcCuboid, a_Player, World, "mirror")) then
 		return
 	end
-	
+
 	-- Push the selection to the undo stack:
 	State:PushUndoInSelection(World, "mirror " .. Plane)
-	
+
 	-- Mirror the selection:
 	local Area = cBlockArea()
 	local Selection = cCuboid(State.Selection.Cuboid)  -- Make a copy of the selection cuboid
 	Selection:Sort()
-	Area:Read(World, Selection, cBlockArea.baTypes + cBlockArea.baMetas)
+	Area:Read(World, Selection)
 	MirrorFn(Area)
-	Area:Write(World, Selection.p1, cBlockArea.baTypes + cBlockArea.baMetas)
-	
+	Area:Write(World, Selection.p1)
+
 	-- Notify other plugins of the change in the world
 	CallHook("OnAreaChanged", SrcCuboid, a_Player, World, "mirror")
-	
+
 	-- Notify of success:
 	a_Player:SendMessage(cChatColor.Rose .. "Selection mirrored")
 	return true
@@ -359,33 +359,33 @@ end
 
 function HandleStackCommand(a_Split, a_Player)
 	-- //stack [Amount] [Direction]
-	
+
 	-- Check the selection:
 	local State = GetPlayerState(a_Player)
 	if not(State.Selection:IsValid()) then
 		a_Player:SendMessage(cChatColor.Rose .. "No region set")
 		return true
 	end
-	
+
 	if (a_Split[2] ~= nil) and (tonumber(a_Split[2]) == nil) then
 		a_Player:SendMessage(cChatColor.Rose .. "Usage: //stack [Blocks] [Direction]")
 		return true
 	end
-	
+
 	-- The amount of time the selection should be stacked
 	local NumStacks = a_Split[2] or 1 -- Use the given amount or 1 if nil
 	local Direction = string.lower(a_Split[3] or ((a_Player:GetPitch() > 70) and "down") or ((a_Player:GetPitch() < -70) and "up") or "forward")
-	
+
 	local SelectionCuboid = State.Selection:GetSortedCuboid()
 	local World = a_Player:GetWorld()
-	
+
 	-- Read the selection
 	local BA = cBlockArea()
-	BA:Read(World, SelectionCuboid, cBlockArea.baTypes + cBlockArea.baMetas)
-	
+	BA:Read(World, SelectionCuboid)
+
 	local VectorDirection = Vector3i()
 	local LookDirection = math.round((a_Player:GetYaw() + 180) / 90)
-	
+
 	-- Find the proper direction and set the VectorDirection using it.
 	if (Direction == "up") then
 		VectorDirection.y = BA:GetSizeY()
@@ -443,30 +443,30 @@ function HandleStackCommand(a_Split, a_Player)
 		a_Player:SendMessage(cChatColor.Rose .. "Unknown direction \"" .. Direction .. "\".")
 		return true
 	end
-	
+
 	-- Create a cuboid that contains the complete area that is going to change
 	local UndoStackCuboid = cCuboid(SelectionCuboid)
 	UndoStackCuboid.p2 = UndoStackCuboid.p2 + (VectorDirection * NumStacks)
 	UndoStackCuboid:Sort()
-	
+
 	-- Check other plugins if they agree
 	if (CallHook("OnAreaChanging", UndoStackCuboid, a_Player, World, "stack")) then
 		return true
 	end
-	
+
 	-- Push the selection that is going to change into the UndoStack
 	State.UndoStack:PushUndoFromCuboid(World, UndoStackCuboid)
-	
+
 	-- Stack the selection in the given Direction.
 	local Pos = SelectionCuboid.p1 + VectorDirection
 	for I=1, NumStacks do
-		BA:Write(World, Pos, cBlockArea.baTypes + cBlockArea.baMetas)
+		BA:Write(World, Pos)
 		Pos = Pos + VectorDirection
 	end
-	
+
 	-- Notify the plugins of the change in the world
 	CallHook("OnAreaChanged", UndoStackCuboid, a_Player, World, "stack")
-	
+
 	a_Player:SendMessage(cChatColor.LightPurple .. BA:GetVolume() * VectorDirection:Length() .. " blocks changed. Undo with //undo")
 	return true
 end
@@ -477,36 +477,40 @@ end
 
 function HandleReplaceCommand(a_Split, a_Player)
 	-- //replace <srcblocktype> <dstblocktype>
-	
+
 	local State = GetPlayerState(a_Player)
-	
+
 	-- Check the selection:
 	if not(State.Selection:IsValid()) then
 		a_Player:SendMessage(cChatColor.Rose .. "No region set")
 		return true
 	end
-	
+
 	-- Check the params:
-	if ((a_Split[2] == nil) or (a_Split[3] == nil)) then
+	local SrcBlockMask, SrcBlockErr, DstBlockSrc, DstBlockErr;
+	if (a_Split[2] and not a_Split[3]) then
+		SrcBlockMask, SrcBlockErr = cMask:new(nil, 0)
+		DstBlockSrc, DstBlockErr = GetBlockDst(a_Split[2], a_Player)
+	elseif (a_Split[2] and a_Split[3]) then
+		SrcBlockMask, SrcBlockErr = cMask:new(a_Split[2])
+		DstBlockSrc, DstBlockErr = GetBlockDst(a_Split[3], a_Player)
+	else
 		a_Player:SendMessage(cChatColor.Rose .. "Usage: //replace <SrcBlockType> <DstBlockType>")
 		return true
 	end
-	
-	-- Retrieve the blocktypes from the params:
-	local SrcBlockTable, ErrBlock = cMask:new(a_Split[2])
-	if (not SrcBlockTable) then
-		a_Player:SendMessage(cChatColor.Rose .. "Unknown src block type: '" .. ErrBlock .. "'.")
+
+	if (not SrcBlockMask) then
+		a_Player:SendMessage(cChatColor.Rose .. "Unknown src block type: '" .. SrcBlockErr .. "'.")
 		return true
 	end
-	
-	local DstBlockTable, ErrBlock = GetBlockDst(a_Split[3], a_Player)
-	if not(DstBlockTable) then
-		a_Player:SendMessage(cChatColor.Rose .. "Unknown dst block type: '" .. ErrBlock .. "'.")
+
+	if not(DstBlockSrc) then
+		a_Player:SendMessage(cChatColor.Rose .. "Unknown dst block type: '" .. DstBlockErr .. "'.")
 		return true
 	end
-	
+
 	-- Replace the blocks:
-	local NumBlocks = ReplaceBlocksInCuboid(a_Player, State.Selection:GetSortedCuboid(), SrcBlockTable, DstBlockTable, "replace")
+	local NumBlocks = ReplaceBlocksInCuboid(a_Player, State.Selection:GetSortedCuboid(), SrcBlockMask, DstBlockSrc, "replace")
 	if (NumBlocks) then
 		a_Player:SendMessage(cChatColor.LightPurple .. NumBlocks .. " block(s) have been changed.")
 	end
@@ -519,7 +523,7 @@ end
 
 function HandleSetCommand(a_Split, a_Player)
 	-- //set <blocktype>
-	
+
 	local State = GetPlayerState(a_Player)
 
 	-- Check the selection:
@@ -527,23 +531,23 @@ function HandleSetCommand(a_Split, a_Player)
 		a_Player:SendMessage(cChatColor.Rose .. "No region set")
 		return true
 	end
-	
+
 	-- Check the params:
 	if (a_Split[2] == nil) then
 		a_Player:SendMessage(cChatColor.Rose .. "Usage: //set <BlockType>")
 		return true
 	end
-	
+
 	-- Retrieve the blocktypes from the params:
 	local DstBlockTable, ErrBlock = GetBlockDst(a_Split[2], a_Player)
 	if not(DstBlockTable) then
 		a_Player:SendMessage(cChatColor.Rose .. "Unknown dst block type: '" .. ErrBlock .. "'.")
 		return true
 	end
-	
+
 	-- Get the selected region of the player
 	local Selection = State.Selection:GetSortedCuboid()
-	
+
 	-- Fill the selection:
 	local NumBlocks = SetBlocksInCuboid(a_Player, Selection, DstBlockTable, "fill")
 	if (NumBlocks) then
@@ -558,36 +562,36 @@ end
 
 function HandleVMirrorCommand(a_Split, a_Player)
 	-- //vmirror
-	
+
 	local State = GetPlayerState(a_Player)
-	
+
 	-- Check the selection:
 	if not(State.Selection:IsValid()) then
 		a_Player:SendMessage(cChatColor.Rose .. "No region selected")
 		return true
 	end
-	
+
 	-- Check with other plugins if the operation is okay:
 	local SrcCuboid = State.Selection:GetSortedCuboid()
 	local World = a_Player:GetWorld()
 	if (CallHook("OnAreaChanging", SrcCuboid, a_Player, World, "vmirror")) then
 		return
 	end
-	
+
 	-- Push the selection to the undo stack:
 	State:PushUndoInSelection(World, "vmirror")
-	
+
 	-- Vert-mirror the selection:
 	local Area = cBlockArea()
 	local Selection = cCuboid(State.Selection.Cuboid)  -- Make a copy of the selection cuboid
 	Selection:Sort()
-	Area:Read(World, Selection, cBlockArea.baTypes + cBlockArea.baMetas)
+	Area:Read(World, Selection)
 	Area:MirrorXZ()
-	Area:Write(World, Selection.p1, cBlockArea.baTypes + cBlockArea.baMetas)
-	
+	Area:Write(World, Selection.p1)
+
 	-- Notify the plugins of the succes
 	CallHook("OnAreaChanged", SrcCuboid, a_Player, World, "vmirror")
-	
+
 	-- Notify the player of success:
 	a_Player:SendMessage(cChatColor.LightPurple .. "Selection mirrored")
 	return true
@@ -599,7 +603,7 @@ end
 
 function HandleWallsCommand(a_Split, a_Player)
 	-- //walls <blocktype>
-	
+
 	local State = GetPlayerState(a_Player)
 
 	-- Check the selection:
@@ -607,20 +611,20 @@ function HandleWallsCommand(a_Split, a_Player)
 		a_Player:SendMessage(cChatColor.Rose .. "No region set")
 		return true
 	end
-	
+
 	-- Check the params:
 	if (a_Split[2] == nil) then
 		a_Player:SendMessage(cChatColor.Rose .. "Usage: //walls <BlockType>")
 		return true
 	end
-	
+
 	-- Retrieve the blocktypes from the params:
 	local DstBlockTable, ErrBlock = GetBlockDst(a_Split[2], a_Player)
 	if not(DstBlockTable) then
 		a_Player:SendMessage(cChatColor.Rose .. "Unknown dst block type: '" .. ErrBlock .. "'.")
 		return true
 	end
-	
+
 	-- Fill the selection:
 	local NumBlocks = FillWalls(State, a_Player, a_Player:GetWorld(), DstBlockTable)
 	if (NumBlocks) then
@@ -628,7 +632,3 @@ function HandleWallsCommand(a_Split, a_Player)
 	end
 	return true
 end
-
-
-
-

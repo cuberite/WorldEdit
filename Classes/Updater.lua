@@ -23,7 +23,7 @@ function cUpdater:CheckForNewerVersion()
 		return;
 	end
 	cUpdater.s_CheckAttempts = cUpdater.s_CheckAttempts + 1;
-	
+
 	cUrlClient:Get("https://raw.githubusercontent.com/cuberite/WorldEdit/master/Info.lua",
 		function(a_Body, a_Data)
 			if (a_Body) then
@@ -50,8 +50,8 @@ function cUpdater:DownloadLatestVersion(a_DisplayVersion)
 		return
 	end
 	cUpdater.s_DownloadAttempts = cUpdater.s_DownloadAttempts + 1;
-	
-	cUrlClient:Get("https://raw.githubusercontent.com/cuberite/WorldEdit/zip/master", 
+
+	cUrlClient:Get("https://raw.githubusercontent.com/cuberite/WorldEdit/zip/master",
 		function (a_Body, a_Data)
 			if (not a_Body or (a_Body:len() ~= tonumber(a_Data["Content-Length"]))) then
 				-- Downloading failed, schedule a retry
@@ -62,12 +62,12 @@ function cUpdater:DownloadLatestVersion(a_DisplayVersion)
 				)
 				return
 			end
-			
+
 			-- Write the ZIP data to the file. The filename looks like this: "WorldEdit v<DisplayVersion>.zip"
-			local ZipFile = assert(io.open("Plugins/WorldEdit v" .. a_DisplayVersion .. ".zip", "wb"), "Failed to open \"Plugins/WorldEdit v" .. (g_LatestVersion or "_Unknown") .. ".zip\"")
+			local ZipFile = assert(io.open("Plugins/WorldEdit v" .. a_DisplayVersion .. ".zip", "wb"), "Failed to open \"Plugins/WorldEdit v" .. (a_DisplayVersion or "_Unknown") .. ".zip\"")
 			ZipFile:write(a_Body)
 			ZipFile:close()
-			
+
 			LOGINFO(string.format("New WorldEdit version downloaded to %q", "Plugins/WorldEdit v" .. a_DisplayVersion .. ".zip"))
 		end
 	)
@@ -83,39 +83,37 @@ function cUpdater:ParsePluginInfo(a_PluginInfo)
 		LOGWARNING("Error while checking for newer WorldEdit version")
 		return
 	end
-	
+
 	local Env = {}
-	
+
 	-- Protect from malicious code (though this shouldn't be possible)
 	setfenv(Func, Env)
-	
+
 	-- Execute the code
 	Func()
-	
+
 	-- Extract the plugin version:
 	if (not Env.g_PluginInfo) then
 		LOGWARNING("Error while checking for newer WorldEdit version")
 		return
 	end
-	
+
 	if (type(Env.g_PluginInfo.Version) ~= "number") then
 		LOGWARNING("Error while checking for newer WorldEdit version")
 		return
 	end
-	
+
 	if (Env.g_PluginInfo.Version <= g_PluginInfo.Version) then
 		if (g_Config.Updates.ShowMessageWhenUpToDate) then
 			LOGINFO("Your WorldEdit plugin is up-to-date")
 		end
 		return
 	end
-	
+
 	LOGINFO("There is a newer WorldEdit version available: v" .. Env.g_PluginInfo.DisplayVersion)
 	if (not g_Config.Updates.DownloadNewerVersion) then
 		return
 	end
-	
+
 	cUpdater:DownloadLatestVersion(Env.g_PluginInfo.DisplayVersion)
 end
-
-

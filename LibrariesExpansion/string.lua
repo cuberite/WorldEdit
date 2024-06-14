@@ -11,10 +11,14 @@
 function string.ucfirst(a_String)
 	local firstChar = a_String:sub(1, 1):upper()
 	local Rest = a_String:sub(2):lower()
-	
+
 	return firstChar .. Rest
 end
 
 
 
 
+-- Returns true if str ends with ending
+function string.endswith(str, ending)
+    return ending == "" or str:sub(-#ending) == ending
+end

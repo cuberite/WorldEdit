@@ -51,7 +51,7 @@ Scripting =
 {
 	-- If true it logs an error when a craftscript failed
 	Debug = false,
-	
+
 	-- The amount of seconds that a script may be active. Any longer and the script will be aborted.
 	-- If negative the time a script can run is unlimited.
 	MaxExecutionTime = 5,
@@ -74,7 +74,7 @@ Storage =
 {
 	-- If set to true the selection of a player will be remembered once he leaves.
 	RememberPlayerSelection = true,
-	
+
 	-- If WorldEdit needs to change a format in the database the database will be backuped first before changing.
 	-- This doesn't mean when adding or removing data the database will be backed up. Only when the used database is outdated.
 	BackupDatabaseWhenUpdating = true,
@@ -87,7 +87,7 @@ Storage =
 
 -- Writes the default configuration to a_Path
 local function WriteDefaultConfiguration(a_Path)
-	LOGWARNING("[WorldEdit] Default configuration written to \"" .. a_Path .. "\"")
+	LOGWARNING("Default configuration written to \"" .. a_Path .. "\"")
 	local File = io.open(a_Path, "w")
 	File:write(g_ConfigDefault)
 	File:close()
@@ -101,10 +101,10 @@ end
 local function GetDefaultConfigurationTable()
 	-- Load the default config
 	local Loader = loadstring("return {" .. g_ConfigDefault .. "}")
-	
+
 	-- Apply the environment to the configloader.
 	setfenv(Loader, g_LoaderEnv)
-	
+
 	return Loader()
 end
 
@@ -114,7 +114,7 @@ end
 
 -- Sets g_Config to the default configuration
 local function LoadDefaultConfiguration()
-	LOGWARNING("[WorldEdit] The default configuration will be used.")
+	LOGWARNING("The default configuration will be used.")
 	g_Config = GetDefaultConfigurationTable()
 end
 
@@ -135,49 +135,46 @@ end
 -- Loads the configuration from the given path. If it doesn't exist, or if there is an error in the config file it will load the defaults.
 function InitializeConfiguration(a_Path)
 	local ConfigContent = cFile:ReadWholeFile(a_Path)
-	
+
 	-- The configuration file doesn't exist or is empty. Write and load the default value
 	if (ConfigContent == "") then
 		WriteDefaultConfiguration(a_Path)
 		LoadDefaultConfiguration()
 		return
 	end
-	
+
 	-- Load the content of the config file. Place brackets around it to make the whole thing a table.
 	-- Also, return the table when executed
 	local ConfigLoader, Error = loadstring("return {" .. ConfigContent .. "}")
 	if (not ConfigLoader) then
 		local ErrorPosition = FindErrorPosition(Error)
-		LOGWARNING("[WorldEdit] Error in the configuration file near line " .. ErrorPosition)
+		LOGWARNING("Error in the configuration file near line " .. ErrorPosition)
 		LoadDefaultConfiguration()
 		return
 	end
-	
+
 	-- Apply the environment to the configloader.
 	setfenv(ConfigLoader, g_LoaderEnv)
-	
+
 	-- Execute the loader. It returns true + the configuration if it executed properly. Else it returns false with the error message.
 	local Succes, Result = pcall(ConfigLoader)
 	if (not Succes) then
 		local ErrorPosition = FindErrorPosition(Result)
-		LOGWARNING("[WorldEdit] Error in the configuration file at line " .. ErrorPosition)
+		LOGWARNING("Error in the configuration file at line " .. ErrorPosition)
 		LoadDefaultConfiguration()
 		return
 	end
-	
-	-- Merge the configuration with the default configuration. 
+
+	-- Merge the configuration with the default configuration.
 	-- When the admin missed something in the configuration it will be set to the default value.
 	local DefaultConfig = GetDefaultConfigurationTable()
 	table.merge(Result, DefaultConfig)
-	
+
 	-- Make a dictionary out of the array of disallowed blocks.
 	if (Result.Limits and (type(Result.Limits.DisallowedBlocks) == "table")) then
 		Result.Limits.DisallowedBlocks = table.todictionary(Result.Limits.DisallowedBlocks)
 	end
-	
+
 	-- Set the g_Config table.
 	g_Config = Result
 end
-
-
-

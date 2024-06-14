@@ -8,7 +8,7 @@
 
 
 -- Rounds the number.
-function math.round(a_GivenNumber)	
+function math.round(a_GivenNumber)
 	local Number, Decimal = math.modf(a_GivenNumber)
 	if (Decimal >= 0.5) then
 		return Number + 1
@@ -16,7 +16,3 @@ function math.round(a_GivenNumber)
 		return Number
 	end
 end
-
-
-
-

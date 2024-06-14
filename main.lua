@@ -14,7 +14,7 @@ dofolder(cPluginManager:Get():GetCurrentPlugin():GetLocalFolder() .. "/Libraries
 
 
 
---- All the folders that shouldn't be loaded by 
+--- All the folders that shouldn't be loaded by
 g_ExcludedFolders = table.todictionary{
 	"craftscripts",
 	"LibrariesExpansion",
@@ -27,18 +27,18 @@ g_ExcludedFolders = table.todictionary{
 
 
 
--- Load all the folders 
-local WorldEditPath = cPluginManager:Get():GetCurrentPlugin():GetLocalFolder()
+-- Load all the folders
+local WorldEditPath = cPluginManager:GetCurrentPlugin():GetLocalFolder()
 for _, Folder in ipairs(cFile:GetFolderContents(WorldEditPath)) do repeat
 	local Path = WorldEditPath .. "/" .. Folder
 	if (not cFile:IsFolder(Path)) then
 		break -- Is a continue due to a do-while directly after the for
 	end
-	
+
 	if (g_ExcludedFolders[Folder]) then
 		break -- Is a continue due to a do-while directly after the for
 	end
-	
+
 	dofolder(Path)
 until true end
 
@@ -51,23 +51,23 @@ function Initialize(a_Plugin)
 	a_Plugin:SetVersion(g_PluginInfo.Version)
 	
 	InitializeConfiguration(a_Plugin:GetLocalFolder() .. "/config.cfg")
-	
+
 	-- Load the InfoReg shared library:
 	dofile(cPluginManager:GetPluginsPath() .. "/InfoReg.lua")
-	
+
 	--Bind all the commands:
 	RegisterPluginInfoCommands();
-	
+
 	if (g_Config.Updates.CheckForUpdates) then
 		cUpdater:CheckForNewerVersion()
 	end
-	
+
 	-- Initialize SQL Storage
 	cSQLStorage:Get()
-	
+
 	cFile:CreateFolder("schematics")
-	
-	LOG("[WorldEdit] Enabling WorldEdit v" .. g_PluginInfo.DisplayVersion)
+
+	LOG("Enabling v" .. g_PluginInfo.DisplayVersion)
 	return true
 end
 
@@ -76,14 +76,10 @@ end
 
 
 function OnDisable()
-	LOG("[WorldEdit] Disabling WorldEdit v" .. g_PluginInfo.DisplayVersion)
+	LOG("Disabling v" .. g_PluginInfo.DisplayVersion)
 	ForEachPlayerState(
 		function(a_State)
 			a_State:Save(a_State:GetUUID())
 		end
 	)
 end
-
-
-
-

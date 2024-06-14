@@ -44,7 +44,7 @@ end
 
 
 
--- Handler that makes the structure solid. 
+-- Handler that makes the structure solid.
 cShapeGenerator.m_SolidHandler = function(a_ShapeGenerator, a_BlockArea, a_BlockPos)
 	return true
 end
@@ -57,12 +57,12 @@ end
 -- a_Zero and a_Unit are Vector3f vectors used to calculate a scaled vector3f. The formula will use the scaled vector as x, y and z values.
 -- a_BlockTable are the blocks to make the shape out of.
 -- a_Expression is a cExpression object that ShapeGenerator will compile. The ShapeGenerator will bind all the parameters and return values in the constructor.
-function cShapeGenerator:new(a_Zero, a_Unit, a_BlockTable, a_Expression)
+function cShapeGenerator:new(a_Zero, a_Unit, a_BlockTable, a_Expression, a_CanUseAllBlocks)
 	local Obj = {}
-	
+
 	setmetatable(Obj, cShapeGenerator)
 	self.__index = self
-	
+
 	-- Bind the parameters that will be used in the expression. We want the data and type returned again with the first comparison
 	a_Expression:AddReturnValue("Comp1")
 	:AddParameter("x")
@@ -70,34 +70,49 @@ function cShapeGenerator:new(a_Zero, a_Unit, a_BlockTable, a_Expression)
 	:AddParameter("z")
 	:AddParameter("type"):AddReturnValue("type")
 	:AddParameter("data"):AddReturnValue("data")
-	
+
+	if (not a_CanUseAllBlocks) then
+		a_Expression:AddReturnValidator(
+			function(shouldPlace, blocktype, blockdata)
+				if (g_Config.Limits.DisallowedBlocks[math.floor(blocktype)]) then
+					return false, ItemTypeToString(blocktype) .. ' is not allowed'
+				else
+					return true
+				end
+			end
+		)
+	end
+
 	local Formula, Error = a_Expression:Compile()
 	if (not Formula) then
 		return false, "Invalid formula"
 	end
-	
+
 	-- Test the formula to check if it is a comparison.
 	local Succes, TestResult = pcall(Formula, 1, 1, 1, 1, 1)
 	if (not Succes or (type(TestResult) ~= "boolean")) then
+		if ((type(TestResult) == 'string') and TestResult:match(" is not allowed$")) then
+			return false, TestResult:match(':%d-: (.+)')
+		end
 		return false, "The formula isn't a comparison"
 	end
-	
+
 	-- A cache with blocktypes by x, y, z coordinates.
 	-- It's only used when the shape is hollow
 	Obj.m_Cache      = {}
-	
+
 	-- A table containing all the blocks to use. The block chances are already calculated
 	Obj.m_BlockTable = a_BlockTable
-	
+
 	-- A function that will calculate the shape
 	Obj.m_Formula    = Formula
-	
+
 	Obj.m_Unit = a_Unit
 	Obj.m_Zero = a_Zero
-	
+
 	-- The size of the blockarea we're going to work in.
 	Obj.m_Size = Vector3f()
-	
+
 	return Obj
 end
 
@@ -111,21 +126,21 @@ end
 function cShapeGenerator:GetBlockInfoFromFormula(a_BlockPos)
 	local Index = a_BlockPos.x + (a_BlockPos.z * self.m_Size.x) + (a_BlockPos.y * self.m_Size.x * self.m_Size.z)
 	local BlockInfo = self.m_Cache[Index]
-	
+
 	-- The block already exists in the cache. Return the info from that.
 	if (BlockInfo) then
 		return BlockInfo.DoSet, BlockInfo.BlockType, BlockInfo.BlockMeta
 	end
-	
+
 	local scaled = (a_BlockPos - self.m_Zero) / self.m_Unit
 	local BlockType, BlockMeta = self.m_BlockTable:Get(a_BlockPos.x, a_BlockPos.y, a_BlockPos.z)
-	
+
 	-- Execute the formula to get the info from it.
 	local DoSet, BlockType, BlockMeta = self.m_Formula(scaled.x, scaled.y, scaled.z, BlockType, BlockMeta)
-	
+
 	-- Save the block info in the cache
 	self.m_Cache[Index] = {DoSet = DoSet, BlockType = BlockType, BlockMeta = BlockMeta}
-	
+
 	return DoSet, BlockType, BlockMeta
 end
 
@@ -143,7 +158,7 @@ function cShapeGenerator:MakeShape(a_BlockArea, a_MinVector, a_MaxVector, a_IsHo
 	local Handler = a_IsHollow and cShapeGenerator.m_HollowHandler or cShapeGenerator.m_SolidHandler
 	local NumAffectedBlocks = 0
 	self.m_Size = Vector3f(a_BlockArea:GetSize())
-	
+
 	local CurrentBlock = Vector3f(a_MinVector)
 	for X = a_MinVector.x, a_MaxVector.x do
 		CurrentBlock.x = X
@@ -152,18 +167,18 @@ function cShapeGenerator:MakeShape(a_BlockArea, a_MinVector, a_MaxVector, a_IsHo
 			for Z = a_MinVector.z, a_MaxVector.z do
 				CurrentBlock.z = Z
 				local DoSet, BlockType, BlockMeta = self:GetBlockInfoFromFormula(CurrentBlock)
-				
-				-- Check for the mask. 
+
+				-- Check for the mask.
 				if (DoSet and DoCheckMask) then
-					local CurrentBlock, CurrentMeta = a_BlockArea:GetRelBlockTypeMeta(X, Y, Z)
-					
-					if (not a_Mask:Contains(CurrentBlock, CurrentMeta)) then
+					local CurrentType, CurrentMeta = a_BlockArea:GetRelBlockTypeMeta(X, Y, Z)
+
+					if (not a_Mask:Contains(CurrentType, CurrentMeta)) then
 						-- The block does not exist in the mask, or the meta isn't set/is different.
 						-- Don't change the block.
 						DoSet = false
 					end
 				end
-					
+
 				if (DoSet and Handler(self, a_BlockArea, CurrentBlock)) then
 					a_BlockArea:SetRelBlockTypeMeta(X, Y, Z, BlockType, BlockMeta)
 					NumAffectedBlocks = NumAffectedBlocks + 1
@@ -171,7 +186,7 @@ function cShapeGenerator:MakeShape(a_BlockArea, a_MinVector, a_MaxVector, a_IsHo
 			end --  /for Z
 		end --  /for Y
 	end --  /for X
-	
+
 	return NumAffectedBlocks
 end
 
@@ -189,7 +204,7 @@ function cShapeGenerator.MakeCylinder(a_BlockArea, a_BlockTable, a_IsHollow, a_M
 	local SizeX, SizeY, SizeZ = a_BlockArea:GetCoordRange()
 	local HalfX, HalfZ = SizeX / 2, SizeZ / 2
 	local SqHalfX, SqHalfZ = HalfX ^ 2, HalfZ ^ 2
-		
+
 	local Expression = cExpression:new("x -= HalfX; z -= HalfZ; ((x * x) / SqHalfX) + ((z * z) / SqHalfZ) <= 1")
 	:AddReturnValue("Comp1")
 	:AddParameter("x")
@@ -198,10 +213,10 @@ function cShapeGenerator.MakeCylinder(a_BlockArea, a_BlockTable, a_IsHollow, a_M
 	:PredefineConstant("SqHalfZ", SqHalfZ)
 	:PredefineConstant("HalfX", HalfX)
 	:PredefineConstant("HalfZ", HalfZ)
-	
+
 	local NumAffectedBlocks = 0
 	local Formula = Expression:Compile()
-	
+
 	-- Sets the block in the blockarea. If the mask was not nil it checks the mask first.
 	local function SetBlock(a_RelX, a_RelY, a_RelZ)
 		if (DoCheckMask) then
@@ -212,11 +227,11 @@ function cShapeGenerator.MakeCylinder(a_BlockArea, a_BlockTable, a_IsHollow, a_M
 				return
 			end
 		end
-		
+
 		a_BlockArea:SetRelBlockTypeMeta(a_RelX, a_RelY, a_RelZ, a_BlockTable:Get(a_RelX, a_RelY, a_RelZ))
 		NumAffectedBlocks = NumAffectedBlocks + 1
 	end
-	
+
 	for X = 0, HalfX, 1 do
 		for Z = 0, HalfZ, 1 do
 			local PlaceColumn = Formula(X, Z)
@@ -226,7 +241,7 @@ function cShapeGenerator.MakeCylinder(a_BlockArea, a_BlockTable, a_IsHollow, a_M
 					PlaceColumn = false
 				end
 			end
-			
+
 			if (PlaceColumn) then
 				for Y = 0, SizeY, 1 do
 					SetBlock(X,         Y,         Z)
@@ -237,7 +252,7 @@ function cShapeGenerator.MakeCylinder(a_BlockArea, a_BlockTable, a_IsHollow, a_M
 			end
 		end
 	end
-	
+
 	return NumAffectedBlocks
 end
 
@@ -255,7 +270,7 @@ function cShapeGenerator.MakeSphere(a_BlockArea, a_BlockTable, a_IsHollow, a_Mas
 	local SizeX, SizeY, SizeZ = a_BlockArea:GetCoordRange()
 	local HalfX, HalfY, HalfZ = SizeX / 2, SizeY / 2, SizeZ / 2
 	local SqHalfX, SqHalfY, SqHalfZ = HalfX ^ 2, HalfY ^ 2, HalfZ ^ 2
-		
+
 	local Expression = cExpression:new("x -= HalfX; y -= HalfY; z -= HalfZ; ((x * x) / SqHalfX) + ((y * y) / SqHalfY) + ((z * z) / SqHalfZ) <= 1")
 	:AddReturnValue("Comp1")
 	:AddParameter("x")
@@ -267,10 +282,10 @@ function cShapeGenerator.MakeSphere(a_BlockArea, a_BlockTable, a_IsHollow, a_Mas
 	:PredefineConstant("HalfX", HalfX)
 	:PredefineConstant("HalfY", HalfY)
 	:PredefineConstant("HalfZ", HalfZ)
-	
+
 	local NumAffectedBlocks = 0
 	local Formula = Expression:Compile()
-	
+
 	-- Sets the block in the blockarea. If the mask was not nil it checks the mask first.
 	local function SetBlock(a_RelX, a_RelY, a_RelZ)
 		if (DoCheckMask) then
@@ -281,11 +296,11 @@ function cShapeGenerator.MakeSphere(a_BlockArea, a_BlockTable, a_IsHollow, a_Mas
 				return
 			end
 		end
-		
+
 		a_BlockArea:SetRelBlockTypeMeta(a_RelX, a_RelY, a_RelZ, a_BlockTable:Get(a_RelX, a_RelY, a_RelZ))
 		NumAffectedBlocks = NumAffectedBlocks + 1
 	end
-	
+
 	for X = 0, HalfX, 1 do
 		for Y = 0, HalfY, 1 do
 			for Z = 0, HalfZ do
@@ -296,14 +311,14 @@ function cShapeGenerator.MakeSphere(a_BlockArea, a_BlockTable, a_IsHollow, a_Mas
 						PlaceBlocks = false
 					end
 				end
-				
+
 				if (PlaceBlocks) then
 					-- Lower half of the sphere
 					SetBlock(X,         Y,         Z)
 					SetBlock(SizeX - X, Y,         Z)
 					SetBlock(X,         Y, SizeZ - Z)
 					SetBlock(SizeX - X, Y, SizeZ - Z)
-					
+
 					-- topper part of the sphere
 					SetBlock(X,         SizeY - Y,         Z)
 					SetBlock(SizeX - X, SizeY - Y,         Z)
@@ -313,7 +328,7 @@ function cShapeGenerator.MakeSphere(a_BlockArea, a_BlockTable, a_IsHollow, a_Mas
 			end
 		end
 	end
-	
+
 	return NumAffectedBlocks
 end
 
@@ -330,7 +345,7 @@ function cShapeGenerator.MakePyramid(a_BlockArea, a_BlockTable, a_IsHollow, a_Ma
 	local DoCheckMask = a_Mask ~= nil
 	local SizeX, SizeY, SizeZ = a_BlockArea:GetCoordRange()
 	local NumAffectedBlocks = 0
-	
+
 	-- Sets the block in the blockarea. If the mask was not nil it checks the mask first.
 	local function SetBlock(a_RelX, a_RelY, a_RelZ)
 		if (DoCheckMask) then
@@ -341,14 +356,14 @@ function cShapeGenerator.MakePyramid(a_BlockArea, a_BlockTable, a_IsHollow, a_Ma
 				return
 			end
 		end
-		
+
 		a_BlockArea:SetRelBlockTypeMeta(a_RelX, a_RelY, a_RelZ, a_BlockTable:Get(a_RelX, a_RelY, a_RelZ))
 		NumAffectedBlocks = NumAffectedBlocks + 1
 	end
-	
+
 	local StepSizeX = SizeX / SizeY / 2
 	local StepSizeZ = SizeZ / SizeY / 2
-	
+
 	-- Makes a hollow layer
 	local HollowLayer = function(a_Y)
 		local MinX = math.floor(a_Y * StepSizeX)
@@ -359,13 +374,13 @@ function cShapeGenerator.MakePyramid(a_BlockArea, a_BlockTable, a_IsHollow, a_Ma
 			SetBlock(X, a_Y, MinZ)
 			SetBlock(X, a_Y, MaxZ)
 		end
-		
+
 		for Z = MinZ + 1, MaxZ - 1 do
 			SetBlock(MinX, a_Y, Z)
 			SetBlock(MaxX, a_Y, Z)
 		end
 	end
-	
+
 	-- Makes a solid layer
 	local SolidLayer = function(a_Y)
 		local MinX = math.floor(a_Y * StepSizeX)
@@ -378,18 +393,15 @@ function cShapeGenerator.MakePyramid(a_BlockArea, a_BlockTable, a_IsHollow, a_Ma
 			end
 		end
 	end
-	
+
 	-- Choose the layer handler
 	local LayerHandler = (a_IsHollow and HollowLayer) or SolidLayer;
-	
+
 	-- Call the layer handler on each layer.
-	for Y = 0, SizeY do		
+	for Y = 0, SizeY do
 		LayerHandler(Y)
 	end
-	
+
 	-- Return the number of changed blocks
 	return NumAffectedBlocks;
 end
-
-
-

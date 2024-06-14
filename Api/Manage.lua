@@ -11,7 +11,7 @@ g_Hooks = {
 	["OnAreaChanging"]            = {}, -- Signature: function(a_AffectedAreaCuboid, a_Player, a_World, a_Operation)
 	["OnAreaChanged"]             = {}, -- Signature: function(a_AffectedAreaCuboid, a_Player, a_World, a_Operation)
 	["OnAreaCopied"]              = {}, -- Signature: function(a_Player, a_World, a_CopiedAreaCuboid)
-	["OnAreaCopying"]             = {}, -- Signature: function(a_Player, a_World, a_CopiedAreaCuboid) 
+	["OnAreaCopying"]             = {}, -- Signature: function(a_Player, a_World, a_CopiedAreaCuboid)
 	["OnPlayerSelectionChanging"] = {}, -- Signature: function(a_Player, a_PosX, a_PosY, a_PosZ, a_PointNr)
 	["OnPlayerSelectionChanged"]  = {}, -- Signature: function(a_Player, a_PosX, a_PosY, a_PosZ, a_PointNr)
 }
@@ -31,21 +31,21 @@ function AddHook(a_HookName, a_PluginName, a_CallbackName)
 		(type(a_PluginName)   ~= "string") or (a_PluginName   == "") or not cPluginManager:Get():IsPluginLoaded(a_PluginName) or
 		(type(a_CallbackName) ~= "string") or (a_CallbackName == "")
 	) then
-		LOGWARNING("[WorldEdit] Invalid callback registration parameters.")
+		LOGWARNING("Invalid callback registration parameters.")
 		LOGWARNING("  AddHook() was called with params " ..
 			tostring(a_HookName     or "<nil>") .. ", " ..
 			tostring(a_PluginName   or "<nil>") .. ", " ..
 			tostring(a_CallbackName or "<nil>")
 		)
-		
+
 		return false
 	end
-	
+
 	if (not g_Hooks[a_HookName]) then
-		LOGWARNING("[WorldEdit] Plugin \"" .. a_PluginName .. "\" tried to register an unexisting hook called \"" .. a_HookName .. "\"")
+		LOGWARNING("Plugin \"" .. a_PluginName .. "\" tried to register an unexisting hook called \"" .. a_HookName .. "\"")
 		return false
 	end
-	
+
 	table.insert(g_Hooks[a_HookName], {PluginName = a_PluginName, CallbackName = a_CallbackName})
 	return true
 end
@@ -60,7 +60,7 @@ end
 --   function(a_AffectedAreaCuboid, a_Player, a_World, a_Operation)
 -- The callback should return true to abort the operation, false to continue.
 function RegisterAreaCallback(a_PluginName, a_FunctionName, a_WorldName)
-	LOGWARNING("[WorldEdit] RegisterAreaCallback is obsolete. Please use AddHook(\"OnAreaChanging\", ...)")
+	LOGWARNING("RegisterAreaCallback is obsolete. Please use AddHook(\"OnAreaChanging\", ...)")
 	LOGWARNING(" The callback signature changed as well. All individual coordinates are now a single cCuboid")
 	return AddHook("OnAreaChanging", a_PluginName, a_FunctionName)
 end
@@ -76,7 +76,7 @@ end
 -- a_PointNr can be 0 for Left click or 1 for right click.
 -- The callback should return true to abort the operation, or false to continue.
 function RegisterPlayerSelectingPoint(a_PluginName, a_FunctionName)
-	LOGWARNING("[WorldEdit] RegisterPlayerSelectingPoint is obsolete. Please use AddHook(\"OnPlayerSelectionChanging\", ...)")
+	LOGWARNING("RegisterPlayerSelectingPoint is obsolete. Please use AddHook(\"OnPlayerSelectionChanging\", ...)")
 	LOGWARNING(" The callback signature changed as well. All individual coordinates are now a single cCuboid")
 	return AddHook("OnPlayerSelectionChanging", a_PluginName, a_FunctionName)
 end
@@ -93,14 +93,14 @@ function SetPlayerCuboidSelection(a_Player, a_Cuboid)
 		(tolua.type(a_Player) ~= "cPlayer") or
 		(tolua.type(a_Cuboid) ~= "cCuboid")
 	) then
-		LOGWARNING("[WorldEdit] Invalid SetPlayerCuboidSelection API function parameters.")
+		LOGWARNING("Invalid SetPlayerCuboidSelection API function parameters.")
 		LOGWARNING("  SetPlayerCuboidSelection() was called with param types \"" ..
 			tolua.type(a_Player) .. "\" (\"cPlayer\" wanted) and \"" ..
 			tolua.type(a_Cuboid) .. "\" (\"cCuboid\" wanted)."
 		)
 		return false
 	end
-	
+
 	-- Set the selection, both points:
 	local State = GetPlayerState(a_Player)
 	State.Selection:SetFirstPoint(a_Cuboid.p1.x, a_Cuboid.p1.y, a_Cuboid.p1.z)
@@ -121,7 +121,7 @@ function SetPlayerCuboidSelectionPoint(a_Player, a_PointNumber, a_CoordVector)
 		(tonumber(a_PointNumber)   == nil)  or
 		(tolua.type(a_CoordVector) ~= "Vector3i")
 	) then
-		LOGWARNING("[WorldEdit] Invalid SetPlayerCuboidSelectionPoint API function parameters.")
+		LOGWARNING("Invalid SetPlayerCuboidSelectionPoint API function parameters.")
 		LOGWARNING("  SetPlayerCuboidSelection() was called with param types \"" ..
 			tolua.type(a_Player) .. "\" (\"cPlayer\" wanted), \"" ..
 			type(a_PointNumber) .. "\" (\"number\" wanted) and \"" ..
@@ -129,7 +129,7 @@ function SetPlayerCuboidSelectionPoint(a_Player, a_PointNumber, a_CoordVector)
 		)
 		return false
 	end
-	
+
 	-- Set the specified selection point:
 	local State = GetPlayerState(a_Player)
 	if (tonumber(a_PointNumber) == 1) then
@@ -137,7 +137,7 @@ function SetPlayerCuboidSelectionPoint(a_Player, a_PointNumber, a_CoordVector)
 	elseif (tonumber(a_PointNumber) == 2) then
 		State.Selection:SetSecondPoint(a_CoordVector)
 	else
-		LOGWARNING("[WorldEdit] Invalid SetPlayerCuboidSelectionPoint API function parameters.")
+		LOGWARNING("Invalid SetPlayerCuboidSelectionPoint API function parameters.")
 		LOGWARNING("  SetPlayerCuboidSelection() was called with invalid point number " .. a_PointNumber)
 		return false
 	end
@@ -169,14 +169,14 @@ function GetPlayerCuboidSelection(a_Player, a_CuboidToSet)
 		(tolua.type(a_Player)      ~= "cPlayer") or
 		(tolua.type(a_CuboidToSet) ~= "cCuboid")
 	) then
-		LOGWARNING("[WorldEdit] Invalid SetPlayerCuboidSelection API function parameters.")
+		LOGWARNING("Invalid SetPlayerCuboidSelection API function parameters.")
 		LOGWARNING("  SetPlayerCuboidSelection() was called with param types \"" ..
 			tolua.type(a_Player) .. "\" (\"cPlayer\" wanted) and \"" ..
 			tolua.type(a_CuboidToSet) .. "\" (\"cCuboid\" wanted)."
 		)
 		return false
 	end
-	
+
 	-- Set the output cuboid to the selection:
 	local State = GetPlayerState(a_Player)
 	a_CuboidToSet:Assign(State.Selection.Cuboid)
@@ -201,7 +201,7 @@ function WEPushUndo(a_Player, a_World, a_Cuboid, a_Description)
 		(tolua.type(a_Cuboid) ~= "cCuboid") or
 		(type(a_Description)  ~= "string")
 	) then
-		LOGWARNING("[WorldEdit] Invalid WEPushUndo API function parameters.")
+		LOGWARNING("Invalid WEPushUndo API function parameters.")
 		LOGWARNING("  WePushUndo() was called with these param types:")
 		LOGWARNING("    " .. tolua.type(a_Player) .. " (cPlayer wanted),")
 		LOGWARNING("    " .. tolua.type(a_World)  .. " (cWorld  wanted),")
@@ -209,7 +209,7 @@ function WEPushUndo(a_Player, a_World, a_Cuboid, a_Description)
 		LOGWARNING("    " .. type(a_Description)  .. " (string  wanted),")
 		return false, "bad params"
 	end
-	
+
 	-- Push the undo:
 	local State = GetPlayerState(a_Player)
 	return State.UndoStack:PushUndoFromCuboid(a_World, a_Cuboid, a_Description)
@@ -238,7 +238,7 @@ function WEPushUndoAsync(a_Player, a_World, a_Cuboid, a_Description, a_CallbackP
 		(type(a_CallbackPluginName)   ~= "string") or
 		(type(a_CallbackFunctionName) ~= "string")
 	) then
-		LOGWARNING("[WorldEdit] Invalid WEPushUndoAsync() API function parameters.")
+		LOGWARNING("Invalid WEPushUndoAsync() API function parameters.")
 		LOGWARNING("  WePushUndo() was called with these param types:")
 		LOGWARNING("    " .. tolua.type(a_Player)         .. " (cPlayer wanted),")
 		LOGWARNING("    " .. tolua.type(a_World)          .. " (cWorld  wanted),")
@@ -248,23 +248,23 @@ function WEPushUndoAsync(a_Player, a_World, a_Cuboid, a_Description, a_CallbackP
 		LOGWARNING("    " .. type(a_CallbackFunctionName) .. " (string  wanted),")
 		return false, "bad params"
 	end
-	
+
 	-- if the input cuboid isn't sorted, create a sorted copy:
 	if not(a_Cuboid:IsSorted()) then
 		a_Cuboid = cCuboid(a_Cuboid)
 		a_Cuboid:Sort()
 	end
-	
+
 	-- Create a callback for the ChunkStay:
 	local State = GetPlayerState(a_Player)  -- a_Player may be deleted in the meantime, but the State table won't
 	local OnAllChunksAvailable = function()
 		local IsSuccess, Msg = State.UndoStack:PushUndoFromCuboid(a_World, a_Cuboid, a_Description)
 		cPluginManager:CallPlugin(a_CallbackPluginName, a_CallbackFunctionName, IsSuccess, Msg)
 	end
-	
+
 	-- Get a list of chunks that need to be present:
 	local Chunks = ListChunksForCuboid(a_Cuboid)
-	
+
 	-- Initiate a ChunkStay operation, pushing the undo when all the chunks are available
 	a_World:ChunkStay(Chunks, nil, OnAllChunksAvailable)
 	return true
@@ -283,10 +283,6 @@ function ExecuteString(a_String, ...)
 	if (not Function) then
 		return false, Error
 	end
-	
+
 	return pcall(Function, ...)
 end
-
-
-
-

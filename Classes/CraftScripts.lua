@@ -12,7 +12,7 @@ local function LOGSCRIPTERROR(a_Msg)
 	if (not g_Config.Scripting.Debug) then
 		return
 	end
-	
+
 	LOGERROR(a_Msg)
 end
 
@@ -69,10 +69,10 @@ function cCraftScript:new(a_Obj)
 	a_Obj = a_Obj or {}
 	setmetatable(a_Obj, cCraftScript)
 	self.__index = self
-	
+
 	-- Initialize the object members:
 	a_Obj.SelectedScript = nil
-	
+
 	return a_Obj;
 end
 
@@ -85,16 +85,16 @@ function cCraftScript:SelectScript(a_ScriptName)
 	if (not cFile:IsFile(Path)) then
 		return false, "The script does not exist."
 	end
-	
+
 	local Function, Err = loadfile(Path)
 	if (not Function) then
 		LOGSCRIPTERROR(Err)
 		return false, "There is an issue in the scripts code."
 	end
-	
+
 	-- Make sure the craftscript can't break code by overlapping our global variables and functions
 	setfenv(Function, g_CraftScriptEnvironment)
-	
+
 	self.SelectedScript = Function
 	return true
 end
@@ -107,7 +107,7 @@ function cCraftScript:Execute(a_Player, a_Split)
 	if (not self.SelectedScript) then
 		return false, "There is no script selected."
 	end
-	
+
 	-- Limit the execution time of the script if configured
 	if (g_Config.Scripting.MaxExecutionTime > 0) then
 		local TimeLimit = os.clock() + g_Config.Scripting.MaxExecutionTime
@@ -118,21 +118,17 @@ function cCraftScript:Execute(a_Player, a_Split)
 			end
 		end, "", 100000)
 	end
-	
+
 	-- Execute the craftscript
 	local Succes, Err = pcall(self.SelectedScript, a_Player, a_Split)
-	
+
 	-- Remove the timelimit.
 	debug.sethook()
-	
+
 	if (not Succes) then
 		LOGSCRIPTERROR(Err)
 		return false, "Something went wrong while running the script."
 	end
-	
+
 	return true
 end
-
-
-
-
