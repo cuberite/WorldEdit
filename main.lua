@@ -49,7 +49,7 @@ until true end
 function Initialize(a_Plugin)
 	a_Plugin:SetName(g_PluginInfo.Name)
 	a_Plugin:SetVersion(g_PluginInfo.Version)
-	
+
 	InitializeConfiguration(a_Plugin:GetLocalFolder() .. "/config.cfg")
 
 	-- Load the InfoReg shared library:

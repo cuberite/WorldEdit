@@ -24,7 +24,7 @@ end
 -- Sends the version of the plugin.
 function HandleWorldEditVersionCommand(a_Split, a_Player)
 	-- /we version
-	
+
 	a_Player:SendMessage(cChatColor.LightPurple .. "This is version " .. cPluginManager:GetCurrentPlugin():GetVersion())
 	return true
 end
