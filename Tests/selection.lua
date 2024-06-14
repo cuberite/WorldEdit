@@ -10,6 +10,10 @@
 
 scenario
 {
+	redirectPluginFiles
+	{
+		["config.cfg"] = "Tests/test.config.cfg"
+	},
 	world
 	{
 		name = "world"

@@ -28,7 +28,7 @@ g_ExcludedFolders = table.todictionary{
 
 
 -- Load all the folders
-local WorldEditPath = cPluginManager:GetCurrentPlugin():GetLocalFolder()
+local WorldEditPath = cPluginManager:Get():GetCurrentPlugin():GetLocalFolder()
 for _, Folder in ipairs(cFile:GetFolderContents(WorldEditPath)) do repeat
 	local Path = WorldEditPath .. "/" .. Folder
 	if (not cFile:IsFolder(Path)) then
