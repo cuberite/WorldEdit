@@ -12,7 +12,9 @@ scenario
 {
 	redirectPluginFiles
 	{
-		["config.cfg"] = "Tests/test.config.cfg"
+		-- Redirect the default config file.
+		-- This disables the update check and also works around a bug in the simulator which causes block/item enums to not be in the global environment.
+		["config.cfg"] = "test.config.cfg"
 	},
 	world
 	{
