@@ -11,14 +11,25 @@ jobs:
 
       - name: Install Lua
         run: |
-          sudo apt install lua5.1 luarocks
+          sudo apt install lua5.1 luarocks libsqlite3-dev
           sudo luarocks install luafilesystem
+          sudo luarocks install lsqlite3
+          sudo luarocks install luasocket
           sudo luarocks install luacheck
+          sudo luarocks install luasec OPENSSL_LIBDIR=/usr/lib/x86_64-linux-gnu
 
       - name: Set up environment
         run: |
-          wget -O .luacheckrc 'https://ci.appveyor.com/api/projects/cuberite/cuberite/artifacts/.luacheckrc?job=Windows-x64&pr=false&branch=master'
+          wget -O ../InfoReg.lua https://raw.githubusercontent.com/cuberite/cuberite/master/Server/Plugins/InfoReg.lua
+          mkdir ~/AutoAPI
+          wget -O ~/AutoAPI.zip --no-check-certificate 'https://ci.appveyor.com/api/projects/cuberite/cuberite/artifacts/AutoAPI.zip?job=Windows-x64&pr=false&branch=master'
+          unzip ~/AutoAPI.zip -d ~/AutoAPI
+          wget -O ~/ManualAPI.zip --no-check-certificate 'https://ci.appveyor.com/api/projects/cuberite/cuberite/artifacts/ManualAPI.zip?job=Windows-x64&pr=false&branch=master'
+          unzip ~/ManualAPI.zip -d ~
+          git clone https://github.com/cuberite/CuberitePluginChecker ~/Checker
+          wget -O .luacheckrc --no-check-certificate 'https://ci.appveyor.com/api/projects/cuberite/cuberite/artifacts/.luacheckrc?job=Windows-x64&pr=false&branch=master'
 
       - name: Run tests
         run: |
-          luacheck . --codes
+          cd ~/Checker && lua CuberitePluginChecker.lua -p $GITHUB_WORKSPACE -a ~/AutoAPI -e ~/ManualAPI.lua -i APIImpl/All.lua -s $GITHUB_WORKSPACE/Tests/selection.lua -g
+          cd $GITHUB_WORKSPACE && luacheck . --codes --exclude-files Tests/*

@@ -8,7 +8,7 @@
 
 
 -- First of all load all the library expansions
-dofolder(cPluginManager:GetCurrentPlugin():GetLocalFolder() .. "/LibrariesExpansion")
+dofolder(cPluginManager:Get():GetCurrentPlugin():GetLocalFolder() .. "/LibrariesExpansion")
 
 
 
@@ -18,6 +18,7 @@ dofolder(cPluginManager:GetCurrentPlugin():GetLocalFolder() .. "/LibrariesExpans
 g_ExcludedFolders = table.todictionary{
 	"craftscripts",
 	"LibrariesExpansion",
+	"Tests",
 	".",
 	"..",
 }
@@ -27,7 +28,7 @@ g_ExcludedFolders = table.todictionary{
 
 
 -- Load all the folders
-local WorldEditPath = cPluginManager:GetCurrentPlugin():GetLocalFolder()
+local WorldEditPath = cPluginManager:Get():GetCurrentPlugin():GetLocalFolder()
 for _, Folder in ipairs(cFile:GetFolderContents(WorldEditPath)) do repeat
 	local Path = WorldEditPath .. "/" .. Folder
 	if (not cFile:IsFolder(Path)) then
@@ -41,13 +42,13 @@ for _, Folder in ipairs(cFile:GetFolderContents(WorldEditPath)) do repeat
 	dofolder(Path)
 until true end
 
-PLUGIN = nil
+
+
 
 
 function Initialize(a_Plugin)
-	PLUGIN = a_Plugin
-	PLUGIN:SetName(g_PluginInfo.Name)
-	PLUGIN:SetVersion(g_PluginInfo.Version)
+	a_Plugin:SetName(g_PluginInfo.Name)
+	a_Plugin:SetVersion(g_PluginInfo.Version)
 
 	InitializeConfiguration(a_Plugin:GetLocalFolder() .. "/config.cfg")
 
