@@ -326,6 +326,8 @@ end
 
 
 -- Register the hooks needed:
-cPluginManager.AddHook(cPluginManager.HOOK_PLAYER_RIGHT_CLICK, RightClickToolsHook);
-cPluginManager.AddHook(cPluginManager.HOOK_PLAYER_LEFT_CLICK,  LeftClickToolsHook);
-cPluginManager.AddHook(cPluginManager.HOOK_PLAYER_ANIMATION,   LeftClickToolsAnimationHook);
+cPluginManager:AddHook(cPluginManager.HOOK_PLAYER_RIGHT_CLICK, RightClickToolsHook);
+cPluginManager:AddHook(cPluginManager.HOOK_PLAYER_LEFT_CLICK,  LeftClickToolsHook);
+cPluginManager:AddHook(cPluginManager.HOOK_PLAYER_ANIMATION,   LeftClickToolsAnimationHook);
+
+
