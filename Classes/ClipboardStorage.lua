@@ -370,22 +370,33 @@ function cClipboardStorage:SaveCubesetV1(a_FileName, a_StructureName, a_Options)
 	-- Recursive function to dump the Lua table to the output file.
 	local function write(a_Tabs, a_Obj)
 		local prefix = string.rep("\t", a_Tabs)
+		-- Prioritize the metadata table.
+		-- Cuberite checks the first 8KiB for the Cubeset version when loading prefabs.
+		-- If the file is too large and the metadata is at the end Cuberite won't be able to find it.
+		if (a_Obj["Metadata"]) then
+			file:write(prefix, '["Metadata"] =')
+			file:write("\n", prefix, "{\n")
+			write(a_Tabs + 1, a_Obj["Metadata"])
+			file:write("\n", prefix, "},\n")
+		end
 		for k, v in pairs(a_Obj) do
-			if (k == "CubesetFormatVersion") then
-				file:write(prefix, k, ' =')
-			elseif (type(k) == "string") then
-				file:write(prefix, '["', k, '"] =')
-			elseif (type(k) == "number") then
-				file:write(prefix, '[', k, '] =')
-			end
-			if (type(v) == "table") then
-				file:write("\n", prefix, "{\n")
+			if (k ~= "Metadata") then
+				if (k == "CubesetFormatVersion") then
+					file:write(prefix, k, ' =')
+				elseif (type(k) == "string") then
+					file:write(prefix, '["', k, '"] =')
+				elseif (type(k) == "number") then
+					file:write(prefix, '[', k, '] =')
+				end
+				if (type(v) == "table") then
+					file:write("\n", prefix, "{\n")
 					write(a_Tabs + 1, v)
-				file:write("\n", prefix, "},\n")
-			elseif (type(v) == "string") then
-				file:write(' "', v, '",\n')
-			elseif (type(v) == "number") then
-				file:write(" ", v, ",\n")
+					file:write("\n", prefix, "},\n")
+				elseif (type(v) == "string") then
+					file:write(' "', v, '",\n')
+				elseif (type(v) == "number") then
+					file:write(" ", v, ",\n")
+				end
 			end
 		end
 	end
